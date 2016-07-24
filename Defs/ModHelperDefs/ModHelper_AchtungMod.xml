@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+    <CommunityCoreLibrary.ModHelperDef>
+        <defName>AchtungMod</defName>
+        <ModName>Achtung!</ModName>
+        <minCCLVersion>0.14.0</minCCLVersion>
+		<SpecialInjectors>
+            <li>AchtungMod._Injector</li>
+        </SpecialInjectors>
+    </CommunityCoreLibrary.ModHelperDef>
+</Defs>
