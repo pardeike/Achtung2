@@ -32,19 +32,23 @@ namespace AchtungMod
 		//
 		public static void SelectorOnGUI()
 		{
-			bool isRightClick = Event.current.button == 1;
-			EventType type = Event.current.type;
-			Vector3 where = Gen.ScreenToWorldPoint(Input.mousePosition);
-
-			Patcher.SelectorOnGUI_Original();
-
 			// we act on right-click only
 			//
+			bool isRightClick = Event.current.button == 1;
 			if (isRightClick)
 			{
+				EventType type = Event.current.type;
+				Vector3 where = Gen.ScreenToWorldPoint(Input.mousePosition);
+
 				// our main method
-				Worker.RightClickHandler(type, where);
+				bool eventHandled = Worker.RightClickHandler(type, where);
+				if (eventHandled)
+				{
+					return;
+				}
 			}
+
+			SelectorOnGUI_Original();
 		}
 	}
 }
