@@ -91,6 +91,23 @@ namespace AchtungMod
 			return pawns.Count == 0 ? null : pawns.First();
 		}
 
+		// get the options for a colonist that would be displayed in original code
+		//
+		private static List<FloatMenuOption> GetMenuOptions(Pawn colonist, bool forceDrafting)
+		{
+			bool oldDraftStatus = false;
+			if (forceDrafting)
+			{
+				oldDraftStatus = SetDraftStatus(colonist, true);
+			}
+			List<FloatMenuOption> options = FloatMenuMakerMap.ChoicesAtFor(Gen.MouseMapPosVector3(), colonist);
+			if (forceDrafting)
+			{
+				SetDraftStatus(colonist, oldDraftStatus);
+			}
+			return options;
+		}
+
 		// build a single menu that contains the sum of all colonist choices
 		// returns if menu is not empty
 		//
@@ -100,9 +117,7 @@ namespace AchtungMod
 			foreach (Pawn colonist in colonistsSelected)
 			{
 				// get possible commandos by temporarily draft colonist
-				bool oldDraftStatus = SetDraftStatus(colonist, true);
-				List<FloatMenuOption> options = FloatMenuMakerMap.ChoicesAtFor(Gen.MouseMapPosVector3(), colonist);
-				SetDraftStatus(colonist, oldDraftStatus);
+				List<FloatMenuOption> options = GetMenuOptions(colonist, true);
 				foreach (FloatMenuOption option in options)
 				{
 					if (option.Disabled == false)
@@ -244,6 +259,7 @@ namespace AchtungMod
 								List<FloatMenuOption> commands = new List<FloatMenuOption>();
 								AddCleanFilthCommand(colonist, room, commands);
 								AddBuildRoofCommand(room, commands);
+								commands.AddRange(GetMenuOptions(colonist, false));
 								if (commands.Count > 0)
 								{
 									Find.WindowStack.Add(new FloatMenu(commands));

@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-    <name>Achtung! Mod v1.1</name>
+    <name>Achtung! Mod v1.11</name>
     <author>Andreas Pardeike</author>
     <url>https://ludeon.com/forums/index.php?topic=22130.0</url>
     <targetVersion>0.14.1241</targetVersion>
-    <description>Achtung! Mod v1.1 for RimWorld
+    <description>Achtung! Mod v1.11 for RimWorld
 
 I want to share my first mod with you. It's a drafting helper that enables the right mouse button for dragging to mark drafting destinations and room commands. Instead of a single horde of colonists around the place you right click it is now possible to drag any line along the colonists will be distributed. Very useful for door combat handling.
 
