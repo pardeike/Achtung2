@@ -253,7 +253,7 @@ namespace AchtungMod
 						if (colonist.Drafted == false)
 						{
 							Room room = RoomQuery.RoomAt(where.ToIntVec3());
-							if (room.IsHuge == false)
+							if (room != null && room.IsHuge == false)
 							{
 								// build room menu
 								List<FloatMenuOption> commands = new List<FloatMenuOption>();
