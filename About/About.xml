@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-    <name>Achtung! Mod v1.11</name>
+    <name>Achtung! Mod v1.12</name>
     <author>Andreas Pardeike</author>
     <url>https://ludeon.com/forums/index.php?topic=22130.0</url>
     <targetVersion>0.14.1241</targetVersion>
-    <description>Achtung! Mod v1.11 for RimWorld
+    <description>Achtung! Mod v1.12 for RimWorld
 
-I want to share my first mod with you. It's a drafting helper that enables the right mouse button for dragging to mark drafting destinations and room commands. Instead of a single horde of colonists around the place you right click it is now possible to drag any line along the colonists will be distributed. Very useful for door combat handling.
+Achtung! Mod is a drafting helper that enables the right mouse button for dragging to mark drafting destinations and room commands. Instead of a single horde of colonists around the place you right click it is now possible to drag any line along the colonists will be distributed. Very useful for door combat handling.
 
 With your colonists selected, use right-click and drag to distribute all selected colonists along a line. They get drafted automatically. 10 colonists + 10 doors in a row? No problem!
 
@@ -26,20 +26,20 @@ How to:
 
 6) Common actions: Right-clicking on a target now display a menu containing the actions of all selected colonists. Never again order all colonists separately to melee a person!
 
-7) Room menu: Right-clicking in a room with a non-drafted colonist selected will present a menu with two (possible) choices: “Clean Room” and “Roof Room”.
+7) Room menu: Right-clicking in a room with a non-drafted colonist selected will present the usual menu but with an extra choice: "Clean Room". This command will start a complete clean of the room including any dirt that colonists add during cleaning.
 
 FAQ
 
-Does this mod alter my save files?
-Answer: No, this mod changes only the interface and the user actions. Rimworld will warn you but you can simply ignore the warning. If you later decide to remove Achtung! your saved games will still work as before!
+- Does this mod alter my save files?
+No, this mod changes only the interface and the user actions. Rimworld will warn you but you can simply ignore the warning. If you later decide to remove Achtung! your saved games will still work as before!
 
-Is this mod compatible with other mods?
-Answer: Most likely. I don’t know of any mods altering the selection mechanism. The combat menu is created in a general way so it will include actions from other mods without breaking.
+- Is this mod compatible with other mods?
+Most likely. I don’t know of any mods altering the selection mechanism. The combat menu is created in a general way so it will include actions from other mods without breaking.
 
-Why is this called "Achtung!"
-Answer: It's german for "Attention!" and used in the military as a command.
+- Why is this called "Achtung!"
+It's german for "Attention!" and used in the military as a command.
 
-I think this should work different/better. Are you open for changes or improvement requests?
-Answer: Always! Please submit an Issue via GitHub or send me an email to andreas@pardeike.net
+- I think this should work different/better. Are you open for changes or improvement requests?
+Always! Please submit an Issue via GitHub or send me an email to andreas@pardeike.net
 </description>
 </ModMetaData>
