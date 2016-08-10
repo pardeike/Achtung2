@@ -14,14 +14,14 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>build\</OutputPath>
+    <OutputPath>..\..\..\..\..\..\..\Program Files %28x86%29\Steam\steamapps\workshop\content\294100\730936602\Assemblies\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
   </PropertyGroup>
@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AchtungMod.cs" />
+    <Compile Include="CleanRoomJob.cs" />
     <Compile Include="OrderedDictionary.cs" />
     <Compile Include="Patcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
