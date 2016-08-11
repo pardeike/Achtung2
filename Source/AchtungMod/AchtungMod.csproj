@@ -14,10 +14,10 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>false</DebugSymbols>
-    <DebugType>none</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\..\..\..\Program Files %28x86%29\Steam\steamapps\workshop\content\294100\730936602\Assemblies\</OutputPath>
+    <OutputPath>..\..\Assemblies\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -26,12 +26,13 @@
     <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>none</DebugType>
-    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>false</Optimize>
     <OutputPath>..\..\Assemblies\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp, Version=0.14.6046.30390, Culture=neutral, processorArchitecture=MSIL">
@@ -58,7 +59,18 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Worker.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>mkdir "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Assemblies"
+copy /B /Y "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Assemblies\$(TargetName).dll"
+xcopy /E /I /Y "$(SolutionDir)..\About" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\About"
+xcopy /E /I /Y "$(SolutionDir)..\Defs" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Defs"
+xcopy /S /E /I /Y "$(SolutionDir)..\Languages\*" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Languages"
+copy /B /Y "$(SolutionDir)..\README.md" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

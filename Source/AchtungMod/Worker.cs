@@ -10,6 +10,68 @@ using mattmc3.Common.Collections.Generic;
 
 namespace AchtungMod
 {
+	public enum ForceDrafting
+	{
+		Unchanged,
+		ForcedOff,
+		ForcedOn
+	}
+
+	public class MultiPawnAction
+	{
+		ForceDrafting _draftingStatus;
+		OrderedDictionary<Pawn, FloatMenuOption> _pawnActions;
+
+		public MultiPawnAction(ForceDrafting draftingStatus)
+		{
+			_draftingStatus = draftingStatus;
+			_pawnActions = new OrderedDictionary<Pawn, FloatMenuOption>();
+		}
+
+		public void AddAction(Pawn pawn, FloatMenuOption option)
+		{
+			_pawnActions.Add(pawn, option);
+		}
+
+		public ICollection<Pawn> Colonists()
+		{
+			return _pawnActions.Keys;
+		}
+
+		public Action GetAction(Pawn actor)
+		{
+			return new Action(delegate
+			{
+				FloatMenuOption option = _pawnActions[actor];
+				if (option.Disabled == false)
+				{
+					if (_draftingStatus != ForceDrafting.Unchanged)
+					{
+						Worker.SetDraftStatus(actor, _draftingStatus == ForceDrafting.ForcedOn);
+					}
+					Action action = option.action;
+					action();
+				}
+			});
+		}
+
+		public ForceDrafting GetForcedDraftingStatus()
+		{
+			return _draftingStatus;
+		}
+
+		internal bool IsDisabled()
+		{
+			bool onlyDisabled = true;
+			foreach (Pawn pawn in Colonists())
+			{
+				FloatMenuOption option = _pawnActions[pawn];
+				onlyDisabled = onlyDisabled && option.Disabled;
+			}
+			return onlyDisabled;
+		}
+	}
+
 	public static class Worker
 	{
 		public static bool isDragging = false;
@@ -22,22 +84,29 @@ namespace AchtungMod
 		{
 			List<Pawn> allPawns = Find.Selector.SelectedObjects.OfType<Pawn>().ToList();
 			return allPawns.FindAll(pawn =>
-				 pawn.drafter != null
-				 && pawn.IsColonistPlayerControlled
-				 && pawn.drafter.CanTakeOrderedJob()
-				 && pawn.Downed == false
+				  pawn.drafter != null
+				  && pawn.IsColonistPlayerControlled
+				  && pawn.drafter.CanTakeOrderedJob()
+				  && pawn.Downed == false
 			);
+		}
+
+		// get draft status of a colonist
+		//
+		public static bool GetDraftingStatus(Pawn pawn)
+		{
+			if (pawn.drafter == null)
+			{
+				pawn.drafter = new Pawn_DraftController(pawn);
+			}
+			return pawn.drafter.Drafted;
 		}
 
 		// sets the draft status of a colonists and returns the old status
 		//
 		public static bool SetDraftStatus(Pawn pawn, bool drafted)
 		{
-			if (pawn.drafter == null)
-			{
-				pawn.drafter = new Pawn_DraftController(pawn);
-			}
-			bool previousStatus = pawn.drafter.Drafted;
+			bool previousStatus = GetDraftingStatus(pawn);
 			if (pawn.drafter.Drafted != drafted)
 			{
 				pawn.drafter.Drafted = drafted;
@@ -97,19 +166,51 @@ namespace AchtungMod
 
 		// get the options for a colonist that would be displayed in original code
 		//
-		private static List<FloatMenuOption> GetMenuOptions(Pawn colonist, bool forceDrafting)
+		private static List<FloatMenuOption> GetMenuOptions(Pawn colonist, ForceDrafting forcedDrafting = ForceDrafting.Unchanged)
 		{
 			bool oldDraftStatus = false;
-			if (forceDrafting)
+			if (forcedDrafting != ForceDrafting.Unchanged)
 			{
-				oldDraftStatus = SetDraftStatus(colonist, true);
+				oldDraftStatus = SetDraftStatus(colonist, forcedDrafting == ForceDrafting.ForcedOn);
 			}
 			List<FloatMenuOption> options = FloatMenuMakerMap.ChoicesAtFor(Gen.MouseMapPosVector3(), colonist);
-			if (forceDrafting)
+			if (forcedDrafting != ForceDrafting.Unchanged)
 			{
 				SetDraftStatus(colonist, oldDraftStatus);
 			}
 			return options;
+		}
+
+		private static void AddActions(Pawn colonist, OrderedDictionary<string, MultiPawnAction> actions, ForceDrafting forcedDrafting)
+		{
+			List<FloatMenuOption> options = GetMenuOptions(colonist, forcedDrafting);
+			foreach (FloatMenuOption option in options)
+			{
+				// disabled items often communicate things to the player
+				// so we keep them, even if you cannot use them
+				//if (option.Disabled == false)
+				//{
+				string name = option.Label;
+				if (actions.ContainsKey(name) == false)
+				{
+					actions.Add(name, new MultiPawnAction(forcedDrafting));
+				}
+				actions[name].AddAction(colonist, option);
+				//}
+			}
+		}
+
+		public static string GetActionPrefix(MultiPawnAction multiPawnAction)
+		{
+			switch (multiPawnAction.GetForcedDraftingStatus())
+			{
+				case ForceDrafting.ForcedOff:
+					return Translator.Translate("CommandUndraftLabel") + ": ";
+				case ForceDrafting.ForcedOn:
+					return Translator.Translate("CommandDraftLabel") + ": ";
+				default:
+					return "";
+			}
 		}
 
 		// build a single menu that contains the sum of all colonist choices
@@ -117,40 +218,41 @@ namespace AchtungMod
 		//
 		public static bool BuildCommonCommandMenu(List<Pawn> colonistsSelected, Pawn clickedPawn)
 		{
-			OrderedDictionary<string, OrderedDictionary<Pawn, Action>> allActions = new OrderedDictionary<string, OrderedDictionary<Pawn, Action>>();
-			foreach (Pawn colonist in colonistsSelected)
+			OrderedDictionary<string, MultiPawnAction> allActions = new OrderedDictionary<string, MultiPawnAction>();
+
+			foreach (Pawn colonist in colonistsSelected) // get possible commandos for an undrafted colonist
 			{
-				// get possible commandos by temporarily draft colonist
-				List<FloatMenuOption> options = GetMenuOptions(colonist, clickedPawn != null);
-				foreach (FloatMenuOption option in options)
-				{
-					if (option.Disabled == false)
-					{
-						string name = option.Label;
-						if (allActions.ContainsKey(name) == false)
-						{
-							allActions.Add(name, new OrderedDictionary<Pawn, Action>());
-						}
-						allActions[name].Add(colonist, option.action);
-					}
-				}
+				bool isDrafted = GetDraftingStatus(colonist);
+				AddActions(colonist, allActions, isDrafted ? ForceDrafting.ForcedOff : ForceDrafting.Unchanged);
+			}
+			foreach (Pawn colonist in colonistsSelected) // get possible commandos for a drafted colonist
+			{
+				bool isDrafted = GetDraftingStatus(colonist);
+				AddActions(colonist, allActions, !isDrafted ? ForceDrafting.ForcedOn : ForceDrafting.Unchanged);
 			}
 
 			// build common menu
 			List<FloatMenuOption> list = new List<FloatMenuOption>();
 			foreach (string commonLabel in allActions.Keys)
 			{
-				string suffix = (colonistsSelected.Count > 1) ? " (" + allActions[commonLabel].Keys.Count + ")" : "";
-				string title = commonLabel + suffix;
+				ICollection<Pawn> colonists = allActions[commonLabel].Colonists();
+
+				string prefix = GetActionPrefix(allActions[commonLabel]);
+
+				int count = colonists.Count;
+				string countInfo = count != 1 ? (count + "x") : colonists.First().NameStringShort;
+				string suffix = (colonistsSelected.Count > 1) ? " (" + countInfo + ")" : "";
+
+				string title = prefix + commonLabel + suffix;
 				FloatMenuOption option = new FloatMenuOption(title, delegate
 				{
-					foreach (Pawn actor in allActions[commonLabel].Keys)
+					foreach (Pawn actor in allActions[commonLabel].Colonists())
 					{
-						AutoDraft(actor);
-						Action colonistAction = allActions[commonLabel][actor];
+						Action colonistAction = allActions[commonLabel].GetAction(actor);
 						colonistAction();
 					}
 				}, MenuOptionPriority.High, null, null);
+				option.Disabled = allActions[commonLabel].IsDisabled();
 				list.Add(option);
 			}
 			if (list.Count == 0)
@@ -177,18 +279,18 @@ namespace AchtungMod
 		}
 
 		/*
-		public static void ForceGenerateRoof(Room room)
-		{
-			 FieldInfo queuedGenerateRoomsInfo = typeof(AutoBuildRoofZoneSetter).GetField("queuedGenerateRooms", BindingFlags.Static | BindingFlags.NonPublic);
-			 List<Room> rooms = queuedGenerateRoomsInfo.GetValue(null) as List<Room>;
-			 if (rooms.Contains(room))
-			 {
-				  rooms.Remove(room);
-			 }
-			 rooms.Insert(0, room);
-			 queuedGenerateRoomsInfo.SetValue(null, rooms);
-			 AutoBuildRoofZoneSetter.ResolveQueuedGenerateRoofs();
-		}*/
+	 public static void ForceGenerateRoof(Room room)
+	 {
+		  FieldInfo queuedGenerateRoomsInfo = typeof(AutoBuildRoofZoneSetter).GetField("queuedGenerateRooms", BindingFlags.Static | BindingFlags.NonPublic);
+		  List<Room> rooms = queuedGenerateRoomsInfo.GetValue(null) as List<Room>;
+		  if (rooms.Contains(room))
+		  {
+				rooms.Remove(room);
+		  }
+		  rooms.Insert(0, room);
+		  queuedGenerateRoomsInfo.SetValue(null, rooms);
+		  AutoBuildRoofZoneSetter.ResolveQueuedGenerateRoofs();
+	 }*/
 
 		// add build roff command if necessary
 		//
@@ -210,19 +312,19 @@ namespace AchtungMod
 						{
 							clearJobs(colonist);
 							cellsWithRoof.ToList().ForEach(cell =>
-								  {
-									  Job job = new Job(JobDefOf.BuildRoof, new TargetInfo(cell));
-									  colonist.QueueJob(job);
-								  });
+										  {
+											  Job job = new Job(JobDefOf.BuildRoof, new TargetInfo(cell));
+											  colonist.QueueJob(job);
+										  });
 						}
 						else
 						{
 							clearJobs(colonist);
 							cellsWithRoof.ToList().ForEach(cell =>
-								  {
-									  Job job = new Job(JobDefOf.RemoveRoof, new TargetInfo(cell));
-									  colonist.QueueJob(job);
-								  });
+										  {
+											  Job job = new Job(JobDefOf.RemoveRoof, new TargetInfo(cell));
+											  colonist.QueueJob(job);
+										  });
 						}
 					}, MenuOptionPriority.High, null, null));
 				}
@@ -290,7 +392,7 @@ namespace AchtungMod
 								// AddHandleRoofCommand(colonist, room, false, commands);  -- does not work yet
 
 								// add original commands back
-								commands.AddRange(GetMenuOptions(colonist, false));
+								commands.AddRange(GetMenuOptions(colonist));
 								if (commands.Count > 0)
 								{
 									Find.WindowStack.Add(new FloatMenu(commands));
