@@ -53,7 +53,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AchtungMod.cs" />
+    <Compile Include="ActionMode.cs" />
     <Compile Include="CleanRoomJob.cs" />
+    <Compile Include="Marker.cs" />
+    <Compile Include="MultiPawnAction.cs" />
     <Compile Include="OrderedDictionary.cs" />
     <Compile Include="Patcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -64,12 +67,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>mkdir "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Assemblies"
-copy /B /Y "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Assemblies\$(TargetName).dll"
-xcopy /E /I /Y "$(SolutionDir)..\About" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\About"
-xcopy /E /I /Y "$(SolutionDir)..\Defs" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Defs"
-xcopy /S /E /I /Y "$(SolutionDir)..\Languages\*" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Languages"
-copy /B /Y "$(SolutionDir)..\README.md" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\"</PostBuildEvent>
+    <PostBuildEvent>mkdir "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Assemblies"
+copy /B /Y "$(TargetPath)" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Assemblies\$(TargetName).dll"
+xcopy /E /I /Y "$(SolutionDir)..\About" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\About"
+xcopy /E /I /Y "$(SolutionDir)..\Defs" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Defs"
+xcopy /S /E /I /Y "$(SolutionDir)..\Languages\*" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Languages"
+xcopy /E /I /Y "$(SolutionDir)..\Textures" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Textures"
+copy /B /Y "$(SolutionDir)..\README.md" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

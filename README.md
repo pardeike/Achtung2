@@ -1,4 +1,4 @@
-# RimWorld-Achtung-Mod v1.13
+# RimWorld-Achtung-Mod v1.14
 Command your colonists like a boss!
 
 Achtung! Mod is a drafting helper that enables the right mouse button for dragging to mark drafting destinations and room commands. Instead of a single horde of colonists around the place you right click it is now possible to drag any line along the colonists will be distributed. Very useful for door combat handling.

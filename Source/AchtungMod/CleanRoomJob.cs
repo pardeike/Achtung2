@@ -53,6 +53,7 @@ namespace AchtungMod
 				return false;
 			}
 
+			room.DrawFieldEdges();
 			List<Filth> filth = room.AllContainedThings.OfType<Filth>().ToList();
 			bool result = filth.Any(f => colonist.CanReserve(f, 1));
 			return result;
