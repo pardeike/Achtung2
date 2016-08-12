@@ -10,77 +10,16 @@ using mattmc3.Common.Collections.Generic;
 
 namespace AchtungMod
 {
-	public enum ForceDrafting
-	{
-		Unchanged,
-		ForcedOff,
-		ForcedOn
-	}
-
-	public class MultiPawnAction
-	{
-		ForceDrafting _draftingStatus;
-		OrderedDictionary<Pawn, FloatMenuOption> _pawnActions;
-
-		public MultiPawnAction(ForceDrafting draftingStatus)
-		{
-			_draftingStatus = draftingStatus;
-			_pawnActions = new OrderedDictionary<Pawn, FloatMenuOption>();
-		}
-
-		public void AddAction(Pawn pawn, FloatMenuOption option)
-		{
-			_pawnActions.Add(pawn, option);
-		}
-
-		public ICollection<Pawn> Colonists()
-		{
-			return _pawnActions.Keys;
-		}
-
-		public Action GetAction(Pawn actor)
-		{
-			return new Action(delegate
-			{
-				FloatMenuOption option = _pawnActions[actor];
-				if (option.Disabled == false)
-				{
-					if (_draftingStatus != ForceDrafting.Unchanged)
-					{
-						Worker.SetDraftStatus(actor, _draftingStatus == ForceDrafting.ForcedOn);
-					}
-					Action action = option.action;
-					action();
-				}
-			});
-		}
-
-		public ForceDrafting GetForcedDraftingStatus()
-		{
-			return _draftingStatus;
-		}
-
-		internal bool IsDisabled()
-		{
-			bool onlyDisabled = true;
-			foreach (Pawn pawn in Colonists())
-			{
-				FloatMenuOption option = _pawnActions[pawn];
-				onlyDisabled = onlyDisabled && option.Disabled;
-			}
-			return onlyDisabled;
-		}
-	}
-
 	public static class Worker
 	{
 		public static bool isDragging = false;
 		public static Vector3 dragStart;
 		public static IntVec3[] lastCells;
+		public static Thing[] markers;
 
 		// make sure we deal with simple colonists that can take orders and can be drafted
 		//
-		public static List<Pawn> selectedAndReadyPawns()
+		public static List<Pawn> UserSelectedAndReadyPawns()
 		{
 			List<Pawn> allPawns = Find.Selector.SelectedObjects.OfType<Pawn>().ToList();
 			return allPawns.FindAll(pawn =>
@@ -104,25 +43,30 @@ namespace AchtungMod
 
 		// sets the draft status of a colonists and returns the old status
 		//
-		public static bool SetDraftStatus(Pawn pawn, bool drafted)
+		public static bool SetDraftStatus(Pawn pawn, bool drafted, bool fake = false)
 		{
 			bool previousStatus = GetDraftingStatus(pawn);
 			if (pawn.drafter.Drafted != drafted)
 			{
-				pawn.drafter.Drafted = drafted;
+				if (fake) // we don't use the indirect method because it has lots of side effects
+				{
+					DraftStateHandler draftHandler = pawn.drafter.draftStateHandler;
+					FieldInfo draftHandlerField = typeof(DraftStateHandler).GetField("draftedInt", BindingFlags.NonPublic | BindingFlags.Instance);
+					if (draftHandlerField == null)
+					{
+						Log.Error("No field 'draftedInt' in DraftStateHandler");
+					}
+					else
+					{
+						draftHandlerField.SetValue(draftHandler, drafted);
+					}
+				}
+				else
+				{
+					pawn.drafter.Drafted = drafted;
+				}
 			}
 			return previousStatus;
-		}
-
-		// auto draft unless shift is pressed
-		//
-		public static void AutoDraft(Pawn pawn)
-		{
-			bool shiftPressed = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-			if (!shiftPressed)
-			{
-				SetDraftStatus(pawn, true);
-			}
 		}
 
 		// OrderToCell drafts pawns if they are not and orders them to a specific location
@@ -132,7 +76,12 @@ namespace AchtungMod
 		//
 		public static void OrderToCell(Pawn pawn, IntVec3 cell)
 		{
-			AutoDraft(pawn);
+			bool shiftPressed = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+			if (!shiftPressed)
+			{
+				SetDraftStatus(pawn, true);
+			}
+
 			Job job = new Job(JobDefOf.Goto, cell);
 			job.playerForced = true;
 			pawn.drafter.TakeOrderedJob(job);
@@ -156,79 +105,111 @@ namespace AchtungMod
 
 		// find first pawn clicked by using 'SelectableObjectsUnderMouse' from original Selector code
 		//
-		public static Pawn PawnUnderMouse()
+		public static List<Pawn> PawnsUnderMouse()
 		{
 			MethodInfo selectableObjectsUnderMouseMethod = Find.Selector.GetType().GetMethod("SelectableObjectsUnderMouse", BindingFlags.NonPublic | BindingFlags.Instance);
 			IEnumerable<object> result = selectableObjectsUnderMouseMethod.Invoke(Find.Selector, null) as IEnumerable<object>;
-			List<Pawn> pawns = result.ToList().FindAll(o => o is Pawn).Cast<Pawn>().ToList();
-			return pawns.Count == 0 ? null : pawns.First();
+			return result.ToList().FindAll(o => o is Pawn).Cast<Pawn>().ToList();
 		}
 
-		// get the options for a colonist that would be displayed in original code
+		// a simple wrapper for private methods in FloatMenuMakerMap
 		//
-		private static List<FloatMenuOption> GetMenuOptions(Pawn colonist, ForceDrafting forcedDrafting = ForceDrafting.Unchanged)
+		public static void FloatMenuMakerMapWrapper(string methodName, Vector3 clickPos, Pawn pawn, List<FloatMenuOption> list)
 		{
-			bool oldDraftStatus = false;
-			if (forcedDrafting != ForceDrafting.Unchanged)
+			MethodInfo info = typeof(FloatMenuMakerMap).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static);
+			if (info == null)
 			{
-				oldDraftStatus = SetDraftStatus(colonist, forcedDrafting == ForceDrafting.ForcedOn);
+				Log.Error("Method " + methodName + " not found in FloatMenuMakerMap");
+				return;
 			}
-			List<FloatMenuOption> options = FloatMenuMakerMap.ChoicesAtFor(Gen.MouseMapPosVector3(), colonist);
-			if (forcedDrafting != ForceDrafting.Unchanged)
-			{
-				SetDraftStatus(colonist, oldDraftStatus);
-			}
-			return options;
+			info.Invoke(null, new object[] { clickPos, pawn, list });
 		}
 
-		private static void AddActions(Pawn colonist, OrderedDictionary<string, MultiPawnAction> actions, ForceDrafting forcedDrafting)
+		// this is basically a copy of FloatMenuMakerMap.ChoicesAtFor(Vector3 clickPos, Pawn pawn)
+		// but with more suble logic to avoid duplicates and side effects
+		//
+		public static List<FloatMenuOption> GetMenuOptionsForMode(Pawn pawn, ActionMode mode)
 		{
-			List<FloatMenuOption> options = GetMenuOptions(colonist, forcedDrafting);
-			foreach (FloatMenuOption option in options)
+			Vector3 clickPos = Gen.MouseMapPosVector3();
+			IntVec3 intVec = IntVec3.FromVector3(clickPos);
+			List<FloatMenuOption> list = new List<FloatMenuOption>();
+			if (intVec.InBounds() && pawn.IsColonistPlayerControlled && pawn.drafter.CanTakeOrderedJob())
 			{
-				// disabled items often communicate things to the player
-				// so we keep them, even if you cannot use them
-				//if (option.Disabled == false)
-				//{
-				string name = option.Label;
-				if (actions.ContainsKey(name) == false)
+				FloatMenuMakerMap.making = true;
+				try
 				{
-					actions.Add(name, new MultiPawnAction(forcedDrafting));
+					switch (mode)
+					{
+						case ActionMode.Drafted:
+							bool undoDraft = false;
+							if (pawn.drafter.Drafted == false)
+							{
+								SetDraftStatus(pawn, true, true);
+								undoDraft = true;
+							}
+							FloatMenuMakerMapWrapper("AddDraftedOrders", clickPos, pawn, list);
+							if (undoDraft)
+							{
+								SetDraftStatus(pawn, false, true);
+							}
+							break;
+						case ActionMode.Undrafted:
+							bool undoUndraft = false;
+							if (pawn.drafter.Drafted == true)
+							{
+								SetDraftStatus(pawn, false, true);
+								undoUndraft = true;
+							}
+							FloatMenuMakerMapWrapper("AddUndraftedOrders", clickPos, pawn, list);
+							if (undoUndraft)
+							{
+								SetDraftStatus(pawn, true, true);
+							}
+							break;
+						case ActionMode.Other:
+							if (pawn.RaceProps.Humanlike)
+							{
+								FloatMenuMakerMapWrapper("AddHumanlikeOrders", clickPos, pawn, list);
+							}
+							list.AddRange(pawn.GetExtraFloatMenuOptionsFor(intVec));
+							break;
+					}
 				}
-				actions[name].AddAction(colonist, option);
-				//}
+				finally
+				{
+					FloatMenuMakerMap.making = false;
+				}
 			}
-		}
-
-		public static string GetActionPrefix(MultiPawnAction multiPawnAction)
-		{
-			switch (multiPawnAction.GetForcedDraftingStatus())
-			{
-				case ForceDrafting.ForcedOff:
-					return Translator.Translate("CommandUndraftLabel") + ": ";
-				case ForceDrafting.ForcedOn:
-					return Translator.Translate("CommandDraftLabel") + ": ";
-				default:
-					return "";
-			}
+			return list;
 		}
 
 		// build a single menu that contains the sum of all colonist choices
 		// returns if menu is not empty
 		//
-		public static bool BuildCommonCommandMenu(List<Pawn> colonistsSelected, Pawn clickedPawn)
+		public static List<FloatMenuOption> BuildCommonCommandMenu(List<Pawn> colonistsSelected, IntVec3 where)
 		{
+			// existing commands, polled by faking draft/undraft modes
+			// plus human and other mods commands
+			//
 			OrderedDictionary<string, MultiPawnAction> allActions = new OrderedDictionary<string, MultiPawnAction>();
-
-			foreach (Pawn colonist in colonistsSelected) // get possible commandos for an undrafted colonist
+			List<ActionMode> stati = new List<ActionMode>() { ActionMode.Drafted, ActionMode.Undrafted, ActionMode.Other };
+			foreach (ActionMode mode in stati)
 			{
-				bool isDrafted = GetDraftingStatus(colonist);
-				AddActions(colonist, allActions, isDrafted ? ForceDrafting.ForcedOff : ForceDrafting.Unchanged);
+				foreach (Pawn colonist in colonistsSelected)
+				{
+					List<FloatMenuOption> optionsByMode = GetMenuOptionsForMode(colonist, mode);
+					optionsByMode.ForEach(option => MultiPawnAction.AddToActions(allActions, colonist, mode, option));
+				}
 			}
-			foreach (Pawn colonist in colonistsSelected) // get possible commandos for a drafted colonist
+
+			// our own commands
+			foreach (Pawn colonist in colonistsSelected)
 			{
-				bool isDrafted = GetDraftingStatus(colonist);
-				AddActions(colonist, allActions, !isDrafted ? ForceDrafting.ForcedOn : ForceDrafting.Unchanged);
+				FloatMenuOption cleanOption = CleanFilthCommand(colonist, where);
+				if (cleanOption != null)
+				{
+					MultiPawnAction.AddToActions(allActions, colonist, ActionMode.Undrafted, cleanOption);
+				}
 			}
 
 			// build common menu
@@ -237,13 +218,12 @@ namespace AchtungMod
 			{
 				ICollection<Pawn> colonists = allActions[commonLabel].Colonists();
 
-				string prefix = GetActionPrefix(allActions[commonLabel]);
-
 				int count = colonists.Count;
 				string countInfo = count != 1 ? (count + "x") : colonists.First().NameStringShort;
 				string suffix = (colonistsSelected.Count > 1) ? " (" + countInfo + ")" : "";
 
-				string title = prefix + commonLabel + suffix;
+				MenuOptionPriority priority = allActions[commonLabel].GetPriority();
+				string title = commonLabel + suffix;
 				FloatMenuOption option = new FloatMenuOption(title, delegate
 				{
 					foreach (Pawn actor in allActions[commonLabel].Colonists())
@@ -251,49 +231,43 @@ namespace AchtungMod
 						Action colonistAction = allActions[commonLabel].GetAction(actor);
 						colonistAction();
 					}
-				}, MenuOptionPriority.High, null, null);
+				}, priority);
 				option.Disabled = allActions[commonLabel].IsDisabled();
 				list.Add(option);
 			}
-			if (list.Count == 0)
-			{
-				return false;
-			}
-			FloatMenu menu = clickedPawn != null ? new FloatMenu(list, clickedPawn.NameStringShort, false) : new FloatMenu(list);
-			Find.WindowStack.Add(menu);
-			return true;
+			return list;
 		}
 
 		// add filth cleaning command if necessary
 		//
-		public static void AddCleanFilthCommand(Pawn colonist, IntVec3 loc, List<FloatMenuOption> commands)
+		public static FloatMenuOption CleanFilthCommand(Pawn colonist, IntVec3 loc)
 		{
-			if (CheckRoomJob.hasFilthToClean(colonist, loc))
+			if (CheckRoomJob.hasFilthToClean(colonist, loc) == false)
 			{
-				commands.Add(new FloatMenuOption("CleanThisRoom".Translate(), delegate
-				{
-					clearJobs(colonist);
-					CheckRoomJob.checkRoomAndCleanIfNecessary(loc, colonist);
-				}, MenuOptionPriority.High, null, null));
+				return null;
 			}
+			return new FloatMenuOption("CleanThisRoom".Translate(), delegate
+			{
+				clearJobs(colonist);
+				CheckRoomJob.checkRoomAndCleanIfNecessary(loc, colonist);
+			},
+			MenuOptionPriority.Low);
 		}
 
 		/*
-	 public static void ForceGenerateRoof(Room room)
-	 {
-		  FieldInfo queuedGenerateRoomsInfo = typeof(AutoBuildRoofZoneSetter).GetField("queuedGenerateRooms", BindingFlags.Static | BindingFlags.NonPublic);
-		  List<Room> rooms = queuedGenerateRoomsInfo.GetValue(null) as List<Room>;
-		  if (rooms.Contains(room))
-		  {
+		public static void ForceGenerateRoof(Room room)
+		{
+			FieldInfo queuedGenerateRoomsInfo = typeof(AutoBuildRoofZoneSetter).GetField("queuedGenerateRooms", BindingFlags.Static | BindingFlags.NonPublic);
+			List<Room> rooms = queuedGenerateRoomsInfo.GetValue(null) as List<Room>;
+			if (rooms.Contains(room))
+			{
 				rooms.Remove(room);
-		  }
-		  rooms.Insert(0, room);
-		  queuedGenerateRoomsInfo.SetValue(null, rooms);
-		  AutoBuildRoofZoneSetter.ResolveQueuedGenerateRoofs();
-	 }*/
-
-		// add build roff command if necessary
-		//
+			}
+			rooms.Insert(0, room);
+			queuedGenerateRoomsInfo.SetValue(null, rooms);
+			AutoBuildRoofZoneSetter.ResolveQueuedGenerateRoofs();
+		}
+		
 		public static void AddHandleRoofCommand(Pawn colonist, Room room, bool isBuildingRoof, List<FloatMenuOption> commands)
 		{
 			// we duplicate AutoBuildRoofZoneSetter.cs:65 precheck here
@@ -330,6 +304,7 @@ namespace AchtungMod
 				}
 			}
 		}
+		*/
 
 		// main routine: handle mouse events and command your colonists!
 		// returns true if event was completely handled and thus prevents
@@ -339,73 +314,36 @@ namespace AchtungMod
 		{
 			if (type == EventType.MouseDown)
 			{
-				List<Pawn> colonistsSelected = selectedAndReadyPawns();
+				List<Pawn> colonistsSelected = UserSelectedAndReadyPawns();
 				if (colonistsSelected.Count == 0)
 				{
+					// no colonist selected, exit
 					return false;
 				}
 
-				// if the user clicked on a pawn we don't go there
-				// instead we try to build a "common" menu containing the sum of all possible
-				// commands for all selected colonists and present it
+				// activate drag function only for more than one selected colonist and only if
+				// the context menu is empty. Start by generating all possible commands for the
+				// current click location and then adding our own to it. To force a menu even
+				// when multiple colonists are selected, simply press the alt key
 				//
-				// the menu then contains actions that will execute the corresponding action
-				// for every colonist that had that menu too (compared by menu label name) 
-				//
-				Pawn clickedPawn = PawnUnderMouse();
-				if (clickedPawn != null)
+				List<FloatMenuOption> commands = BuildCommonCommandMenu(colonistsSelected, where.ToIntVec3());
+				bool altPressed = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+				List<Pawn> pawnsClicked = PawnsUnderMouse();
+				if ((colonistsSelected.Count == 1 || (colonistsSelected.Count > 1 && altPressed) || pawnsClicked.Count > 0) && commands.Count > 0)
 				{
-					bool success = BuildCommonCommandMenu(colonistsSelected, clickedPawn);
-					if (success)
-					{
-						Event.current.Use();
-					}
-					return success;
+					// present the new combined menu to the user
+					Find.WindowStack.Add(new FloatMenu(commands));
+					return true;
 				}
-
-				// with only one colonist selected we choose to stay out of the way
-				// however, pressing the alt-key activates this mod anyway
-				//
-				if (colonistsSelected.Count == 1)
+				else
 				{
-					bool altPressed = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
-					if (altPressed)
-					{
-						lastCells = colonistsSelected.Select(p => IntVec3.Invalid).ToArray<IntVec3>();
-						dragStart = where;
-						isDragging = true;
-					}
-					else
-					{
-						Pawn colonist = colonistsSelected.ElementAt(0);
-						if (colonist.Drafted == false)
-						{
-							Room room = RoomQuery.RoomAt(where.ToIntVec3());
-							if (room != null && room.IsHuge == false)
-							{
-								// build room menu
-								List<FloatMenuOption> commands = new List<FloatMenuOption>();
-
-								// add our own commands first
-								AddCleanFilthCommand(colonist, where.ToIntVec3(), commands);
-								// AddHandleRoofCommand(colonist, room, true, commands);   -- does not work yet
-								// AddHandleRoofCommand(colonist, room, false, commands);  -- does not work yet
-
-								// add original commands back
-								commands.AddRange(GetMenuOptions(colonist));
-								if (commands.Count > 0)
-								{
-									Find.WindowStack.Add(new FloatMenu(commands));
-									room.DrawFieldEdges();
-									return true;
-								}
-							}
-						}
-					}
-				}
-				if (colonistsSelected.Count > 1)
-				{
+					// start dragging positions
 					lastCells = colonistsSelected.Select(p => IntVec3.Invalid).ToArray<IntVec3>();
+					markers = new Thing[colonistsSelected.Count];
+					for (int i = 0; i < colonistsSelected.Count; i++)
+					{
+						markers[i] = null;
+					}
 					dragStart = where;
 					isDragging = true;
 				}
@@ -413,6 +351,9 @@ namespace AchtungMod
 
 			if (type == EventType.MouseUp && isDragging == true)
 			{
+				markers.ToList().FindAll(m => m != null && m.Destroyed == false).ForEach(m => m.Destroy(DestroyMode.Vanish));
+				markers = new Thing[0]; // save memory
+
 				isDragging = false;
 			}
 
@@ -420,7 +361,7 @@ namespace AchtungMod
 			//
 			if ((type == EventType.MouseDown || type == EventType.MouseDrag) && isDragging == true)
 			{
-				List<Pawn> colonistsSelected = selectedAndReadyPawns();
+				List<Pawn> colonistsSelected = UserSelectedAndReadyPawns();
 				int colonistsCount = colonistsSelected.Count;
 				if (colonistsCount > 0 && colonistsCount == lastCells.Count())
 				{
@@ -438,12 +379,25 @@ namespace AchtungMod
 						IntVec3 cell = Pawn_DraftController.BestGotoDestNear(optimalCell, pawn);
 						if (cell != null)
 						{
-							// TODO: use a permanent cell maker instead of these
-							MoteThrower.ThrowStatic(cell, ThingDefOf.Mote_FeedbackGoto);
-
 							if (lastCell.IsValid == false || cell != lastCell)
 							{
+								if (markers[i] != null)
+								{
+									if (markers[i].Destroyed == false)
+									{
+										markers[i].Destroy(DestroyMode.Cancel);
+									}
+									markers[i] = null;
+								}
+
 								lastCells[i] = cell;
+
+								Thing marker = ThingMaker.MakeThing(ThingDef.Named("AchtungMarker"));
+								if (GenPlace.TryPlaceThing(marker, cell, ThingPlaceMode.Direct))
+								{
+									markers[i] = marker;
+								}
+
 								OrderToCell(pawn, cell);
 							}
 						}

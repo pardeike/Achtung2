@@ -1,11 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-  <name>Achtung! Mod v1.13</name>
+  <name>Achtung! Mod v1.14</name>
   <author>Andreas Pardeike</author>
   <url>https://ludeon.com/forums/index.php?topic=22130.0</url>
   <targetVersion>0.14.1241</targetVersion>
   <description>
-    Achtung! Mod v1.13 for RimWorld
+    Achtung! Mod v1.14 for RimWorld
 
     Achtung! Mod is a drafting helper that enables the right mouse button for dragging to mark drafting destinations and room commands. Instead of a single horde of colonists around the place you right click it is now possible to drag any line along the colonists will be distributed. Very useful for door combat handling.
 
@@ -35,7 +35,7 @@
     No, this mod changes only the interface and the user actions. Rimworld will warn you but you can simply ignore the warning. If you later decide to remove Achtung! your saved games will still work as before!
 
     - Is this mod compatible with other mods?
-    Most likely. I don’t know of any mods altering the selection mechanism. The combat menu is created in a general way so it will include actions from other mods without breaking.
+    Most likely. I don�t know of any mods altering the selection mechanism. The combat menu is created in a general way so it will include actions from other mods without breaking.
 
     - Why is this called "Achtung!"
     It's german for "Attention!" and used in the military as a command.
