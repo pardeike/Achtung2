@@ -2,11 +2,34 @@
 using Verse;
 using System.Reflection;
 using System;
+using RimWorld;
+using UnityEngine;
+using System.Collections.Generic;
 
 namespace AchtungMod
 {
-	public class _Injector : SpecialInjector
+	public class BootInjector : SpecialInjector
 	{
+		// smart way to fetch the build version from the assembly
+		//
+		private static string _version = null;
+		public static string Version
+		{
+			get
+			{
+				if (_version == null)
+				{
+					_version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+					string[] vparts = Version.Split(".".ToCharArray());
+					if (vparts.Length > 3)
+					{
+						_version = vparts[0] + "." + vparts[1] + "." + vparts[2];
+					}
+				}
+				return _version;
+			}
+		}
+
 		// Our way in is the method RimWorld.Selector.SelectorOnGUI which we detour
 		// to our own version in Patcher.cs
 		//
@@ -30,6 +53,21 @@ namespace AchtungMod
 				Log.Error("Exception " + e);
 				return false;
 			}
+		}
+	}
+
+	// this will be called whenever a new game is loaded. we use it to notify the
+	// user in case we are disabled
+	//
+	public class StartGameInjector : SpecialInjector
+	{
+		public override bool Inject()
+		{
+			if (Settings.modActive == false)
+			{
+				Find.WindowStack.Add(new Notification());
+			}
+			return true;
 		}
 	}
 }

@@ -1,46 +1,116 @@
-# RimWorld-Achtung-Mod v1.14
+## RimWorld Achtung! Mod 
 Command your colonists like a boss!
 
-Achtung! Mod is a drafting helper that enables the right mouse button for dragging to mark drafting destinations and room commands. Instead of a single horde of colonists around the place you right click it is now possible to drag any line along the colonists will be distributed. Very useful for door combat handling.
+**Achtung! Mod** enhances how you control RimWorld and reduces the number of clicks by half. No game settings are modified so there is no risk using it.
 
-With your colonists selected, use right-click and drag to distribute all selected colonists along a line. They get drafted automatically. 10 colonists + 10 doors in a row? No problem!
+These enhancements can be divided into the following areas:
 
-Community Core Library is currently required.
+---
 
-How to:
+##### Automatic drafting/undrafting of colonists
 
-1) Install Community Core Library from Steam and put this Achtung! Mod after it.
+Wouldn't it be nice to not micro-manage the drafting status of your colonists? With Achtung! you can.
 
-2) Select at least one colonist (no need to draft them)
+With Achtung! the context menu contains all possible actions regardless of the current drafting status of the selected colonist. Once you select an action **Achtung!** automatically changes the drafting status if necessary to execute the action.
 
-3) Per default, Achtung! won't activate with a single colonist selected. Override this with the alt-key (not necessary if you click inside a room).
+---
 
-4) Use the right mouse button to drag along the map to distribute selected colonists or click inside a room to get the room commands.
+##### Control multiple colonists at once
 
-5) Colonists that are not drafted become automatically drafted. Hold shift-key to not auto-draft.
+Save time by issuing a command with more than one colonist selected. For example: select three brawlers and right click an enemy, then choose "melee". Done.
 
-6) Common actions: Right-clicking on a target now display a menu containing the actions of all selected colonists. Never again order all colonists separately to melee a person!
+Achtung! combines all possible actions into one MultiAction(tm) context menu and shows you how many colonists can execute a certain action by appending a multiplier at the end of the menu item.
 
-7) Room menu: Right-clicking in a room with a non-drafted colonist selected will present the usual menu but with an extra choice: "Clean Room". This command will start a complete clean of the room including any dirt that colonists add during cleaning.
+---
 
-# FAQ
+##### Position your colonists like in the military
 
-**Does this mod alter my save files?**
+This is where the name "Achtung!" comes from. It's the german word used to get the attention of soldiers and which is usually followed by a line-up in front of the commander.
 
-No, this mod changes only the interface and the user actions. Rimworld will warn you but you can simply ignore the warning. If you later decide to remove Achtung! your saved games will still work as before!
+Within RimWorld in combat, you want your colonists neatly positioned along a line or equally spaced in all your door openings. This is really easy with Achtung! Select multiple colonists, and with the right mouse button, drag along a line. Achtung! will move your colonists to equally spaced positions in real time. 10 colonists into 10 doors? No problem!
 
-**Is this mod compatible with other mods?**
+---
 
-Most likely. I don’t know of any mods altering the selection mechanism. The combat menu is created in a general way so it will include actions from other mods without breaking.
+##### Important tasks
 
-**Why is this called "Achtung!"**
+Some tasks are too important to be interrupted. Like cleaning that hospital room so nobody gets infected. That's why Achtung! has a few extra commands that will make sure that something is really done well.
 
-It's german for "Attention!" and used in the military as a command
+For now, this is only "Clean Room" but there are other tasks planned in the future.
 
-**I think this should work different/better. Are you open for changes or improvement requests?**
+When you choose Clean Room, the colonist(s) will start cleaning the room until you stop them or the room is really clean. They will check the room while cleaning so that it doesn't matter if other colonists might introduce new filth while the cleaning is ongoing.
 
-Answer: Always! Please submit an Issue via GitHub or send me an email to **andreas@pardeike.net**
+---
 
-Have fun!
+##### Flexibility
 
-/Andreas
+A few commands have different way to behave. Achtung! uses both: the ALT and the SHIFT key to modify the way it works. Hold SHIFT during an operation to not auto-draft colonist(s). Hold ALT to switch between presenting the context menu and positioning colonists. The behavior of the ALT key can be customized in the mod settings.
+
+---
+
+##### Stability and compatibility
+
+Achtung! is developed with the user in mind. Nobody is perfect and if Achtung! might not work as expected, you can always turn it on/off in the Mod Options without restarting RimWorld. You will also find a few other settings there that might make you happy.
+
+To stay compatible with other mods, Achtung! was developed to stay out of its way and does not overwrite any essential functions. Instead, it reuses existing functionality and probably works with 99% of other mods out of the box.
+
+---
+
+##### Requirements
+
+Achtung! uses CCL - Community Core Library for the settings options and at startup. It requires at least RimWorld Alpha 14 and will get updated tightly with new RimWorld versions in necessary.
+
+---
+
+##### Installation
+
+Make sure you have the Community Core Library (CCL) installed. The plain version without vanilla tweaks is enough. Achtung! Mod must load after CCL but the order of other mods is not important.
+
+Use preferable Steam to subscribe to Achtung! Mod [here](http://steamcommunity.com/sharedfiles/filedetails/?id=730936602&searchtext=achtung). Doing so will automatically update Achtung! anytime a new version comes out.
+
+Alternatively, download the zip file from [here](https://dl.dropboxusercontent.com/u/6298289/AchtungMod.zip) and install it by copying the AchtungMod folder into the Mods folder.
+
+---
+
+##### Feedback
+
+Without feedback, this mod would have never come so far. So please, send me feedback and rate and recommend my mod whenever possible. The three main places to do so are
+
+- [Ludeon Forums](https://ludeon.com/forums/index.php?topic=22130.0)
+- [Steam Workshop](http://steamcommunity.com/sharedfiles/filedetails/comments/730936602)
+- [GitHub](https://github.com/pardeike/RimWorld-Achtung-Mod)
+
+---
+
+##### FAQ
+
+###### Does this alter my save files?
+
+No, Achtung! changes only the interface and the user actions. Rimworld will warn you but you can simply ignore the warning. If you later decide to remove Achtung! your saved games will still work as before!
+
+###### Is this mod compatible with other mods?
+
+Most likely. I don’t know of any mods altering the selection mechanism. The context menu is created in a general way so it will include actions from other mods without breaking.
+
+###### Why is this called "Achtung!" ?
+
+It's german for "Attention!" and used in the military as a command to line up soldiers.
+
+###### I think this should work different/better. Are you open for changes or improvement requests?
+
+Awesome! Please send see the Feedback section or send me email to andreas@pardeike.net
+
+---
+
+##### License
+
+Free. As in free beer. Copy, learn and be respectful.
+
+---
+
+##### Contact
+
+Andreas Pardeike  
+Email: andreas@pardeike.net  
+Steam: pardeike  
+Twitter: @pardeike  
+Cell: +46722120680

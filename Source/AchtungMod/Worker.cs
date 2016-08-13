@@ -7,6 +7,8 @@ using Verse.AI;
 using System.Reflection;
 using System;
 using mattmc3.Common.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.IO;
 
 namespace AchtungMod
 {
@@ -82,6 +84,10 @@ namespace AchtungMod
 				SetDraftStatus(pawn, true);
 			}
 
+			//pawn.Notify_Teleported();
+			//pawn.ClearMind();
+			//pawn.ClearReservations();
+
 			Job job = new Job(JobDefOf.Goto, cell);
 			job.playerForced = true;
 			pawn.drafter.TakeOrderedJob(job);
@@ -103,20 +109,23 @@ namespace AchtungMod
 			}
 		}
 
-		// find first pawn clicked by using 'SelectableObjectsUnderMouse' from original Selector code
+		/* find first pawn clicked by using 'SelectableObjectsUnderMouse' from original Selector code
 		//
 		public static List<Pawn> PawnsUnderMouse()
 		{
 			MethodInfo selectableObjectsUnderMouseMethod = Find.Selector.GetType().GetMethod("SelectableObjectsUnderMouse", BindingFlags.NonPublic | BindingFlags.Instance);
 			IEnumerable<object> result = selectableObjectsUnderMouseMethod.Invoke(Find.Selector, null) as IEnumerable<object>;
 			return result.ToList().FindAll(o => o is Pawn).Cast<Pawn>().ToList();
-		}
+		}*/
 
 		// a simple wrapper for private methods in FloatMenuMakerMap
 		//
 		public static void FloatMenuMakerMapWrapper(string methodName, Vector3 clickPos, Pawn pawn, List<FloatMenuOption> list)
 		{
-			MethodInfo info = typeof(FloatMenuMakerMap).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static);
+			// ugly hack for mods that detour FloatMenuMakerMap
+			//
+			Type type = Tools.GetTypeOfFloatMenuMakerMap();
+			MethodInfo info = type.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static);
 			if (info == null)
 			{
 				Log.Error("Method " + methodName + " not found in FloatMenuMakerMap");
@@ -142,7 +151,7 @@ namespace AchtungMod
 					{
 						case ActionMode.Drafted:
 							bool undoDraft = false;
-							if (pawn.drafter.Drafted == false)
+							if (GetDraftingStatus(pawn) == false)
 							{
 								SetDraftStatus(pawn, true, true);
 								undoDraft = true;
@@ -153,24 +162,30 @@ namespace AchtungMod
 								SetDraftStatus(pawn, false, true);
 							}
 							break;
+
 						case ActionMode.Undrafted:
 							bool undoUndraft = false;
-							if (pawn.drafter.Drafted == true)
+							if (GetDraftingStatus(pawn) == true)
 							{
 								SetDraftStatus(pawn, false, true);
 								undoUndraft = true;
 							}
 							FloatMenuMakerMapWrapper("AddUndraftedOrders", clickPos, pawn, list);
+							if (pawn.RaceProps.Humanlike)
+							{
+								FloatMenuMakerMapWrapper("AddHumanlikeOrders", clickPos, pawn, list);
+							}
 							if (undoUndraft)
 							{
 								SetDraftStatus(pawn, true, true);
 							}
 							break;
+
 						case ActionMode.Other:
-							if (pawn.RaceProps.Humanlike)
-							{
-								FloatMenuMakerMapWrapper("AddHumanlikeOrders", clickPos, pawn, list);
-							}
+
+							// extra orders are probably mod specific and we don't do auto draft/undraft for them. the user
+							// needs to set the colonist into the correct draft mode to get the options she wants
+							//
 							list.AddRange(pawn.GetExtraFloatMenuOptionsFor(intVec));
 							break;
 					}
@@ -306,12 +321,63 @@ namespace AchtungMod
 		}
 		*/
 
+		public static string goHereLabel = "GoHere".Translate();
+		public static Regex goHereSuffix = new Regex(@"^ \(\d+x\)$", RegexOptions.None);
+		public static bool isGoHereOption(FloatMenuOption option)
+		{
+			if (option.Label.StartsWith(goHereLabel) == false)
+			{
+				return false;
+			}
+			string suffix = option.Label.Substring(goHereLabel.Length);
+			return suffix.Length == 0 || goHereSuffix.Match(suffix).Success;
+		}
+
+		// this is the main logic. quite tricky to get right as many users can confirm ;-)
+		//
+		public static bool UseCombinedMenu(List<Pawn> colonistsSelected, List<FloatMenuOption> commands)
+		{
+			List<FloatMenuOption> enabledCommands = commands.FindAll(option => option.Disabled == false);
+
+			// absolutely no commands in the menu?
+			if (commands.Count == 0)
+			{
+				// drag!
+				return false;
+			}
+
+			// one active command and it's "Go here"?
+			if (enabledCommands.Count == 1 && isGoHereOption(enabledCommands.First()))
+			{
+				// drag!
+				return false;
+			}
+
+			// with at least one active command (that is not "go here"), show the menu unless alt-key is pressed
+			bool altPressed = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+			if (altPressed == Settings.altKeyInverted)
+			{
+				// menu!
+				return true;
+			}
+
+			// drag!
+			return false;
+		}
+
 		// main routine: handle mouse events and command your colonists!
 		// returns true if event was completely handled and thus prevents
 		// original code from being called
 		//
 		public static bool RightClickHandler(EventType type, Vector3 where)
 		{
+			// Bail out if we are not active
+			//
+			if (Settings.modActive == false)
+			{
+				return false;
+			}
+
 			if (type == EventType.MouseDown)
 			{
 				List<Pawn> colonistsSelected = UserSelectedAndReadyPawns();
@@ -327,9 +393,7 @@ namespace AchtungMod
 				// when multiple colonists are selected, simply press the alt key
 				//
 				List<FloatMenuOption> commands = BuildCommonCommandMenu(colonistsSelected, where.ToIntVec3());
-				bool altPressed = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
-				List<Pawn> pawnsClicked = PawnsUnderMouse();
-				if ((colonistsSelected.Count == 1 || (colonistsSelected.Count > 1 && altPressed) || pawnsClicked.Count > 0) && commands.Count > 0)
+				if (UseCombinedMenu(colonistsSelected, commands))
 				{
 					// present the new combined menu to the user
 					Find.WindowStack.Add(new FloatMenu(commands));
@@ -340,9 +404,11 @@ namespace AchtungMod
 					// start dragging positions
 					lastCells = colonistsSelected.Select(p => IntVec3.Invalid).ToArray<IntVec3>();
 					markers = new Thing[colonistsSelected.Count];
-					for (int i = 0; i < colonistsSelected.Count; i++)
+					for (int i = 0; i < markers.Length; i++)
 					{
-						markers[i] = null;
+						Pawn colonist = colonistsSelected[i];
+						markers[i] = ThingMaker.MakeThing(Marker.ThingDef(colonist));
+						Find.DynamicDrawManager.RegisterDrawable(markers[i]);
 					}
 					dragStart = where;
 					isDragging = true;
@@ -351,8 +417,11 @@ namespace AchtungMod
 
 			if (type == EventType.MouseUp && isDragging == true)
 			{
-				markers.ToList().FindAll(m => m != null && m.Destroyed == false).ForEach(m => m.Destroy(DestroyMode.Vanish));
-				markers = new Thing[0]; // save memory
+				for (int i = 0; i < markers.Length; i++)
+				{
+					Find.DynamicDrawManager.DeRegisterDrawable(markers[i]);
+				}
+				markers = null;
 
 				isDragging = false;
 			}
@@ -381,24 +450,12 @@ namespace AchtungMod
 						{
 							if (lastCell.IsValid == false || cell != lastCell)
 							{
-								if (markers[i] != null)
+								if (cell.InBounds())
 								{
-									if (markers[i].Destroyed == false)
-									{
-										markers[i].Destroy(DestroyMode.Cancel);
-									}
-									markers[i] = null;
+									lastCells[i] = cell;
+									markers[i].SetPositionDirect(cell);
+									OrderToCell(pawn, cell);
 								}
-
-								lastCells[i] = cell;
-
-								Thing marker = ThingMaker.MakeThing(ThingDef.Named("AchtungMarker"));
-								if (GenPlace.TryPlaceThing(marker, cell, ThingPlaceMode.Direct))
-								{
-									markers[i] = marker;
-								}
-
-								OrderToCell(pawn, cell);
 							}
 						}
 
