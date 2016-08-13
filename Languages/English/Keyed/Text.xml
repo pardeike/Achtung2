@@ -2,4 +2,11 @@
 <LanguageData>
 	<CleanThisRoom>Clean this room</CleanThisRoom>
 	<RoofThisRoom>Roof this room</RoofThisRoom>
+	<ModVersion>Version</ModVersion>
+	<AchtungEnabled>Active</AchtungEnabled>
+	<AchtungEnabledExplained>This mod can be turned on/off without restarting RimWorld</AchtungEnabledExplained>
+	<AltKeyInverted>Invert Alt-key usage</AltKeyInverted>
+	<AltKeyInvertedExplained1>Pressing Alt-key shows menu instead of positioning colonists</AltKeyInvertedExplained1>
+	<AltKeyInvertedExplained2>Pressing Alt-key positions colonists instead of showing the menu</AltKeyInvertedExplained2>
+	<ModDeactivated>The mod is disabled. To enable it, go to {0} and turn it on again.</ModDeactivated>
 </LanguageData>
