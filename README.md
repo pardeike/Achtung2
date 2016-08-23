@@ -1,6 +1,8 @@
 ## RimWorld Achtung! Mod 
 Command your colonists like a boss!
 
+![alt text](https://raw.githubusercontent.com/pardeike/RimWorld-Achtung-Mod/master/About/Preview.png "Achtung! Mod")
+
 **Achtung! Mod** enhances how you control RimWorld and reduces the number of clicks by half. No game settings are modified so there is no risk using it.
 
 These enhancements can be divided into the following areas:
@@ -44,7 +46,7 @@ The command "Fight Fire" works outside the home area and is useful if you don't 
 
 ##### Flexibility
 
-A few commands have different way to behave. Achtung! uses both: the ALT and the SHIFT key to modify the way it works. Hold SHIFT to move colonists relative to their current position. Hold ALT while right-clicking to draft your selected colonists before the operation.
+A few commands have different way to behave. Achtung! uses both: the ALT and the SHIFT key to modify the way it works. Hold SHIFT to move colonists relative to their current position. Hold ALT while right-clicking to draft your selected colonists before the operation and to suppress the context menu.
 
 ---
 
@@ -58,7 +60,7 @@ To stay compatible with other mods, Achtung! was developed to stay out of its wa
 
 ##### Requirements
 
-Achtung! Mod requires at least RimWorld Alpha 14 and will get updated tightly with new RimWorld versions in necessary. I does not depend on any other mods and is known to work in any mod order you like.
+Achtung! Mod requires at least RimWorld Alpha 14 or 15 and will get updated tightly with new RimWorld versions in necessary. I does not depend on any other mods and is known to work in any mod order you like.
 
 ---
 
@@ -66,9 +68,9 @@ Achtung! Mod requires at least RimWorld Alpha 14 and will get updated tightly wi
 
 Make sure you have the Community Core Library (CCL) installed. The plain version without vanilla tweaks is enough. Achtung! Mod must load after CCL but the order of other mods is not important.
 
-Use preferable Steam to subscribe to Achtung! Mod [here](http://steamcommunity.com/sharedfiles/filedetails/?id=730936602&searchtext=achtung). Doing so will automatically update Achtung! anytime a new version comes out.
+Use should prefer to use Steam Workshop to subscribe to Achtung! Mod updates [here](http://steamcommunity.com/sharedfiles/filedetails/?id=730936602&searchtext=achtung). Doing so will automatically update Achtung! anytime a new version comes out.
 
-Alternatively, download the zip file from [here](https://dl.dropboxusercontent.com/u/6298289/AchtungMod.zip) and install it by copying the AchtungMod folder into the Mods folder.
+Alternatively, download the zip file from [GitHub](https://github.com/pardeike/RimWorld-Achtung-Mod/archive/master.zip) and install it by unzipping the "RimWorld-Achtung-Mod-master" directory into the Mods folder (you can rename it but it doesn't matter).
 
 ---
 
@@ -90,7 +92,7 @@ No, Achtung! changes only the interface and the user actions. Rimworld will warn
 
 ###### Is this mod compatible with other mods?
 
-Most likely. I don’t know of any mods altering the selection mechanism. The context menu is created in a general way so it will include actions from other mods without breaking.
+Most likely. I donâ€™t know of any mods altering the selection mechanism. The context menu is created in a general way so it will include actions from other mods without breaking.
 
 ###### Why is this called "Achtung!" ?
 
