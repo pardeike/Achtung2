@@ -1,12 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
-	<CleanThisRoom>Städa rummet</CleanThisRoom>
-	<RoofThisRoom>Skapa tak för rummet</RoofThisRoom>
-	<ModVersion>Version</ModVersion>
-	<AchtungEnabled>Aktivt</AchtungEnabled>
-	<AchtungEnabledExplained>Den här Modden kan aktiveras/avaktiveras utan att man måste starta om RimWorld</AchtungEnabledExplained>
-	<AltKeyInverted>Invertera Alt-knapp användning</AltKeyInverted>
-	<AltKeyInvertedExplained1>Trygg Alt för att visa menyn istället för positionering av kolonister</AltKeyInvertedExplained1>
-	<AltKeyInvertedExplained2>Trygg Alt for att positionera kolonister istället för att visa meny</AltKeyInvertedExplained2>
-	<ModDeactivated>Modden är inte aktivt. För att aktivera den går till {0} och slå på den igen.</ModDeactivated>
+  <CleanThisRoom>Städa rummet</CleanThisRoom>
+  <CleaningReport>Städa {0}: {1}</CleaningReport>
+  <CleanInfoText>Städar rummet</CleanInfoText>
+  <CleanDescription>Städar ett rum tills det är rent</CleanDescription>
+  <NotARoom>Inte ett rum</NotARoom>
+  <RoomTooLarge>Rummet är för stort</RoomTooLarge>
+  <RoomHasNoFilth>Rummet är rent</RoomHasNoFilth>
+  <FightThisFire>Släck brand</FightThisFire>
+  <ExtinguishInfoText>Släcker en brand</ExtinguishInfoText>
+  <FightingFireReport>Släcker brand: {0}</FightingFireReport>
+  <ExtinguishDescription>Släcker brand (även utanför hemområde)</ExtinguishDescription>
 </LanguageData>

@@ -1,116 +1,130 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
 namespace AchtungMod
 {
-	class Tools
+	public enum ActionMode
 	{
-		// just like CheckboxLabeled but with a static text at the end (like iOS)
-		//
-		public static void ValueLabeled(Listing_Standard listing, string label, object value, string tooltip = null)
+		Drafted,
+		Undrafted,
+		Other
+	}
+
+	[StaticConstructorOnStartup]
+	static class Tools
+	{
+		public static Material markerMaterial;
+		public static Material lineMaterial;
+		public static string goHereLabel;
+
+		static Tools()
 		{
-			float lineHeight = Text.LineHeight;
-			Rect rect = listing.GetRect(lineHeight);
-			if (!tooltip.NullOrEmpty())
+			markerMaterial = MaterialPool.MatFrom("Marker", ShaderDatabase.MoteGlow);
+			lineMaterial = MaterialPool.MatFrom("Line", ShaderDatabase.MoteGlow);
+			goHereLabel = "GoHere".Translate();
+		}
+
+		public static List<Pawn> UserSelectedAndReadyPawns()
+		{
+			List<Pawn> allPawns = Find.Selector.SelectedObjects.OfType<Pawn>().ToList();
+			return allPawns.FindAll(pawn =>
+					pawn.drafter != null
+					&& pawn.IsColonistPlayerControlled
+					&& pawn.Downed == false
+					&& pawn.drafter.CanTakeOrderedJob()
+			);
+		}
+
+		public static bool IsGoHereOption(FloatMenuOption option)
+		{
+			return option.Label == goHereLabel;
+		}
+
+		public static bool GetDraftingStatus(Pawn pawn)
+		{
+			if (pawn.drafter == null)
 			{
-				if (Mouse.IsOver(rect))
-				{
-					Widgets.DrawHighlight(rect);
-				}
-				TooltipHandler.TipRegion(rect, tooltip);
+				pawn.drafter = new Pawn_DraftController(pawn);
 			}
-
-			TextAnchor savedAnchor = Text.Anchor;
-
-			Text.Anchor = TextAnchor.MiddleLeft;
-			Widgets.Label(rect, label);
-
-			Text.Anchor = TextAnchor.MiddleRight;
-			Widgets.Label(rect, value.ToString());
-
-			Text.Anchor = savedAnchor;
-
-			listing.Gap(listing.verticalSpacing);
+			return pawn.drafter.Drafted;
 		}
 
-		// ugly hack to find a types fullname in any existing assembly
-		//
-		public static List<Type> FindTypesInSolution(string typeFullName)
+		public static bool SetDraftStatus(Pawn pawn, bool drafted, bool fake = true)
 		{
-			List<Assembly> assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList()
-				.FindAll(a => a.FullName.StartsWith("System,") == false)
-				.FindAll(a => a.FullName.StartsWith("System.") == false)
-				.FindAll(a => a.FullName.StartsWith("mscorlib,") == false)
-				.FindAll(a => a.FullName.StartsWith("Community Core Library,") == false)
-				.FindAll(a => a.FullName.StartsWith("UnityEngine.") == false)
-				.FindAll(a => a.FullName.StartsWith("AchtungMod,") == false)
-				.FindAll(a => a.FullName.StartsWith("Assembly-CSharp") == false);
-			List<Type> result = new List<Type>();
-			assemblies.ForEach(assembly => result.AddRange(assembly.GetTypes().ToList().FindAll(t => t.FullName == typeFullName)));
-			return result;
-		}
-
-		// removes the last part (parts defined by a separator)
-		//
-		public static string RemoveLastPartSeparatedBy(string str, char separator)
-		{
-			List<string> parts = str.Split(new char[] { separator }).ToList();
-			parts.RemoveLast();
-			return String.Join(separator.ToString(), parts.ToArray());
-		}
-
-		// Checks if a type has all named methods (simple check, not including arguments)
-		//
-		public static bool HasAllMethods(Type type, string[] methodNames)
-		{
-			List<string> matches = methodNames.ToList().FindAll(name =>
+			bool previousStatus = GetDraftingStatus(pawn);
+			if (pawn.drafter.Drafted != drafted)
 			{
-				return type.GetMethod(name) != null ||
-					type.GetMethod(name, BindingFlags.NonPublic | BindingFlags.Static) != null ||
-					type.GetMethod(name, BindingFlags.Public | BindingFlags.Static) != null;
-			});
-			return methodNames.Length == matches.Count;
-		}
-
-		// Ugly hack for mods that detour FloatMenuMakerMap
-		//
-		public static Type TypeOfFloatMenuMakerMap = null;
-		public static Type GetTypeOfFloatMenuMakerMap()
-		{
-			string[] methodsRequired = new string[] { "AddDraftedOrders", "AddUndraftedOrders", "AddHumanlikeOrders" };
-
-			if (TypeOfFloatMenuMakerMap == null)
-			{
-				// this is the original FloatMenuMakerMap
-				TypeOfFloatMenuMakerMap = typeof(RimWorld.FloatMenuMakerMap);
-
-				// let's see if Community Core Library has a detour for it
-				FieldInfo detouredField = typeof(CommunityCoreLibrary.Detours).GetField("detoured", BindingFlags.NonPublic | BindingFlags.Static);
-				FieldInfo destinationsField = typeof(CommunityCoreLibrary.Detours).GetField("destinations", BindingFlags.NonPublic | BindingFlags.Static);
-				if (detouredField != null && destinationsField != null)
+				if (fake) // we don't use the indirect method because it has lots of side effects
 				{
-					List<string> detoured = (List<string>)detouredField.GetValue(null);
-					string sourceString = detoured.FindLast(detour => detour.StartsWith(TypeOfFloatMenuMakerMap.FullName + "."));
-					if (sourceString != null)
+					DraftStateHandler draftHandler = pawn.drafter.draftStateHandler;
+					FieldInfo draftHandlerField = typeof(DraftStateHandler).GetField("draftedInt", BindingFlags.NonPublic | BindingFlags.Instance);
+					if (draftHandlerField == null)
 					{
-						List<string> destinations = (List<string>)destinationsField.GetValue(null);
-						string destinationString = destinations[detoured.IndexOf(sourceString)];
-						string fullname = RemoveLastPartSeparatedBy(destinationString, '.');
-						List<Type> types = FindTypesInSolution(fullname).FindAll(t => HasAllMethods(t, methodsRequired));
-						if (types.Count == 1)
-						{
-							// seems we found an implementation
-							TypeOfFloatMenuMakerMap = types.First();
-						}
+						Log.Error("No field 'draftedInt' in DraftStateHandler");
+					}
+					else
+					{
+						draftHandlerField.SetValue(draftHandler, drafted);
 					}
 				}
+				else
+				{
+					pawn.drafter.Drafted = drafted;
+				}
 			}
-
-			return TypeOfFloatMenuMakerMap;
+			return previousStatus;
 		}
+
+		public static bool ForceDraft(Pawn pawn, bool drafted)
+		{
+			bool oldState = SetDraftStatus(pawn, drafted, false);
+			return oldState != drafted;
+		}
+
+		public static void DrawMarker(Vector3 pos)
+		{
+			pos.y = Altitudes.AltitudeFor(AltitudeLayer.Pawn - 1);
+			Tools.DrawScaledMesh(MeshPool.plane10, markerMaterial, pos, Quaternion.identity, 1.5f, 1.5f);
+		}
+
+		public static void DrawScaledMesh(Mesh mesh, Material mat, Vector3 pos, Quaternion q, float mx, float my, float mz = 1f)
+		{
+			Vector3 s = new Vector3(mx, mz, my);
+			Matrix4x4 matrix = new Matrix4x4();
+			matrix.SetTRS(pos, q, s);
+			Graphics.DrawMesh(mesh, matrix, mat, 0);
+		}
+
+		public static void DrawLineBetween(Vector3 A, Vector3 B, float thickness)
+		{
+			if ((Mathf.Abs((float)(A.x - B.x)) >= 0.01f) || (Mathf.Abs((float)(A.z - B.z)) >= 0.01f))
+			{
+				Vector3 pos = (Vector3)((A + B) / 2f);
+				if (A != B)
+				{
+					A.y = B.y;
+					float z = (A - B).MagnitudeHorizontal();
+					Quaternion q1 = Quaternion.LookRotation(A - B);
+					Quaternion q2 = Quaternion.LookRotation(B - A);
+					float w = 0.5f;
+					DrawScaledMesh(MeshPool.plane10, lineMaterial, pos, q1, w, z);
+					DrawScaledMesh(MeshPool.pies[180], lineMaterial, A, q1, w, w);
+					DrawScaledMesh(MeshPool.pies[180], lineMaterial, B, q2, w, w);
+				}
+			}
+		}
+
+		public static Vector2 LabelDrawPosFor(Vector3 drawPos, float worldOffsetZ)
+		{
+			drawPos.z += worldOffsetZ;
+			Vector2 vector2 = Find.Camera.WorldToScreenPoint(drawPos);
+			vector2.y = Screen.height - vector2.y;
+			return vector2;
+		}
+
 	}
 }

@@ -1,12 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
-	<CleanThisRoom>Diesen Raum säubern</CleanThisRoom>
-	<RoofThisRoom>Diesen Raum überdachen</RoofThisRoom>
-	<ModVersion>Version</ModVersion>
-	<AchtungEnabled>Aktiv</AchtungEnabled>
-	<AchtungEnabledExplained>Dieser Mod kan an- und ausgeschaltet werden ohne RimWorld neu zu starten</AchtungEnabledExplained>
-	<AltKeyInverted>Umgekehrte Alt-key Anwendung</AltKeyInverted>
-	<AltKeyInvertedExplained1>Die Alt-Taste zeigt das Menü anstelle die Kolonisten zu positionieren</AltKeyInvertedExplained1>
-	<AltKeyInvertedExplained2>Die Alt-Taste positioniert die Kolonisten anstelle das Menü anzuzeigen</AltKeyInvertedExplained2>
-	<ModDeactivated>Das Modul is deaktiviert. Um es anzuschalten, ändern Sie die Einstellungen im Menü {0}.</ModDeactivated>
+  <CleanThisRoom>Diesen Raum säubern</CleanThisRoom>
+  <CleaningReport>Säubern von {0}: {1}</CleaningReport>
+  <CleanInfoText>Raum wird gesäubert</CleanInfoText>
+  <CleanDescription>Einen Raum komplett sauber machen</CleanDescription>
+  <NotARoom>Kein Raum</NotARoom>
+  <RoomTooLarge>Der Raums is zu gross</RoomTooLarge>
+  <RoomHasNoFilth>Der Raum ist nicht schmutzig</RoomHasNoFilth>
+  <FightThisFire>Bekämpfe Feuer</FightThisFire>
+  <ExtinguishInfoText>Bekämpfe ein Feuer</ExtinguishInfoText>
+  <FightingFireReport>Bekämpfe Feuer: {0}</FightingFireReport>
+  <ExtinguishDescription>Bekämpft Feuer (auch ausserhalb des Heimgebietes)</ExtinguishDescription>
 </LanguageData>

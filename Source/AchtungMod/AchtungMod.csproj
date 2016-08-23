@@ -15,15 +15,16 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\Assemblies\</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>true</UseVSHostingProcess>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -52,28 +53,29 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AchtungMod.cs" />
-    <Compile Include="ActionMode.cs" />
-    <Compile Include="CleanRoomJob.cs" />
-    <Compile Include="ConfigurationMenu.cs" />
-    <Compile Include="Marker.cs" />
-    <Compile Include="MultiPawnAction.cs" />
-    <Compile Include="Notification.cs" />
-    <Compile Include="OrderedDictionary.cs" />
-    <Compile Include="Patcher.cs" />
+    <Compile Include="Colonist.cs" />
+    <Compile Include="Controller.cs" />
+    <Compile Include="Injection\AsmHelper.cs" />
+    <Compile Include="Injection\HookInjector.cs" />
+    <Compile Include="Injection\Logger.cs" />
+    <Compile Include="Injection\Platform.cs" />
+    <Compile Include="JobDriver_CleanRoom.cs" />
+    <Compile Include="JobDriver_FightFire.cs" />
+    <Compile Include="Main.cs" />
+    <Compile Include="MultiAction.cs" />
+    <Compile Include="MultiActions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools.cs" />
-    <Compile Include="Worker.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>mkdir "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Assemblies"
+    <PostBuildEvent>copy /B /Y "$(TargetPath)" "$(SolutionDir)..\Assemblies\$(TargetName).dll"
+mkdir "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Assemblies"
 copy /B /Y "$(TargetPath)" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Assemblies\$(TargetName).dll"
 xcopy /E /I /Y "$(SolutionDir)..\About" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\About"
-xcopy /E /I /Y "$(SolutionDir)..\Defs" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Defs"
 xcopy /S /E /I /Y "$(SolutionDir)..\Languages\*" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Languages"
 xcopy /E /I /Y "$(SolutionDir)..\Textures" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Textures"
 copy /B /Y "$(SolutionDir)..\README.md" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\"</PostBuildEvent>

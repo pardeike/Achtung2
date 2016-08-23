@@ -34,16 +34,17 @@ Within RimWorld in combat, you want your colonists neatly positioned along a lin
 ##### Important tasks
 
 Some tasks are too important to be interrupted. Like cleaning that hospital room so nobody gets infected. That's why Achtung! has a few extra commands that will make sure that something is really done well.
+For now, this is only "Clean Room" and "Fight Fire" but there are other tasks planned in the future.
 
-For now, this is only "Clean Room" but there are other tasks planned in the future.
+When you choose "Clean Room", the colonist(s) will start cleaning the room until you stop them or the room is really clean. They will check the room while cleaning so that it doesn't matter if other colonists might introduce new filth while the cleaning is ongoing.
 
-When you choose Clean Room, the colonist(s) will start cleaning the room until you stop them or the room is really clean. They will check the room while cleaning so that it doesn't matter if other colonists might introduce new filth while the cleaning is ongoing.
+The command "Fight Fire" works outside the home area and is useful if you don't want to extend the home area just to get rid of a fire.
 
 ---
 
 ##### Flexibility
 
-A few commands have different way to behave. Achtung! uses both: the ALT and the SHIFT key to modify the way it works. Hold SHIFT during an operation to not auto-draft colonist(s). Hold ALT to switch between presenting the context menu and positioning colonists. The behavior of the ALT key can be customized in the mod settings.
+A few commands have different way to behave. Achtung! uses both: the ALT and the SHIFT key to modify the way it works. Hold SHIFT to move colonists relative to their current position. Hold ALT while right-clicking to draft your selected colonists before the operation.
 
 ---
 
@@ -57,7 +58,7 @@ To stay compatible with other mods, Achtung! was developed to stay out of its wa
 
 ##### Requirements
 
-Achtung! uses CCL - Community Core Library for the settings options and at startup. It requires at least RimWorld Alpha 14 and will get updated tightly with new RimWorld versions in necessary.
+Achtung! Mod requires at least RimWorld Alpha 14 and will get updated tightly with new RimWorld versions in necessary. I does not depend on any other mods and is known to work in any mod order you like.
 
 ---
 
