@@ -59,7 +59,7 @@ namespace AchtungMod
 					MultiActions actions = new MultiActions(colonists, where);
 
 					// present combined menu to the user
-					if (actions.Count() > 0)
+					if (actions.Count() > 0 && altKeyPressed == false)
 					{
 						Find.WindowStack.Add(actions.GetWindow());
 						Event.current.Use();

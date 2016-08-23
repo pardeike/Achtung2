@@ -4,6 +4,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using System.Linq;
+using System.Reflection;
 
 namespace AchtungMod
 {
@@ -28,8 +29,6 @@ namespace AchtungMod
 		float cleaningCounter = 0;
 		float currentFilthCount = -1f;
 		float totalFilthCount = -1f;
-
-		private static Func<SoundDef> soundFunc;
 
 		public static JobDef makeJobDef()
 		{
@@ -63,7 +62,7 @@ namespace AchtungMod
 			pawn.jobs.StartJob(job, JobCondition.InterruptForced, null, true, true, null);
 		}
 
-		private float Progress()
+		public float Progress()
 		{
 			if (currentFilthCount <= 0f || totalFilthCount <= 0f) return 0f;
 			return (totalFilthCount - currentFilthCount) / totalFilthCount;
@@ -86,7 +85,7 @@ namespace AchtungMod
 			return new RoomInfo(room, true, "");
 		}
 
-		private Filth FindNextFilthToClean()
+		public Filth FindNextFilthToClean()
 		{
 			RoomInfo info = CleanableRoomAt(pawn, TargetA.Cell);
 			if (info.valid == false) return null;
@@ -101,7 +100,7 @@ namespace AchtungMod
 			isMoving = false;
 		}
 
-		private void InitAction()
+		public void InitAction()
 		{
 			currentFilth = null;
 			isMoving = false;
@@ -110,7 +109,7 @@ namespace AchtungMod
 			totalFilthCount = -1f;
 		}
 
-		private void TickAction()
+		public void TickAction()
 		{
 			if (currentFilth == null || currentFilth.Destroyed)
 			{
@@ -158,8 +157,6 @@ namespace AchtungMod
 			toil.tickAction = new Action(TickAction);
 			toil.WithEffect("Clean", TargetIndex.A);
 			toil.WithProgressBar(TargetIndex.A, Progress, true, -0.5f);
-			if (soundFunc == null) soundFunc = new Func<SoundDef>(() => { return SoundDefOf.Interact_CleanFilth; });
-			toil.WithSustainer(soundFunc);
 			toil.defaultCompleteMode = ToilCompleteMode.Never;
 			yield return toil;
 		}

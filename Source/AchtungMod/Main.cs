@@ -8,19 +8,12 @@ namespace AchtungMod
 {
 	// start of game inject
 	//
-	public class MapIniterUtility_Patch : MonoBehaviour
+	public static class MapIniterUtility_Patch
 	{
 		internal static void MapIniterUtility_FinalizeMapInit()
 		{
 			MapIniterUtility.FinalizeMapInit();
-			var game = new GameObject();
-			game.AddComponent<MapIniterUtility_Patch>();
-		}
-
-		void Start()
-		{
-			Controller.getInstance(); // force creation
-			Destroy(gameObject);
+			Controller.getInstance();
 		}
 	}
 

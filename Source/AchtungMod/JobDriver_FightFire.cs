@@ -63,7 +63,7 @@ namespace AchtungMod
 			pawn.jobs.StartJob(job, JobCondition.InterruptForced, null, true, true, null);
 		}
 
-		private float Progress()
+		public float Progress()
 		{
 			if (currentFireCount <= 0f || totalFireCount <= 0f) return 0f;
 			return (totalFireCount - currentFireCount) / totalFireCount;
@@ -84,7 +84,7 @@ namespace AchtungMod
 			if (totalFireCount < currentFireCount) totalFireCount = currentFireCount;
 		}
 
-		private Fire FindNextFireToExtinguish()
+		public Fire FindNextFireToExtinguish()
 		{
 			return fireLocations
 				.OrderBy(loc => Math.Abs(loc.x - pawn.Position.x) + Math.Abs(loc.z - pawn.Position.z))
@@ -98,7 +98,7 @@ namespace AchtungMod
 			isMoving = false;
 		}
 
-		private void InitAction()
+		public void InitAction()
 		{
 			fireLocations = new HashSet<IntVec3>() { TargetA.Cell };
 			currentFire = null;
@@ -107,7 +107,7 @@ namespace AchtungMod
 			totalFireCount = -1f;
 		}
 
-		private void TickAction()
+		public void TickAction()
 		{
 			UpdateFireLocations();
 

@@ -8,7 +8,7 @@ namespace AchtungMod
 {
 	public class Colonist
 	{
-		private static FieldInfo draftHandlerField = typeof(DraftStateHandler).GetField("draftedInt", BindingFlags.NonPublic | BindingFlags.Instance);
+		public static FieldInfo draftHandlerField = typeof(DraftStateHandler).GetField("draftedInt", BindingFlags.NonPublic | BindingFlags.Instance);
 
 		public Pawn pawn;
 		public Vector3 designation;

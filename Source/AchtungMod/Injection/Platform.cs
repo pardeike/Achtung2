@@ -60,7 +60,7 @@ namespace AchtungMod
 
 			}
 
-			Log.Warning(string.Format("Allocated {0} bytes at 0x{1:X}.", _pageSize, ptr.ToInt64()));
+			// Log.Warning(string.Format("Allocated {0} bytes at 0x{1:X}.", _pageSize, ptr.ToInt64()));
 
 			return ptr;
 		}
