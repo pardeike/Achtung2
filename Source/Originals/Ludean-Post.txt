@@ -1,0 +1,114 @@
+[b][color=yellow]RimWorld Achtung! Mod[/color][/b]
+Command your colonists like a boss!
+
+[img]https://raw.githubusercontent.com/pardeike/RimWorld-Achtung-Mod/master/About/Preview.png[/img]
+
+[b]Achtung! Mod[/b] enhances how you control RimWorld and reduces the number of clicks by half. No game settings are modified so there is no risk using it.
+
+These enhancements can be divided into the following areas:
+
+[hr]
+
+[b][color=yellow]Automatic drafting/undrafting of colonists[/color][/b]
+
+Wouldn't it be nice to not micro-manage the drafting status of your colonists? With Achtung! you can.
+
+With Achtung! the context menu contains all possible actions regardless of the current drafting status of the selected colonist. Once you select an action **Achtung!** automatically changes the drafting status if necessary to execute the action.
+
+[hr]
+
+[b][color=yellow]Control multiple colonists at once[/color][/b]
+
+Save time by issuing a command with more than one colonist selected. For example: select three brawlers and right click an enemy, then choose "melee". Done.
+
+Achtung! combines all possible actions into one MultiAction(tm) context menu and shows you how many colonists can execute a certain action by appending a multiplier at the end of the menu item.
+
+[hr]
+
+[b][color=yellow]Position your colonists like in the military[/color][/b]
+
+This is where the name "Achtung!" comes from. It's the german word used to get the attention of soldiers and which is usually followed by a line-up in front of the commander.
+
+Within RimWorld in combat, you want your colonists neatly positioned along a line or equally spaced in all your door openings. This is really easy with Achtung! Select multiple colonists, and with the right mouse button, drag along a line. Achtung! will move your colonists to equally spaced positions in real time. 10 colonists into 10 doors? No problem!
+
+[hr]
+
+[b][color=yellow]Important tasks[/color][/b]
+
+Some tasks are too important to be interrupted. Like cleaning that hospital room so nobody gets infected. That's why Achtung! has a few extra commands that will make sure that something is really done well.
+For now, this is only "Clean Room" and "Fight Fire" but there are other tasks planned in the future.
+
+When you choose "Clean Room", the colonist(s) will start cleaning the room until you stop them or the room is really clean. They will check the room while cleaning so that it doesn't matter if other colonists might introduce new filth while the cleaning is ongoing.
+
+The command "Fight Fire" works outside the home area and is useful if you don't want to extend the home area just to get rid of a fire.
+
+[hr]
+
+[b][color=yellow]Flexibility[/color][/b]
+
+A few commands have different way to behave. Achtung! uses both: the ALT and the SHIFT key to modify the way it works. Hold SHIFT to move colonists relative to their current position. Hold ALT while right-clicking to draft your selected colonists before the operation and to suppress the context menu.
+
+[hr]
+
+[b][color=yellow]Stability and compatibility[/color][/b]
+
+Achtung! is developed with the user in mind. Nobody is perfect and if Achtung! might not work as expected, you can always turn it on/off in the Mod Options without restarting RimWorld. You will also find a few other settings there that might make you happy.
+
+To stay compatible with other mods, Achtung! was developed to stay out of its way and does not overwrite any essential functions. Instead, it reuses existing functionality and probably works with 99% of other mods out of the box.
+
+
+[hr]
+
+[b][color=yellow]Requirements[/color][/b]
+
+Achtung! Mod requires at least RimWorld Alpha 14 or 15 and will get updated tightly with new RimWorld versions in necessary. I does not depend on any other mods and is known to work in any mod order you like.
+
+[hr]
+
+[b][color=yellow]Installation[/color][/b]
+
+Use should prefer to use Steam Workshop to subscribe to Achtung! Mod updates [url=http://steamcommunity.com/sharedfiles/filedetails/?id=730936602&searchtext=achtung]here[/url]. Doing so will automatically update Achtung! anytime a new version comes out.
+
+Alternatively, download the zip file from [url=https://github.com/pardeike/RimWorld-Achtung-Mod/archive/master.zip]GitHub[/url] and install it by unzipping the "RimWorld-Achtung-Mod-master" directory into the Mods folder (you can rename it but it doesn't matter).
+
+[hr]
+
+[b][color=yellow]Feedback[/color][/b]
+
+Without feedback, this mod would have never come so far. So please, send me feedback and rate and recommend my mod whenever possible. The three main places to do so are
+
+- Ludeon Forums [url=https://ludeon.com/forums/index.php?topic=22130.0]https://ludeon.com/forums/index.php?topic=22130.0[/url]
+- Steam Workshop [url=http://steamcommunity.com/sharedfiles/filedetails/comments/730936602]http://steamcommunity.com/sharedfiles/filedetails/comments/730936602[/url]
+- GitHub [url=https://github.com/pardeike/RimWorld-Achtung-Mod]https://github.com/pardeike/RimWorld-Achtung-Mod[/url]
+
+[hr]
+
+[b][color=yellow]FAQ[/color][/b]
+
+[b]Does this alter my save files?[/b]
+No, Achtung! changes only the interface and the user actions. Rimworld will warn you but you can simply ignore the warning. If you later decide to remove Achtung! your saved games will still work as before!
+
+[b]Is this mod compatible with other mods?[/b]
+Most likely. I don’t know of any mods altering the selection mechanism. The context menu is created in a general way so it will include actions from other mods without breaking.
+
+[b]Why is this called "Achtung!" ?[/b]
+It's german for "Attention!" and used in the military as a command to line up soldiers.
+
+[b]I think this should work different/better. Are you open for changes or improvement requests?[/b]
+Awesome! Please send see the Feedback section or send me email to andreas@pardeike.net
+
+[hr]
+
+[b][color=yellow]License[/color][/b]
+
+Free. As in free beer. Copy, learn and be respectful.
+
+[hr]
+
+[b][color=yellow]##### Contact[/color][/b]
+
+Andreas Pardeike  
+Email: andreas@pardeike.net  
+Steam: pardeike  
+Twitter: @pardeike  
+Cell: +46722120680
