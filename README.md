@@ -36,11 +36,13 @@ Within RimWorld in combat, you want your colonists neatly positioned along a lin
 ##### Important tasks
 
 Some tasks are too important to be interrupted. Like cleaning that hospital room so nobody gets infected. That's why Achtung! has a few extra commands that will make sure that something is really done well.
-For now, this is only "Clean Room" and "Fight Fire" but there are other tasks planned in the future.
+For now, this is "Clean Room", "Fight Fire" and "Sow Zone/Room" but there are other tasks planned in the future.
 
 When you choose "Clean Room", the colonist(s) will start cleaning the room until you stop them or the room is really clean. They will check the room while cleaning so that it doesn't matter if other colonists might introduce new filth while the cleaning is ongoing.
 
 The command "Fight Fire" works outside the home area and is useful if you don't want to extend the home area just to get rid of a fire.
+
+Finally, choosing "Sow Zone/Room" will make sure that the zone selected or all growing inside a room will be sowed completely. Time consuming tasks like removing other large plants like trees or hawling away objects are not performed to avoid exhaustion.
 
 ---
 
