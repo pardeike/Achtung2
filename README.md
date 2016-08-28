@@ -92,7 +92,7 @@ No, Achtung! changes only the interface and the user actions. Rimworld will warn
 
 ###### Is this mod compatible with other mods?
 
-Most likely. I donâ€™t know of any mods altering the selection mechanism. The context menu is created in a general way so it will include actions from other mods without breaking.
+Most likely. I don't know of any mods altering the selection mechanism. The context menu is created in a general way so it will include actions from other mods without breaking.
 
 ###### Why is this called "Achtung!" ?
 

@@ -90,7 +90,7 @@ Without feedback, this mod would have never come so far. So please, send me feed
 No, Achtung! changes only the interface and the user actions. Rimworld will warn you but you can simply ignore the warning. If you later decide to remove Achtung! your saved games will still work as before!
 
 [b]Is this mod compatible with other mods?[/b]
-Most likely. I don’t know of any mods altering the selection mechanism. The context menu is created in a general way so it will include actions from other mods without breaking.
+Most likely. I don't know of any mods altering the selection mechanism. The context menu is created in a general way so it will include actions from other mods without breaking.
 
 [b]Why is this called "Achtung!" ?[/b]
 It's german for "Attention!" and used in the military as a command to line up soldiers.
