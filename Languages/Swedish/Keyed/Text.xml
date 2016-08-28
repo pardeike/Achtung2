@@ -1,14 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
-  <CleanThisRoom>Städa rummet</CleanThisRoom>
-  <CleaningReport>Städa {0}: {1}</CleaningReport>
-  <CleanInfoText>Städar rummet</CleanInfoText>
-  <CleanDescription>Städar ett rum tills det är rent</CleanDescription>
-  <NotARoom>Inte ett rum</NotARoom>
-  <RoomTooLarge>Rummet är för stort</RoomTooLarge>
-  <RoomHasNoFilth>Rummet är rent</RoomHasNoFilth>
-  <FightThisFire>Släck brand</FightThisFire>
-  <ExtinguishInfoText>Släcker en brand</ExtinguishInfoText>
-  <FightingFireReport>Släcker brand: {0}</FightingFireReport>
-  <ExtinguishDescription>Släcker brand (även utanför hemområde)</ExtinguishDescription>
+
+	<CleanRoomLabel>Städa rummet</CleanRoomLabel>
+	<CleanRoomInfoText>Städar rummet</CleanRoomInfoText>
+	<CleanRoomDescription>Städar ett rum tills det är rent</CleanRoomDescription>
+	<CleanRoomReport>Städa{0}: {1}</CleanRoomReport>
+
+	<FireFightLabel>Släck brand</FireFightLabel>
+	<FireFightInfoText>Släcker en brand</FireFightInfoText>
+	<FireFightDescription>Släcker brand (även utanför hemområde)</FireFightDescription>
+	<FireFightReport>Släcker brand: {0}</FireFightReport>
+
+	<SowZoneLabel>Så zonen/rummet</SowZoneLabel>
+	<SowZoneInfoText>Så en zon/rum</SowZoneInfoText>
+	<SowZoneDescription>Så en hel zon eller rum</SowZoneDescription>
+	<SowZoneReport>Så{0}: {1}</SowZoneReport>
+
 </LanguageData>

@@ -1,14 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
-  <CleanThisRoom>Clean this room</CleanThisRoom>
-  <CleaningReport>Cleaning {0}: {1}</CleaningReport>
-  <CleanInfoText>Cleaning room thoroughly</CleanInfoText>
-  <CleanDescription>Clean a room until it is completely clean</CleanDescription>
-  <NotARoom>Not a room</NotARoom>
-  <RoomTooLarge>Room is too large</RoomTooLarge>
-  <RoomHasNoFilth>Room has no cleanable filth</RoomHasNoFilth>
-  <FightThisFire>Fight fire</FightThisFire>
-  <ExtinguishInfoText>Fighting a fire</ExtinguishInfoText>
-  <FightingFireReport>Fighting fire: {0}</FightingFireReport>
-  <ExtinguishDescription>Fights a fire (even outside home zone)</ExtinguishDescription>
+
+	<CleanRoomLabel>Clean this room</CleanRoomLabel>
+	<CleanRoomInfoText>Cleaning room thoroughly</CleanRoomInfoText>
+	<CleanRoomDescription>Clean a room until it is completely clean</CleanRoomDescription>
+	<CleanRoomReport>Cleaning{0}: {1}</CleanRoomReport>
+
+	<FireFightLabel>Fight fire</FireFightLabel>
+	<FireFightInfoText>Fighting a fire</FireFightInfoText>
+	<FireFightDescription>Fights a fire (even outside home zone)</FireFightDescription>
+	<FireFightReport>Fighting fire: {0}</FireFightReport>
+
+	<SowZoneLabel>Sow this zone/room</SowZoneLabel>
+	<SowZoneInfoText>Sowing zone/room</SowZoneInfoText>
+	<SowZoneDescription>Sow a growing zone or room until it is completely sowed</SowZoneDescription>
+	<SowZoneReport>Sowing{0}: {1}</SowZoneReport>
+
 </LanguageData>

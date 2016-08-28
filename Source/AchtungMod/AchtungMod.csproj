@@ -59,8 +59,10 @@
     <Compile Include="Injection\HookInjector.cs" />
     <Compile Include="Injection\Logger.cs" />
     <Compile Include="Injection\Platform.cs" />
+    <Compile Include="JobDriver_SowAll.cs" />
     <Compile Include="JobDriver_CleanRoom.cs" />
     <Compile Include="JobDriver_FightFire.cs" />
+    <Compile Include="JobDriver_Thoroughly.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="MultiAction.cs" />
     <Compile Include="MultiActions.cs" />

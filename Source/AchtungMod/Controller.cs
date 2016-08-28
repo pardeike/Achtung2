@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -10,12 +11,23 @@ namespace AchtungMod
 {
 	public class Controller
 	{
+		static bool debugging = false;
+
 		List<Colonist> colonists;
 		Vector3 lineStart;
 		Vector3 lineEnd;
 		bool isDragging;
 		bool shiftPositions;
 		bool drawColonistPreviews;
+
+		static IEnumerable<IntVec3> debugPositions = null;
+		public static void SetDebugPositions(IEnumerable<IntVec3> pos)
+		{
+			if (debugging == false) return;
+			List<IntVec3> l = new List<IntVec3>();
+			if (pos != null) l.AddRange(pos);
+			debugPositions = l;
+		}
 
 		public static Controller controller = null;
 		public static Controller getInstance()
@@ -114,6 +126,19 @@ namespace AchtungMod
 			}
 		}
 
+		public void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType)
+		{
+			JobDriver_Thoroughly driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
+			if (driver.CanStart(pawn, clickPos.ToIntVec3()))
+			{
+				Action action = delegate
+				{
+					driver.StartJob(pawn, clickPos.ToIntVec3());
+				};
+				options.Add(new FloatMenuOption(driver.GetLabel(), action, MenuOptionPriority.Low));
+			}
+		}
+
 		public List<FloatMenuOption> ChoicesAtFor(Vector3 clickPos, Pawn pawn)
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
@@ -121,31 +146,9 @@ namespace AchtungMod
 			bool altKeyPressed = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
 			if (altKeyPressed == false)
 			{
-				if (JobDriver_FightFire.CanStart(pawn, clickPos.ToIntVec3()))
-				{
-					Action action = delegate
-					{
-						JobDriver_FightFire.StartJob(pawn, clickPos.ToIntVec3());
-					};
-					options.Add(new FloatMenuOption("FightThisFire".Translate(), action, MenuOptionPriority.Low));
-				}
-
-				RoomInfo info = JobDriver_CleanRoom.CanStart(pawn, clickPos.ToIntVec3());
-				if (info.valid && info.room != null)
-				{
-					Action action = delegate
-						{
-							JobDriver_CleanRoom.StartJob(pawn, clickPos.ToIntVec3());
-						};
-					options.Add(new FloatMenuOption("CleanThisRoom".Translate(), action, MenuOptionPriority.Low));
-				}
-				// else if (info.room != null && info.room.Role != RoomRoleDefOf.None)
-				// {
-				// 	string error = info.room.Role.label + ": " + info.error;
-				// FloatMenuOption option = new FloatMenuOption("CleanThisRoom".Translate() + "(" + info.error + ")", null, MenuOptionPriority.Low);
-				// option.Disabled = true;
-				// options.Add(option);
-				// }
+				AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_CleanRoom));
+				AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_FightFire));
+				AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_SowAll));
 			}
 
 			return options;
@@ -187,6 +190,11 @@ namespace AchtungMod
 
 		public void HandleDrawing()
 		{
+			if (debugPositions != null && debugPositions.FirstOrDefault() != null)
+			{
+				debugPositions.ToList().ForEach(loc => Tools.DebugPosition(loc.ToVector3()));
+			}
+
 			if (isDragging)
 			{
 				if (colonists.Count > 1) Tools.DrawLineBetween(lineStart, lineEnd, 1.0f);

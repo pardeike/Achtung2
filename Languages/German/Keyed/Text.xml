@@ -1,14 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
-  <CleanThisRoom>Diesen Raum säubern</CleanThisRoom>
-  <CleaningReport>Säubern von {0}: {1}</CleaningReport>
-  <CleanInfoText>Raum wird gesäubert</CleanInfoText>
-  <CleanDescription>Einen Raum komplett sauber machen</CleanDescription>
-  <NotARoom>Kein Raum</NotARoom>
-  <RoomTooLarge>Der Raums is zu gross</RoomTooLarge>
-  <RoomHasNoFilth>Der Raum ist nicht schmutzig</RoomHasNoFilth>
-  <FightThisFire>Bekämpfe Feuer</FightThisFire>
-  <ExtinguishInfoText>Bekämpfe ein Feuer</ExtinguishInfoText>
-  <FightingFireReport>Bekämpfe Feuer: {0}</FightingFireReport>
-  <ExtinguishDescription>Bekämpft Feuer (auch ausserhalb des Heimgebietes)</ExtinguishDescription>
+
+	<CleanRoomLabel>Diesen Raum säubern</CleanRoomLabel>
+	<CleanRoomInfoText>Raum wird gesäubert</CleanRoomInfoText>
+	<CleanRoomDescription>Einen Raum komplett sauber machen</CleanRoomDescription>
+	<CleanRoomReport>Säubere{0}: {1}</CleanRoomReport>
+
+	<FireFightLabel>Bekämpfe Feuer</FireFightLabel>
+	<FireFightInfoText>Bekämpfe ein Feuer</FireFightInfoText>
+	<FireFightDescription>Bekämpft Feuer (auch ausserhalb des Heimgebietes)</FireFightDescription>
+	<FireFightReport>Bekämpfe Feuer: {0}</FireFightReport>
+
+	<SowZoneLabel>Sähe Zone/Raum</SowZoneLabel>
+	<SowZoneInfoText>Sähe eine Zone/Raum</SowZoneInfoText>
+	<SowZoneDescription>Säht eine komplette Zone oder Raum</SowZoneDescription>
+	<SowZoneReport>Sähe{0}: {1}</SowZoneReport>
+
 </LanguageData>
