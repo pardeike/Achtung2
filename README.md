@@ -54,23 +54,27 @@ A few commands have different way to behave. Achtung! uses both: the ALT and the
 
 ##### Known errors and bugs
 
-Achtung! is developed with the user in mind. Nobody is perfect and if Achtung! might not work as expected, you can always turn it on/off in the Mod menu. To stay compatible with other mods, Achtung! was developed to stay out of its way and does not overwrite any essential functions. Instead, it reuses existing functionality and probably works with 99% of other mods out of the box.
+Achtung! is developed with the user in mind. To stay compatible with other mods, Achtung! was developed to stay out of its way and does not overwrite any essential functions. Instead, it reuses existing functionality and probably works with 99% of other mods out of the box.
 
 Here are the current problems and their workarounds for the current version:
 
-- v1.21 has its own job drivers which (without my knowledge) are saved to a save game when a colonists has an ongoing command 
+- v1.21 has its own job drivers which (without my knowledge) are saved to a save game when colonists have an ongoing Achtung! command (clean room, fight fire & sow room/zone). This causes further bugs and makes your save game dependent on this mod. Workaround: stop those jobs before saving.
+
+- Older versions had a Mod Option menu (curtesy CCL library) but since 1.21 is no longer dependent on CCL this is no longer available. Future version will bring back this popular way to turn off Achtung without restating Rimworld.
+
+- The jobs in Achtung have 1st priority (that's the whole point). They all force the colonist to work until done and if you don't keep an eye on them, they will go mental or break down. But that's how we roll here at Achtung! Workaround: if you want the soft solution just schedule stuff and hope for the best ;-)
 
 ---
 
 ##### Requirements
 
-Achtung! Mod requires at least RimWorld Alpha 14 or 15 and will get updated tightly with new RimWorld versions in necessary. I does not depend on any other mods and is known to work in any mod order you like.
+Achtung! Mod works with RimWorld Alpha 14 and 15 and will get updated tightly with new RimWorld versions. I does not depend on any other mods and is known to work in any mod order you like.
 
 ---
 
 ##### Installation
 
-The preferred way to install Achtung! Is to use Steam Workshop to subscribe to Achtung! Mod updates [here](http://steamcommunity.com/sharedfiles/filedetails/?id=730936602&searchtext=achtung). Doing so will automatically update it anytime a new version comes out.
+The preferred way to install Achtung! is to use Steam Workshop to subscribe to Achtung! Mod updates [here](http://steamcommunity.com/sharedfiles/filedetails/?id=730936602&searchtext=achtung). Doing so will automatically update it anytime a new version comes out.
 
 Alternatively, download the zip file from [GitHub](https://github.com/pardeike/RimWorld-Achtung-Mod/archive/master.zip) and install it by unzipping the "RimWorld-Achtung-Mod-master" directory into the Mods folder (you can rename it but it doesn't matter).
 
