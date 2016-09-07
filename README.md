@@ -52,11 +52,13 @@ A few commands have different way to behave. Achtung! uses both: the ALT and the
 
 ---
 
-##### Stability and compatibility
+##### Known errors and bugs
 
-Achtung! is developed with the user in mind. Nobody is perfect and if Achtung! might not work as expected, you can always turn it on/off in the Mod Options without restarting RimWorld. You will also find a few other settings there that might make you happy.
+Achtung! is developed with the user in mind. Nobody is perfect and if Achtung! might not work as expected, you can always turn it on/off in the Mod menu. To stay compatible with other mods, Achtung! was developed to stay out of its way and does not overwrite any essential functions. Instead, it reuses existing functionality and probably works with 99% of other mods out of the box.
 
-To stay compatible with other mods, Achtung! was developed to stay out of its way and does not overwrite any essential functions. Instead, it reuses existing functionality and probably works with 99% of other mods out of the box.
+Here are the current problems and their workarounds for the current version:
+
+- v1.21 has its own job drivers which (without my knowledge) are saved to a save game when a colonists has an ongoing command 
 
 ---
 
@@ -68,7 +70,7 @@ Achtung! Mod requires at least RimWorld Alpha 14 or 15 and will get updated tigh
 
 ##### Installation
 
-Use should prefer to use Steam Workshop to subscribe to Achtung! Mod updates [here](http://steamcommunity.com/sharedfiles/filedetails/?id=730936602&searchtext=achtung). Doing so will automatically update Achtung! anytime a new version comes out.
+The preferred way to install Achtung! Is to use Steam Workshop to subscribe to Achtung! Mod updates [here](http://steamcommunity.com/sharedfiles/filedetails/?id=730936602&searchtext=achtung). Doing so will automatically update it anytime a new version comes out.
 
 Alternatively, download the zip file from [GitHub](https://github.com/pardeike/RimWorld-Achtung-Mod/archive/master.zip) and install it by unzipping the "RimWorld-Achtung-Mod-master" directory into the Mods folder (you can rename it but it doesn't matter).
 
