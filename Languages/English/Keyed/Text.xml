@@ -16,4 +16,13 @@
 	<SowZoneDescription>Sow a growing zone or room until it is completely sowed</SowZoneDescription>
 	<SowZoneReport>Sowing{0}: {1}</SowZoneReport>
 
+	<AutoCombatLabel>Auto combat</AutoCombatLabel>
+	<AutoCombatInfoText>Fighting automatically</AutoCombatInfoText>
+	<AutoCombatDescription>Fight an enemy or target automatically</AutoCombatDescription>
+	<AutoCombatReport>Auto combat: {0}</AutoCombatReport>
+	<AutoCombatAdvancing>advancing to {0}</AutoCombatAdvancing>
+	<AutoCombatMoving>positioning ({0})</AutoCombatMoving>
+	<AutoCombatShooting>shooting at {0}</AutoCombatShooting>
+	<AutoCombatReady>aiming at {0}</AutoCombatReady>
+
 </LanguageData>

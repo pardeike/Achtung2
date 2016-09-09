@@ -91,10 +91,11 @@ namespace AchtungMod
 			Tools.DrawScaledMesh(MeshPool.plane10, markerMaterial, pos, Quaternion.identity, 1.5f, 1.5f);
 		}
 
-		public static void DebugPosition(Vector3 pos)
+		public static void DebugPosition(Vector3 pos, Color color)
 		{
 			pos.y = Altitudes.AltitudeFor(AltitudeLayer.Pawn - 1);
-			Tools.DrawScaledMesh(MeshPool.plane10, lineMaterial, pos + new Vector3(0.5f, 0f, 0.5f), Quaternion.identity, 1.0f, 1.0f);
+			Material material = SolidColorMaterials.SimpleSolidColorMaterial(color);
+			Tools.DrawScaledMesh(MeshPool.plane10, material, pos + new Vector3(0.5f, 0f, 0.5f), Quaternion.identity, 1.0f, 1.0f);
 		}
 
 		public static void DrawScaledMesh(Mesh mesh, Material mat, Vector3 pos, Quaternion q, float mx, float my, float mz = 1f)

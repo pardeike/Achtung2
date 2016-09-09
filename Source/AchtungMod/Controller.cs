@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -9,9 +8,27 @@ using Verse.AI;
 
 namespace AchtungMod
 {
+	public class ScoredPosition
+	{
+		public IntVec3 v;
+		public float score;
+
+		public ScoredPosition(IntVec3 v, float score = 0f)
+		{
+			this.v = v;
+			this.score = score;
+		}
+
+		public ScoredPosition Add(float s, float factor = 1f)
+		{
+			score += s * factor;
+			return this;
+		}
+	}
+
 	public class Controller
 	{
-		static bool debugging = false;
+		static bool debugging = true;
 
 		List<Colonist> colonists;
 		Vector3 lineStart;
@@ -20,13 +37,18 @@ namespace AchtungMod
 		bool shiftPositions;
 		bool drawColonistPreviews;
 
-		static IEnumerable<IntVec3> debugPositions = null;
-		public static void SetDebugPositions(IEnumerable<IntVec3> pos)
+		static IEnumerable<ScoredPosition> debugPositions = null;
+		public static void SetDebugPositions(IEnumerable<ScoredPosition> pos)
 		{
 			if (debugging == false) return;
-			List<IntVec3> l = new List<IntVec3>();
+			List<ScoredPosition> l = new List<ScoredPosition>();
 			if (pos != null) l.AddRange(pos);
 			debugPositions = l;
+		}
+		public static void SetDebugPositions(IEnumerable<IntVec3> vecs)
+		{
+			IEnumerable<ScoredPosition> pos = vecs.Select(v => new ScoredPosition(v, 1f));
+			SetDebugPositions(pos);
 		}
 
 		public static Controller controller = null;
@@ -43,6 +65,23 @@ namespace AchtungMod
 			lineEnd = Vector3.zero;
 			isDragging = false;
 			drawColonistPreviews = true;
+			InstallJobDefs();
+		}
+
+		public void InstallJobDefs()
+		{
+			new List<JobDef> {
+				new JobDriver_CleanRoom().MakeJobDef(),
+				new JobDriver_FightFire().MakeJobDef(),
+				new JobDriver_SowAll().MakeJobDef(),
+				new JobDriver_AutoCombat().MakeJobDef()
+			}.ForEach(def =>
+			{
+				if (DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null)
+				{
+					DefDatabase<JobDef>.Add(def);
+				}
+			});
 		}
 
 		public void MouseDown(Vector3 pos)
@@ -129,13 +168,17 @@ namespace AchtungMod
 		public void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType)
 		{
 			JobDriver_Thoroughly driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
-			if (driver.CanStart(pawn, clickPos.ToIntVec3()))
+			IEnumerable<TargetInfo> targets = driver.CanStart(pawn, clickPos);
+			if (targets != null)
 			{
-				Action action = delegate
+				targets.ToList().ForEach(target =>
 				{
-					driver.StartJob(pawn, clickPos.ToIntVec3());
-				};
-				options.Add(new FloatMenuOption(driver.GetLabel(), action, MenuOptionPriority.Low));
+					Action action = delegate
+					{
+						driver.StartJob(pawn, target);
+					};
+					options.Add(new FloatMenuOption(driver.GetLabel(), action, MenuOptionPriority.Low));
+				});
 			}
 		}
 
@@ -149,6 +192,7 @@ namespace AchtungMod
 				AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_CleanRoom));
 				AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_FightFire));
 				AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_SowAll));
+				AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_AutoCombat));
 			}
 
 			return options;
@@ -192,7 +236,9 @@ namespace AchtungMod
 		{
 			if (debugPositions != null && debugPositions.FirstOrDefault() != null)
 			{
-				debugPositions.ToList().ForEach(loc => Tools.DebugPosition(loc.ToVector3()));
+				float min = debugPositions.ToList().Min(sp => sp.score);
+				float max = debugPositions.ToList().Max(sp => sp.score);
+				debugPositions.ToList().ForEach(sp => Tools.DebugPosition(sp.v.ToVector3(), new Color(1f, 0f, 0f, GenMath.LerpDouble(min, max, 0.1f, 0.8f, sp.score))));
 			}
 
 			if (isDragging)

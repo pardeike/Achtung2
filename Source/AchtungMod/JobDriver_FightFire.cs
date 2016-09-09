@@ -4,6 +4,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using System.Linq;
+using UnityEngine;
 
 namespace AchtungMod
 {
@@ -14,13 +15,15 @@ namespace AchtungMod
 			return "FireFight";
 		}
 
-		public override bool CanStart(Pawn pawn, IntVec3 loc)
+		public override IEnumerable<TargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
 		{
-			base.CanStart(pawn, loc);
-			if (pawn.workSettings.GetPriority(WorkTypeDefOf.Firefighter) == 0) return false;
-			Thing item = Find.ThingGrid.ThingAt(loc, ThingDefOf.Fire);
-			if (item == null) return false;
-			return item.Destroyed == false && pawn.CanReach(item, PathEndMode.Touch, pawn.NormalMaxDanger()) && pawn.CanReserve(item, 1);
+			base.CanStart(pawn, clickPos);
+			if (pawn.workSettings.GetPriority(WorkTypeDefOf.Firefighter) == 0) return null;
+			TargetInfo cell = IntVec3.FromVector3(clickPos);
+			Thing item = Find.ThingGrid.ThingAt(cell.Cell, ThingDefOf.Fire);
+			if (item == null) return null;
+			bool canFight = item.Destroyed == false && pawn.CanReach(item, PathEndMode.Touch, pawn.NormalMaxDanger()) && pawn.CanReserve(item, 1);
+			return canFight ? new List<TargetInfo> { cell } : null;
 		}
 
 		public override void UpdateWorkLocations()

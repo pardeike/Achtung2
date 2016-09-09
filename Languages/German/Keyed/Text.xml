@@ -16,4 +16,13 @@
 	<SowZoneDescription>Säht eine komplette Zone oder Raum</SowZoneDescription>
 	<SowZoneReport>Sähe{0}: {1}</SowZoneReport>
 
+	<AutoCombatLabel>Automatisch kämpfen</AutoCombatLabel>
+	<AutoCombatInfoText>Kämpfe automatisch</AutoCombatInfoText>
+	<AutoCombatDescription>Automatisch einen Gegner oder ein Ziel bekämpfen</AutoCombatDescription>
+	<AutoCombatReport>Automatisch kämpfen: {0}</AutoCombatReport>
+	<AutoCombatAdvancing>vorrücken zu {0}</AutoCombatAdvancing>
+	<AutoCombatMoving>positionieren ({0})</AutoCombatMoving>
+	<AutoCombatShooting>auf {0} schiessen</AutoCombatShooting>
+	<AutoCombatReady>auf {0} zielen</AutoCombatReady>
+
 </LanguageData>

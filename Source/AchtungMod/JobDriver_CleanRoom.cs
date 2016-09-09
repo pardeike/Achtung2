@@ -4,6 +4,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using System.Linq;
+using UnityEngine;
 
 namespace AchtungMod
 {
@@ -26,12 +27,13 @@ namespace AchtungMod
 			return "CleanRoom";
 		}
 
-		public override bool CanStart(Pawn pawn, IntVec3 loc)
+		public override IEnumerable<TargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
 		{
-			base.CanStart(pawn, loc);
-			if (pawn.workSettings.GetPriority(WorkTypeDefOf.Cleaning) == 0) return false;
-			RoomInfo info = WorkInfoAt(pawn, loc);
-			return (info.valid && info.room != null);
+			base.CanStart(pawn, clickPos);
+			if (pawn.workSettings.GetPriority(WorkTypeDefOf.Cleaning) == 0) return null;
+			TargetInfo cell = IntVec3.FromVector3(clickPos);
+			RoomInfo info = WorkInfoAt(pawn, cell);
+			return (info.valid && info.room != null) ? new List<TargetInfo> { cell } : null;
 		}
 
 		// filth in room
@@ -44,9 +46,9 @@ namespace AchtungMod
 		}
 
 		// room info
-		public RoomInfo WorkInfoAt(Pawn pawn, IntVec3 loc)
+		public RoomInfo WorkInfoAt(Pawn pawn, TargetInfo target)
 		{
-			Room room = RoomQuery.RoomAt(loc);
+			Room room = RoomQuery.RoomAt(target.Cell);
 			if (room == null || room.IsHuge) return new RoomInfo(room, false);
 			if (AllWorkInRoom(room, pawn).Count() == 0) return new RoomInfo(room, false);
 			return new RoomInfo(room, true);
@@ -54,7 +56,7 @@ namespace AchtungMod
 
 		public override TargetInfo FindNextWorkItem()
 		{
-			RoomInfo info = WorkInfoAt(pawn, TargetA.Cell);
+			RoomInfo info = WorkInfoAt(pawn, TargetA);
 			if (info.valid == false) return null;
 			IEnumerable<Thing> items = AllWorkInRoom(info.room, pawn);
 			Controller.SetDebugPositions(items.Select(t => t.Position));
@@ -77,7 +79,7 @@ namespace AchtungMod
 
 		public override string GetReport()
 		{
-			RoomInfo info = WorkInfoAt(pawn, TargetA.Cell);
+			RoomInfo info = WorkInfoAt(pawn, TargetA);
 			string name = info.room == null ? "" : " " + info.room.Role.label;
 			return (GetPrefix() + "Report").Translate(new object[] { name, info.valid ? Math.Floor(Progress() * 100f) + "%" : "-" });
 		}

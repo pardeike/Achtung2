@@ -16,4 +16,13 @@
 	<SowZoneDescription>Så en hel zon eller rum</SowZoneDescription>
 	<SowZoneReport>Så{0}: {1}</SowZoneReport>
 
+	<AutoCombatLabel>Bekämpa automatiskt</AutoCombatLabel>
+	<AutoCombatInfoText>Bekämper automatiskt</AutoCombatInfoText>
+	<AutoCombatDescription>Bekämper en fiende eller ett mål automatiskt</AutoCombatDescription>
+	<AutoCombatReport>Bekämpa automatiskt: {0}</AutoCombatReport>
+	<AutoCombatAdvancing>flytta fram till {0}</AutoCombatAdvancing>
+	<AutoCombatMoving>positionering ({0})</AutoCombatMoving>
+	<AutoCombatShooting>skjuta på {0}</AutoCombatShooting>
+	<AutoCombatReady>siktar mot {0}</AutoCombatReady>
+
 </LanguageData>

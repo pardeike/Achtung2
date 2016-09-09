@@ -6,14 +6,14 @@ using Verse.AI;
 
 namespace AchtungMod
 {
-	// start of game inject
+	// root map
 	//
-	public static class MapIniterUtility_Patch
+	public class RootMap_Patch : RootMap
 	{
-		internal static void MapIniterUtility_FinalizeMapInit()
+		internal void RootMap_Start()
 		{
-			MapIniterUtility.FinalizeMapInit();
-			Controller.getInstance();
+			Controller.getInstance(); // will create controller
+			Start();
 		}
 	}
 
@@ -110,7 +110,7 @@ namespace AchtungMod
 		static Main()
 		{
 			var injector = new HookInjector();
-			injector.Inject(typeof(MapIniterUtility), "FinalizeMapInit", typeof(MapIniterUtility_Patch));
+			injector.Inject(typeof(RootMap), "Start", typeof(RootMap_Patch));
 			injector.Inject(typeof(MainTabsRoot), "HandleLowPriorityShortcuts", typeof(MainTabsRoot_Patch));
 			injector.Inject(typeof(SelectionDrawer), "DrawSelectionOverlays", typeof(SelectionDrawer_Patch));
 			injector.Inject(typeof(ThingOverlays), "ThingOverlaysOnGUI", typeof(ThingOverlays_Patch));

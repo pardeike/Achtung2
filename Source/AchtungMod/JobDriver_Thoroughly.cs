@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
 using Verse;
 using Verse.AI;
+using UnityEngine;
 
 namespace AchtungMod
 {
@@ -47,17 +43,27 @@ namespace AchtungMod
 			return def;
 		}
 
-		public virtual bool CanStart(Pawn pawn, IntVec3 loc)
+		public override void ExposeData()
 		{
-			this.pawn = pawn;
-			return false;
+			base.ExposeData();
+			Scribe_Collections.LookHashSet<IntVec3>(ref this.workLocations, "workLocations");
+			Scribe_Values.LookValue<bool>(ref this.isMoving, "isMoving", false, false);
+			Scribe_Values.LookValue<float>(ref this.subCounter, "subCounter", 0, false);
+			Scribe_Values.LookValue<float>(ref this.currentWorkCount, "currentWorkCount", -1f, false);
+			Scribe_Values.LookValue<float>(ref this.totalWorkCount, "totalWorkCount", -1f, false);
 		}
 
-		public virtual void StartJob(Pawn pawn, IntVec3 loc)
+		public virtual IEnumerable<TargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
+		{
+			this.pawn = pawn;
+			return null;
+		}
+
+		public virtual void StartJob(Pawn pawn, TargetInfo target)
 		{
 			// pawn.jobs.debugLog = true;
 
-			Job job = new Job(MakeJobDef(), new TargetInfo(loc));
+			Job job = new Job(MakeJobDef(), target);
 			job.playerForced = true;
 			pawn.jobs.StartJob(job, JobCondition.InterruptForced, null, true, true, null);
 		}
@@ -99,7 +105,11 @@ namespace AchtungMod
 
 		public virtual bool CurrentItemInvalid()
 		{
-			return currentItem == null || (currentItem.Thing != null && currentItem.Thing.Destroyed) || currentItem.Cell.IsValid == false;
+			return
+				currentItem == null ||
+				(currentItem.Thing != null && currentItem.Thing.Destroyed) ||
+				currentItem.Cell.IsValid == false ||
+				(currentItem.Cell.x == 0 && currentItem.Cell.z == 0);
 		}
 
 		public virtual void TickAction()
@@ -117,7 +127,7 @@ namespace AchtungMod
 			}
 			if (CurrentItemInvalid())
 			{
-				Controller.SetDebugPositions(null);
+				Controller.SetDebugPositions((IEnumerable<ScoredPosition>)null);
 				EndJobWith(JobCondition.Succeeded);
 				return;
 			}
