@@ -127,7 +127,6 @@ namespace AchtungMod
 			}
 			if (CurrentItemInvalid())
 			{
-				Controller.SetDebugPositions((IEnumerable<ScoredPosition>)null);
 				EndJobWith(JobCondition.Succeeded);
 				return;
 			}

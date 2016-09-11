@@ -4,6 +4,7 @@ using System.Reflection;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using System;
 
 namespace AchtungMod
 {
@@ -21,11 +22,48 @@ namespace AchtungMod
 		public static Material lineMaterial;
 		public static string goHereLabel;
 
+		private static string _version = null;
+		public static string Version
+		{
+			get
+			{
+				if (_version == null)
+				{
+					_version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+					string[] vparts = Version.Split(".".ToCharArray());
+					if (vparts.Length > 3)
+					{
+						_version = vparts[0] + "." + vparts[1] + "." + vparts[2];
+					}
+				}
+				return _version;
+			}
+		}
+
 		static Tools()
 		{
 			markerMaterial = MaterialPool.MatFrom("Marker", ShaderDatabase.MoteGlow);
 			lineMaterial = MaterialPool.MatFrom("Line", ShaderDatabase.MoteGlow);
 			goHereLabel = "GoHere".Translate();
+		}
+
+		public static bool IsModKeyPressed(ModKey key)
+		{
+			switch (key)
+			{
+				case ModKey.Alt:
+					return Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+				case ModKey.Ctrl:
+					return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+				case ModKey.Shift:
+					return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+				case ModKey.Meta:
+					return Input.GetKey(KeyCode.LeftWindows) || Input.GetKey(KeyCode.RightWindows)
+						|| Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand);
+				default:
+					break;
+			}
+			return false;
 		}
 
 		public static List<Pawn> UserSelectedAndReadyPawns()
@@ -131,6 +169,67 @@ namespace AchtungMod
 			Vector2 vector2 = Find.Camera.WorldToScreenPoint(drawPos);
 			vector2.y = Screen.height - vector2.y;
 			return vector2;
+		}
+
+		public static void ValueLabeled(this Listing_Standard listing, string label, object value, string tooltip = null)
+		{
+			float lineHeight = Text.LineHeight;
+			Rect rect = listing.GetRect(lineHeight);
+			if (!tooltip.NullOrEmpty())
+			{
+				if (Mouse.IsOver(rect))
+				{
+					Widgets.DrawHighlight(rect);
+				}
+				TooltipHandler.TipRegion(rect, tooltip);
+			}
+
+			TextAnchor savedAnchor = Text.Anchor;
+
+			Text.Anchor = TextAnchor.MiddleLeft;
+			Widgets.Label(rect, label);
+
+			Text.Anchor = TextAnchor.MiddleRight;
+			Widgets.Label(rect, value.ToString());
+
+			Text.Anchor = savedAnchor;
+
+			listing.Gap(listing.verticalSpacing);
+		}
+
+		public static void ModKeyChoice(this Listing_Standard listing, String prefix, ref ModKey value)
+		{
+			float lineHeight = Text.LineHeight;
+			Rect rect = listing.GetRect(lineHeight);
+
+			TextAnchor savedAnchor = Text.Anchor;
+			Text.Anchor = TextAnchor.LowerCenter;
+
+			IEnumerable<ModKey> keys = Enum.GetValues(typeof(ModKey)).Cast<ModKey>();
+			rect.width = rect.width / keys.Count();
+
+			Vector3 vec3 = Gen.MouseMapPosVector3();
+			Vector2 pos = new Vector2(vec3.x, vec3.z);
+			for (int i = 0; i < keys.Count(); i++)
+			{
+				ModKey val = keys.ElementAt(i);
+				if (Mouse.IsOver(rect) && Event.current.isMouse) value = val;
+
+				if (Mouse.IsOver(rect)) Widgets.DrawMenuSection(rect, false);
+				if (value == val)
+				{
+					GUI.color = Color.green;
+					Widgets.DrawHighlight(rect);
+					GUI.color = Color.white;
+				}
+				String label = (prefix + val).Translate();
+				Widgets.Label(rect, label);
+				rect.x += rect.width;
+			}
+
+			Text.Anchor = savedAnchor;
+
+			listing.Gap(listing.verticalSpacing);
 		}
 
 	}

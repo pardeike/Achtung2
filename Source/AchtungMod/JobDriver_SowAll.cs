@@ -148,7 +148,7 @@ namespace AchtungMod
 		public override TargetInfo FindNextWorkItem()
 		{
 			IEnumerable<IntVec3> cells = AllWorkAt(TargetA, pawn);
-			Controller.SetDebugPositions(cells);
+			Controller.AddDebugPositions(cells);
 			if (cells == null || cells.Count() == 0) return null;
 			currentWorkCount = cells.Count();
 			if (totalWorkCount < currentWorkCount) totalWorkCount = currentWorkCount;

@@ -43,7 +43,7 @@ namespace AchtungMod
 
 		public override TargetInfo FindNextWorkItem()
 		{
-			Controller.SetDebugPositions(workLocations);
+			Controller.AddDebugPositions(workLocations);
 			return workLocations
 				.OrderBy(loc => Math.Abs(loc.x - pawn.Position.x) + Math.Abs(loc.z - pawn.Position.z))
 				.Select(loc => Find.ThingGrid.ThingAt(loc, ThingDefOf.Fire) as Fire)

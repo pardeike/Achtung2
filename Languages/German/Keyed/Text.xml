@@ -1,6 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
+	<AchtungVersion>Unterstützt von Achtung! Mod {0} {1}</AchtungVersion>
+	<AchtungOff>(AUS)</AchtungOff>
+	<AchtungOptions>Drücke Shift-Return für Einstellungen</AchtungOptions>
+
+	<AchtungOptionsTitle>Achtung! Mod Einstellungen</AchtungOptionsTitle>
+	<AchtungEnabled>Aktiv</AchtungEnabled>
+	<AchtungEnabledExplained>Dieser Mod kan an- und ausgeschaltet werden ohne RimWorld neu zu starten</AchtungEnabledExplained>
+	<ModVersion>Version</ModVersion>
+
+	<ForceDraft>Force draft</ForceDraft>
+	<ForceDraftExplained>To draft an undrafted colonist while right-clicking, hold the selected key</ForceDraftExplained>
+
+	<IgnoreMenu>Ignore context menu</IgnoreMenu>
+	<IgnoreMenuExplained>To ignore the context menu while positioning colonists, hold the selected key key while right-clicking</IgnoreMenuExplained>
+
+	<RelativeMovement>Move colonists relative</RelativeMovement>
+	<RelativeMovementExplained>To move selected colonists relative to their current position, hold the selected key while right-click-dragging</RelativeMovementExplained>
+
+	<ModKeyNone>Disabled</ModKeyNone>
+	<ModKeyAlt>Alt</ModKeyAlt>
+	<ModKeyCtrl>Ctrl</ModKeyCtrl>
+	<ModKeyShift>Shift</ModKeyShift>
+	<ModKeyMeta>Win/Cmd</ModKeyMeta>
+
 	<CleanRoomLabel>Diesen Raum säubern</CleanRoomLabel>
 	<CleanRoomInfoText>Raum wird gesäubert</CleanRoomInfoText>
 	<CleanRoomDescription>Einen Raum komplett sauber machen</CleanRoomDescription>
@@ -20,9 +44,10 @@
 	<AutoCombatInfoText>Kämpfe automatisch</AutoCombatInfoText>
 	<AutoCombatDescription>Automatisch einen Gegner oder ein Ziel bekämpfen</AutoCombatDescription>
 	<AutoCombatReport>Automatisch kämpfen: {0}</AutoCombatReport>
-	<AutoCombatAdvancing>vorrücken zu {0}</AutoCombatAdvancing>
-	<AutoCombatMoving>positionieren ({0})</AutoCombatMoving>
-	<AutoCombatShooting>auf {0} schiessen</AutoCombatShooting>
-	<AutoCombatReady>auf {0} zielen</AutoCombatReady>
+	<AutoCombatAdvancing>Vorrücken zu {0}</AutoCombatAdvancing>
+	<AutoCombatMoving>Positionieren ({0})</AutoCombatMoving>
+	<AutoCombatShooting>Auf {0} schiessen</AutoCombatShooting>
+	<AutoCombatHitting>Nahkampf mit {0}</AutoCombatHitting>
+	<AutoCombatReady>Auf {0} zielen</AutoCombatReady>
 
 </LanguageData>

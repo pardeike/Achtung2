@@ -3,21 +3,35 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using System.IO;
 
 namespace AchtungMod
 {
-	// root map
+
+	// install job defs
 	//
 	public class RootMap_Patch : RootMap
 	{
 		internal void RootMap_Start()
 		{
-			Controller.getInstance(); // will create controller
+			Controller.getInstance().InstallJobDefs();
 			Start();
 		}
 	}
 
-	// handle events early inject
+	// start of game/map
+	//
+	public static class MapIniterUtility_Patch
+	{
+		internal static void MapIniterUtility_FinalizeMapInit()
+		{
+			MapIniterUtility.FinalizeMapInit();
+			Settings.Load();
+			Controller.getInstance().Initialize();
+		}
+	}
+
+	// handle events early
 	//
 	public class MainTabsRoot_Patch : MainTabsRoot
 	{
@@ -28,7 +42,7 @@ namespace AchtungMod
 		}
 	}
 
-	// handle drawing inject
+	// handle drawing
 	//
 	public static class SelectionDrawer_Patch
 	{
@@ -39,7 +53,7 @@ namespace AchtungMod
 		}
 	}
 
-	// handle gui inject
+	// handle gui
 	//
 	public class ThingOverlays_Patch : ThingOverlays
 	{
@@ -94,6 +108,8 @@ namespace AchtungMod
 		}
 	}
 
+	// custom context menu
+	//
 	public static class FloatMenuMakerMap_Patch
 	{
 		public static List<FloatMenuOption> FloatMenuMakerMap_ChoicesAtFor(Vector3 clickPos, Pawn pawn)
@@ -111,6 +127,7 @@ namespace AchtungMod
 		{
 			var injector = new HookInjector();
 			injector.Inject(typeof(RootMap), "Start", typeof(RootMap_Patch));
+			injector.Inject(typeof(MapIniterUtility), "FinalizeMapInit", typeof(MapIniterUtility_Patch));
 			injector.Inject(typeof(MainTabsRoot), "HandleLowPriorityShortcuts", typeof(MainTabsRoot_Patch));
 			injector.Inject(typeof(SelectionDrawer), "DrawSelectionOverlays", typeof(SelectionDrawer_Patch));
 			injector.Inject(typeof(ThingOverlays), "ThingOverlaysOnGUI", typeof(ThingOverlays_Patch));

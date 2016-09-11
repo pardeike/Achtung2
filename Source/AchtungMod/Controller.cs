@@ -5,6 +5,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using System.Reflection;
 
 namespace AchtungMod
 {
@@ -12,6 +13,12 @@ namespace AchtungMod
 	{
 		public IntVec3 v;
 		public float score;
+
+		public ScoredPosition(IntVec3 v)
+		{
+			this.v = v;
+			this.score = 100f;
+		}
 
 		public ScoredPosition(IntVec3 v, float score = 0f)
 		{
@@ -34,21 +41,24 @@ namespace AchtungMod
 		Vector3 lineStart;
 		Vector3 lineEnd;
 		bool isDragging;
-		bool shiftPositions;
+		bool relativeMovement;
 		bool drawColonistPreviews;
 
-		static IEnumerable<ScoredPosition> debugPositions = null;
-		public static void SetDebugPositions(IEnumerable<ScoredPosition> pos)
+		static HashSet<ScoredPosition> debugPositions = new HashSet<ScoredPosition>();
+		static bool debugPositionNeedsClear = true;
+		public static void AddDebugPositions(IEnumerable<ScoredPosition> pos)
 		{
 			if (debugging == false) return;
-			List<ScoredPosition> l = new List<ScoredPosition>();
-			if (pos != null) l.AddRange(pos);
-			debugPositions = l;
+			if (debugPositionNeedsClear) debugPositions = new HashSet<ScoredPosition>();
+			debugPositionNeedsClear = false;
+			if (pos != null) debugPositions.UnionWith(pos);
 		}
-		public static void SetDebugPositions(IEnumerable<IntVec3> vecs)
+		public static void AddDebugPositions(IEnumerable<IntVec3> vecs)
 		{
-			IEnumerable<ScoredPosition> pos = vecs.Select(v => new ScoredPosition(v, 1f));
-			SetDebugPositions(pos);
+			if (debugging == false) return;
+			if (debugPositionNeedsClear) debugPositions = new HashSet<ScoredPosition>();
+			debugPositionNeedsClear = false;
+			if (vecs != null) debugPositions.UnionWith(vecs.Select(v => new ScoredPosition(v, 1f)));
 		}
 
 		public static Controller controller = null;
@@ -65,7 +75,13 @@ namespace AchtungMod
 			lineEnd = Vector3.zero;
 			isDragging = false;
 			drawColonistPreviews = true;
-			InstallJobDefs();
+		}
+
+		public void Initialize()
+		{
+			Messages.Message("AchtungOptions".Translate(), MessageSound.Benefit);
+			String state = Settings.instance.modActive ? "" : "AchtungOff".Translate();
+			Messages.Message("AchtungVersion".Translate(Tools.Version, state), MessageSound.Silent);
 		}
 
 		public void InstallJobDefs()
@@ -90,13 +106,14 @@ namespace AchtungMod
 			{
 				Vector3 where = Gen.MouseMapPosVector3();
 
-				bool altKeyPressed = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
-				shiftPositions = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+				relativeMovement = Tools.IsModKeyPressed(Settings.instance.relativeMovementKey);
 
-				colonists = Tools.UserSelectedAndReadyPawns().Select(p => new Colonist(p, altKeyPressed)).ToList();
+				bool forceDraft = Tools.IsModKeyPressed(Settings.instance.forceDraftKey);
+				colonists = Tools.UserSelectedAndReadyPawns().Select(p => new Colonist(p, forceDraft)).ToList();
 				if (colonists.Count > 0)
 				{
-					if (colonists.Count == 1 && altKeyPressed == false)
+					bool ignoreMenu = Tools.IsModKeyPressed(Settings.instance.ignoreMenuKey);
+					if (colonists.Count == 1 && ignoreMenu == false)
 					{
 						List<FloatMenuOption> choices = FloatMenuMakerMap.ChoicesAtFor(where, colonists.First().pawn);
 						if (choices.Count > 0)
@@ -110,7 +127,7 @@ namespace AchtungMod
 					MultiActions actions = new MultiActions(colonists, where);
 
 					// present combined menu to the user
-					if (actions.Count() > 0 && altKeyPressed == false)
+					if (actions.Count() > 0 && ignoreMenu == false)
 					{
 						Find.WindowStack.Add(actions.GetWindow());
 						Event.current.Use();
@@ -142,7 +159,7 @@ namespace AchtungMod
 				int count = colonists.Count;
 				Vector3 dragVector = lineEnd - lineStart;
 
-				if (shiftPositions)
+				if (relativeMovement)
 				{
 					colonists.ForEach(colonist =>
 					{
@@ -185,9 +202,10 @@ namespace AchtungMod
 		public List<FloatMenuOption> ChoicesAtFor(Vector3 clickPos, Pawn pawn)
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
+			if (Settings.instance.modActive == false) return options;
 
-			bool altKeyPressed = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
-			if (altKeyPressed == false)
+			bool ignoreMenu = Tools.IsModKeyPressed(Settings.instance.ignoreMenuKey);
+			if (ignoreMenu == false)
 			{
 				AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_CleanRoom));
 				AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_FightFire));
@@ -234,11 +252,15 @@ namespace AchtungMod
 
 		public void HandleDrawing()
 		{
-			if (debugPositions != null && debugPositions.FirstOrDefault() != null)
+			if (Settings.instance.modActive == false) return;
+
+			if (Find.Selector.SelectedObjects.Count() == 0) debugPositions = new HashSet<ScoredPosition>();
+			if (debugPositions.Count() > 0)
 			{
 				float min = debugPositions.ToList().Min(sp => sp.score);
 				float max = debugPositions.ToList().Max(sp => sp.score);
 				debugPositions.ToList().ForEach(sp => Tools.DebugPosition(sp.v.ToVector3(), new Color(1f, 0f, 0f, GenMath.LerpDouble(min, max, 0.1f, 0.8f, sp.score))));
+				debugPositionNeedsClear = true;
 			}
 
 			if (isDragging)
@@ -263,6 +285,8 @@ namespace AchtungMod
 
 		public void HandleDrawingOnGUI()
 		{
+			if (Settings.instance.modActive == false) return;
+
 			colonists.ForEach(colonist =>
 			{
 				if (colonist.designation != Vector3.zero)
@@ -275,6 +299,18 @@ namespace AchtungMod
 
 		public void HandleEvents()
 		{
+			bool shiftKey = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+			if (shiftKey && Input.GetKeyDown(KeyCode.Return))
+			{
+				Event.current.Use();
+				if (Find.WindowStack.IsOpen(typeof(PreferenceDialog)) == false)
+				{
+					Find.WindowStack.Add(new PreferenceDialog());
+				}
+			}
+
+			if (Settings.instance.modActive == false) return;
+
 			Vector3 pos = Gen.MouseMapPosVector3();
 			switch (Event.current.type)
 			{

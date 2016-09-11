@@ -1,6 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
+	<AchtungVersion>Powered by Achtung! Mod {0} {1}</AchtungVersion>
+	<AchtungOff>(OFF)</AchtungOff>
+	<AchtungOptions>Press Shift-Return for configuration</AchtungOptions>
+
+	<AchtungOptionsTitle>Achtung! Mod Options</AchtungOptionsTitle>
+	<AchtungEnabled>Active</AchtungEnabled>
+	<AchtungEnabledExplained>This mod can be turned on/off without restarting RimWorld</AchtungEnabledExplained>
+	<ModVersion>Version</ModVersion>
+
+	<ForceDraft>Force draft</ForceDraft>
+	<ForceDraftExplained>To draft an undrafted colonist while right-clicking, hold the selected key</ForceDraftExplained>
+
+	<IgnoreMenu>Ignore context menu</IgnoreMenu>
+	<IgnoreMenuExplained>To ignore the context menu while positioning colonists, hold the selected key key while right-clicking</IgnoreMenuExplained>
+
+	<RelativeMovement>Move colonists relative</RelativeMovement>
+	<RelativeMovementExplained>To move selected colonists relative to their current position, hold the selected key while right-click-dragging</RelativeMovementExplained>
+
+	<ModKeyNone>Disabled</ModKeyNone>
+	<ModKeyAlt>Alt</ModKeyAlt>
+	<ModKeyCtrl>Ctrl</ModKeyCtrl>
+	<ModKeyShift>Shift</ModKeyShift>
+	<ModKeyMeta>Win/Cmd</ModKeyMeta>
+
 	<CleanRoomLabel>Clean this room</CleanRoomLabel>
 	<CleanRoomInfoText>Cleaning room thoroughly</CleanRoomInfoText>
 	<CleanRoomDescription>Clean a room until it is completely clean</CleanRoomDescription>
@@ -20,9 +44,10 @@
 	<AutoCombatInfoText>Fighting automatically</AutoCombatInfoText>
 	<AutoCombatDescription>Fight an enemy or target automatically</AutoCombatDescription>
 	<AutoCombatReport>Auto combat: {0}</AutoCombatReport>
-	<AutoCombatAdvancing>advancing to {0}</AutoCombatAdvancing>
-	<AutoCombatMoving>positioning ({0})</AutoCombatMoving>
-	<AutoCombatShooting>shooting at {0}</AutoCombatShooting>
-	<AutoCombatReady>aiming at {0}</AutoCombatReady>
+	<AutoCombatAdvancing>Advancing to {0}</AutoCombatAdvancing>
+	<AutoCombatMoving>Positioning ({0})</AutoCombatMoving>
+	<AutoCombatShooting>Shooting at {0}</AutoCombatShooting>
+	<AutoCombatHitting>Hitting {0}</AutoCombatHitting>
+	<AutoCombatReady>Aiming at {0}</AutoCombatReady>
 
 </LanguageData>
