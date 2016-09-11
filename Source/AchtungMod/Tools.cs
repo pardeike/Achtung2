@@ -66,15 +66,96 @@ namespace AchtungMod
 			return false;
 		}
 
-		public static List<Pawn> UserSelectedAndReadyPawns()
+		public static IEnumerable<IntVec3> CellsBetween(IntVec3 start, IntVec3 end)
 		{
-			List<Pawn> allPawns = Find.Selector.SelectedObjects.OfType<Pawn>().ToList();
-			return allPawns.FindAll(pawn =>
+			HashSet<IntVec3> cells = new HashSet<IntVec3>();
+			int dx = Math.Sign(end.x - start.x);
+			for (int x = start.x; dx != 0 && x != end.x; x += dx)
+			{
+				int z = (int)(GenMath.LerpDouble(start.x, end.x, start.z, end.z, x) + 0.5f);
+				cells.Add(new IntVec3(x, 0, z));
+			}
+			int dz = Math.Sign(end.z - start.z);
+			for (int z = start.z; dz != 0 && z != end.z; z += dz)
+			{
+				int x = (int)(GenMath.LerpDouble(start.z, end.z, start.x, end.x, z) + 0.5f);
+				cells.Add(new IntVec3(x, 0, z));
+			}
+			return cells;
+		}
+
+		public static void ApplyScore(HashSet<ScoredPosition> result, Func<ScoredPosition, float> func)
+		{
+			result
+				.Select(sp => new KeyValuePair<ScoredPosition, float>(sp, func(sp)))
+				.Do(kv => kv.Key.Add(kv.Value));
+		}
+
+		public static void ApplyScoreLerped(HashSet<ScoredPosition> result, Func<ScoredPosition, float> func, float factorMin, float factorMax)
+		{
+			IEnumerable<KeyValuePair<ScoredPosition, float>> scores = result.Select(sp => new KeyValuePair<ScoredPosition, float>(sp, func(sp)));
+			if (scores.Count() > 0)
+			{
+				float minScore = scores.Min(kv => kv.Value);
+				float maxScore = scores.Max(kv => kv.Value);
+				scores.Do(kv => kv.Key.Add(GenMath.LerpDouble(minScore, maxScore, factorMin, factorMax, kv.Value)));
+			}
+		}
+
+		public static float PawnCellDistance(Pawn enemy, IntVec3 cell)
+		{
+			float dx = cell.x - enemy.DrawPos.x;
+			float dz = cell.z - enemy.DrawPos.z;
+			return 0.1f + dx * dx + dz * dz;
+		}
+
+		public static IEnumerable<T> Do<T>(this IEnumerable<T> sequence, Action<T> action)
+		{
+			if (sequence == null) return null;
+			//bool logFirstException = true;
+			IEnumerator<T> enumerator = sequence.GetEnumerator();
+			while (enumerator.MoveNext()) action(enumerator.Current);
+			/*{
+				try
+				{
+					action(enumerator.Current);
+				}
+				catch (Exception ex)
+				{
+					if (logFirstException)
+					{
+						Log.Error("Iterating " + typeof(T) + ", element " + enumerator.Current + ", " + action + " cause exeception: " + ex);
+						Log.Error(ex.StackTrace);
+						logFirstException = false;
+					}
+				}
+			}
+			if (logFirstException == false) Log.Error("Exception context: " + Environment.StackTrace);*/
+			return sequence;
+		}
+
+		public static IEnumerable<T> DoIf<T>(this IEnumerable<T> sequence, Func<T, bool> condition, Action<T> action)
+		{
+			return sequence.Where(condition).Do(action);
+		}
+
+		public static void Clear<T>(this IEnumerable<T> sequence)
+		{
+			if (sequence is List<T>)
+				(sequence as List<T>).Clear();
+			else
+				sequence = sequence.Where(o => false);
+		}
+
+		public static IEnumerable<Pawn> UserSelectedAndReadyPawns()
+		{
+			return Find.Selector.SelectedObjects.OfType<Pawn>()
+				.Where(pawn =>
 					pawn.drafter != null
 					&& pawn.IsColonistPlayerControlled
 					&& pawn.Downed == false
 					&& pawn.drafter.CanTakeOrderedJob()
-			);
+				);
 		}
 
 		public static bool IsGoHereOption(FloatMenuOption option)

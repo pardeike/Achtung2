@@ -112,8 +112,28 @@ namespace AchtungMod
 				(currentItem.Cell.x == 0 && currentItem.Cell.z == 0);
 		}
 
+		public virtual void CheckJobCancelling()
+		{
+			if (pawn.mindState.mentalBreaker.BreakMajorIsImminent) // BreakMinorIsImminent, BreakMajorIsImminent, BreakExtremeIsApproaching, BreakExtremeIsImminent
+			{
+				EndJobWith(JobCondition.InterruptOptional);
+				String jobName = (GetPrefix() + "Label").Translate();
+				Find.LetterStack.ReceiveLetter(new Letter("JobInterruptedLabel".Translate(jobName), "JobInterruptedBreakdown".Translate(pawn.NameStringShort), LetterType.BadNonUrgent, pawn));
+				return;
+			}
+
+			if (pawn.health.InPainShock) // [ShouldBeTendedNow, ShouldDoSurgeryNow], PrefersMedicalRest, NeedsMedicalRest, InPainShock
+			{
+				EndJobWith(JobCondition.InterruptOptional);
+				String jobName = (GetPrefix() + "Label").Translate();
+				Find.LetterStack.ReceiveLetter(new Letter("JobInterruptedLabel".Translate(jobName), "JobInterruptedBadHealth".Translate(pawn.NameStringShort), LetterType.BadNonUrgent, pawn));
+				return;
+			}
+		}
+
 		public virtual void TickAction()
 		{
+			CheckJobCancelling();
 			UpdateWorkLocations();
 
 			if (CurrentItemInvalid())

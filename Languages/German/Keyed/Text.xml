@@ -10,20 +10,24 @@
 	<AchtungEnabledExplained>Dieser Mod kan an- und ausgeschaltet werden ohne RimWorld neu zu starten</AchtungEnabledExplained>
 	<ModVersion>Version</ModVersion>
 
-	<ForceDraft>Force draft</ForceDraft>
-	<ForceDraftExplained>To draft an undrafted colonist while right-clicking, hold the selected key</ForceDraftExplained>
+	<ForceDraft>Kontrolle erzwingen</ForceDraft>
+	<ForceDraftExplained>Um ein Kolonisten in den kontrolierten Zustand zu bringen drücken Sie während des Rechtsklicks folgende Taste</ForceDraftExplained>
 
-	<IgnoreMenu>Ignore context menu</IgnoreMenu>
-	<IgnoreMenuExplained>To ignore the context menu while positioning colonists, hold the selected key key while right-clicking</IgnoreMenuExplained>
+	<IgnoreMenu>Das Kontextmenü ignorieren</IgnoreMenu>
+	<IgnoreMenuExplained>Um das Kontextmenü wåhrend des Positionierens zu ignorieren drücken Sie während des Rechtsklicks folgende Taste</IgnoreMenuExplained>
 
-	<RelativeMovement>Move colonists relative</RelativeMovement>
-	<RelativeMovementExplained>To move selected colonists relative to their current position, hold the selected key while right-click-dragging</RelativeMovementExplained>
+	<RelativeMovement>Kolonisten relativ bewegen</RelativeMovement>
+	<RelativeMovementExplained>Um Kolonisten relativ zu sich selbst zu bewegen drücken Sie zusätzlich zur gedrückten rechten Maustaste folgende Taste</RelativeMovementExplained>
 
-	<ModKeyNone>Disabled</ModKeyNone>
+	<ModKeyNone>Keine</ModKeyNone>
 	<ModKeyAlt>Alt</ModKeyAlt>
 	<ModKeyCtrl>Ctrl</ModKeyCtrl>
 	<ModKeyShift>Shift</ModKeyShift>
 	<ModKeyMeta>Win/Cmd</ModKeyMeta>
+
+	<JobInterruptedLabel>{0} wurde abgebrochen</JobInterruptedLabel>
+	<JobInterruptedBreakdown>{0} steht kurz vor dem Zusammenbruch</JobInterruptedBreakdown>
+	<JobInterruptedBadHealth>{0} ist in schlechter gesundheitlicher Verfassung</JobInterruptedBadHealth>
 
 	<CleanRoomLabel>Diesen Raum säubern</CleanRoomLabel>
 	<CleanRoomInfoText>Raum wird gesäubert</CleanRoomInfoText>

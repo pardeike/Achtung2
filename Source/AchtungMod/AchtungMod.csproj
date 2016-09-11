@@ -21,7 +21,7 @@
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -70,7 +70,9 @@
     <Compile Include="MultiAction.cs" />
     <Compile Include="MultiActions.cs" />
     <Compile Include="PreferenceDialog.cs" />
+    <Compile Include="ProjectileInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScoredPosition.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Tools.cs" />
   </ItemGroup>

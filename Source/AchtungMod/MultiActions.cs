@@ -12,21 +12,21 @@ namespace AchtungMod
 		public Vector3 clickPos;
 		List<MultiAction> allActions;
 
-		public MultiActions(List<Colonist> colonists, Vector3 clickPos)
+		public MultiActions(IEnumerable<Colonist> colonists, Vector3 clickPos)
 		{
 			this.clickPos = clickPos;
 			allActions = new List<MultiAction>();
-			colonists.ForEach(AddColonist);
+			colonists.Do(AddColonist);
 		}
 
 		public void AddColonist(Colonist colonist)
 		{
 			bool forceDrafted = Tools.ForceDraft(colonist.pawn, true);
-			FloatMenuMakerMap.ChoicesAtFor(clickPos, colonist.pawn).ForEach(option => AddMultiAction(colonist, true, option));
+			FloatMenuMakerMap.ChoicesAtFor(clickPos, colonist.pawn).Do(option => AddMultiAction(colonist, true, option));
 			if (forceDrafted) Tools.SetDraftStatus(colonist.pawn, false, false);
 
 			bool forceUndrafted = Tools.ForceDraft(colonist.pawn, false);
-			FloatMenuMakerMap.ChoicesAtFor(clickPos, colonist.pawn).ForEach(option => AddMultiAction(colonist, false, option));
+			FloatMenuMakerMap.ChoicesAtFor(clickPos, colonist.pawn).Do(option => AddMultiAction(colonist, false, option));
 			if (forceUndrafted) Tools.SetDraftStatus(colonist.pawn, true, false);
 		}
 
@@ -40,37 +40,37 @@ namespace AchtungMod
 			return allActions.Count();
 		}
 
-		public List<string> GetKeys()
+		public IEnumerable<string> GetKeys()
 		{
-			return allActions.Select(action => action.Key).Distinct().ToList();
+			return allActions.Select(action => action.Key).Distinct();
 		}
 
-		public List<MultiAction> ActionsForKey(string key)
+		public IEnumerable<MultiAction> ActionsForKey(string key)
 		{
-			List<MultiAction> actionsForKey = allActions.Where(action => action.Key == key).ToList();
+			IEnumerable<MultiAction> actionsForKey = allActions.Where(action => action.Key == key);
 			return actionsForKey.Select(actionForKey =>
 			{
 				Colonist colonist = actionForKey.colonist;
 				return actionsForKey.Where(action => action.colonist == colonist)
 					.OrderBy(action => action.IsForced() ? 2 : 1).First();
-			}).ToList();
+			});
 		}
 
-		public List<Colonist> ColonistsForActions(List<MultiAction> subActions)
+		public IEnumerable<Colonist> ColonistsForActions(IEnumerable<MultiAction> subActions)
 		{
-			return subActions.Select(action => action.colonist).Distinct().ToList();
+			return subActions.Select(action => action.colonist).Distinct();
 		}
 
-		public FloatMenuOption GetOption(string title, List<MultiAction> multiActions)
+		public FloatMenuOption GetOption(string title, IEnumerable<MultiAction> multiActions)
 		{
 			MenuOptionPriority priority = multiActions.Max(a => a.option.priority);
 			FloatMenuOption option = new FloatMenuOption(title, delegate
 			{
-				foreach (MultiAction multiAction in multiActions)
+				multiActions.Do(multiAction =>
 				{
 					Action colonistAction = multiAction.GetAction();
 					colonistAction();
-				}
+				});
 			}, priority);
 			option.Disabled = multiActions.All(a => a.option.Disabled);
 			return option;
@@ -80,10 +80,10 @@ namespace AchtungMod
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
 
-			GetKeys().ForEach(key =>
+			GetKeys().Do(key =>
 			{
-				List<MultiAction> subActions = ActionsForKey(key);
-				List<Colonist> colonists = ColonistsForActions(subActions);
+				IEnumerable<MultiAction> subActions = ActionsForKey(key);
+				IEnumerable<Colonist> colonists = ColonistsForActions(subActions);
 				string title = subActions.First().EnhancedLabel(colonists);
 				FloatMenuOption option = GetOption(title, subActions);
 				options.Add(option);

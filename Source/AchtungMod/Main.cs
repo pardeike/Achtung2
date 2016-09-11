@@ -3,7 +3,8 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.AI;
-using System.IO;
+using System.Reflection;
+using System;
 
 namespace AchtungMod
 {
@@ -115,8 +116,19 @@ namespace AchtungMod
 		public static List<FloatMenuOption> FloatMenuMakerMap_ChoicesAtFor(Vector3 clickPos, Pawn pawn)
 		{
 			List<FloatMenuOption> options = FloatMenuMakerMap.ChoicesAtFor(clickPos, pawn);
-			options.AddRange(Controller.getInstance().ChoicesAtFor(clickPos, pawn));
+			options.AddRange(Controller.getInstance().AchtungChoicesAtFor(clickPos, pawn));
 			return options;
+		}
+	}
+
+	// track projectiles
+	//
+	public abstract class Projectile_Patch : Projectile
+	{
+		public void Projectile_Launch(Thing launcher, Vector3 origin, TargetInfo targ, Thing equipment = null)
+		{
+			Controller.getInstance().AddProjectile(this, launcher, origin, targ, equipment);
+			Launch(launcher, origin, targ, equipment);
 		}
 	}
 
@@ -133,6 +145,9 @@ namespace AchtungMod
 			injector.Inject(typeof(ThingOverlays), "ThingOverlaysOnGUI", typeof(ThingOverlays_Patch));
 			injector.Inject(typeof(ReservationManager), "LogCouldNotReserveError", typeof(ReservationManager_Patch));
 			injector.Inject(typeof(FloatMenuMakerMap), "ChoicesAtFor", typeof(FloatMenuMakerMap_Patch));
+
+			MethodInfo method = typeof(Projectile).GetMethod("Launch", new Type[] { typeof(Thing), typeof(Vector3), typeof(TargetInfo), typeof(Thing) });
+			injector.Inject(typeof(Projectile), method, typeof(Projectile_Patch));
 		}
 	}
 }

@@ -5,47 +5,23 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.AI;
-using System.Reflection;
 
 namespace AchtungMod
 {
-	public class ScoredPosition
-	{
-		public IntVec3 v;
-		public float score;
-
-		public ScoredPosition(IntVec3 v)
-		{
-			this.v = v;
-			this.score = 100f;
-		}
-
-		public ScoredPosition(IntVec3 v, float score = 0f)
-		{
-			this.v = v;
-			this.score = score;
-		}
-
-		public ScoredPosition Add(float s, float factor = 1f)
-		{
-			score += s * factor;
-			return this;
-		}
-	}
-
 	public class Controller
 	{
-		static bool debugging = true;
+		public static bool debugging = true;
 
-		List<Colonist> colonists;
-		Vector3 lineStart;
-		Vector3 lineEnd;
-		bool isDragging;
-		bool relativeMovement;
-		bool drawColonistPreviews;
+		public IEnumerable<Colonist> colonists;
+		public Vector3 lineStart;
+		public Vector3 lineEnd;
+		public bool isDragging;
+		public bool relativeMovement;
+		public bool drawColonistPreviews;
+		public static Dictionary<Projectile, ProjectileInfo> projectiles = new Dictionary<Projectile, ProjectileInfo>();
 
-		static HashSet<ScoredPosition> debugPositions = new HashSet<ScoredPosition>();
-		static bool debugPositionNeedsClear = true;
+		public static HashSet<ScoredPosition> debugPositions = new HashSet<ScoredPosition>();
+		public static bool debugPositionNeedsClear = true;
 		public static void AddDebugPositions(IEnumerable<ScoredPosition> pos)
 		{
 			if (debugging == false) return;
@@ -91,13 +67,8 @@ namespace AchtungMod
 				new JobDriver_FightFire().MakeJobDef(),
 				new JobDriver_SowAll().MakeJobDef(),
 				new JobDriver_AutoCombat().MakeJobDef()
-			}.ForEach(def =>
-			{
-				if (DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null)
-				{
-					DefDatabase<JobDef>.Add(def);
-				}
-			});
+			}
+			.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, def => DefDatabase<JobDef>.Add(def));
 		}
 
 		public void MouseDown(Vector3 pos)
@@ -109,14 +80,14 @@ namespace AchtungMod
 				relativeMovement = Tools.IsModKeyPressed(Settings.instance.relativeMovementKey);
 
 				bool forceDraft = Tools.IsModKeyPressed(Settings.instance.forceDraftKey);
-				colonists = Tools.UserSelectedAndReadyPawns().Select(p => new Colonist(p, forceDraft)).ToList();
-				if (colonists.Count > 0)
+				colonists = Tools.UserSelectedAndReadyPawns().Select(p => new Colonist(p, forceDraft));
+				if (colonists.Count() > 0)
 				{
 					bool ignoreMenu = Tools.IsModKeyPressed(Settings.instance.ignoreMenuKey);
-					if (colonists.Count == 1 && ignoreMenu == false)
+					if (colonists.Count() == 1 && ignoreMenu == false)
 					{
-						List<FloatMenuOption> choices = FloatMenuMakerMap.ChoicesAtFor(where, colonists.First().pawn);
-						if (choices.Count > 0)
+						IEnumerable<FloatMenuOption> choices = FloatMenuMakerMap.ChoicesAtFor(where, colonists.First().pawn);
+						if (choices.Count() > 0)
 						{
 							// don't overwrite existing floating menu
 							return;
@@ -134,7 +105,7 @@ namespace AchtungMod
 						return;
 					}
 
-					if (colonists.Count == 1 && Tools.GetDraftingStatus(colonists.First().pawn) == false)
+					if (colonists.Count() == 1 && Tools.GetDraftingStatus(colonists.First().pawn) == false)
 					{
 						// don't drag if neither standard menu nor multi menu have any choices and it's a single colonist
 						return;
@@ -156,12 +127,12 @@ namespace AchtungMod
 			{
 				lineEnd = pos;
 				lineEnd.y = Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays);
-				int count = colonists.Count;
+				int count = colonists.Count();
 				Vector3 dragVector = lineEnd - lineStart;
 
 				if (relativeMovement)
 				{
-					colonists.ForEach(colonist =>
+					colonists.Do(colonist =>
 					{
 						Vector3 delta = lineEnd - lineStart;
 						colonist.OrderTo(colonist.startPosition + delta);
@@ -171,7 +142,7 @@ namespace AchtungMod
 				{
 					Vector3 delta = count > 1 ? dragVector / (float)(count - 1) : Vector3.zero;
 					Vector3 linePosition = count == 1 ? lineEnd : lineStart;
-					colonists.ForEach(colonist =>
+					colonists.Do(colonist =>
 					{
 						colonist.OrderTo(linePosition);
 						linePosition += delta;
@@ -188,7 +159,7 @@ namespace AchtungMod
 			IEnumerable<TargetInfo> targets = driver.CanStart(pawn, clickPos);
 			if (targets != null)
 			{
-				targets.ToList().ForEach(target =>
+				targets.Do(target =>
 				{
 					Action action = delegate
 					{
@@ -199,7 +170,7 @@ namespace AchtungMod
 			}
 		}
 
-		public List<FloatMenuOption> ChoicesAtFor(Vector3 clickPos, Pawn pawn)
+		public IEnumerable<FloatMenuOption> AchtungChoicesAtFor(Vector3 clickPos, Pawn pawn)
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
 			if (Settings.instance.modActive == false) return options;
@@ -234,7 +205,7 @@ namespace AchtungMod
 				{
 					isDragging = false;
 
-					colonists.ForEach(colonist =>
+					colonists.Do(colonist =>
 					{
 						Tools.SetDraftStatus(colonist.pawn, colonist.originalDraftStatus);
 						colonist.pawn.mindState.priorityWork.Clear();
@@ -257,43 +228,38 @@ namespace AchtungMod
 			if (Find.Selector.SelectedObjects.Count() == 0) debugPositions = new HashSet<ScoredPosition>();
 			if (debugPositions.Count() > 0)
 			{
-				float min = debugPositions.ToList().Min(sp => sp.score);
-				float max = debugPositions.ToList().Max(sp => sp.score);
-				debugPositions.ToList().ForEach(sp => Tools.DebugPosition(sp.v.ToVector3(), new Color(1f, 0f, 0f, GenMath.LerpDouble(min, max, 0.1f, 0.8f, sp.score))));
+				float min = debugPositions.Min(sp => sp.score);
+				float max = debugPositions.Max(sp => sp.score);
+				debugPositions.Do(sp => Tools.DebugPosition(sp.v.ToVector3(), new Color(1f, 0f, 0f, GenMath.LerpDouble(min, max, 0.1f, 0.8f, sp.score))));
 				debugPositionNeedsClear = true;
 			}
 
 			if (isDragging)
 			{
-				if (colonists.Count > 1) Tools.DrawLineBetween(lineStart, lineEnd, 1.0f);
+				if (colonists.Count() > 1) Tools.DrawLineBetween(lineStart, lineEnd, 1.0f);
 
-				colonists.ForEach(colonist =>
+				colonists.DoIf(c => (c.designation != Vector3.zero), c =>
 				{
-					if (colonist.designation != Vector3.zero)
+					Tools.DrawMarker(c.designation);
+					if (drawColonistPreviews)
 					{
-						Tools.DrawMarker(colonist.designation);
-
-						if (drawColonistPreviews)
-						{
-							colonist.pawn.Drawer.renderer.RenderPawnAt(colonist.designation);
-							colonist.pawn.DrawExtraSelectionOverlays();
-						}
+						c.pawn.Drawer.renderer.RenderPawnAt(c.designation);
+						c.pawn.DrawExtraSelectionOverlays();
 					}
 				});
 			}
+
+			UpdateProjectiles();
 		}
 
 		public void HandleDrawingOnGUI()
 		{
 			if (Settings.instance.modActive == false) return;
 
-			colonists.ForEach(colonist =>
+			colonists.DoIf(c => (c.designation != Vector3.zero), c =>
 			{
-				if (colonist.designation != Vector3.zero)
-				{
-					Vector2 labelPos = Tools.LabelDrawPosFor(colonist.designation, -0.6f);
-					GenWorldUI.DrawPawnLabel(colonist.pawn, labelPos, 1f, 9999f, null);
-				}
+				Vector2 labelPos = Tools.LabelDrawPosFor(c.designation, -0.6f);
+				GenWorldUI.DrawPawnLabel(c.pawn, labelPos, 1f, 9999f, null);
 			});
 		}
 
@@ -330,6 +296,33 @@ namespace AchtungMod
 				default:
 					break;
 			}
+		}
+
+		public void AddProjectile(Projectile projectile, Thing launcher, Vector3 origin, TargetInfo targ, Thing equipment)
+		{
+			Bullet bullet = projectile as Bullet;
+			Projectile_Explosive explosive = projectile as Projectile_Explosive;
+			if (bullet != null || explosive != null)
+			{
+				projectiles.Add(projectile, new ProjectileInfo(launcher, origin, targ, equipment));
+			}
+		}
+
+		public void UpdateProjectiles()
+		{
+			HashSet<Projectile> activeProjectiles = new HashSet<Projectile>();
+
+			Find.MapPawns.AllPawnsSpawned
+				.Where(p => p.Spawned == true && p.Destroyed == false && p.Downed == false && p.Dead == false)
+				.DoIf(p => p.equipment != null && p.equipment.Primary != null, p =>
+				{
+					ThingDef def = p.equipment.PrimaryEq.PrimaryVerb.verbProps.projectileDef;
+					if (def != null) activeProjectiles.UnionWith(Find.ListerThings.ThingsOfDef(def).Cast<Projectile>());
+				});
+
+			Dictionary<Projectile, ProjectileInfo> remaining = new Dictionary<Projectile, ProjectileInfo>();
+			projectiles.Keys.DoIf(p => activeProjectiles.Contains(p), p => remaining.Add(p, projectiles[p]));
+			projectiles = remaining;
 		}
 	}
 }

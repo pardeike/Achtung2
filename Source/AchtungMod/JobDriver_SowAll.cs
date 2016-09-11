@@ -114,15 +114,11 @@ namespace AchtungMod
 								{
 									zone.cells
 										.Where(c => CanSowHere(c, zone.GetPlantDefToGrow()))
-										.ToList()
-										.ForEach(c => zoneCells.Add(c));
+										.Do(c => zoneCells.Add(c));
 								}
 							}
 						}
-						zone.cells.ForEach(c =>
-						{
-							if (c != cell) roomCells.Remove(c);
-						});
+						zone.cells.DoIf(c => (c != cell), c => roomCells.Remove(c));
 					}
 					roomCells.Remove(cell);
 				}

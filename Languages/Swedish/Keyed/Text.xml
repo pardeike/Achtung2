@@ -10,20 +10,24 @@
 	<AchtungEnabledExplained>Den här Modden kan aktiveras/avaktiveras utan att man måste starta om RimWorld</AchtungEnabledExplained>
 	<ModVersion>Version</ModVersion>
 
-	<ForceDraft>Force draft</ForceDraft>
-	<ForceDraftExplained>To draft an undrafted colonist while right-clicking, hold the selected key</ForceDraftExplained>
+	<ForceDraft>Tvinga kontroll</ForceDraft>
+	<ForceDraftExplained>För att ertvinga kontroll öve en kolonist, håll i följande knapp när du högerklicker</ForceDraftExplained>
 
-	<IgnoreMenu>Ignore context menu</IgnoreMenu>
-	<IgnoreMenuExplained>To ignore the context menu while positioning colonists, hold the selected key key while right-clicking</IgnoreMenuExplained>
+	<IgnoreMenu>Ignorera kontextmenyn</IgnoreMenu>
+	<IgnoreMenuExplained>För att ignorera kontextmenyn när du vill positionera kolonister, håll i följande knapp när du högerklicker</IgnoreMenuExplained>
 
-	<RelativeMovement>Move colonists relative</RelativeMovement>
-	<RelativeMovementExplained>To move selected colonists relative to their current position, hold the selected key while right-click-dragging</RelativeMovementExplained>
+	<RelativeMovement>Flytta kolonister relativt</RelativeMovement>
+	<RelativeMovementExplained>För att flytta kolonister relativt till deras nuvarande position, håll i följande knapp samtidigt när du håller högre musknappen</RelativeMovementExplained>
 
-	<ModKeyNone>Disabled</ModKeyNone>
+	<ModKeyNone>Av</ModKeyNone>
 	<ModKeyAlt>Alt</ModKeyAlt>
 	<ModKeyCtrl>Ctrl</ModKeyCtrl>
 	<ModKeyShift>Shift</ModKeyShift>
 	<ModKeyMeta>Win/Cmd</ModKeyMeta>
+
+	<JobInterruptedLabel>{0} avbruten</JobInterruptedLabel>
+	<JobInterruptedBreakdown>{0} står inför ett sammanbrott</JobInterruptedBreakdown>
+	<JobInterruptedBadHealth>{0} har låg hälsa</JobInterruptedBadHealth>
 
 	<CleanRoomLabel>Städa rummet</CleanRoomLabel>
 	<CleanRoomInfoText>Städar rummet</CleanRoomInfoText>

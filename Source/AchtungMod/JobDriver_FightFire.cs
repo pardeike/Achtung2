@@ -28,16 +28,15 @@ namespace AchtungMod
 
 		public override void UpdateWorkLocations()
 		{
-			List<IntVec3> locations = workLocations.ToList();
-			locations.ForEach(pos =>
+			workLocations.Do(pos =>
 			{
 				if (Find.ThingGrid.CellContains(pos, ThingDefOf.Fire) == false) workLocations.Remove(pos);
 				GenAdj.CellsAdjacent8Way(new TargetInfo(pos))
 					.Where(loc => workLocations.Contains(loc) == false)
 					.Where(loc => Find.ThingGrid.CellContains(loc, ThingDefOf.Fire))
-					.ToList().ForEach(loc => workLocations.Add(loc));
+					.Do(loc => workLocations.Add(loc));
 			});
-			currentWorkCount = locations.Count();
+			currentWorkCount = workLocations.Count();
 			if (totalWorkCount < currentWorkCount) totalWorkCount = currentWorkCount;
 		}
 

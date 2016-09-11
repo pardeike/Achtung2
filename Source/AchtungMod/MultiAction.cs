@@ -31,7 +31,7 @@ namespace AchtungMod
 			return Tools.GetDraftingStatus(colonist.pawn) != draftMode;
 		}
 
-		public string EnhancedLabel(List<Colonist> colonists)
+		public string EnhancedLabel(IEnumerable<Colonist> colonists)
 		{
 			string suffix = (colonists.Count() == 1) ? " (" + colonists.First().pawn.NameStringShort + ")" : " (" + colonists.Count() + "x)";
 			return option.Label + suffix;

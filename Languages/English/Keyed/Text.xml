@@ -25,6 +25,10 @@
 	<ModKeyShift>Shift</ModKeyShift>
 	<ModKeyMeta>Win/Cmd</ModKeyMeta>
 
+	<JobInterruptedLabel>{0} was cancelled</JobInterruptedLabel>
+	<JobInterruptedBreakdown>{0} is facing an imminent breakdown</JobInterruptedBreakdown>
+	<JobInterruptedBadHealth>{0} is in bad shape</JobInterruptedBadHealth>
+
 	<CleanRoomLabel>Clean this room</CleanRoomLabel>
 	<CleanRoomInfoText>Cleaning room thoroughly</CleanRoomInfoText>
 	<CleanRoomDescription>Clean a room until it is completely clean</CleanRoomDescription>
