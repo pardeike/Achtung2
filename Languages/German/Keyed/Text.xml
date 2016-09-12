@@ -11,10 +11,10 @@
 	<ModVersion>Version</ModVersion>
 
 	<ForceDraft>Kontrolle erzwingen</ForceDraft>
-	<ForceDraftExplained>Um ein Kolonisten in den kontrolierten Zustand zu bringen drücken Sie während des Rechtsklicks folgende Taste</ForceDraftExplained>
+	<ForceDraftExplained>Um ein Kolonisten in den kontrollierten Zustand zu bringen drücken Sie während des Rechtsklicks folgende Taste</ForceDraftExplained>
 
 	<IgnoreMenu>Das Kontextmenü ignorieren</IgnoreMenu>
-	<IgnoreMenuExplained>Um das Kontextmenü wåhrend des Positionierens zu ignorieren drücken Sie während des Rechtsklicks folgende Taste</IgnoreMenuExplained>
+	<IgnoreMenuExplained>Um das Kontextmenü während des Positionierens zu ignorieren drücken Sie während des Rechtsklicks folgende Taste</IgnoreMenuExplained>
 
 	<RelativeMovement>Kolonisten relativ bewegen</RelativeMovement>
 	<RelativeMovementExplained>Um Kolonisten relativ zu sich selbst zu bewegen drücken Sie zusätzlich zur gedrückten rechten Maustaste folgende Taste</RelativeMovementExplained>
