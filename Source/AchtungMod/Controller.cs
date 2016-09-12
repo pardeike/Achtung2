@@ -71,6 +71,14 @@ namespace AchtungMod
 			.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, def => DefDatabase<JobDef>.Add(def));
 		}
 
+		public IEnumerable<Colonist> CreateColonists(bool forceDraft)
+		{
+			List<Colonist> temp = new List<Colonist>();
+			// the following line cannot be done using .Select() !
+			foreach (Pawn tempPawn in Tools.UserSelectedAndReadyPawns()) temp.Add(new Colonist(tempPawn, forceDraft));
+			return temp;
+		}
+
 		public void MouseDown(Vector3 pos)
 		{
 			if (Event.current.button == 1)
@@ -80,7 +88,7 @@ namespace AchtungMod
 				relativeMovement = Tools.IsModKeyPressed(Settings.instance.relativeMovementKey);
 
 				bool forceDraft = Tools.IsModKeyPressed(Settings.instance.forceDraftKey);
-				colonists = Tools.UserSelectedAndReadyPawns().Select(p => new Colonist(p, forceDraft));
+				colonists = CreateColonists(forceDraft);
 				if (colonists.Count() > 0)
 				{
 					bool ignoreMenu = Tools.IsModKeyPressed(Settings.instance.ignoreMenuKey);
