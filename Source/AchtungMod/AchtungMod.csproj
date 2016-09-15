@@ -75,6 +75,7 @@
     <Compile Include="ScoredPosition.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Tools.cs" />
+    <Compile Include="XiaolinCells.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -89,6 +90,11 @@ xcopy /S /E /I /Y "$(SolutionDir)..\Languages\*" "D:\Program Files (x86)\Steam\s
 xcopy /E /I /Y "$(SolutionDir)..\Textures" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Textures"
 copy /B /Y "$(SolutionDir)..\README.md" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\"</PostBuildEvent>
   </PropertyGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties BuildVersion_ReplaceNonNumerics="False" BuildVersion_UseUniversalClock="False" BuildVersion_UseGlobalSettings="False" BuildVersion_UpdateFileVersion="False" BuildVersion_UpdateAssemblyVersion="False" BuildVersion_BuildVersioningStyle="None.None.None.None" BuildVersion_StartDate="2000/1/1" BuildVersion_IncrementBeforeBuild="False" BuildVersion_ConfigurationName="Any" BuildVersion_DetectChanges="False" />
+    </VisualStudio>
+  </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -48,6 +48,8 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "English", "D:\Program Files
 		SlnRelativePath = "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Core\Languages\English\"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AchtungMod.reloaded", "AchtungMod.reloaded\AchtungMod.reloaded.csproj", "{AD4AAE04-6BC7-4079-A19E-A69789C04E97}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,8 +68,24 @@ Global
 		{5D7169A6-E248-4D7D-BBE3-F3C889CD564B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D7169A6-E248-4D7D-BBE3-F3C889CD564B}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{5D7169A6-E248-4D7D-BBE3-F3C889CD564B}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{AD4AAE04-6BC7-4079-A19E-A69789C04E97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD4AAE04-6BC7-4079-A19E-A69789C04E97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD4AAE04-6BC7-4079-A19E-A69789C04E97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD4AAE04-6BC7-4079-A19E-A69789C04E97}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		BuildVersion_ReplaceNonNumerics = False
+		BuildVersion_UseUniversalClock = False
+		BuildVersion_UseGlobalSettings = False
+		BuildVersion_UpdateFileVersion = False
+		BuildVersion_UpdateAssemblyVersion = False
+		BuildVersion_BuildVersioningStyle = None.None.None.None
+		BuildVersion_DetectChanges = False
+		BuildVersion_ConfigurationName = Any
+		BuildVersion_IncrementBeforeBuild = False
+		BuildVersion_StartDate = 2000/1/1
 	EndGlobalSection
 EndGlobal

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using Verse;
 
@@ -9,110 +7,70 @@ namespace AchtungMod
 {
 	public class PreferenceDialog : Window
 	{
+		public override Vector2 InitialSize
+		{
+			get
+			{
+				return GetDialogSize();
+			}
+		}
+
+		public Vector2 GetDialogSize()
+		{
+			return new Vector2(500, 590);
+		}
+
 		public override void PreOpen()
 		{
 			base.PreOpen();
-			absorbInputAroundWindow = true;
+			absorbInputAroundWindow = false;
 			closeOnClickedOutside = false;
 			closeOnEscapeKey = true;
-			doCloseButton = true;
+			doCloseButton = false;
 			doCloseX = true;
-			draggable = false;
+			draggable = true;
 			drawShadow = true;
 			focusWhenOpened = true;
-			forcePause = true;
-			preventCameraMotion = true;
+			forcePause = false;
+			preventCameraMotion = false;
 			preventDrawTutor = true;
-			resizeable = false;
-
-			windowRect.height = CreateWindowContents(windowRect);
+			resizeable = true;
 		}
 
 		public override void PreClose()
 		{
-			base.PreClose();
 			Settings.Save();
-		}
-
-		public float CreateWindowContents(Rect rect)
-		{
-			var listing = new Listing_Standard(rect);
-			{
-				// title
-				Text.Font = GameFont.Medium;
-				listing.Label("AchtungOptionsTitle".Translate());
-				listing.Gap();
-
-				// mod active
-				Text.Font = GameFont.Small;
-				GUI.color = Color.white;
-				listing.CheckboxLabeled("AchtungEnabled".Translate(), ref Settings.instance.modActive);
-				Text.Font = GameFont.Tiny;
-				listing.ColumnWidth -= 34;
-				GUI.color = Color.gray;
-				listing.Label("AchtungEnabledExplained".Translate());
-				listing.ColumnWidth += 34;
-				listing.Gap();
-
-				// force draft settings
-				Text.Font = GameFont.Small;
-				GUI.color = Color.white;
-				listing.Label("ForceDraft".Translate());
-				Text.Font = GameFont.Small;
-				GUI.color = Color.white;
-				listing.ModKeyChoice("ModKey", ref Settings.instance.forceDraftKey);
-				Text.Font = GameFont.Tiny;
-				listing.ColumnWidth -= 34;
-				GUI.color = Color.gray;
-				listing.Label("ForceDraftExplained".Translate());
-				listing.ColumnWidth += 34;
-				listing.Gap();
-
-				// Ignore menu settings
-				Text.Font = GameFont.Small;
-				GUI.color = Color.white;
-				listing.Label("IgnoreMenu".Translate());
-				Text.Font = GameFont.Small;
-				GUI.color = Color.white;
-				listing.ModKeyChoice("ModKey", ref Settings.instance.ignoreMenuKey);
-				Text.Font = GameFont.Tiny;
-				listing.ColumnWidth -= 34;
-				GUI.color = Color.gray;
-				listing.Label("IgnoreMenuExplained".Translate());
-				listing.ColumnWidth += 34;
-				listing.Gap();
-
-				// Relative movement settings
-				Text.Font = GameFont.Small;
-				GUI.color = Color.white;
-				listing.Label("RelativeMovement".Translate());
-				Text.Font = GameFont.Small;
-				GUI.color = Color.white;
-				listing.ModKeyChoice("ModKey", ref Settings.instance.relativeMovementKey);
-				Text.Font = GameFont.Tiny;
-				listing.ColumnWidth -= 34;
-				GUI.color = Color.gray;
-				listing.Label("RelativeMovementExplained".Translate());
-				listing.ColumnWidth += 34;
-				listing.Gap();
-
-				// version
-				Text.Font = GameFont.Small;
-				GUI.color = Color.white;
-				listing.ValueLabeled("ModVersion".Translate(), Tools.Version);
-
-				Text.Font = GameFont.Tiny;
-				GUI.color = Color.white;
-				listing.Label("(c) 2016 Andreas Pardeike");
-				listing.Gap();
-			}
-			listing.End();
-			return listing.CurHeight + Margin * 2 + CloseButSize.y + Margin;
+			base.PreClose();
 		}
 
 		public override void DoWindowContents(Rect rect)
 		{
-			CreateWindowContents(rect);
+			rect.height = 2000f;
+			var listing = new Listing_Standard(rect);
+			{
+				Text.Font = GameFont.Medium;
+				listing.Label("AchtungSettingsTitle".Translate());
+				Text.Font = GameFont.Tiny;
+				GUI.color = Color.white;
+				listing.Label("Version " + Tools.Version + ", © 2016 Andreas Pardeike");
+				listing.Gap();
+				Text.Font = GameFont.Medium;
+
+				listing.CheckboxEnhanced("AchtungEnabled", ref Settings.instance.modActive);
+				listing.ValueLabeled("ForceDraft", ref Settings.instance.forceDraftKey);
+				listing.ValueLabeled("IgnoreMenu", ref Settings.instance.ignoreMenuKey);
+				listing.ValueLabeled("RelativeMovement", ref Settings.instance.relativeMovementKey);
+				listing.ValueLabeled("BreakLevel", ref Settings.instance.breakLevel);
+				listing.ValueLabeled("HealthLevel", ref Settings.instance.healthLevel);
+
+				Text.Font = GameFont.Small;
+				GUI.color = Color.white;
+				listing.Label("Auto Combat Aggressiveness " + GenText.ToStringPercent(Settings.instance.aggressiveness));
+				Settings.instance.aggressiveness = listing.Slider(Settings.instance.aggressiveness, 0f, 1f);
+
+				listing.CheckboxEnhanced("DebugPositions", ref Settings.instance.debugPositions);
+			}
+			listing.End();
 		}
 	}
 }

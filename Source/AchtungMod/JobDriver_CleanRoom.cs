@@ -59,7 +59,6 @@ namespace AchtungMod
 			RoomInfo info = WorkInfoAt(pawn, TargetA);
 			if (info.valid == false) return null;
 			IEnumerable<Thing> items = AllWorkInRoom(info.room, pawn);
-			Controller.AddDebugPositions(items.Select(t => t.Position));
 			currentWorkCount = items.Count();
 			if (totalWorkCount < currentWorkCount) totalWorkCount = currentWorkCount;
 			return items.FirstOrDefault();

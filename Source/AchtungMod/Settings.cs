@@ -16,12 +16,34 @@ namespace AchtungMod
 		Meta
 	}
 
+	public enum BreakLevel
+	{
+		None,
+		Minor,
+		Major,
+		AlmostExtreme,
+		Extreme
+	}
+
+	public enum HealthLevel
+	{
+		None,
+		ShouldBeTendedNow,
+		PrefersMedicalRest,
+		NeedsMedicalRest,
+		InPainShock
+	}
+
 	public class Settings : IExposable
 	{
 		public bool modActive = true;
 		public ModKey forceDraftKey = ModKey.Alt;
 		public ModKey ignoreMenuKey = ModKey.Alt;
 		public ModKey relativeMovementKey = ModKey.Shift;
+		public BreakLevel breakLevel = BreakLevel.AlmostExtreme;
+		public HealthLevel healthLevel = HealthLevel.InPainShock;
+		public float aggressiveness = 0.5f;
+		public bool debugPositions = false;
 
 		public void ExposeData()
 		{
@@ -29,12 +51,16 @@ namespace AchtungMod
 			Scribe_Values.LookValue<ModKey>(ref forceDraftKey, "ForceDraft", ModKey.Alt, true);
 			Scribe_Values.LookValue<ModKey>(ref ignoreMenuKey, "IgnoreMenu", ModKey.Alt, true);
 			Scribe_Values.LookValue<ModKey>(ref relativeMovementKey, "RelativeMovement", ModKey.Shift, true);
+			Scribe_Values.LookValue<BreakLevel>(ref breakLevel, "BreakLevel", BreakLevel.AlmostExtreme, true);
+			Scribe_Values.LookValue<HealthLevel>(ref healthLevel, "HealthLevel", HealthLevel.InPainShock, true);
+			Scribe_Values.LookValue<float>(ref aggressiveness, "Aggressiveness", 0.5f, true);
+			Scribe_Values.LookValue<bool>(ref debugPositions, "DebugPositions", false, true);
 		}
 
 		//
 
 		public static Settings instance = new Settings();
-		public static String settingsPath = Path.Combine(Path.GetDirectoryName(GenFilePaths.ModsConfigFilePath), "AchtungModSettings.xml");
+		public static string settingsPath = Path.Combine(Path.GetDirectoryName(GenFilePaths.ModsConfigFilePath), "AchtungModSettings.xml");
 
 		public static void Load()
 		{

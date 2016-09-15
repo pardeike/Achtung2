@@ -66,17 +66,18 @@ namespace AchtungMod
 			return false;
 		}
 
-		public static IEnumerable<IntVec3> CellsBetween(IntVec3 start, IntVec3 end)
+		// unused and replaced by xiaolin wu algorithm
+		public static IEnumerable<IntVec3> CellsBetween_Naive(IntVec3 start, IntVec3 end, bool excludeFirst = true)
 		{
 			HashSet<IntVec3> cells = new HashSet<IntVec3>();
 			int dx = Math.Sign(end.x - start.x);
-			for (int x = start.x; dx != 0 && x != end.x; x += dx)
+			for (int x = start.x + (excludeFirst ? dx : 0); dx != 0 && x != end.x; x += dx)
 			{
 				int z = (int)(GenMath.LerpDouble(start.x, end.x, start.z, end.z, x) + 0.5f);
 				cells.Add(new IntVec3(x, 0, z));
 			}
 			int dz = Math.Sign(end.z - start.z);
-			for (int z = start.z; dz != 0 && z != end.z; z += dz)
+			for (int z = start.z + (excludeFirst ? dz : 0); dz != 0 && z != end.z; z += dz)
 			{
 				int x = (int)(GenMath.LerpDouble(start.z, end.z, start.x, end.x, z) + 0.5f);
 				cells.Add(new IntVec3(x, 0, z));
@@ -112,25 +113,8 @@ namespace AchtungMod
 		public static IEnumerable<T> Do<T>(this IEnumerable<T> sequence, Action<T> action)
 		{
 			if (sequence == null) return null;
-			//bool logFirstException = true;
 			IEnumerator<T> enumerator = sequence.GetEnumerator();
 			while (enumerator.MoveNext()) action(enumerator.Current);
-			/*{
-				try
-				{
-					action(enumerator.Current);
-				}
-				catch (Exception ex)
-				{
-					if (logFirstException)
-					{
-						Log.Error("Iterating " + typeof(T) + ", element " + enumerator.Current + ", " + action + " cause exeception: " + ex);
-						Log.Error(ex.StackTrace);
-						logFirstException = false;
-					}
-				}
-			}
-			if (logFirstException == false) Log.Error("Exception context: " + Environment.StackTrace);*/
 			return sequence;
 		}
 
@@ -252,65 +236,89 @@ namespace AchtungMod
 			return vector2;
 		}
 
-		public static void ValueLabeled(this Listing_Standard listing, string label, object value, string tooltip = null)
+		public static void CheckboxEnhanced(this Listing_Standard listing, string name, ref bool value, string tooltip = null)
 		{
-			float lineHeight = Text.LineHeight;
-			Rect rect = listing.GetRect(lineHeight);
-			if (!tooltip.NullOrEmpty())
+			float startHeight = listing.CurHeight;
+
+			Text.Font = GameFont.Small;
+			GUI.color = Color.white;
+			listing.CheckboxLabeled((name + "Title").Translate(), ref value);
+
+			Text.Font = GameFont.Tiny;
+			listing.ColumnWidth -= 34;
+			GUI.color = Color.gray;
+			listing.Label((name + "Explained").Translate());
+			listing.ColumnWidth += 34;
+
+			Rect rect = listing.GetRect(0);
+			rect.height = listing.CurHeight - startHeight;
+			rect.y -= rect.height;
+			if (Mouse.IsOver(rect))
 			{
-				if (Mouse.IsOver(rect))
-				{
-					Widgets.DrawHighlight(rect);
-				}
-				TooltipHandler.TipRegion(rect, tooltip);
+				Widgets.DrawHighlight(rect);
+				if (!tooltip.NullOrEmpty()) TooltipHandler.TipRegion(rect, tooltip);
 			}
+
+			listing.Gap();
+		}
+
+		public static void ValueLabeled<T>(this Listing_Standard listing, string name, ref T value, string tooltip = null)
+		{
+			float startHeight = listing.CurHeight;
+
+			Rect rect = listing.GetRect(Text.LineHeight + listing.verticalSpacing);
+
+			Text.Font = GameFont.Small;
+			GUI.color = Color.white;
 
 			TextAnchor savedAnchor = Text.Anchor;
 
 			Text.Anchor = TextAnchor.MiddleLeft;
-			Widgets.Label(rect, label);
+			Widgets.Label(rect, (name + "Title").Translate());
 
 			Text.Anchor = TextAnchor.MiddleRight;
-			Widgets.Label(rect, value.ToString());
+			if (typeof(T).IsEnum)
+				Widgets.Label(rect, (typeof(T).Name + "Option" + value.ToString()).Translate());
+			else
+				Widgets.Label(rect, value.ToString());
 
 			Text.Anchor = savedAnchor;
 
-			listing.Gap(listing.verticalSpacing);
-		}
-
-		public static void ModKeyChoice(this Listing_Standard listing, String prefix, ref ModKey value)
-		{
-			float lineHeight = Text.LineHeight;
-			Rect rect = listing.GetRect(lineHeight);
-
-			TextAnchor savedAnchor = Text.Anchor;
-			Text.Anchor = TextAnchor.LowerCenter;
-
-			IEnumerable<ModKey> keys = Enum.GetValues(typeof(ModKey)).Cast<ModKey>();
-			rect.width = rect.width / keys.Count();
-
-			Vector3 vec3 = Gen.MouseMapPosVector3();
-			Vector2 pos = new Vector2(vec3.x, vec3.z);
-			for (int i = 0; i < keys.Count(); i++)
+			string key = name + "Explained";
+			if (key.CanTranslate())
 			{
-				ModKey val = keys.ElementAt(i);
-				if (Mouse.IsOver(rect) && Event.current.isMouse) value = val;
-
-				if (Mouse.IsOver(rect)) Widgets.DrawMenuSection(rect, false);
-				if (value == val)
-				{
-					GUI.color = Color.green;
-					Widgets.DrawHighlight(rect);
-					GUI.color = Color.white;
-				}
-				String label = (prefix + val).Translate();
-				Widgets.Label(rect, label);
-				rect.x += rect.width;
+				Text.Font = GameFont.Tiny;
+				listing.ColumnWidth -= 34;
+				GUI.color = Color.gray;
+				listing.Label(key.Translate());
+				listing.ColumnWidth += 34;
 			}
 
-			Text.Anchor = savedAnchor;
+			rect = listing.GetRect(0);
+			rect.height = listing.CurHeight - startHeight;
+			rect.y -= rect.height;
+			if (Mouse.IsOver(rect))
+			{
+				Widgets.DrawHighlight(rect);
+				if (!tooltip.NullOrEmpty()) TooltipHandler.TipRegion(rect, tooltip);
 
-			listing.Gap(listing.verticalSpacing);
+				if (Event.current.isMouse && Event.current.button == 0 && Event.current.type == EventType.MouseDown)
+				{
+					T[] keys = Enum.GetValues(typeof(T)).Cast<T>().ToArray();
+					for (int i = 0; i < keys.Length; i++)
+					{
+						T newValue = keys[(i + 1) % keys.Length];
+						if (keys[i].ToString() == value.ToString())
+						{
+							value = newValue;
+							break;
+						}
+					}
+					Event.current.Use();
+				}
+			}
+
+			listing.Gap();
 		}
 
 	}

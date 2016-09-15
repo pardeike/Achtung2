@@ -45,15 +45,17 @@ namespace AchtungMod
 			base.CanStart(pawn, clickPos);
 			if (pawn.workSettings.GetPriority(WorkTypeDefOf.Growing) == 0) return null;
 			TargetInfo cell = IntVec3.FromVector3(clickPos);
-			IEnumerable<IntVec3> cells = AllWorkAt(cell, pawn);
-			return (cells != null && cells.Count() > 0) ? new List<TargetInfo> { cell } : null;
+			IEnumerable<IntVec3> cells = AllWorkAt(cell, pawn, true);
+			IEnumerable<TargetInfo> result = (cells != null && cells.Count() > 0) ? new List<TargetInfo> { cell } : null;
+
+			return result;
 		}
 
-		private bool CanSowHere(IntVec3 cell, ThingDef def)
+		private bool CanSowHere(IntVec3 cell, ThingDef def, bool fastMode)
 		{
 			if (GenPlant.GrowthSeasonNow(cell) == false) return false;
-			if (pawn.CanReach(cell, PathEndMode.Touch, pawn.NormalMaxDanger()) == false) return false;
-			if (pawn.CanReserve(cell, 1) == false) return false;
+			if (fastMode == false && pawn.CanReach(cell, PathEndMode.Touch, pawn.NormalMaxDanger()) == false) return false;
+			if (fastMode == false && pawn.CanReserve(cell, 1) == false) return false;
 			float maxHarvestWork = 550;
 			bool failureCondition = cell.GetThingList().Any(t =>
 			{
@@ -67,7 +69,7 @@ namespace AchtungMod
 		}
 
 		// work in zone/room
-		public IEnumerable<IntVec3> AllWorkAt(TargetInfo target, Pawn pawn)
+		public IEnumerable<IntVec3> AllWorkAt(TargetInfo target, Pawn pawn, bool fastMode = false)
 		{
 			if (pawn.skills == null) return null;
 
@@ -75,26 +77,26 @@ namespace AchtungMod
 			if (room != null && room.IsHuge == false)
 			{
 				HashSet<IntVec3> growerCells = new HashSet<IntVec3>(Find.ListerBuildings.allBuildingsColonist
-					.Where(b =>
-					{
-						if (b == null || b.GetRoom() != room || b.Faction != pawn.Faction) return false;
+					 .Where(b =>
+					 {
+						 if (b == null || b.GetRoom() != room || b.Faction != pawn.Faction) return false;
 
-						IPlantToGrowSettable grower = b as IPlantToGrowSettable;
-						if (grower == null) return false;
+						 IPlantToGrowSettable grower = b as IPlantToGrowSettable;
+						 if (grower == null) return false;
 
-						if (grower.CanAcceptSowNow() == false) return false;
-						ThingDef def1 = grower.GetPlantDefToGrow();
-						if (def1 == null) return false;
+						 if (grower.CanAcceptSowNow() == false) return false;
+						 ThingDef def1 = grower.GetPlantDefToGrow();
+						 if (def1 == null) return false;
 
-						int growSkills1 = pawn.skills.GetSkill(SkillDefOf.Growing).level;
-						return (def1.plant.sowMinSkill <= 0 || growSkills1 >= def1.plant.sowMinSkill);
-					})
-					.Cast<IPlantToGrowSettable>()
-					.SelectMany(g =>
-					{
-						ThingDef def = g.GetPlantDefToGrow();
-						return ((Building)g).OccupiedRect().Cells.Where(c => CanSowHere(c, def));
-					}));
+						 int growSkills1 = pawn.skills.GetSkill(SkillDefOf.Growing).level;
+						 return (def1.plant.sowMinSkill <= 0 || growSkills1 >= def1.plant.sowMinSkill);
+					 })
+					 .Cast<IPlantToGrowSettable>()
+					 .SelectMany(g =>
+					 {
+						 ThingDef def = g.GetPlantDefToGrow();
+						 return ((Building)g).OccupiedRect().Cells.Where(c => CanSowHere(c, def, fastMode));
+					 }));
 
 				HashSet<IntVec3> zoneCells = new HashSet<IntVec3>();
 				HashSet<IntVec3> roomCells = new HashSet<IntVec3>(room.Cells);
@@ -113,8 +115,8 @@ namespace AchtungMod
 								if (def2.plant.sowMinSkill <= 0 || growSkills2 >= def2.plant.sowMinSkill)
 								{
 									zone.cells
-										.Where(c => CanSowHere(c, zone.GetPlantDefToGrow()))
-										.Do(c => zoneCells.Add(c));
+										 .Where(c => CanSowHere(c, zone.GetPlantDefToGrow(), fastMode))
+										 .Do(c => zoneCells.Add(c));
 								}
 							}
 						}
@@ -124,7 +126,7 @@ namespace AchtungMod
 				}
 
 				return zoneCells.Union(growerCells).Distinct()
-					.OrderBy(c => Math.Abs(c.x - pawn.Position.x) + Math.Abs(c.z - pawn.Position.z));
+					 .OrderBy(c => Math.Abs(c.x - pawn.Position.x) + Math.Abs(c.z - pawn.Position.z));
 			}
 
 			Zone_Growing outdoorZone = Find.ZoneManager.ZoneAt(target.Cell) as Zone_Growing;
@@ -137,18 +139,17 @@ namespace AchtungMod
 			if (def3.plant.sowMinSkill > 0 && growSkills3 < def3.plant.sowMinSkill) return null;
 
 			return outdoorZone.Cells
-				.Where(c => CanSowHere(c, outdoorZone.GetPlantDefToGrow()))
-				.OrderBy(c => Math.Abs(c.x - pawn.Position.x) + Math.Abs(c.z - pawn.Position.z));
+				 .Where(c => CanSowHere(c, outdoorZone.GetPlantDefToGrow(), fastMode))
+				 .OrderBy(c => Math.Abs(c.x - pawn.Position.x) + Math.Abs(c.z - pawn.Position.z));
 		}
 
 		public override TargetInfo FindNextWorkItem()
 		{
 			IEnumerable<IntVec3> cells = AllWorkAt(TargetA, pawn);
-			Controller.AddDebugPositions(cells);
 			if (cells == null || cells.Count() == 0) return null;
 			currentWorkCount = cells.Count();
 			if (totalWorkCount < currentWorkCount) totalWorkCount = currentWorkCount;
-			IntVec3 c = cells.FirstOrDefault();
+			IntVec3 c = cells.First();
 
 			Zone_Growing zone = Find.ZoneManager.ZoneAt(c) as Zone_Growing;
 			if (zone != null)
@@ -158,10 +159,10 @@ namespace AchtungMod
 			else
 			{
 				currentPlantDef = Find.ListerBuildings.allBuildingsColonist
-					.Where(b => b.OccupiedRect().Contains(c))
-					.Cast<IPlantToGrowSettable>()
-					.Select(b => b.GetPlantDefToGrow())
-					.FirstOrDefault();
+					 .Where(b => b.OccupiedRect().Contains(c))
+					 .Cast<IPlantToGrowSettable>()
+					 .Select(b => b.GetPlantDefToGrow())
+					 .FirstOrDefault();
 			}
 			return c;
 		}

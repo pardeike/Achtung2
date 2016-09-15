@@ -10,8 +10,6 @@ namespace AchtungMod
 {
 	public class Controller
 	{
-		public static bool debugging = true;
-
 		public IEnumerable<Colonist> colonists;
 		public Vector3 lineStart;
 		public Vector3 lineEnd;
@@ -24,17 +22,23 @@ namespace AchtungMod
 		public static bool debugPositionNeedsClear = true;
 		public static void AddDebugPositions(IEnumerable<ScoredPosition> pos)
 		{
-			if (debugging == false) return;
+			if (Settings.instance.debugPositions == false) return;
 			if (debugPositionNeedsClear) debugPositions = new HashSet<ScoredPosition>();
 			debugPositionNeedsClear = false;
 			if (pos != null) debugPositions.UnionWith(pos);
 		}
 		public static void AddDebugPositions(IEnumerable<IntVec3> vecs)
 		{
-			if (debugging == false) return;
+			if (Settings.instance.debugPositions == false) return;
 			if (debugPositionNeedsClear) debugPositions = new HashSet<ScoredPosition>();
 			debugPositionNeedsClear = false;
-			if (vecs != null) debugPositions.UnionWith(vecs.Select(v => new ScoredPosition(v, 1f)));
+			if (vecs != null) debugPositions.UnionWith(vecs.Select(v => new ScoredPosition(v)));
+		}
+		public static void ClearDebugPositions()
+		{
+			if (Settings.instance.debugPositions == false) return;
+			if (debugPositionNeedsClear) debugPositions = new HashSet<ScoredPosition>();
+			debugPositionNeedsClear = false;
 		}
 
 		public static Controller controller = null;
@@ -56,25 +60,24 @@ namespace AchtungMod
 		public void Initialize()
 		{
 			Messages.Message("AchtungOptions".Translate(), MessageSound.Benefit);
-			String state = Settings.instance.modActive ? "" : "AchtungOff".Translate();
+			string state = Settings.instance.modActive ? "" : "AchtungOff".Translate();
 			Messages.Message("AchtungVersion".Translate(Tools.Version, state), MessageSound.Silent);
 		}
 
 		public void InstallJobDefs()
 		{
 			new List<JobDef> {
-				new JobDriver_CleanRoom().MakeJobDef(),
-				new JobDriver_FightFire().MakeJobDef(),
-				new JobDriver_SowAll().MakeJobDef(),
-				new JobDriver_AutoCombat().MakeJobDef()
-			}
+					 new JobDriver_CleanRoom().MakeJobDef(),
+					 new JobDriver_FightFire().MakeJobDef(),
+					 new JobDriver_SowAll().MakeJobDef(),
+					 new JobDriver_AutoCombat().MakeJobDef()
+				}
 			.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, def => DefDatabase<JobDef>.Add(def));
 		}
 
-		public IEnumerable<Colonist> CreateColonists(bool forceDraft)
+		public IEnumerable<Colonist> GetSelectedColonists(bool forceDraft)
 		{
 			List<Colonist> temp = new List<Colonist>();
-			// the following line cannot be done using .Select() !
 			foreach (Pawn tempPawn in Tools.UserSelectedAndReadyPawns()) temp.Add(new Colonist(tempPawn, forceDraft));
 			return temp;
 		}
@@ -88,7 +91,7 @@ namespace AchtungMod
 				relativeMovement = Tools.IsModKeyPressed(Settings.instance.relativeMovementKey);
 
 				bool forceDraft = Tools.IsModKeyPressed(Settings.instance.forceDraftKey);
-				colonists = CreateColonists(forceDraft);
+				colonists = GetSelectedColonists(forceDraft);
 				if (colonists.Count() > 0)
 				{
 					bool ignoreMenu = Tools.IsModKeyPressed(Settings.instance.ignoreMenuKey);
@@ -167,13 +170,15 @@ namespace AchtungMod
 			IEnumerable<TargetInfo> targets = driver.CanStart(pawn, clickPos);
 			if (targets != null)
 			{
+				List<Job> existingJobs = driver.SameJobTypesOngoing();
 				targets.Do(target =>
 				{
 					Action action = delegate
 					{
 						driver.StartJob(pawn, target);
 					};
-					options.Add(new FloatMenuOption(driver.GetLabel(), action, MenuOptionPriority.Low));
+					string suffix = existingJobs.Count() > 0 ? " " + ("AlreadyDoing".Translate(existingJobs.Count() + 1)) : "";
+					options.Add(new FloatMenuOption(driver.GetLabel() + suffix, action, MenuOptionPriority.Low));
 				});
 			}
 		}
@@ -233,13 +238,16 @@ namespace AchtungMod
 		{
 			if (Settings.instance.modActive == false) return;
 
-			if (Find.Selector.SelectedObjects.Count() == 0) debugPositions = new HashSet<ScoredPosition>();
-			if (debugPositions.Count() > 0)
+			if (Settings.instance.debugPositions)
 			{
-				float min = debugPositions.Min(sp => sp.score);
-				float max = debugPositions.Max(sp => sp.score);
-				debugPositions.Do(sp => Tools.DebugPosition(sp.v.ToVector3(), new Color(1f, 0f, 0f, GenMath.LerpDouble(min, max, 0.1f, 0.8f, sp.score))));
-				debugPositionNeedsClear = true;
+				// if (Find.Selector.SelectedObjects.Count() == 0) debugPositions = new HashSet<ScoredPosition>();
+				if (debugPositions.Count() > 0)
+				{
+					float min = debugPositions.Min(sp => sp.score);
+					float max = debugPositions.Max(sp => sp.score);
+					debugPositions.Do(sp => Tools.DebugPosition(sp.v.ToVector3(), new Color(1f, 0f, 0f, GenMath.LerpDouble(min, max, 0.1f, 0.8f, sp.score))));
+					debugPositionNeedsClear = true;
+				}
 			}
 
 			if (isDragging)
@@ -321,12 +329,12 @@ namespace AchtungMod
 			HashSet<Projectile> activeProjectiles = new HashSet<Projectile>();
 
 			Find.MapPawns.AllPawnsSpawned
-				.Where(p => p.Spawned == true && p.Destroyed == false && p.Downed == false && p.Dead == false)
-				.DoIf(p => p.equipment != null && p.equipment.Primary != null, p =>
-				{
-					ThingDef def = p.equipment.PrimaryEq.PrimaryVerb.verbProps.projectileDef;
-					if (def != null) activeProjectiles.UnionWith(Find.ListerThings.ThingsOfDef(def).Cast<Projectile>());
-				});
+				 .Where(p => p.Spawned == true && p.Destroyed == false && p.Downed == false && p.Dead == false)
+				 .DoIf(p => p.equipment != null && p.equipment.Primary != null, p =>
+				 {
+					 ThingDef def = p.equipment.PrimaryEq.PrimaryVerb.verbProps.projectileDef;
+					 if (def != null) activeProjectiles.UnionWith(Find.ListerThings.ThingsOfDef(def).Cast<Projectile>());
+				 });
 
 			Dictionary<Projectile, ProjectileInfo> remaining = new Dictionary<Projectile, ProjectileInfo>();
 			projectiles.Keys.DoIf(p => activeProjectiles.Contains(p), p => remaining.Add(p, projectiles[p]));

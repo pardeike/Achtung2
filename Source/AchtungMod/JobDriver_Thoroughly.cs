@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 using UnityEngine;
+using RimWorld;
 
 namespace AchtungMod
 {
@@ -59,10 +60,22 @@ namespace AchtungMod
 			return null;
 		}
 
+		public List<Job> SameJobTypesOngoing()
+		{
+			List<Job> jobs = new List<Job>();
+			if (pawn.jobs == null) return jobs;
+			JobQueue queue = pawn.jobs.jobQueue;
+			if (queue == null) return jobs;
+			for (int i = -1; i < queue.Count; i++)
+			{
+				Job job = i == -1 && pawn.CurJob != null ? pawn.CurJob : queue[i];
+				if (job.def.driverClass.IsInstanceOfType(this)) jobs.Add(job);
+			}
+			return jobs;
+		}
+
 		public virtual void StartJob(Pawn pawn, TargetInfo target)
 		{
-			// pawn.jobs.debugLog = true;
-
 			Job job = new Job(MakeJobDef(), target);
 			job.playerForced = true;
 			pawn.jobs.StartJob(job, JobCondition.InterruptForced, null, true, true, null);
@@ -74,7 +87,7 @@ namespace AchtungMod
 			return (totalWorkCount - currentWorkCount) / totalWorkCount;
 		}
 
-		public virtual void UpdateWorkLocations()
+		public virtual void UpdateVerbAndWorkLocations()
 		{
 		}
 
@@ -112,20 +125,64 @@ namespace AchtungMod
 				(currentItem.Cell.x == 0 && currentItem.Cell.z == 0);
 		}
 
+		public Func<bool> GetPawnBreakLevel()
+		{
+			MentalBreaker mb = pawn.mindState.mentalBreaker;
+			switch (Settings.instance.breakLevel)
+			{
+				case BreakLevel.Minor:
+					return () => mb.BreakMinorIsImminent;
+				case BreakLevel.Major:
+					return () => mb.BreakMajorIsImminent;
+				case BreakLevel.AlmostExtreme:
+					return () => mb.BreakExtremeIsApproaching;
+				case BreakLevel.Extreme:
+					return () => mb.BreakExtremeIsImminent;
+			}
+			return () => false;
+		}
+
+		public Func<bool> GetPawnHealthLevel()
+		{
+			Pawn_HealthTracker ht = pawn.health;
+			switch (Settings.instance.healthLevel)
+			{
+				case HealthLevel.ShouldBeTendedNow:
+					return () => ht.ShouldBeTendedNow || ht.ShouldDoSurgeryNow;
+				case HealthLevel.PrefersMedicalRest:
+					return () => ht.PrefersMedicalRest;
+				case HealthLevel.NeedsMedicalRest:
+					return () => ht.NeedsMedicalRest;
+				case HealthLevel.InPainShock:
+					return () => ht.InPainShock;
+			}
+			return () => false;
+		}
+
 		public virtual void CheckJobCancelling()
 		{
-			if (pawn.mindState.mentalBreaker.BreakMajorIsImminent) // BreakMinorIsImminent, BreakMajorIsImminent, BreakExtremeIsApproaching, BreakExtremeIsImminent
+			if (pawn.Dead || pawn.Downed || pawn.HasAttachment(ThingDefOf.Fire))
 			{
-				EndJobWith(JobCondition.InterruptOptional);
-				String jobName = (GetPrefix() + "Label").Translate();
-				Find.LetterStack.ReceiveLetter(new Letter("JobInterruptedLabel".Translate(jobName), "JobInterruptedBreakdown".Translate(pawn.NameStringShort), LetterType.BadNonUrgent, pawn));
+				Find.PawnDestinationManager.UnreserveAllFor(pawn);
+				EndJobWith(JobCondition.Incompletable);
 				return;
 			}
 
-			if (pawn.health.InPainShock) // [ShouldBeTendedNow, ShouldDoSurgeryNow], PrefersMedicalRest, NeedsMedicalRest, InPainShock
+			if (GetPawnBreakLevel()())
 			{
-				EndJobWith(JobCondition.InterruptOptional);
-				String jobName = (GetPrefix() + "Label").Translate();
+				Find.PawnDestinationManager.UnreserveAllFor(pawn);
+				EndJobWith(JobCondition.Incompletable);
+				string jobName = (GetPrefix() + "Label").Translate();
+				string label = "JobInterruptedLabel".Translate(jobName);
+				Find.LetterStack.ReceiveLetter(new Letter(label, "JobInterruptedBreakdown".Translate(pawn.NameStringShort), LetterType.BadNonUrgent, pawn));
+				return;
+			}
+
+			if (GetPawnHealthLevel()())
+			{
+				Find.PawnDestinationManager.UnreserveAllFor(pawn);
+				EndJobWith(JobCondition.Incompletable);
+				string jobName = (GetPrefix() + "Label").Translate();
 				Find.LetterStack.ReceiveLetter(new Letter("JobInterruptedLabel".Translate(jobName), "JobInterruptedBadHealth".Translate(pawn.NameStringShort), LetterType.BadNonUrgent, pawn));
 				return;
 			}
@@ -134,7 +191,7 @@ namespace AchtungMod
 		public virtual void TickAction()
 		{
 			CheckJobCancelling();
-			UpdateWorkLocations();
+			UpdateVerbAndWorkLocations();
 
 			if (CurrentItemInvalid())
 			{

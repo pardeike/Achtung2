@@ -1,8 +1,9 @@
-﻿using Verse;
+﻿using System;
+using Verse;
 
 namespace AchtungMod
 {
-	public class ScoredPosition
+	public class ScoredPosition : IComparable
 	{
 		public IntVec3 v;
 		public float score;
@@ -23,6 +24,17 @@ namespace AchtungMod
 		{
 			score += s * factor;
 			return this;
+		}
+
+		public int CompareTo(object obj)
+		{
+			if (obj == this) return 0;
+			return score.CompareTo((obj as ScoredPosition).score);
+		}
+
+		public static Func<ScoredPosition, bool> EqualsToFunction(IntVec3 pos)
+		{
+			return (sp) => sp.v == pos;
 		}
 	}
 }

@@ -26,9 +26,9 @@ namespace AchtungMod
 			return canFight ? new List<TargetInfo> { cell } : null;
 		}
 
-		public override void UpdateWorkLocations()
+		public override void UpdateVerbAndWorkLocations()
 		{
-			workLocations.Do(pos =>
+			workLocations.ToList().Do(pos =>
 			{
 				if (Find.ThingGrid.CellContains(pos, ThingDefOf.Fire) == false) workLocations.Remove(pos);
 				GenAdj.CellsAdjacent8Way(new TargetInfo(pos))
@@ -42,7 +42,6 @@ namespace AchtungMod
 
 		public override TargetInfo FindNextWorkItem()
 		{
-			Controller.AddDebugPositions(workLocations);
 			return workLocations
 				.OrderBy(loc => Math.Abs(loc.x - pawn.Position.x) + Math.Abs(loc.z - pawn.Position.z))
 				.Select(loc => Find.ThingGrid.ThingAt(loc, ThingDefOf.Fire) as Fire)
