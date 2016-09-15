@@ -96,7 +96,7 @@ Without feedback, this mod would have never come so far. So please, send me feed
 
 ###### Are there any videos showing Achtung! in action?
 
-Yes, here's a playlist: https://www.youtube.com/playlist?list=PLD-NUF0yC-fI6MooxYA1cPO7hyWZKndmi
+Yes, here's a youtube playlist: http://tinyurl.com/achtungmod
 
 ###### Does this alter my save files?
 
@@ -112,7 +112,7 @@ It's german for "Attention!" and used in the military as a command to line up so
 
 ###### Why do I need Auto Combat? Isn't this just the auto response thing already in the game?
 
-Not at all. For example: Once you get a raid or siege you cannot auto respond to it. First, those raiders are usually out of sight and second even if you get your colonists there they are usually drafted which means that they will just stand still once they're done.
+Not at all. For example: Once you get a raid or siege you cannot auto respond to it. First, those raiders are usually out of sight and second even if you get your colonists there they are usually drafted which means that they will just stand still once they're done. All this and a super smart positioning system will beat the living hell out of the build in auto response.
 
 ###### I think this should work different/better. Are you open for changes or improvement requests?
 
