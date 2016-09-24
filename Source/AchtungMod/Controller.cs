@@ -5,6 +5,8 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using System.Reflection;
+using Verse.Sound;
 
 namespace AchtungMod
 {
@@ -95,7 +97,10 @@ namespace AchtungMod
 				if (colonists.Count() > 0)
 				{
 					bool ignoreMenu = Tools.IsModKeyPressed(Settings.instance.ignoreMenuKey);
-					if (colonists.Count() == 1 && ignoreMenu == false)
+
+					// old code that plays it safe by calling original context menu for a single colonist
+					//
+					/*if (colonists.Count() == 1 && ignoreMenu == false)
 					{
 						IEnumerable<FloatMenuOption> choices = FloatMenuMakerMap.ChoicesAtFor(where, colonists.First().pawn);
 						if (choices.Count() > 0)
@@ -103,7 +108,7 @@ namespace AchtungMod
 							// don't overwrite existing floating menu
 							return;
 						}
-					}
+					}*/
 
 					// build multi menu from existing commands
 					MultiActions actions = new MultiActions(colonists, where);
@@ -128,6 +133,10 @@ namespace AchtungMod
 
 					isDragging = true;
 					Event.current.Use();
+				}
+				else
+				{
+					TryCopyElement(where);
 				}
 			}
 		}
@@ -162,6 +171,57 @@ namespace AchtungMod
 
 				Event.current.Use();
 			}
+		}
+
+		public bool TryCopyElement(Vector3 where)
+		{
+			BuildableDef buildDef = null;
+			ThingDef thingDef = null;
+
+			Thing thing = Find.ThingGrid.ThingAt<Building>(where.ToIntVec3());
+			if (thing != null)
+			{
+				buildDef = thing.def;
+				thingDef = thing.Stuff;
+			}
+			else
+			{
+				Blueprint_Build blueprint = Find.ThingGrid.ThingAt<Blueprint_Build>(where.ToIntVec3());
+				if (blueprint != null)
+				{
+					thing = blueprint;
+					buildDef = blueprint.def.entityDefToBuild;
+					thingDef = blueprint.stuffToUse;
+				}
+			}
+
+			if (thing != null && buildDef != null)
+			{
+				Designator_Build designator = DefDatabase<DesignationCategoryDef>.AllDefs
+					.SelectMany(catdef => catdef.ResolvedAllowedDesignators)
+					.Where(d => d is Designator_Build && (d as Designator_Build).PlacingDef == buildDef)
+					.Cast<Designator_Build>()
+					.FirstOrDefault();
+				if (designator != null)
+				{
+					Find.Selector.ClearSelection();
+					Find.Selector.Select(thing, true, true);
+
+					SoundDefOf.SelectDesignator.PlayOneShotOnCamera();
+					designator.SetStuffDef(thingDef);
+					DesignatorManager.Select(designator);
+
+					Find.MainTabsRoot.SetCurrentTab(MainTabDefOf.Inspect, true);
+
+					FieldInfo placingRot = designator.GetType().GetField("placingRot", BindingFlags.Instance | BindingFlags.NonPublic);
+					if (placingRot != null) placingRot.SetValue(designator, thing.Rotation);
+
+					Event.current.Use();
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		public void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType)

@@ -77,15 +77,15 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		BuildVersion_ReplaceNonNumerics = False
-		BuildVersion_UseUniversalClock = False
-		BuildVersion_UseGlobalSettings = False
-		BuildVersion_UpdateFileVersion = False
-		BuildVersion_UpdateAssemblyVersion = False
-		BuildVersion_BuildVersioningStyle = None.None.None.None
-		BuildVersion_DetectChanges = False
-		BuildVersion_ConfigurationName = Any
-		BuildVersion_IncrementBeforeBuild = False
 		BuildVersion_StartDate = 2000/1/1
+		BuildVersion_IncrementBeforeBuild = False
+		BuildVersion_ConfigurationName = Any
+		BuildVersion_DetectChanges = False
+		BuildVersion_BuildVersioningStyle = None.None.None.None
+		BuildVersion_UpdateAssemblyVersion = False
+		BuildVersion_UpdateFileVersion = False
+		BuildVersion_UseGlobalSettings = False
+		BuildVersion_UseUniversalClock = False
+		BuildVersion_ReplaceNonNumerics = False
 	EndGlobalSection
 EndGlobal

@@ -156,27 +156,22 @@ namespace AchtungMod
 			return pawn.drafter.Drafted;
 		}
 
-		public static bool SetDraftStatus(Pawn pawn, bool drafted, bool fake = true)
+		public static bool SetDraftStatus(Pawn pawn, bool drafted)
 		{
 			bool previousStatus = GetDraftingStatus(pawn);
-			if (pawn.drafter.Drafted != drafted)
+			if (previousStatus != drafted)
 			{
-				if (fake) // we don't use the indirect method because it has lots of side effects
+				// we don't use the indirect method because it has lots of side effects
+				//
+				DraftStateHandler draftHandler = pawn.drafter.draftStateHandler;
+				FieldInfo draftHandlerField = typeof(DraftStateHandler).GetField("draftedInt", BindingFlags.NonPublic | BindingFlags.Instance);
+				if (draftHandlerField == null)
 				{
-					DraftStateHandler draftHandler = pawn.drafter.draftStateHandler;
-					FieldInfo draftHandlerField = typeof(DraftStateHandler).GetField("draftedInt", BindingFlags.NonPublic | BindingFlags.Instance);
-					if (draftHandlerField == null)
-					{
-						Log.Error("No field 'draftedInt' in DraftStateHandler");
-					}
-					else
-					{
-						draftHandlerField.SetValue(draftHandler, drafted);
-					}
+					Log.Error("No field 'draftedInt' in DraftStateHandler");
 				}
 				else
 				{
-					pawn.drafter.Drafted = drafted;
+					draftHandlerField.SetValue(draftHandler, drafted);
 				}
 			}
 			return previousStatus;
@@ -184,7 +179,7 @@ namespace AchtungMod
 
 		public static bool ForceDraft(Pawn pawn, bool drafted)
 		{
-			bool oldState = SetDraftStatus(pawn, drafted, false);
+			bool oldState = SetDraftStatus(pawn, drafted);
 			return oldState != drafted;
 		}
 

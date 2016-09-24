@@ -33,7 +33,9 @@ namespace AchtungMod
 
 		public string EnhancedLabel(IEnumerable<Colonist> colonists)
 		{
-			string suffix = (colonists.Count() == 1) ? " (" + colonists.First().pawn.NameStringShort + ")" : " (" + colonists.Count() + "x)";
+			string suffix = "";
+			if (colonists != null)
+				suffix = (colonists.Count() == 1) ? " (" + colonists.First().pawn.NameStringShort + ")" : " (" + colonists.Count() + "x)";
 			return option.Label + suffix;
 		}
 
