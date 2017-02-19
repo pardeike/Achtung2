@@ -131,5 +131,4 @@ Free. As in free beer. Copy, learn and be respectful.
 Andreas Pardeike  
 Email: andreas@pardeike.net  
 Steam: pardeike  
-Twitter: @pardeike  
-Cell: +46722120680
+Twitter: @pardeike
