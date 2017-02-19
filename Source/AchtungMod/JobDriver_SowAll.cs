@@ -37,27 +37,28 @@ namespace AchtungMod
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Defs.LookDef<ThingDef>(ref this.currentPlantDef, "currentPlantDef");
+			// TODO: check if this has to be done somehow
+			// Scribe_Values.LookValue<Faction>(ref this.faction, "faction", null, false);
 		}
 
-		public override IEnumerable<TargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
+		public override IEnumerable<LocalTargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
 		{
 			base.CanStart(pawn, clickPos);
 			if (pawn.workSettings.GetPriority(WorkTypeDefOf.Growing) == 0) return null;
-			TargetInfo cell = IntVec3.FromVector3(clickPos);
+			LocalTargetInfo cell = IntVec3.FromVector3(clickPos);
 			IEnumerable<IntVec3> cells = AllWorkAt(cell, pawn, true);
-			IEnumerable<TargetInfo> result = (cells != null && cells.Count() > 0) ? new List<TargetInfo> { cell } : null;
+			IEnumerable<LocalTargetInfo> result = (cells != null && cells.Count() > 0) ? new List<LocalTargetInfo> { cell } : null;
 
 			return result;
 		}
 
 		private bool CanSowHere(IntVec3 cell, ThingDef def, bool fastMode)
 		{
-			if (GenPlant.GrowthSeasonNow(cell) == false) return false;
+			if (GenPlant.GrowthSeasonNow(cell, pawn.Map) == false) return false;
 			if (fastMode == false && pawn.CanReach(cell, PathEndMode.Touch, pawn.NormalMaxDanger()) == false) return false;
 			if (fastMode == false && pawn.CanReserve(cell, 1) == false) return false;
 			float maxHarvestWork = 550;
-			bool failureCondition = cell.GetThingList().Any(t =>
+			bool failureCondition = cell.GetThingList(pawn.Map).Any(t =>
 			{
 				if (t.def == def) return true;
 				if (((t is Blueprint) || (t is Frame)) && (t.Faction == pawn.Faction)) return true;
@@ -69,14 +70,14 @@ namespace AchtungMod
 		}
 
 		// work in zone/room
-		public IEnumerable<IntVec3> AllWorkAt(TargetInfo target, Pawn pawn, bool fastMode = false)
+		public IEnumerable<IntVec3> AllWorkAt(LocalTargetInfo target, Pawn pawn, bool fastMode = false)
 		{
 			if (pawn.skills == null) return null;
 
-			Room room = RoomQuery.RoomAt(target.Cell);
+			Room room = RoomQuery.RoomAt(target.Cell, pawn.Map);
 			if (room != null && room.IsHuge == false)
 			{
-				HashSet<IntVec3> growerCells = new HashSet<IntVec3>(Find.ListerBuildings.allBuildingsColonist
+				HashSet<IntVec3> growerCells = new HashSet<IntVec3>(Find.VisibleMap.listerBuildings.allBuildingsColonist
 					 .Where(b =>
 					 {
 						 if (b == null || b.GetRoom() != room || b.Faction != pawn.Faction) return false;
@@ -88,7 +89,7 @@ namespace AchtungMod
 						 ThingDef def1 = grower.GetPlantDefToGrow();
 						 if (def1 == null) return false;
 
-						 int growSkills1 = pawn.skills.GetSkill(SkillDefOf.Growing).level;
+						 int growSkills1 = pawn.skills.GetSkill(SkillDefOf.Growing).Level;
 						 return (def1.plant.sowMinSkill <= 0 || growSkills1 >= def1.plant.sowMinSkill);
 					 })
 					 .Cast<IPlantToGrowSettable>()
@@ -103,7 +104,7 @@ namespace AchtungMod
 				while (roomCells.Count > 0)
 				{
 					IntVec3 cell = roomCells.First();
-					Zone_Growing zone = Find.ZoneManager.ZoneAt(cell) as Zone_Growing;
+					Zone_Growing zone = Find.VisibleMap.zoneManager.ZoneAt(cell) as Zone_Growing;
 					if (zone != null && zone.cells.Count > 0)
 					{
 						if (zone.CanAcceptSowNow() && zone.allowSow)
@@ -111,7 +112,7 @@ namespace AchtungMod
 							ThingDef def2 = zone.GetPlantDefToGrow();
 							if (def2 != null)
 							{
-								int growSkills2 = pawn.skills.GetSkill(SkillDefOf.Growing).level;
+								int growSkills2 = pawn.skills.GetSkill(SkillDefOf.Growing).Level;
 								if (def2.plant.sowMinSkill <= 0 || growSkills2 >= def2.plant.sowMinSkill)
 								{
 									zone.cells
@@ -129,13 +130,13 @@ namespace AchtungMod
 					 .OrderBy(c => Math.Abs(c.x - pawn.Position.x) + Math.Abs(c.z - pawn.Position.z));
 			}
 
-			Zone_Growing outdoorZone = Find.ZoneManager.ZoneAt(target.Cell) as Zone_Growing;
+			Zone_Growing outdoorZone = Find.VisibleMap.zoneManager.ZoneAt(target.Cell) as Zone_Growing;
 			if (outdoorZone == null || outdoorZone.cells.Count == 0) return null;
 			if (outdoorZone.CanAcceptSowNow() == false || outdoorZone.allowSow == false) return null;
 			ThingDef def3 = outdoorZone.GetPlantDefToGrow();
 			if (def3 == null) return null;
 
-			int growSkills3 = pawn.skills.GetSkill(SkillDefOf.Growing).level;
+			int growSkills3 = pawn.skills.GetSkill(SkillDefOf.Growing).Level;
 			if (def3.plant.sowMinSkill > 0 && growSkills3 < def3.plant.sowMinSkill) return null;
 
 			return outdoorZone.Cells
@@ -143,7 +144,7 @@ namespace AchtungMod
 				 .OrderBy(c => Math.Abs(c.x - pawn.Position.x) + Math.Abs(c.z - pawn.Position.z));
 		}
 
-		public override TargetInfo FindNextWorkItem()
+		public override LocalTargetInfo FindNextWorkItem()
 		{
 			IEnumerable<IntVec3> cells = AllWorkAt(TargetA, pawn);
 			if (cells == null || cells.Count() == 0) return null;
@@ -151,14 +152,14 @@ namespace AchtungMod
 			if (totalWorkCount < currentWorkCount) totalWorkCount = currentWorkCount;
 			IntVec3 c = cells.First();
 
-			Zone_Growing zone = Find.ZoneManager.ZoneAt(c) as Zone_Growing;
+			Zone_Growing zone = Find.VisibleMap.zoneManager.ZoneAt(c) as Zone_Growing;
 			if (zone != null)
 			{
 				currentPlantDef = zone.GetPlantDefToGrow();
 			}
 			else
 			{
-				currentPlantDef = Find.ListerBuildings.allBuildingsColonist
+				currentPlantDef = Find.VisibleMap.listerBuildings.allBuildingsColonist
 					 .Where(b => b.OccupiedRect().Contains(c))
 					 .Cast<IPlantToGrowSettable>()
 					 .Select(b => b.GetPlantDefToGrow())
@@ -203,7 +204,7 @@ namespace AchtungMod
 							{
 								t.SetForbidden(true, true);
 							}
-							GenPlace.TryPlaceThing(t, pawn.Position, ThingPlaceMode.Near, null);
+							GenPlace.TryPlaceThing(t, pawn.Position, pawn.Map, ThingPlaceMode.Near, null);
 							pawn.records.Increment(RecordDefOf.PlantsHarvested);
 						}
 					}
@@ -216,7 +217,7 @@ namespace AchtungMod
 
 		public IEnumerable<Plant> PlantsToCutFirstAt(IntVec3 cell)
 		{
-			return cell.GetThingList().Where(p => p is Plant && p.def != currentPlantDef && p.def.BlockPlanting && p.Destroyed == false).Cast<Plant>();
+			return cell.GetThingList(pawn.Map).Where(p => p is Plant && p.def != currentPlantDef && p.def.BlockPlanting && p.Destroyed == false).Cast<Plant>();
 		}
 
 		public override bool DoWorkToItem()
@@ -231,7 +232,7 @@ namespace AchtungMod
 			Plant plant = currentItem.Thing as Plant;
 			if (currentItem.Thing == null)
 			{
-				currentItem = new TargetInfo(GenSpawn.Spawn(currentPlantDef, currentItem.Cell));
+				currentItem = new LocalTargetInfo(GenSpawn.Spawn(currentPlantDef, currentItem.Cell, pawn.Map));
 				plant = (Plant)currentItem.Thing;
 				plant.Growth = 0f;
 				plant.sown = true;
@@ -245,7 +246,7 @@ namespace AchtungMod
 			{
 				subCounter = 0f;
 				plant.Growth = 0.05f;
-				Find.MapDrawer.MapMeshDirty(plant.Position, MapMeshFlag.Things);
+				Find.VisibleMap.mapDrawer.MapMeshDirty(plant.Position, MapMeshFlag.Things);
 				pawn.records.Increment(RecordDefOf.PlantsSown);
 				return true;
 			}
@@ -255,7 +256,7 @@ namespace AchtungMod
 
 		public override string GetReport()
 		{
-			Zone_Growing zone = Find.ZoneManager.ZoneAt(TargetA.Cell) as Zone_Growing;
+			Zone_Growing zone = Find.VisibleMap.zoneManager.ZoneAt(TargetA.Cell) as Zone_Growing;
 			string name = currentPlantDef == null ? "" : " " + currentPlantDef.label;
 			return (GetPrefix() + "Report").Translate(new object[] { name, Math.Floor(Progress() * 100f) + "%" });
 		}

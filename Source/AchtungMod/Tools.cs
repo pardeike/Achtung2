@@ -22,6 +22,8 @@ namespace AchtungMod
 		public static Material lineMaterial;
 		public static string goHereLabel;
 
+		public static FieldInfo draftHandlerField = typeof(Pawn_DraftController).GetField("draftedInt", BindingFlags.NonPublic | BindingFlags.Instance);
+
 		private static string _version = null;
 		public static string Version
 		{
@@ -138,7 +140,7 @@ namespace AchtungMod
 					pawn.drafter != null
 					&& pawn.IsColonistPlayerControlled
 					&& pawn.Downed == false
-					&& pawn.drafter.CanTakeOrderedJob()
+					&& pawn.jobs.CanTakeOrderedJob()
 				);
 		}
 
@@ -163,16 +165,8 @@ namespace AchtungMod
 			{
 				// we don't use the indirect method because it has lots of side effects
 				//
-				DraftStateHandler draftHandler = pawn.drafter.draftStateHandler;
-				FieldInfo draftHandlerField = typeof(DraftStateHandler).GetField("draftedInt", BindingFlags.NonPublic | BindingFlags.Instance);
-				if (draftHandlerField == null)
-				{
-					Log.Error("No field 'draftedInt' in DraftStateHandler");
-				}
-				else
-				{
-					draftHandlerField.SetValue(draftHandler, drafted);
-				}
+				if (draftHandlerField != null)
+					draftHandlerField.SetValue(pawn.drafter, drafted);
 			}
 			return previousStatus;
 		}

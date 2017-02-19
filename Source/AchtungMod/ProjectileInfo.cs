@@ -8,9 +8,9 @@ namespace AchtungMod
 		public Thing equipment;
 		public Thing launcher;
 		public Vector3 origin;
-		public TargetInfo targ;
+		public LocalTargetInfo targ;
 
-		public ProjectileInfo(Thing launcher, Vector3 origin, TargetInfo targ, Thing equipment)
+		public ProjectileInfo(Thing launcher, Vector3 origin, LocalTargetInfo targ, Thing equipment)
 		{
 			this.launcher = launcher;
 			this.origin = origin;

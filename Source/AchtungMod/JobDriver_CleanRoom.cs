@@ -27,13 +27,14 @@ namespace AchtungMod
 			return "CleanRoom";
 		}
 
-		public override IEnumerable<TargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
+		public override IEnumerable<LocalTargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
 		{
 			base.CanStart(pawn, clickPos);
-			if (pawn.workSettings.GetPriority(WorkTypeDefOf.Cleaning) == 0) return null;
-			TargetInfo cell = IntVec3.FromVector3(clickPos);
+			var cleanDef = DefDatabase<WorkTypeDef>.GetNamed("Cleaning");
+			if (pawn.workSettings.GetPriority(cleanDef) == 0) return null;
+			LocalTargetInfo cell = IntVec3.FromVector3(clickPos);
 			RoomInfo info = WorkInfoAt(pawn, cell);
-			return (info.valid && info.room != null) ? new List<TargetInfo> { cell } : null;
+			return (info.valid && info.room != null) ? new List<LocalTargetInfo> { cell } : null;
 		}
 
 		// filth in room
@@ -46,15 +47,15 @@ namespace AchtungMod
 		}
 
 		// room info
-		public RoomInfo WorkInfoAt(Pawn pawn, TargetInfo target)
+		public RoomInfo WorkInfoAt(Pawn pawn, LocalTargetInfo target)
 		{
-			Room room = RoomQuery.RoomAt(target.Cell);
+			Room room = RoomQuery.RoomAt(target.Cell, pawn.Map);
 			if (room == null || room.IsHuge) return new RoomInfo(room, false);
 			if (AllWorkInRoom(room, pawn).Count() == 0) return new RoomInfo(room, false);
 			return new RoomInfo(room, true);
 		}
 
-		public override TargetInfo FindNextWorkItem()
+		public override LocalTargetInfo FindNextWorkItem()
 		{
 			RoomInfo info = WorkInfoAt(pawn, TargetA);
 			if (info.valid == false) return null;
@@ -86,7 +87,8 @@ namespace AchtungMod
 		protected override IEnumerable<Toil> MakeNewToils()
 		{
 			Toil toil = base.MakeNewToils().First();
-			toil.WithEffect("Clean", TargetIndex.A);
+			toil.WithEffect(EffecterDefOf.Clean, TargetIndex.A);
+
 			yield return toil;
 		}
 	}

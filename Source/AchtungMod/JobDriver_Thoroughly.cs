@@ -10,7 +10,7 @@ namespace AchtungMod
 	public abstract class JobDriver_Thoroughly : JobDriver
 	{
 		public HashSet<IntVec3> workLocations = null;
-		public TargetInfo currentItem = null;
+		public LocalTargetInfo currentItem = null;
 		public bool isMoving = false;
 		public float subCounter = 0;
 		public float currentWorkCount = -1f;
@@ -54,7 +54,7 @@ namespace AchtungMod
 			Scribe_Values.LookValue<float>(ref this.totalWorkCount, "totalWorkCount", -1f, false);
 		}
 
-		public virtual IEnumerable<TargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
+		public virtual IEnumerable<LocalTargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
 		{
 			this.pawn = pawn;
 			return null;
@@ -74,7 +74,7 @@ namespace AchtungMod
 			return jobs;
 		}
 
-		public virtual void StartJob(Pawn pawn, TargetInfo target)
+		public virtual void StartJob(Pawn pawn, LocalTargetInfo target)
 		{
 			Job job = new Job(MakeJobDef(), target);
 			job.playerForced = true;
@@ -91,7 +91,7 @@ namespace AchtungMod
 		{
 		}
 
-		public virtual TargetInfo FindNextWorkItem()
+		public virtual LocalTargetInfo FindNextWorkItem()
 		{
 			return null;
 		}
@@ -144,17 +144,16 @@ namespace AchtungMod
 
 		public Func<bool> GetPawnHealthLevel()
 		{
-			Pawn_HealthTracker ht = pawn.health;
 			switch (Settings.instance.healthLevel)
 			{
 				case HealthLevel.ShouldBeTendedNow:
-					return () => ht.ShouldBeTendedNow || ht.ShouldDoSurgeryNow;
+					return () => HealthAIUtility.ShouldBeTendedNow(pawn) || HealthAIUtility.ShouldHaveSurgeryDoneNow(pawn);
 				case HealthLevel.PrefersMedicalRest:
-					return () => ht.PrefersMedicalRest;
+					return () => HealthAIUtility.ShouldSeekMedicalRest(pawn);
 				case HealthLevel.NeedsMedicalRest:
-					return () => ht.NeedsMedicalRest;
+					return () => HealthAIUtility.ShouldSeekMedicalRestUrgent(pawn);
 				case HealthLevel.InPainShock:
-					return () => ht.InPainShock;
+					return () => pawn.health.InPainShock;
 			}
 			return () => false;
 		}
@@ -163,14 +162,14 @@ namespace AchtungMod
 		{
 			if (pawn.Dead || pawn.Downed || pawn.HasAttachment(ThingDefOf.Fire))
 			{
-				Find.PawnDestinationManager.UnreserveAllFor(pawn);
+				Find.VisibleMap.pawnDestinationManager.UnreserveAllFor(pawn);
 				EndJobWith(JobCondition.Incompletable);
 				return;
 			}
 
 			if (GetPawnBreakLevel()())
 			{
-				Find.PawnDestinationManager.UnreserveAllFor(pawn);
+				Find.VisibleMap.pawnDestinationManager.UnreserveAllFor(pawn);
 				EndJobWith(JobCondition.Incompletable);
 				string jobName = (GetPrefix() + "Label").Translate();
 				string label = "JobInterruptedLabel".Translate(jobName);
@@ -180,7 +179,7 @@ namespace AchtungMod
 
 			if (GetPawnHealthLevel()())
 			{
-				Find.PawnDestinationManager.UnreserveAllFor(pawn);
+				Find.VisibleMap.pawnDestinationManager.UnreserveAllFor(pawn);
 				EndJobWith(JobCondition.Incompletable);
 				string jobName = (GetPrefix() + "Label").Translate();
 				Find.LetterStack.ReceiveLetter(new Letter("JobInterruptedLabel".Translate(jobName), "JobInterruptedBadHealth".Translate(pawn.NameStringShort), LetterType.BadNonUrgent, pawn));
@@ -198,7 +197,7 @@ namespace AchtungMod
 				currentItem = FindNextWorkItem();
 				if (CurrentItemInvalid() == false)
 				{
-					Find.Reservations.Reserve(pawn, currentItem);
+					Find.VisibleMap.reservationManager.Reserve(pawn, currentItem);
 					pawn.CurJob.SetTarget(TargetIndex.A, currentItem);
 				}
 			}

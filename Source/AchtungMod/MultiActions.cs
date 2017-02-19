@@ -67,7 +67,7 @@ namespace AchtungMod
 
 		public FloatMenuOption GetOption(string title, IEnumerable<MultiAction> multiActions)
 		{
-			MenuOptionPriority priority = multiActions.Max(a => a.option.priority);
+			MenuOptionPriority priority = multiActions.Max(a => a.option.Priority);
 			FloatMenuOption option = new FloatMenuOption(title, delegate
 			{
 				multiActions.Do(multiAction =>

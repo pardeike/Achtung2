@@ -15,36 +15,36 @@ namespace AchtungMod
 			return "FireFight";
 		}
 
-		public override IEnumerable<TargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
+		public override IEnumerable<LocalTargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
 		{
 			base.CanStart(pawn, clickPos);
 			if (pawn.workSettings.GetPriority(WorkTypeDefOf.Firefighter) == 0) return null;
-			TargetInfo cell = IntVec3.FromVector3(clickPos);
-			Thing item = Find.ThingGrid.ThingAt(cell.Cell, ThingDefOf.Fire);
+			LocalTargetInfo cell = IntVec3.FromVector3(clickPos);
+			Thing item = Find.VisibleMap.thingGrid.ThingAt(cell.Cell, ThingDefOf.Fire);
 			if (item == null) return null;
 			bool canFight = item.Destroyed == false && pawn.CanReach(item, PathEndMode.Touch, pawn.NormalMaxDanger()) && pawn.CanReserve(item, 1);
-			return canFight ? new List<TargetInfo> { cell } : null;
+			return canFight ? new List<LocalTargetInfo> { cell } : null;
 		}
 
 		public override void UpdateVerbAndWorkLocations()
 		{
 			workLocations.ToList().Do(pos =>
 			{
-				if (Find.ThingGrid.CellContains(pos, ThingDefOf.Fire) == false) workLocations.Remove(pos);
-				GenAdj.CellsAdjacent8Way(new TargetInfo(pos))
+				if (Find.VisibleMap.thingGrid.CellContains(pos, ThingDefOf.Fire) == false) workLocations.Remove(pos);
+				GenAdj.CellsAdjacent8Way(new LocalTargetInfo(pos).ToTargetInfo(pawn.Map))
 					.Where(loc => workLocations.Contains(loc) == false)
-					.Where(loc => Find.ThingGrid.CellContains(loc, ThingDefOf.Fire))
+					.Where(loc => Find.VisibleMap.thingGrid.CellContains(loc, ThingDefOf.Fire))
 					.Do(loc => workLocations.Add(loc));
 			});
 			currentWorkCount = workLocations.Count();
 			if (totalWorkCount < currentWorkCount) totalWorkCount = currentWorkCount;
 		}
 
-		public override TargetInfo FindNextWorkItem()
+		public override LocalTargetInfo FindNextWorkItem()
 		{
 			return workLocations
 				.OrderBy(loc => Math.Abs(loc.x - pawn.Position.x) + Math.Abs(loc.z - pawn.Position.z))
-				.Select(loc => Find.ThingGrid.ThingAt(loc, ThingDefOf.Fire) as Fire)
+				.Select(loc => Find.VisibleMap.thingGrid.ThingAt(loc, ThingDefOf.Fire) as Fire)
 				.Where(f => f.Destroyed == false && pawn.CanReach(f, PathEndMode.Touch, pawn.NormalMaxDanger()) && pawn.CanReserve(f, 1))
 				.FirstOrDefault();
 		}

@@ -96,7 +96,7 @@ namespace AchtungMod
 			Scribe_References.LookReference<Pawn>(ref target, "target");
 		}
 
-		public bool ValidTarget(TargetInfo info)
+		public bool ValidTarget(LocalTargetInfo info)
 		{
 			if (info == null) return false;
 			Thing t = info.Thing;
@@ -108,7 +108,7 @@ namespace AchtungMod
 			return false;
 		}
 
-		public override IEnumerable<TargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
+		public override IEnumerable<LocalTargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
 		{
 			base.CanStart(pawn, clickPos);
 			if (pawn.IsColonistPlayerControlled == false) return null;
@@ -175,9 +175,9 @@ namespace AchtungMod
 
 		public bool CanShootTargetSafelyFrom(IntVec3 cell, HashSet<IntVec3> avoidDangerArea = null)
 		{
-			if (cell.InBounds() == false) return false;
+			if (cell.InBounds(pawn.Map) == false) return false;
 			if (avoidDangerArea != null && avoidDangerArea.Contains(cell)) return false;
-			if (Reachability.CanReach(pawn, cell, PathEndMode.OnCell, pawn.NormalMaxDanger()) == false) return false;
+			if (pawn.CanReach(new LocalTargetInfo(cell), PathEndMode.OnCell, pawn.NormalMaxDanger()) == false) return false;
 			if (currentVerb == null || currentVerb.CanHitTargetFrom(cell, target) == false) return false;
 
 			float distance = GenGeo.MagnitudeHorizontalSquared(cell.ToVector3Shifted() - target.TrueCenter());
@@ -202,7 +202,7 @@ namespace AchtungMod
 			float rangeSquared = range * range;
 
 			HashSet<IntVec3> danger = GetDangerArea(range, true);
-			HashSet<IntVec3> occuppiedDoors = new HashSet<IntVec3>(otherColonists.Select(p => p.Position).Where(v => Find.ThingGrid.ThingAt<Building_Door>(v) != null));
+			HashSet<IntVec3> occuppiedDoors = new HashSet<IntVec3>(otherColonists.Select(p => p.Position).Where(v => Find.VisibleMap.thingGrid.ThingAt<Building_Door>(v) != null));
 			HashSet<ScoredPosition> result = new HashSet<ScoredPosition>(
 				 GetCircle(range)
 				.Where(v =>
@@ -231,10 +231,10 @@ namespace AchtungMod
 			if (targetIsFleeing == false)
 			{
 				Tools.ApplyScoreLerped(result, sp => target.Position.DistanceToSquared(sp.v), 0f, targetDistanceFactor);
-				currentEnemies.Do(e => Tools.ApplyScore(result, sp => coverFactor * CoverUtility.CalculateOverallBlockChance(sp.v, e.pawn.Position)));
+				currentEnemies.Do(e => Tools.ApplyScore(result, sp => coverFactor * CoverUtility.CalculateOverallBlockChance(sp.v, e.pawn.Position, e.pawn.Map)));
 			}
 			Tools.ApplyScoreLerped(result, sp => pawn.Position.DistanceToSquared(sp.v), pawnClosenessFactor, 0f);
-			Tools.ApplyScore(result, sp => -1f * hitChanceFactor * CoverUtility.CalculateOverallBlockChance(target.Position, sp.v));
+			Tools.ApplyScore(result, sp => -1f * hitChanceFactor * CoverUtility.CalculateOverallBlockChance(target.Position, sp.v, target.Map));
 
 			return result;
 		}
@@ -258,19 +258,19 @@ namespace AchtungMod
 
 			Tools.ApplyScoreLerped(result, sp => 1f / Tools.PawnCellDistance(target, sp.v), 0f, targetClosenessFactor);
 			currentEnemies.DoIf(e => (e.pawn != target), e => Tools.ApplyScoreLerped(result, sp => Tools.PawnCellDistance(e.pawn, sp.v), 0f, enemyDistanceFactor));
-			currentEnemies.DoIf(e => (e.pawn != target), e => Tools.ApplyScore(result, sp => coverFactor * CoverUtility.CalculateOverallBlockChance(sp.v, e.pawn.Position)));
+			currentEnemies.DoIf(e => (e.pawn != target), e => Tools.ApplyScore(result, sp => coverFactor * CoverUtility.CalculateOverallBlockChance(sp.v, e.pawn.Position, e.pawn.Map)));
 
 			return result;
 		}
 
 		public void UpdateColonistsAndEnemies()
 		{
-			currentEnemies = Find.MapPawns.AllPawnsSpawned
+			currentEnemies = Find.VisibleMap.mapPawns.AllPawnsSpawned
 				.Where(p => p.Spawned == true && p.Destroyed == false && p.Downed == false && p.Dead == false)
 				.Where(p => p.InAggroMentalState || p.HostileTo(pawn.Faction))
 				.Select(p => new EnemyInfo(p)).ToList();
 
-			otherColonists = Find.MapPawns.AllPawnsSpawned
+			otherColonists = Find.VisibleMap.mapPawns.AllPawnsSpawned
 				.Where(p => p != pawn && p.Spawned == true && p.Destroyed == false && p.Dead == false && p.Faction == pawn.Faction);
 
 			targetIsFleeing = target != null && target.MentalStateDef != null && target.MentalStateDef.category == MentalStateCategory.Panic;
@@ -300,7 +300,7 @@ namespace AchtungMod
 
 		public Pawn FindNextTarget()
 		{
-			return Find.MapPawns.AllPawnsSpawned
+			return Find.VisibleMap.mapPawns.AllPawnsSpawned
 				.Where(p => p.InAggroMentalState || p.HostileTo(pawn.Faction))
 				.Where(p => p.Spawned == true && p.Destroyed == false && p.Downed == false && p.Dead == false)
 				.OrderBy(p => (pawn.Faction == target.Faction ? 100000f : 0f) + p.Position.DistanceToSquared(pawn.Position))
@@ -353,10 +353,10 @@ namespace AchtungMod
 
 		public bool TryPathStart(IntVec3 destination)
 		{
-			if (destination.IsValid && Find.Reservations.CanReserve(pawn, destination))
+			if (destination.IsValid && Find.VisibleMap.reservationManager.CanReserve(pawn, destination))
 			{
 				pathEndLocation = destination;
-				Find.Reservations.Reserve(pawn, pathEndLocation);
+				Find.VisibleMap.reservationManager.Reserve(pawn, pathEndLocation);
 				pawn.pather.StartPath(destination, PathEndMode.OnCell);
 				return true;
 			}
@@ -367,8 +367,8 @@ namespace AchtungMod
 		{
 			if (pathEndLocation.IsValid)
 			{
-				if (Find.Reservations.ReservedBy(pathEndLocation, pawn))
-					Find.Reservations.Release(pathEndLocation, pawn);
+				if (Find.VisibleMap.reservationManager.ReservedBy(pathEndLocation, pawn))
+					Find.VisibleMap.reservationManager.Release(pathEndLocation, pawn);
 				pathEndCallback(failure);
 				pathEndCallback = b => { };
 			}
@@ -386,7 +386,7 @@ namespace AchtungMod
 				if (ValidTarget(target) == false)
 				{
 					Controller.ClearDebugPositions();
-					Find.PawnDestinationManager.UnreserveAllFor(pawn);
+					Find.VisibleMap.pawnDestinationManager.UnreserveAllFor(pawn);
 					EndJobWith(JobCondition.Succeeded);
 					return;
 				}
@@ -397,7 +397,7 @@ namespace AchtungMod
 			if (pawn.Dead || pawn.Downed || pawn.HasAttachment(ThingDefOf.Fire) || badStates.Contains(pawn.MentalStateDef))
 			{
 				Controller.ClearDebugPositions();
-				Find.PawnDestinationManager.UnreserveAllFor(pawn);
+				Find.VisibleMap.pawnDestinationManager.UnreserveAllFor(pawn);
 				EndJobWith(JobCondition.Incompletable);
 				return;
 			}
@@ -416,7 +416,7 @@ namespace AchtungMod
 				switch (doorCheese)
 				{
 					case DoorCheese.None:
-						Building_Door door = Find.ThingGrid.ThingAt<Building_Door>(pawn.Position);
+						Building_Door door = Find.VisibleMap.thingGrid.ThingAt<Building_Door>(pawn.Position);
 						if (door != null && beforeDoorPosition.IsValid && targetIsFleeing == false)
 						{
 							bool doorIsSafe = scoredPositions.Where(sp => sp.v == door.Position).FirstOrDefault() != null;
@@ -429,7 +429,7 @@ namespace AchtungMod
 									{
 										if (doorCheesePosition.IsValid)
 										{
-											Find.Reservations.Release(doorCheesePosition, pawn);
+											Find.VisibleMap.reservationManager.Release(doorCheesePosition, pawn);
 											doorCheesePosition = IntVec3.Invalid;
 										}
 										doorCheese = DoorCheese.None;
@@ -446,10 +446,10 @@ namespace AchtungMod
 
 								if (TryShoot(shootingEnded))
 								{
-									if (doorCheesePosition.IsValid) Find.Reservations.Release(doorCheesePosition, pawn);
+									if (doorCheesePosition.IsValid) Find.VisibleMap.reservationManager.Release(doorCheesePosition, pawn);
 
 									doorCheesePosition = door.Position;
-									Find.Reservations.Reserve(pawn, doorCheesePosition);
+									Find.VisibleMap.reservationManager.Reserve(pawn, doorCheesePosition);
 									doorCheese = DoorCheese.Shooting;
 									state = AutoCombatState.Shooting;
 									return;
@@ -460,7 +460,7 @@ namespace AchtungMod
 							{
 								if (doorCheesePosition.IsValid)
 								{
-									Find.Reservations.Release(doorCheesePosition, pawn);
+									Find.VisibleMap.reservationManager.Release(doorCheesePosition, pawn);
 									doorCheesePosition = IntVec3.Invalid;
 									state = AutoCombatState.Ready;
 								}
@@ -477,7 +477,7 @@ namespace AchtungMod
 							{
 								if (doorCheesePosition.IsValid)
 								{
-									Find.Reservations.Release(doorCheesePosition, pawn);
+									Find.VisibleMap.reservationManager.Release(doorCheesePosition, pawn);
 									doorCheesePosition = IntVec3.Invalid;
 								}
 								doorCheese = DoorCheese.None;
@@ -495,7 +495,7 @@ namespace AchtungMod
 						if (pawn.Position != beforeDoorPosition) return;
 						if (doorCheesePosition.IsValid)
 						{
-							Find.Reservations.Release(doorCheesePosition, pawn);
+							Find.VisibleMap.reservationManager.Release(doorCheesePosition, pawn);
 							doorCheesePosition = IntVec3.Invalid;
 						}
 						doorCheese = DoorCheese.None;

@@ -5,28 +5,6 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AchtungMod", "AchtungMod\AchtungMod.csproj", "{8BD5A28F-96C4-43B4-907F-600AA0162F84}"
 EndProject
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "RimWorld-Achtung-Mod", "..\", "{CD5A98B4-D9E8-4C83-96BA-6B5328FC45E3}"
-	ProjectSection(WebsiteProperties) = preProject
-		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
-		Debug.AspNetCompiler.VirtualPath = "/temp"
-		Debug.AspNetCompiler.PhysicalPath = "..\..\RimWorld-Achtung-Mod\"
-		Debug.AspNetCompiler.TargetPath = "..\..\..\..\..\..\temp\"
-		Debug.AspNetCompiler.Updateable = "false"
-		Debug.AspNetCompiler.ForceOverwrite = "true"
-		Debug.AspNetCompiler.FixedNames = "false"
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.VirtualPath = "/temp"
-		Release.AspNetCompiler.PhysicalPath = "..\..\RimWorld-Achtung-Mod\"
-		Release.AspNetCompiler.TargetPath = "..\..\..\..\..\..\temp\"
-		Release.AspNetCompiler.Updateable = "false"
-		Release.AspNetCompiler.ForceOverwrite = "true"
-		Release.AspNetCompiler.FixedNames = "false"
-		Release.AspNetCompiler.Debug = "False"
-		VWDPort = "63070"
-		SlnRelativePath = "..\..\RimWorld-Achtung-Mod\"
-		StartServerOnDebug = "false"
-	EndProjectSection
-EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "English", "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Core\Languages\English\", "{5D7169A6-E248-4D7D-BBE3-F3C889CD564B}"
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
@@ -48,8 +26,6 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "English", "D:\Program Files
 		SlnRelativePath = "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\Core\Languages\English\"
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AchtungMod.reloaded", "AchtungMod.reloaded\AchtungMod.reloaded.csproj", "{AD4AAE04-6BC7-4079-A19E-A69789C04E97}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,32 +36,24 @@ Global
 		{8BD5A28F-96C4-43B4-907F-600AA0162F84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BD5A28F-96C4-43B4-907F-600AA0162F84}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8BD5A28F-96C4-43B4-907F-600AA0162F84}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD5A98B4-D9E8-4C83-96BA-6B5328FC45E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD5A98B4-D9E8-4C83-96BA-6B5328FC45E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD5A98B4-D9E8-4C83-96BA-6B5328FC45E3}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD5A98B4-D9E8-4C83-96BA-6B5328FC45E3}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{5D7169A6-E248-4D7D-BBE3-F3C889CD564B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5D7169A6-E248-4D7D-BBE3-F3C889CD564B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D7169A6-E248-4D7D-BBE3-F3C889CD564B}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{5D7169A6-E248-4D7D-BBE3-F3C889CD564B}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{AD4AAE04-6BC7-4079-A19E-A69789C04E97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AD4AAE04-6BC7-4079-A19E-A69789C04E97}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AD4AAE04-6BC7-4079-A19E-A69789C04E97}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AD4AAE04-6BC7-4079-A19E-A69789C04E97}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		BuildVersion_StartDate = 2000/1/1
-		BuildVersion_IncrementBeforeBuild = False
-		BuildVersion_ConfigurationName = Any
-		BuildVersion_DetectChanges = False
-		BuildVersion_BuildVersioningStyle = None.None.None.None
-		BuildVersion_UpdateAssemblyVersion = False
-		BuildVersion_UpdateFileVersion = False
-		BuildVersion_UseGlobalSettings = False
-		BuildVersion_UseUniversalClock = False
 		BuildVersion_ReplaceNonNumerics = False
+		BuildVersion_UseUniversalClock = False
+		BuildVersion_UseGlobalSettings = False
+		BuildVersion_UpdateFileVersion = False
+		BuildVersion_UpdateAssemblyVersion = False
+		BuildVersion_BuildVersioningStyle = None.None.None.None
+		BuildVersion_DetectChanges = False
+		BuildVersion_ConfigurationName = Any
+		BuildVersion_IncrementBeforeBuild = False
+		BuildVersion_StartDate = 2000/1/1
 	EndGlobalSection
 EndGlobal

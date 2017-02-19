@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using RimWorld;
+﻿using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -8,8 +7,6 @@ namespace AchtungMod
 {
 	public class Colonist
 	{
-		public static FieldInfo draftHandlerField = typeof(DraftStateHandler).GetField("draftedInt", BindingFlags.NonPublic | BindingFlags.Instance);
-
 		public Pawn pawn;
 		public Vector3 designation;
 		public IntVec3 lastOrder;
@@ -29,8 +26,8 @@ namespace AchtungMod
 
 		public IntVec3 UpdateOrderPos(Vector3 pos)
 		{
-			IntVec3 bestCell = Pawn_DraftController.BestGotoDestNear(pos.ToIntVec3(), pawn);
-			if (bestCell != null && bestCell.InBounds())
+			IntVec3 bestCell = RCellFinder.BestOrderedGotoDestNear(pos.ToIntVec3(), pawn);
+			if (bestCell != null && bestCell.InBounds(pawn.Map))
 			{
 				designation = bestCell.ToVector3Shifted();
 				designation.y = Altitudes.AltitudeFor(AltitudeLayer.Pawn);
@@ -47,9 +44,9 @@ namespace AchtungMod
 				lastOrder = bestCell;
 
 				Job job = new Job(JobDefOf.Goto, bestCell);
-				if (pawn.drafter.CanTakeOrderedJob())
+				if (pawn.jobs.CanTakeOrderedJob())
 				{
-					pawn.drafter.TakeOrderedJob(job);
+					pawn.jobs.TryTakeOrderedJob(job);
 				}
 			}
 		}

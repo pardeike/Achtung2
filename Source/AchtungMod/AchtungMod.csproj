@@ -17,27 +17,31 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
-    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
     <OutputPath>..\..\Assemblies\</OutputPath>
     <DefineConstants>
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DebugSymbols>true</DebugSymbols>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Assemblies\</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DebugSymbols>false</DebugSymbols>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\Harmony\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp, Version=0.14.6046.30390, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Rimworld-DLLs\Assembly-CSharp.dll</HintPath>
@@ -52,15 +56,12 @@
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>D:\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Colonist.cs" />
     <Compile Include="Controller.cs" />
-    <Compile Include="Injection\AsmHelper.cs" />
-    <Compile Include="Injection\HookInjector.cs" />
-    <Compile Include="Injection\Logger.cs" />
-    <Compile Include="Injection\Platform.cs" />
     <Compile Include="JobDriver_AutoCombat.cs" />
     <Compile Include="JobDriver_SowAll.cs" />
     <Compile Include="JobDriver_CleanRoom.cs" />
@@ -77,22 +78,14 @@
     <Compile Include="Tools.cs" />
     <Compile Include="XiaolinCells.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /B /Y "$(TargetPath)" "$(SolutionDir)..\Assemblies\$(TargetName).dll"
-mkdir "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Assemblies"
-copy /B /Y "$(TargetPath)" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Assemblies\$(TargetName).dll"
-xcopy /E /I /Y "$(SolutionDir)..\About" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\About"
-xcopy /S /E /I /Y "$(SolutionDir)..\Languages\*" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Languages"
-xcopy /E /I /Y "$(SolutionDir)..\Textures" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\Textures"
-copy /B /Y "$(SolutionDir)..\README.md" "D:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(TargetName)\"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_ReplaceNonNumerics="False" BuildVersion_UseUniversalClock="False" BuildVersion_UseGlobalSettings="False" BuildVersion_UpdateFileVersion="False" BuildVersion_UpdateAssemblyVersion="False" BuildVersion_BuildVersioningStyle="None.None.None.None" BuildVersion_StartDate="2000/1/1" BuildVersion_IncrementBeforeBuild="False" BuildVersion_ConfigurationName="Any" BuildVersion_DetectChanges="False" />
+      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_ConfigurationName="Any" BuildVersion_IncrementBeforeBuild="False" BuildVersion_StartDate="2000/1/1" BuildVersion_BuildVersioningStyle="None.None.None.None" BuildVersion_UpdateAssemblyVersion="False" BuildVersion_UpdateFileVersion="False" BuildVersion_UseGlobalSettings="False" BuildVersion_UseUniversalClock="False" BuildVersion_ReplaceNonNumerics="False" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

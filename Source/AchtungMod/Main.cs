@@ -5,28 +5,31 @@ using Verse;
 using Verse.AI;
 using System.Reflection;
 using System;
+using Harmony;
+using Harmony.ILCopying;
 
 namespace AchtungMod
 {
-
-	// install job defs
-	//
-	public class RootMap_Patch : RootMap
+	[StaticConstructorOnStartup]
+	static class Main
 	{
-		internal void RootMap_Start()
+		static Main()
 		{
 			Controller.getInstance().InstallJobDefs();
-			Start();
+
+			var harmony = HarmonyInstance.Create("net.pardeike.rimworld.mods.achtung");
+			harmony.PatchAll(Assembly.GetExecutingAssembly());
 		}
 	}
 
 	// start of game/map
 	//
-	public static class MapIniterUtility_Patch
+	[HarmonyPatch(typeof(Root_Play))]
+	[HarmonyPatch("Start")]
+	static class Root_Play_Start_Patch
 	{
-		internal static void MapIniterUtility_FinalizeMapInit()
+		static void Postfix()
 		{
-			MapIniterUtility.FinalizeMapInit();
 			Settings.Load();
 			Controller.getInstance().Initialize();
 		}
@@ -34,120 +37,80 @@ namespace AchtungMod
 
 	// handle events early
 	//
-	public class MainTabsRoot_Patch : MainTabsRoot
+	[HarmonyPatch(typeof(MainTabsRoot))]
+	[HarmonyPatch("HandleLowPriorityShortcuts")]
+	static class MainTabsRoot_HandleLowPriorityShortcuts_Patch
 	{
-		internal void MainTabsRoot_HandleLowPriorityShortcuts()
+		static void Prefix()
 		{
 			Controller.getInstance().HandleEvents();
-			HandleLowPriorityShortcuts();
 		}
 	}
 
 	// handle drawing
 	//
-	public static class SelectionDrawer_Patch
+	[HarmonyPatch(typeof(SelectionDrawer))]
+	[HarmonyPatch("DrawSelectionOverlays")]
+	static class SelectionDrawer_DrawSelectionOverlays_Patch
 	{
-		internal static void SelectionDrawer_DrawSelectionOverlays()
+		static void Prefix()
 		{
 			Controller.getInstance().HandleDrawing();
-			SelectionDrawer.DrawSelectionOverlays();
 		}
 	}
 
 	// handle gui
 	//
-	public class ThingOverlays_Patch : ThingOverlays
+	[HarmonyPatch(typeof(ThingOverlays))]
+	[HarmonyPatch("ThingOverlaysOnGUI")]
+	static class ThingOverlays_ThingOverlaysOnGUI_Patch
 	{
-		public void ThingOverlays_ThingOverlaysOnGUI()
+		static void Postfix()
 		{
-			ThingOverlaysOnGUI();
 			Controller.getInstance().HandleDrawingOnGUI();
 		}
 	}
 
 	// turn reservation error into warning inject
 	//
-	public class ReservationManager_Patch
+	[HarmonyPatch(typeof(ReservationManager))]
+	[HarmonyPatch("LogCouldNotReserveError")]
+	static class ReservationManager_LogCouldNotReserveError_Patch
 	{
-		internal void ReservationManager_LogCouldNotReserveError(Pawn claimant, TargetInfo target, int maxPawns)
+		[HarmonyProcessors]
+		static HarmonyProcessor ErrorToWarning(MethodBase original)
 		{
-			Job curJob = claimant.CurJob;
-			string str = "null";
-			int curToilIndex = -1;
-			if (curJob != null)
-			{
-				str = curJob.ToString();
-				if (claimant.jobs.curDriver != null)
-				{
-					curToilIndex = claimant.jobs.curDriver.CurToilIndex;
-				}
-			}
+			var fromMethod = AccessTools.Method(typeof(Log), "Error", new Type[] { typeof(string) });
+			var toMethod = AccessTools.Method(typeof(Log), "Warning", new Type[] { typeof(string) });
 
-			Pawn pawn = Find.Reservations.FirstReserverOf(target, claimant.Faction, true);
-			string str2 = "null";
-			int num2 = -1;
-			if (pawn != null)
-			{
-				Job job2 = pawn.CurJob;
-				if (job2 != null)
-				{
-					str2 = job2.ToString();
-					if (pawn.jobs.curDriver != null)
-					{
-						num2 = pawn.jobs.curDriver.CurToilIndex;
-					}
-				}
-			}
-
-			Log.Warning(string.Concat(new object[] {
-					 "Could not reserve ", target, " for ", claimant.NameStringShort, " doing job ", str, "(curToil=", curToilIndex, ") for maxPawns ", maxPawns
-				}));
-			Log.Warning(string.Concat(new object[] {
-					 "Existing reserver: ", pawn.NameStringShort, " doing job ", str2, "(curToil=", num2, ")"
-				}));
-
+			var processor = new HarmonyProcessor();
+			processor.AddILProcessor(new MethodReplacer(fromMethod, toMethod));
+			return processor;
 		}
 	}
 
 	// custom context menu
 	//
-	public static class FloatMenuMakerMap_Patch
+	[HarmonyPatch(typeof(FloatMenuMakerMap))]
+	[HarmonyPatch("ChoicesAtFor")]
+	static class FloatMenuMakerMap_ChoicesAtFor_Patch
 	{
-		public static List<FloatMenuOption> FloatMenuMakerMap_ChoicesAtFor(Vector3 clickPos, Pawn pawn)
+		static void Postfix(List<FloatMenuOption> __result, Vector3 clickPos, Pawn pawn)
 		{
-			List<FloatMenuOption> options = FloatMenuMakerMap.ChoicesAtFor(clickPos, pawn);
-			options.AddRange(Controller.getInstance().AchtungChoicesAtFor(clickPos, pawn));
-			return options;
+			__result.AddRange(Controller.getInstance().AchtungChoicesAtFor(clickPos, pawn));
 		}
 	}
 
 	// track projectiles
 	//
-	public abstract class Projectile_Patch : Projectile
+	[HarmonyPatch(typeof(Projectile))]
+	[HarmonyPatch("Launch")]
+	[HarmonyPatch(new Type[] { typeof(Thing), typeof(Vector3), typeof(LocalTargetInfo), typeof(Thing) })]
+	static class Projectile_Launch_Patch
 	{
-		public void Projectile_Launch(Thing launcher, Vector3 origin, TargetInfo targ, Thing equipment = null)
+		static void Prefix(Projectile __instance, Thing launcher, Vector3 origin, LocalTargetInfo targ, Thing equipment)
 		{
-			Controller.getInstance().AddProjectile(this, launcher, origin, targ, equipment);
-			Launch(launcher, origin, targ, equipment);
-		}
-	}
-
-	[StaticConstructorOnStartup]
-	static class Main
-	{
-		static Main()
-		{
-			var injector = new HookInjector();
-			injector.Inject(typeof(RootMap), "Start", typeof(RootMap_Patch));
-			injector.Inject(typeof(MapIniterUtility), "FinalizeMapInit", typeof(MapIniterUtility_Patch));
-			injector.Inject(typeof(MainTabsRoot), "HandleLowPriorityShortcuts", typeof(MainTabsRoot_Patch));
-			injector.Inject(typeof(SelectionDrawer), "DrawSelectionOverlays", typeof(SelectionDrawer_Patch));
-			injector.Inject(typeof(ThingOverlays), "ThingOverlaysOnGUI", typeof(ThingOverlays_Patch));
-			injector.Inject(typeof(ReservationManager), "LogCouldNotReserveError", typeof(ReservationManager_Patch));
-			injector.Inject(typeof(FloatMenuMakerMap), "ChoicesAtFor", typeof(FloatMenuMakerMap_Patch));
-
-			MethodInfo method = typeof(Projectile).GetMethod("Launch", new Type[] { typeof(Thing), typeof(Vector3), typeof(TargetInfo), typeof(Thing) });
-			injector.Inject(typeof(Projectile), method, typeof(Projectile_Patch));
+			Controller.getInstance().AddProjectile(__instance, launcher, origin, targ, equipment);
 		}
 	}
 }

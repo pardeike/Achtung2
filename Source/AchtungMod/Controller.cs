@@ -5,8 +5,6 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.AI;
-using System.Reflection;
-using Verse.Sound;
 
 namespace AchtungMod
 {
@@ -84,11 +82,29 @@ namespace AchtungMod
 			return temp;
 		}
 
+		public IEnumerable<Colonist> GetAllColonists(bool forceDraft)
+		{
+			List<Colonist> temp = new List<Colonist>();
+
+			IEnumerable<Pawn> pawns = Find.VisibleMap.listerThings.ThingsInGroup(ThingRequestGroup.Pawn)
+				.Cast<Pawn>()
+				.Where(pawn =>
+					pawn.Faction == Faction.OfPlayer
+					&& pawn.drafter != null
+					&& pawn.IsColonistPlayerControlled
+					&& pawn.Downed == false
+					&& pawn.jobs.CanTakeOrderedJob()
+				);
+
+			foreach (Pawn tempPawn in pawns) temp.Add(new Colonist(tempPawn, forceDraft));
+			return temp;
+		}
+
 		public void MouseDown(Vector3 pos)
 		{
 			if (Event.current.button == 1)
 			{
-				Vector3 where = Gen.MouseMapPosVector3();
+				Vector3 where = UI.MouseMapPosition();
 
 				relativeMovement = Tools.IsModKeyPressed(Settings.instance.relativeMovementKey);
 
@@ -97,10 +113,7 @@ namespace AchtungMod
 				if (colonists.Count() > 0)
 				{
 					bool ignoreMenu = Tools.IsModKeyPressed(Settings.instance.ignoreMenuKey);
-
-					// old code that plays it safe by calling original context menu for a single colonist
-					//
-					/*if (colonists.Count() == 1 && ignoreMenu == false)
+					if (colonists.Count() == 1 && ignoreMenu == false)
 					{
 						IEnumerable<FloatMenuOption> choices = FloatMenuMakerMap.ChoicesAtFor(where, colonists.First().pawn);
 						if (choices.Count() > 0)
@@ -108,7 +121,7 @@ namespace AchtungMod
 							// don't overwrite existing floating menu
 							return;
 						}
-					}*/
+					}
 
 					// build multi menu from existing commands
 					MultiActions actions = new MultiActions(colonists, where);
@@ -133,10 +146,6 @@ namespace AchtungMod
 
 					isDragging = true;
 					Event.current.Use();
-				}
-				else
-				{
-					TryCopyElement(where);
 				}
 			}
 		}
@@ -173,12 +182,13 @@ namespace AchtungMod
 			}
 		}
 
+		/*
 		public bool TryCopyElement(Vector3 where)
 		{
 			BuildableDef buildDef = null;
 			ThingDef thingDef = null;
 
-			Thing thing = Find.ThingGrid.ThingAt<Building>(where.ToIntVec3());
+			Thing thing = Find.VisibleMap.thingGrid.ThingAt<Building>(where.ToIntVec3());
 			if (thing != null)
 			{
 				buildDef = thing.def;
@@ -186,7 +196,7 @@ namespace AchtungMod
 			}
 			else
 			{
-				Blueprint_Build blueprint = Find.ThingGrid.ThingAt<Blueprint_Build>(where.ToIntVec3());
+				Blueprint_Build blueprint = Find.VisibleMap.thingGrid.ThingAt<Blueprint_Build>(where.ToIntVec3());
 				if (blueprint != null)
 				{
 					thing = blueprint;
@@ -209,25 +219,25 @@ namespace AchtungMod
 
 					SoundDefOf.SelectDesignator.PlayOneShotOnCamera();
 					designator.SetStuffDef(thingDef);
-					DesignatorManager.Select(designator);
+					Find.DesignatorManager.Select(designator);
 
 					Find.MainTabsRoot.SetCurrentTab(MainTabDefOf.Inspect, true);
 
 					FieldInfo placingRot = designator.GetType().GetField("placingRot", BindingFlags.Instance | BindingFlags.NonPublic);
 					if (placingRot != null) placingRot.SetValue(designator, thing.Rotation);
 
-					Event.current.Use();
 					return true;
 				}
 			}
 
 			return false;
 		}
+		*/
 
 		public void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType)
 		{
 			JobDriver_Thoroughly driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
-			IEnumerable<TargetInfo> targets = driver.CanStart(pawn, clickPos);
+			IEnumerable<LocalTargetInfo> targets = driver.CanStart(pawn, clickPos);
 			if (targets != null)
 			{
 				List<Job> existingJobs = driver.SameJobTypesOngoing();
@@ -282,7 +292,7 @@ namespace AchtungMod
 					{
 						Tools.SetDraftStatus(colonist.pawn, colonist.originalDraftStatus);
 						colonist.pawn.mindState.priorityWork.Clear();
-						if ((colonist.pawn.jobs.curJob != null) && colonist.pawn.drafter.CanTakeOrderedJob())
+						if ((colonist.pawn.jobs.curJob != null) && colonist.pawn.jobs.CanTakeOrderedJob())
 						{
 							colonist.pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
 						}
@@ -335,7 +345,7 @@ namespace AchtungMod
 			colonists.DoIf(c => (c.designation != Vector3.zero), c =>
 			{
 				Vector2 labelPos = Tools.LabelDrawPosFor(c.designation, -0.6f);
-				GenWorldUI.DrawPawnLabel(c.pawn, labelPos, 1f, 9999f, null);
+				GenMapUI.DrawPawnLabel(c.pawn, labelPos, 1f, 9999f, null);
 			});
 		}
 
@@ -353,7 +363,7 @@ namespace AchtungMod
 
 			if (Settings.instance.modActive == false) return;
 
-			Vector3 pos = Gen.MouseMapPosVector3();
+			Vector3 pos = UI.MouseMapPosition();
 			switch (Event.current.type)
 			{
 				case EventType.mouseDown:
@@ -374,7 +384,7 @@ namespace AchtungMod
 			}
 		}
 
-		public void AddProjectile(Projectile projectile, Thing launcher, Vector3 origin, TargetInfo targ, Thing equipment)
+		public void AddProjectile(Projectile projectile, Thing launcher, Vector3 origin, LocalTargetInfo targ, Thing equipment)
 		{
 			Bullet bullet = projectile as Bullet;
 			Projectile_Explosive explosive = projectile as Projectile_Explosive;
@@ -388,12 +398,12 @@ namespace AchtungMod
 		{
 			HashSet<Projectile> activeProjectiles = new HashSet<Projectile>();
 
-			Find.MapPawns.AllPawnsSpawned
+			Find.VisibleMap.mapPawns.AllPawnsSpawned
 				 .Where(p => p.Spawned == true && p.Destroyed == false && p.Downed == false && p.Dead == false)
 				 .DoIf(p => p.equipment != null && p.equipment.Primary != null, p =>
 				 {
 					 ThingDef def = p.equipment.PrimaryEq.PrimaryVerb.verbProps.projectileDef;
-					 if (def != null) activeProjectiles.UnionWith(Find.ListerThings.ThingsOfDef(def).Cast<Projectile>());
+					 if (def != null) activeProjectiles.UnionWith(Find.VisibleMap.listerThings.ThingsOfDef(def).Cast<Projectile>());
 				 });
 
 			Dictionary<Projectile, ProjectileInfo> remaining = new Dictionary<Projectile, ProjectileInfo>();
