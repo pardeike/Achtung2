@@ -6,7 +6,6 @@ using Verse.AI;
 using System.Reflection;
 using System;
 using Harmony;
-using Harmony.ILCopying;
 
 namespace AchtungMod
 {
@@ -77,14 +76,14 @@ namespace AchtungMod
 	[HarmonyPatch("LogCouldNotReserveError")]
 	static class ReservationManager_LogCouldNotReserveError_Patch
 	{
-		[HarmonyProcessors]
+		[HarmonyProcessorFactory]
 		static HarmonyProcessor ErrorToWarning(MethodBase original)
 		{
 			var fromMethod = AccessTools.Method(typeof(Log), "Error", new Type[] { typeof(string) });
 			var toMethod = AccessTools.Method(typeof(Log), "Warning", new Type[] { typeof(string) });
 
 			var processor = new HarmonyProcessor();
-			processor.AddILProcessor(new MethodReplacer(fromMethod, toMethod));
+			processor.Add(new MethodReplacer(fromMethod, toMethod));
 			return processor;
 		}
 	}
