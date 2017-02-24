@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <AchtungVersion>來自[Achtung! Mod]的技術支持{0} {1}</AchtungVersion>
+  <AchtungOff>（關閉）</AchtungOff>
+  <AchtungOptions>通過按Shift+Enter鍵來進行配置</AchtungOptions>
+
+  <AchtungSettingsTitle>Achtung! Mod</AchtungSettingsTitle>
+
+  <AchtungEnabledTitle>激活</AchtungEnabledTitle>
+  <AchtungEnabledExplained>開啟/關閉此Mod時無需重啟RimWorld</AchtungEnabledExplained>
+
+  <ForceDraftTitle>組合移動</ForceDraftTitle>
+  <ForceDraftExplained>按住指定鍵並右鍵拖動來實現選中的已徵召殖民者的組合移動。</ForceDraftExplained>
+
+  <IgnoreMenuTitle>忽略右鍵菜單</IgnoreMenuTitle>
+  <IgnoreMenuExplained>按住指定键並右鍵點擊來實現在安排已徵召殖民者到達防禦位置時忽略可能彈出的右鍵菜單。</IgnoreMenuExplained>
+
+  <RelativeMovementTitle>殖民者同步移動</RelativeMovementTitle>
+  <RelativeMovementExplained>按住指定鍵並右鍵拖動來實現選中的已徵召殖民者同步移動至當前位置。</RelativeMovementExplained>
+
+  <ModKeyOptionNone>未激活</ModKeyOptionNone>
+  <ModKeyOptionAlt>Alt</ModKeyOptionAlt>
+  <ModKeyOptionCtrl>Ctrl</ModKeyOptionCtrl>
+  <ModKeyOptionShift>Shift</ModKeyOptionShift>
+  <ModKeyOptionMeta>Win/Cmd</ModKeyOptionMeta>
+
+  <BreakLevelTitle>精神崩潰閾值</BreakLevelTitle>
+  <BreakLevelExplained>設定根據殖民者的精神崩潰等級終止命令的閾值</BreakLevelExplained>
+  <BreakLevelOptionNone>忽略</BreakLevelOptionNone>
+  <BreakLevelOptionMinor>輕度</BreakLevelOptionMinor>
+  <BreakLevelOptionMajor>嚴重</BreakLevelOptionMajor>
+  <BreakLevelOptionAlmostExtreme>極重</BreakLevelOptionAlmostExtreme>
+  <BreakLevelOptionExtreme>瀕臨崩潰</BreakLevelOptionExtreme>
+
+  <HealthLevelTitle>健康狀態閾值</HealthLevelTitle>
+  <HealthLevelExplained>設定根據殖民者的健康狀態終止命令的閾值</HealthLevelExplained>
+  <HealthLevelOptionNone>忽略</HealthLevelOptionNone>
+  <HealthLevelOptionShouldBeTendedNow>需要包紮傷口</HealthLevelOptionShouldBeTendedNow>
+  <HealthLevelOptionPrefersMedicalRest>需要藥物治療</HealthLevelOptionPrefersMedicalRest>
+  <HealthLevelOptionNeedsMedicalRest>需要臥床養傷</HealthLevelOptionNeedsMedicalRest>
+  <HealthLevelOptionInPainShock>因疼痛而休克</HealthLevelOptionInPainShock>
+
+  <DebugPositionsTitle>顯示自動作戰位置</DebugPositionsTitle>
+  <DebugPositionsExplained>啟用後會顯示選中殖民者在自動作戰中將到達的位置。</DebugPositionsExplained>
+
+  <JobInterruptedLabel>{0} 已取消</JobInterruptedLabel>
+  <JobInterruptedBreakdown>{0} 即將崩潰</JobInterruptedBreakdown>
+  <JobInterruptedBadHealth>{0} 處於劣勢</JobInterruptedBadHealth>
+
+  <CleanRoomLabel>打掃這個房間</CleanRoomLabel>
+  <CleanRoomInfoText>徹底清掃房間</CleanRoomInfoText>
+  <CleanRoomDescription>打掃房間直到將房間完全清掃乾淨</CleanRoomDescription>
+  <CleanRoomReport>打掃{0}中：{1}</CleanRoomReport>
+
+  <FireFightLabel>滅火</FireFightLabel>
+  <FireFightInfoText>正在滅火</FireFightInfoText>
+  <FireFightDescription>滅火（即使火災不在生活區）</FireFightDescription>
+  <FireFightReport>滅火中：{0}</FireFightReport>
+
+  <SowZoneLabel>播種這個區域/房間</SowZoneLabel>
+  <SowZoneInfoText>正在播種這個區域/房間</SowZoneInfoText>
+  <SowZoneDescription>播種區域/房間直到全部播種完成</SowZoneDescription>
+  <SowZoneReport>播種{0}中：{1}</SowZoneReport>
+
+  <AutoCombatLabel>自動作戰 {0}</AutoCombatLabel>
+  <AutoCombatInfoText>自動作戰中</AutoCombatInfoText>
+  <AutoCombatDescription>自動攻擊敵人/目標</AutoCombatDescription>
+  <AutoCombatReport>自動作戰：{0}</AutoCombatReport>
+  <AutoCombatAdvancing>接近{0}</AutoCombatAdvancing>
+  <AutoCombatMoving>前往({0})</AutoCombatMoving>
+  <AutoCombatShooting>射擊{0}</AutoCombatShooting>
+  <AutoCombatHitting>近身攻擊{0}</AutoCombatHitting>
+  <AutoCombatReady>瞄準{0}</AutoCombatReady>
+
+  <AlreadyDoing>(指令 #{0})</AlreadyDoing>
+
+</LanguageData>
