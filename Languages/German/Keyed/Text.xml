@@ -16,6 +16,9 @@
 	<IgnoreMenuTitle>Das Kontextmenü ignorieren</IgnoreMenuTitle>
 	<IgnoreMenuExplained>Um das Kontextmenü während des Positionierens zu ignorieren drücken Sie während des Rechtsklicks folgende Taste</IgnoreMenuExplained>
 
+	<ReverseIgnoreMenuTitle>Kontextmenü ignorieren umkehren</ReverseIgnoreMenuTitle>
+	<ReverseIgnoreMenuExplained>Kontextmenü wird ignoriert wenn die Taste NICHT gedrückt wird</ReverseIgnoreMenuExplained>
+
 	<RelativeMovement>Kolonisten relativ bewegen</RelativeMovement>
 	<RelativeMovementExplained>Um Kolonisten relativ zu sich selbst zu bewegen drücken Sie zusätzlich zur gedrückten rechten Maustaste folgende Taste</RelativeMovementExplained>
 

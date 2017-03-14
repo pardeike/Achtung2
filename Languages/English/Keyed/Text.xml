@@ -14,7 +14,10 @@
 	<ForceDraftExplained>To draft an undrafted colonist while right-clicking, hold the selected key</ForceDraftExplained>
 
 	<IgnoreMenuTitle>Ignore context menu</IgnoreMenuTitle>
-	<IgnoreMenuExplained>To ignore the context menu while positioning colonists, hold the selected key key while right-clicking</IgnoreMenuExplained>
+	<IgnoreMenuExplained>To ignore the context menu while positioning colonists, hold the selected key while right-clicking</IgnoreMenuExplained>
+
+	<ReverseIgnoreMenuTitle>Reverse context menu key</ReverseIgnoreMenuTitle>
+	<ReverseIgnoreMenuExplained>If checked, the context menu is ignored when you are NOT holding the selected key</ReverseIgnoreMenuExplained>
 
 	<RelativeMovementTitle>Move colonists relative</RelativeMovementTitle>
 	<RelativeMovementExplained>To move selected colonists relative to their current position, hold the selected key while right-click-dragging</RelativeMovementExplained>

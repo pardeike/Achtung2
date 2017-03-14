@@ -16,6 +16,9 @@
 	<IgnoreMenuTitle>Ignorera kontextmenyn</IgnoreMenuTitle>
 	<IgnoreMenuExplained>För att ignorera kontextmenyn när du vill positionera kolonister, håll i följande knapp när du högerklicker</IgnoreMenuExplained>
 
+	<ReverseIgnoreMenuTitle>Ignorera kontextmenyn omvänd</ReverseIgnoreMenuTitle>
+	<ReverseIgnoreMenuExplained>Kontextmenyn ignoreras när knappen INTE hålls i</ReverseIgnoreMenuExplained>
+
 	<RelativeMovement>Flytta kolonister relativt</RelativeMovement>
 	<RelativeMovementExplained>För att flytta kolonister relativt till deras nuvarande position, håll i följande knapp samtidigt när du håller högre musknappen</RelativeMovementExplained>
 

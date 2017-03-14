@@ -113,7 +113,7 @@ namespace AchtungMod
 				if (colonists.Count() > 0)
 				{
 					bool ignoreMenu = Tools.IsModKeyPressed(Settings.instance.ignoreMenuKey);
-					if (colonists.Count() == 1 && ignoreMenu == false)
+					if (colonists.Count() == 1 && ignoreMenu == Settings.instance.reverseMenuKey)
 					{
 						IEnumerable<FloatMenuOption> choices = FloatMenuMakerMap.ChoicesAtFor(where, colonists.First().pawn);
 						if (choices.Count() > 0)
@@ -127,7 +127,7 @@ namespace AchtungMod
 					MultiActions actions = new MultiActions(colonists, where);
 
 					// present combined menu to the user
-					if (actions.Count() > 0 && ignoreMenu == false)
+					if (actions.Count() > 0 && ignoreMenu == Settings.instance.reverseMenuKey)
 					{
 						Find.WindowStack.Add(actions.GetWindow());
 						Event.current.Use();
@@ -259,7 +259,7 @@ namespace AchtungMod
 			if (Settings.instance.modActive == false) return options;
 
 			bool ignoreMenu = Tools.IsModKeyPressed(Settings.instance.ignoreMenuKey);
-			if (ignoreMenu == false)
+			if (ignoreMenu == Settings.instance.reverseMenuKey)
 			{
 				AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_CleanRoom));
 				AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_FightFire));

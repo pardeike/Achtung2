@@ -15,7 +15,7 @@ namespace AchtungMod
 
 		public Vector2 GetDialogSize()
 		{
-			return new Vector2(500, 590);
+			return new Vector2(500, 620);
 		}
 
 		public override void PreOpen()
@@ -57,6 +57,7 @@ namespace AchtungMod
 				listing.CheckboxEnhanced("AchtungEnabled", ref Settings.instance.modActive);
 				listing.ValueLabeled("ForceDraft", ref Settings.instance.forceDraftKey);
 				listing.ValueLabeled("IgnoreMenu", ref Settings.instance.ignoreMenuKey);
+				listing.CheckboxEnhanced("ReverseIgnoreMenu", ref Settings.instance.reverseMenuKey);
 				listing.ValueLabeled("RelativeMovement", ref Settings.instance.relativeMovementKey);
 				listing.ValueLabeled("BreakLevel", ref Settings.instance.breakLevel);
 				listing.ValueLabeled("HealthLevel", ref Settings.instance.healthLevel);

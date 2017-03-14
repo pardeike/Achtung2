@@ -13,6 +13,9 @@
   <ForceDraftTitle>組合移動</ForceDraftTitle>
   <ForceDraftExplained>按住指定鍵並右鍵拖動來實現選中的已徵召殖民者的組合移動。</ForceDraftExplained>
 
+  <ReverseIgnoreMenuTitle>Reverse context menu key</ReverseIgnoreMenuTitle>
+  <ReverseIgnoreMenuExplained>If checked, the context menu is ignored when you are NOT holding the selected key</ReverseIgnoreMenuExplained>
+
   <IgnoreMenuTitle>忽略右鍵菜單</IgnoreMenuTitle>
   <IgnoreMenuExplained>按住指定键並右鍵點擊來實現在安排已徵召殖民者到達防禦位置時忽略可能彈出的右鍵菜單。</IgnoreMenuExplained>
 

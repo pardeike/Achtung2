@@ -76,15 +76,11 @@ namespace AchtungMod
 	[HarmonyPatch("LogCouldNotReserveError")]
 	static class ReservationManager_LogCouldNotReserveError_Patch
 	{
-		[HarmonyProcessorFactory]
-		static HarmonyProcessor ErrorToWarning(MethodBase original)
+		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var fromMethod = AccessTools.Method(typeof(Log), "Error", new Type[] { typeof(string) });
 			var toMethod = AccessTools.Method(typeof(Log), "Warning", new Type[] { typeof(string) });
-
-			var processor = new HarmonyProcessor();
-			processor.Add(new MethodReplacer(fromMethod, toMethod));
-			return processor;
+			return Transpilers.MethodReplacer(instructions, fromMethod, toMethod);
 		}
 	}
 

@@ -35,6 +35,7 @@ namespace AchtungMod
 		public bool modActive = true;
 		public ModKey forceDraftKey = ModKey.Alt;
 		public ModKey ignoreMenuKey = ModKey.Alt;
+		public bool reverseMenuKey = false;
 		public ModKey relativeMovementKey = ModKey.Shift;
 		public BreakLevel breakLevel = BreakLevel.AlmostExtreme;
 		public HealthLevel healthLevel = HealthLevel.InPainShock;
@@ -46,6 +47,7 @@ namespace AchtungMod
 			Scribe_Values.LookValue<bool>(ref modActive, "Active", true, true);
 			Scribe_Values.LookValue<ModKey>(ref forceDraftKey, "ForceDraft", ModKey.Alt, true);
 			Scribe_Values.LookValue<ModKey>(ref ignoreMenuKey, "IgnoreMenu", ModKey.Alt, true);
+			Scribe_Values.LookValue<bool>(ref reverseMenuKey, "ReverseMenu", false, true);
 			Scribe_Values.LookValue<ModKey>(ref relativeMovementKey, "RelativeMovement", ModKey.Shift, true);
 			Scribe_Values.LookValue<BreakLevel>(ref breakLevel, "BreakLevel", BreakLevel.AlmostExtreme, true);
 			Scribe_Values.LookValue<HealthLevel>(ref healthLevel, "HealthLevel", HealthLevel.InPainShock, true);
