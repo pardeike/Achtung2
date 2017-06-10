@@ -16,8 +16,8 @@
   <IgnoreMenuTitle>忽略右键菜单</IgnoreMenuTitle>
   <IgnoreMenuExplained>按住指定键并右键点击来实现在安排已征召殖民者到达防御位置时忽略可能弹出的右键菜单。</IgnoreMenuExplained>
 
-  <ReverseIgnoreMenuTitle>Reverse context menu key</ReverseIgnoreMenuTitle>
-  <ReverseIgnoreMenuExplained>If checked, the context menu is ignored when you are NOT holding the selected key</ReverseIgnoreMenuExplained>
+  <ReverseIgnoreMenuTitle>反向忽略右键菜单</ReverseIgnoreMenuTitle>
+  <ReverseIgnoreMenuExplained>选中后，当你未按住指定键时，右键菜单的弹出会被忽略。</ReverseIgnoreMenuExplained>
 
   <RelativeMovementTitle>殖民者同步移动</RelativeMovementTitle>
   <RelativeMovementExplained>按住指定键并右键拖动来实现选中的已征召殖民者同步移动至当前位置。</RelativeMovementExplained>
