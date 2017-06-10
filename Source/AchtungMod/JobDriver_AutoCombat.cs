@@ -91,9 +91,9 @@ namespace AchtungMod
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Values.LookValue<AutoCombatState>(ref this.state, "state", AutoCombatState.Moving, false);
-			Scribe_Values.LookValue<AttackStyle>(ref this.attackStyle, "attackStyle", AttackStyle.None, false);
-			Scribe_References.LookReference<Pawn>(ref target, "target");
+			Scribe_Values.Look(ref state, "state", AutoCombatState.Moving, false);
+			Scribe_Values.Look(ref attackStyle, "attackStyle", AttackStyle.None, false);
+			Scribe_References.Look(ref target, "target");
 		}
 
 		public bool ValidTarget(LocalTargetInfo info)
@@ -328,7 +328,8 @@ namespace AchtungMod
 
 		public bool TryShoot(Action callback)
 		{
-			currentVerb.castCompleteCallback?.Invoke();
+			if (currentVerb.castCompleteCallback != null)
+				currentVerb.castCompleteCallback.Invoke();
 			currentVerb.castCompleteCallback = delegate
 			{
 				currentVerb.castCompleteCallback = null;
@@ -577,8 +578,8 @@ namespace AchtungMod
 
 		public override string GetReport()
 		{
-			string s1 = target == null ? "" : " (" + target.NameStringShort + ")";
-			string s2 = target == null ? "" : "at " + target.NameStringShort;
+			// string s1 = target == null ? "" : " (" + target.NameStringShort + ")";
+			// string s2 = target == null ? "" : "at " + target.NameStringShort;
 			string name = target == null ? "target" : target.NameStringShort;
 			string status = (GetPrefix() + state).Translate(name);
 			return (GetPrefix() + "Report").Translate(status);

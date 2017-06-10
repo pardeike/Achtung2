@@ -44,31 +44,33 @@ namespace AchtungMod
 		public override void DoWindowContents(Rect rect)
 		{
 			rect.height = 2000f;
-			var listing = new Listing_Standard(rect);
-			{
-				Text.Font = GameFont.Medium;
-				listing.Label("AchtungSettingsTitle".Translate());
-				Text.Font = GameFont.Tiny;
-				GUI.color = Color.white;
-				listing.Label("Version " + Tools.Version + ", © 2016 Andreas Pardeike");
-				listing.Gap();
-				Text.Font = GameFont.Medium;
+			var listing = new Listing_Standard();
 
-				listing.CheckboxEnhanced("AchtungEnabled", ref Settings.instance.modActive);
-				listing.ValueLabeled("ForceDraft", ref Settings.instance.forceDraftKey);
-				listing.ValueLabeled("IgnoreMenu", ref Settings.instance.ignoreMenuKey);
-				listing.CheckboxEnhanced("ReverseIgnoreMenu", ref Settings.instance.reverseMenuKey);
-				listing.ValueLabeled("RelativeMovement", ref Settings.instance.relativeMovementKey);
-				listing.ValueLabeled("BreakLevel", ref Settings.instance.breakLevel);
-				listing.ValueLabeled("HealthLevel", ref Settings.instance.healthLevel);
+			listing.Begin(rect);
 
-				Text.Font = GameFont.Small;
-				GUI.color = Color.white;
-				listing.Label("Auto Combat Aggressiveness " + GenText.ToStringPercent(Settings.instance.aggressiveness));
-				Settings.instance.aggressiveness = listing.Slider(Settings.instance.aggressiveness, 0f, 1f);
+			Text.Font = GameFont.Medium;
+			listing.Label("AchtungSettingsTitle".Translate());
+			Text.Font = GameFont.Tiny;
+			GUI.color = Color.white;
+			listing.Label("Version " + Tools.Version + ", © 2016 Andreas Pardeike");
+			listing.Gap();
+			Text.Font = GameFont.Medium;
 
-				listing.CheckboxEnhanced("DebugPositions", ref Settings.instance.debugPositions);
-			}
+			listing.CheckboxEnhanced("AchtungEnabled", ref Settings.instance.modActive);
+			listing.ValueLabeled("ForceDraft", ref Settings.instance.forceDraftKey);
+			listing.ValueLabeled("IgnoreMenu", ref Settings.instance.ignoreMenuKey);
+			listing.CheckboxEnhanced("ReverseIgnoreMenu", ref Settings.instance.reverseMenuKey);
+			listing.ValueLabeled("RelativeMovement", ref Settings.instance.relativeMovementKey);
+			listing.ValueLabeled("BreakLevel", ref Settings.instance.breakLevel);
+			listing.ValueLabeled("HealthLevel", ref Settings.instance.healthLevel);
+
+			Text.Font = GameFont.Small;
+			GUI.color = Color.white;
+			listing.Label("Auto Combat Aggressiveness " + GenText.ToStringPercent(Settings.instance.aggressiveness));
+			Settings.instance.aggressiveness = listing.Slider(Settings.instance.aggressiveness, 0f, 1f);
+
+			listing.CheckboxEnhanced("DebugPositions", ref Settings.instance.debugPositions);
+
 			listing.End();
 		}
 	}

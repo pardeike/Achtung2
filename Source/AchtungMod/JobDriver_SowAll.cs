@@ -74,7 +74,7 @@ namespace AchtungMod
 		{
 			if (pawn.skills == null) return null;
 
-			Room room = RoomQuery.RoomAt(target.Cell, pawn.Map);
+			Room room = RegionAndRoomQuery.RoomAt(target.Cell, pawn.Map);
 			if (room != null && room.IsHuge == false)
 			{
 				HashSet<IntVec3> growerCells = new HashSet<IntVec3>(Find.VisibleMap.listerBuildings.allBuildingsColonist
@@ -188,7 +188,7 @@ namespace AchtungMod
 				subCounter = 0;
 				if (plant.def.plant.harvestedThingDef != null)
 				{
-					if ((pawn.RaceProps.Humanlike && plant.def.plant.harvestFailable) && (Rand.Value < pawn.GetStatValue(StatDefOf.HarvestFailChance, true)))
+					if (pawn.RaceProps.Humanlike && plant.def.plant.harvestFailable && Rand.Value > pawn.GetStatValue(StatDefOf.PlantHarvestYield, true))
 					{
 						Vector3 loc = (Vector3)((pawn.DrawPos + plant.DrawPos) / 2f);
 						ThrowText(loc, "HarvestFailed".Translate());
@@ -256,7 +256,7 @@ namespace AchtungMod
 
 		public override string GetReport()
 		{
-			Zone_Growing zone = Find.VisibleMap.zoneManager.ZoneAt(TargetA.Cell) as Zone_Growing;
+			// Zone_Growing zone = Find.VisibleMap.zoneManager.ZoneAt(TargetA.Cell) as Zone_Growing;
 			string name = currentPlantDef == null ? "" : " " + currentPlantDef.label;
 			return (GetPrefix() + "Report").Translate(new object[] { name, Math.Floor(Progress() * 100f) + "%" });
 		}

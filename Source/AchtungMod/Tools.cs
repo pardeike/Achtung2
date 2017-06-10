@@ -140,7 +140,7 @@ namespace AchtungMod
 					pawn.drafter != null
 					&& pawn.IsColonistPlayerControlled
 					&& pawn.Downed == false
-					&& pawn.jobs.CanTakeOrderedJob()
+					&& pawn.jobs.IsCurrentJobPlayerInterruptible()
 				);
 		}
 

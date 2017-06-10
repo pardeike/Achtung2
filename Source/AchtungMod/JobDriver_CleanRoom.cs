@@ -41,7 +41,7 @@ namespace AchtungMod
 		public IEnumerable<Thing> AllWorkInRoom(Room room, Pawn pawn)
 		{
 			return room
-				.AllContainedThings.OfType<Filth>().Cast<Thing>()
+				.ContainedAndAdjacentThings.OfType<Filth>().Cast<Thing>()
 				.Where(f => f.Destroyed == false && pawn.CanReach(f, PathEndMode.Touch, pawn.NormalMaxDanger()) && pawn.CanReserve(f, 1))
 				.OrderBy(f => Math.Abs(f.Position.x - pawn.Position.x) + Math.Abs(f.Position.z - pawn.Position.z));
 		}
@@ -49,7 +49,7 @@ namespace AchtungMod
 		// room info
 		public RoomInfo WorkInfoAt(Pawn pawn, LocalTargetInfo target)
 		{
-			Room room = RoomQuery.RoomAt(target.Cell, pawn.Map);
+			Room room = RegionAndRoomQuery.RoomAt(target.Cell, pawn.Map);
 			if (room == null || room.IsHuge) return new RoomInfo(room, false);
 			if (AllWorkInRoom(room, pawn).Count() == 0) return new RoomInfo(room, false);
 			return new RoomInfo(room, true);

@@ -93,7 +93,7 @@ namespace AchtungMod
 					&& pawn.drafter != null
 					&& pawn.IsColonistPlayerControlled
 					&& pawn.Downed == false
-					&& pawn.jobs.CanTakeOrderedJob()
+					&& pawn.jobs.IsCurrentJobPlayerInterruptible()
 				);
 
 			foreach (Pawn tempPawn in pawns) temp.Add(new Colonist(tempPawn, forceDraft));
@@ -292,7 +292,7 @@ namespace AchtungMod
 					{
 						Tools.SetDraftStatus(colonist.pawn, colonist.originalDraftStatus);
 						colonist.pawn.mindState.priorityWork.Clear();
-						if ((colonist.pawn.jobs.curJob != null) && colonist.pawn.jobs.CanTakeOrderedJob())
+						if (colonist.pawn.jobs.curJob != null && colonist.pawn.jobs.IsCurrentJobPlayerInterruptible())
 						{
 							colonist.pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
 						}

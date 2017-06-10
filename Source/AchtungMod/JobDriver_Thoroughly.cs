@@ -36,7 +36,7 @@ namespace AchtungMod
 			def.reportString = (GetPrefix() + "InfoText").Translate();
 			def.description = (GetPrefix() + "Description").Translate();
 			def.playerInterruptible = true;
-			def.canCheckOverrideOnDamage = true;
+			def.checkOverrideOnDamage = CheckJobOverrideOnDamageMode.Always;
 			def.suspendable = true;
 			def.alwaysShowWeapon = false;
 			def.neverShowWeapon = true;
@@ -47,11 +47,11 @@ namespace AchtungMod
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Collections.LookHashSet<IntVec3>(ref this.workLocations, "workLocations");
-			Scribe_Values.LookValue<bool>(ref this.isMoving, "isMoving", false, false);
-			Scribe_Values.LookValue<float>(ref this.subCounter, "subCounter", 0, false);
-			Scribe_Values.LookValue<float>(ref this.currentWorkCount, "currentWorkCount", -1f, false);
-			Scribe_Values.LookValue<float>(ref this.totalWorkCount, "totalWorkCount", -1f, false);
+			Scribe_Collections.Look(ref workLocations, "workLocations");
+			Scribe_Values.Look(ref isMoving, "isMoving", false, false);
+			Scribe_Values.Look(ref subCounter, "subCounter", 0, false);
+			Scribe_Values.Look(ref currentWorkCount, "currentWorkCount", -1f, false);
+			Scribe_Values.Look(ref totalWorkCount, "totalWorkCount", -1f, false);
 		}
 
 		public virtual IEnumerable<LocalTargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
@@ -68,7 +68,7 @@ namespace AchtungMod
 			if (queue == null) return jobs;
 			for (int i = -1; i < queue.Count; i++)
 			{
-				Job job = i == -1 && pawn.CurJob != null ? pawn.CurJob : queue[i];
+				Job job = i == -1 && pawn.CurJob != null ? pawn.CurJob : queue[i].job;
 				if (job.def.driverClass.IsInstanceOfType(this)) jobs.Add(job);
 			}
 			return jobs;
@@ -173,7 +173,7 @@ namespace AchtungMod
 				EndJobWith(JobCondition.Incompletable);
 				string jobName = (GetPrefix() + "Label").Translate();
 				string label = "JobInterruptedLabel".Translate(jobName);
-				Find.LetterStack.ReceiveLetter(new Letter(label, "JobInterruptedBreakdown".Translate(pawn.NameStringShort), LetterType.BadNonUrgent, pawn));
+				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(pawn.NameStringShort), LetterDefOf.BadNonUrgent, pawn));
 				return;
 			}
 
@@ -182,7 +182,7 @@ namespace AchtungMod
 				Find.VisibleMap.pawnDestinationManager.UnreserveAllFor(pawn);
 				EndJobWith(JobCondition.Incompletable);
 				string jobName = (GetPrefix() + "Label").Translate();
-				Find.LetterStack.ReceiveLetter(new Letter("JobInterruptedLabel".Translate(jobName), "JobInterruptedBadHealth".Translate(pawn.NameStringShort), LetterType.BadNonUrgent, pawn));
+				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter("JobInterruptedLabel".Translate(jobName), "JobInterruptedBadHealth".Translate(pawn.NameStringShort), LetterDefOf.BadNonUrgent, pawn));
 				return;
 			}
 		}

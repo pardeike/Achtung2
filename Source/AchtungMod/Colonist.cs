@@ -27,7 +27,7 @@ namespace AchtungMod
 		public IntVec3 UpdateOrderPos(Vector3 pos)
 		{
 			IntVec3 bestCell = RCellFinder.BestOrderedGotoDestNear(pos.ToIntVec3(), pawn);
-			if (bestCell != null && bestCell.InBounds(pawn.Map))
+			if (bestCell.InBounds(pawn.Map))
 			{
 				designation = bestCell.ToVector3Shifted();
 				designation.y = Altitudes.AltitudeFor(AltitudeLayer.Pawn);
@@ -44,7 +44,7 @@ namespace AchtungMod
 				lastOrder = bestCell;
 
 				Job job = new Job(JobDefOf.Goto, bestCell);
-				if (pawn.jobs.CanTakeOrderedJob())
+				if (pawn.jobs.IsCurrentJobPlayerInterruptible())
 				{
 					pawn.jobs.TryTakeOrderedJob(job);
 				}

@@ -44,15 +44,15 @@ namespace AchtungMod
 
 		public void ExposeData()
 		{
-			Scribe_Values.LookValue<bool>(ref modActive, "Active", true, true);
-			Scribe_Values.LookValue<ModKey>(ref forceDraftKey, "ForceDraft", ModKey.Alt, true);
-			Scribe_Values.LookValue<ModKey>(ref ignoreMenuKey, "IgnoreMenu", ModKey.Alt, true);
-			Scribe_Values.LookValue<bool>(ref reverseMenuKey, "ReverseMenu", false, true);
-			Scribe_Values.LookValue<ModKey>(ref relativeMovementKey, "RelativeMovement", ModKey.Shift, true);
-			Scribe_Values.LookValue<BreakLevel>(ref breakLevel, "BreakLevel", BreakLevel.AlmostExtreme, true);
-			Scribe_Values.LookValue<HealthLevel>(ref healthLevel, "HealthLevel", HealthLevel.InPainShock, true);
-			Scribe_Values.LookValue<float>(ref aggressiveness, "Aggressiveness", 0.5f, true);
-			Scribe_Values.LookValue<bool>(ref debugPositions, "DebugPositions", false, true);
+			Scribe_Values.Look(ref modActive, "Active", true, true);
+			Scribe_Values.Look(ref forceDraftKey, "ForceDraft", ModKey.Alt, true);
+			Scribe_Values.Look(ref ignoreMenuKey, "IgnoreMenu", ModKey.Alt, true);
+			Scribe_Values.Look(ref reverseMenuKey, "ReverseMenu", false, true);
+			Scribe_Values.Look(ref relativeMovementKey, "RelativeMovement", ModKey.Shift, true);
+			Scribe_Values.Look(ref breakLevel, "BreakLevel", BreakLevel.AlmostExtreme, true);
+			Scribe_Values.Look(ref healthLevel, "HealthLevel", HealthLevel.InPainShock, true);
+			Scribe_Values.Look(ref aggressiveness, "Aggressiveness", 0.5f, true);
+			Scribe_Values.Look(ref debugPositions, "DebugPositions", false, true);
 		}
 
 		//
@@ -64,24 +64,24 @@ namespace AchtungMod
 		{
 			if (File.Exists(settingsPath))
 			{
-				Scribe.InitLoading(settingsPath);
+				Scribe.loader.InitLoading(settingsPath);
 				if (Scribe.mode == LoadSaveMode.LoadingVars)
 				{
-					Scribe_Deep.LookDeep<Settings>(ref Settings.instance, "Settings", new object[0]);
+					Scribe_Deep.Look(ref Settings.instance, "Settings", new object[0]);
 				}
-				Scribe.FinalizeLoading();
+				Scribe.loader.FinalizeLoading();
 				Scribe.mode = LoadSaveMode.Inactive;
 			}
 		}
 
 		public static void Save()
 		{
-			Scribe.InitWriting(settingsPath, "AchtungConfiguration");
+			Scribe.saver.InitSaving(settingsPath, "AchtungConfiguration");
 			if (Scribe.mode == LoadSaveMode.Saving)
 			{
-				Scribe_Deep.LookDeep<Settings>(ref Settings.instance, "Settings", new object[0]);
+				Scribe_Deep.Look(ref Settings.instance, "Settings", new object[0]);
 			}
-			Scribe.FinalizeWriting();
+			Scribe.saver.FinalizeSaving();
 			Scribe.mode = LoadSaveMode.Inactive;
 		}
 	}
