@@ -399,12 +399,17 @@ namespace AchtungMod
 			HashSet<Projectile> activeProjectiles = new HashSet<Projectile>();
 
 			Find.VisibleMap.mapPawns.AllPawnsSpawned
-				 .Where(p => p.Spawned == true && p.Destroyed == false && p.Downed == false && p.Dead == false)
-				 .DoIf(p => p.equipment != null && p.equipment.Primary != null, p =>
-				 {
-					 ThingDef def = p.equipment.PrimaryEq.PrimaryVerb.verbProps.projectileDef;
-					 if (def != null) activeProjectiles.UnionWith(Find.VisibleMap.listerThings.ThingsOfDef(def).Cast<Projectile>());
-				 });
+				.Where(p => p.Spawned == true && p.Destroyed == false && p.Downed == false && p.Dead == false)
+				.DoIf(p => p.equipment != null && p.equipment.Primary != null, p =>
+				{
+					ThingDef def = p.equipment.PrimaryEq.PrimaryVerb.verbProps.projectileDef;
+					if (def != null) activeProjectiles.UnionWith(
+						Find.VisibleMap.listerThings
+							.ThingsOfDef(def)
+							.Select(t => t as Projectile)
+							.Where(t => t != null)
+					);
+				});
 
 			Dictionary<Projectile, ProjectileInfo> remaining = new Dictionary<Projectile, ProjectileInfo>();
 			projectiles.Keys.DoIf(p => activeProjectiles.Contains(p), p => remaining.Add(p, projectiles[p]));
