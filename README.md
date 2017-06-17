@@ -70,7 +70,7 @@ Here are the current problems and their workarounds for the current version:
 
 ##### Requirements
 
-Achtung! Mod works with RimWorld Alpha 14 and 15 and will get updated tightly with new RimWorld versions. I does not depend on any other mods and is known to work in any mod order you like.
+Achtung! Mod works with RimWorld Alpha 17 and will get updated tightly with new RimWorld versions. I does not depend on any other mods and is known to work in any mod order you like.
 
 ---
 
