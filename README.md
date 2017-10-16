@@ -87,7 +87,7 @@ Alternatively, download the zip file from [GitHub](https://github.com/pardeike/R
 Without feedback, this mod would have never come so far. So please, send me feedback and rate and recommend my mod whenever possible. The three main places to do so are
 
 - [Ludeon Forums](https://ludeon.com/forums/index.php?topic=22130.0)
-- [Steam Workshop](http://steamcommunity.com/sharedfiles/filedetails/comments/730936602)
+- [Steam Workshop](http://steamcommunity.com/sharedfiles/filedetails/?id=730936602)
 - [GitHub](https://github.com/pardeike/RimWorld-Achtung-Mod)
 
 ---
