@@ -59,9 +59,9 @@ namespace AchtungMod
 
 		public void Initialize()
 		{
-			Messages.Message("AchtungOptions".Translate(), MessageSound.Benefit);
+			Messages.Message("AchtungOptions".Translate(), MessageTypeDefOf.PositiveEvent);
 			string state = Settings.instance.modActive ? "" : "AchtungOff".Translate();
-			Messages.Message("AchtungVersion".Translate(Tools.Version, state), MessageSound.Silent);
+			Messages.Message("AchtungVersion".Translate(Tools.Version, state), MessageTypeDefOf.SilentInput);
 		}
 
 		public void InstallJobDefs()
@@ -402,10 +402,10 @@ namespace AchtungMod
 				.Where(p => p.Spawned == true && p.Destroyed == false && p.Downed == false && p.Dead == false)
 				.DoIf(p => p.equipment != null && p.equipment.Primary != null, p =>
 				{
-					ThingDef def = p.equipment.PrimaryEq.PrimaryVerb.verbProps.projectileDef;
-					if (def != null) activeProjectiles.UnionWith(
+					var projectile = p.CurrentEffectiveVerb.GetProjectile();
+					if (projectile != null) activeProjectiles.UnionWith(
 						Find.VisibleMap.listerThings
-							.ThingsOfDef(def)
+							.ThingsOfDef(projectile)
 							.Select(t => t as Projectile)
 							.Where(t => t != null)
 					);

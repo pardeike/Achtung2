@@ -59,5 +59,10 @@ namespace AchtungMod
 			}
 			return false;
 		}
+
+		public override bool TryMakePreToilReservations()
+		{
+			return true;
+		}
 	}
 }

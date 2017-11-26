@@ -335,7 +335,7 @@ namespace AchtungMod
 				currentVerb.castCompleteCallback = null;
 				callback();
 			};
-			pawn.Drawer.rotator.FaceCell(target.Position);
+			pawn.rotationTracker.FaceCell(target.Position);
 			return currentVerb.TryStartCastOn(target, false, true);
 		}
 
@@ -357,7 +357,7 @@ namespace AchtungMod
 			if (destination.IsValid && Find.VisibleMap.reservationManager.CanReserve(pawn, destination))
 			{
 				pathEndLocation = destination;
-				Find.VisibleMap.reservationManager.Reserve(pawn, pathEndLocation);
+				Find.VisibleMap.reservationManager.Reserve(pawn, job, pathEndLocation);
 				pawn.pather.StartPath(destination, PathEndMode.OnCell);
 				return true;
 			}
@@ -369,7 +369,7 @@ namespace AchtungMod
 			if (pathEndLocation.IsValid)
 			{
 				if (Find.VisibleMap.reservationManager.ReservedBy(pathEndLocation, pawn))
-					Find.VisibleMap.reservationManager.Release(pathEndLocation, pawn);
+					Find.VisibleMap.reservationManager.Release(pathEndLocation, pawn, job);
 				pathEndCallback(failure);
 				pathEndCallback = b => { };
 			}
@@ -387,7 +387,7 @@ namespace AchtungMod
 				if (ValidTarget(target) == false)
 				{
 					Controller.ClearDebugPositions();
-					Find.VisibleMap.pawnDestinationManager.UnreserveAllFor(pawn);
+					Find.VisibleMap.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
 					EndJobWith(JobCondition.Succeeded);
 					return;
 				}
@@ -398,7 +398,7 @@ namespace AchtungMod
 			if (pawn.Dead || pawn.Downed || pawn.HasAttachment(ThingDefOf.Fire) || badStates.Contains(pawn.MentalStateDef))
 			{
 				Controller.ClearDebugPositions();
-				Find.VisibleMap.pawnDestinationManager.UnreserveAllFor(pawn);
+				Find.VisibleMap.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
 				EndJobWith(JobCondition.Incompletable);
 				return;
 			}
@@ -430,7 +430,7 @@ namespace AchtungMod
 									{
 										if (doorCheesePosition.IsValid)
 										{
-											Find.VisibleMap.reservationManager.Release(doorCheesePosition, pawn);
+											Find.VisibleMap.reservationManager.Release(doorCheesePosition, pawn, job);
 											doorCheesePosition = IntVec3.Invalid;
 										}
 										doorCheese = DoorCheese.None;
@@ -447,10 +447,11 @@ namespace AchtungMod
 
 								if (TryShoot(shootingEnded))
 								{
-									if (doorCheesePosition.IsValid) Find.VisibleMap.reservationManager.Release(doorCheesePosition, pawn);
+									if (doorCheesePosition.IsValid) 
+										Find.VisibleMap.reservationManager.Release(doorCheesePosition, pawn, job);
 
 									doorCheesePosition = door.Position;
-									Find.VisibleMap.reservationManager.Reserve(pawn, doorCheesePosition);
+									Find.VisibleMap.reservationManager.Reserve(pawn, job, doorCheesePosition);
 									doorCheese = DoorCheese.Shooting;
 									state = AutoCombatState.Shooting;
 									return;
@@ -461,7 +462,7 @@ namespace AchtungMod
 							{
 								if (doorCheesePosition.IsValid)
 								{
-									Find.VisibleMap.reservationManager.Release(doorCheesePosition, pawn);
+									Find.VisibleMap.reservationManager.Release(doorCheesePosition, pawn, job);
 									doorCheesePosition = IntVec3.Invalid;
 									state = AutoCombatState.Ready;
 								}
@@ -478,7 +479,7 @@ namespace AchtungMod
 							{
 								if (doorCheesePosition.IsValid)
 								{
-									Find.VisibleMap.reservationManager.Release(doorCheesePosition, pawn);
+									Find.VisibleMap.reservationManager.Release(doorCheesePosition, pawn, job);
 									doorCheesePosition = IntVec3.Invalid;
 								}
 								doorCheese = DoorCheese.None;
@@ -496,7 +497,7 @@ namespace AchtungMod
 						if (pawn.Position != beforeDoorPosition) return;
 						if (doorCheesePosition.IsValid)
 						{
-							Find.VisibleMap.reservationManager.Release(doorCheesePosition, pawn);
+							Find.VisibleMap.reservationManager.Release(doorCheesePosition, pawn, job);
 							doorCheesePosition = IntVec3.Invalid;
 						}
 						doorCheese = DoorCheese.None;
@@ -589,6 +590,11 @@ namespace AchtungMod
 		{
 			Toil toil = base.MakeNewToils().First();
 			yield return toil;
+		}
+
+		public override bool TryMakePreToilReservations()
+		{
+			return true;
 		}
 	}
 }

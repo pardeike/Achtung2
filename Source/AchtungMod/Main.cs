@@ -100,7 +100,7 @@ namespace AchtungMod
 	//
 	[HarmonyPatch(typeof(Projectile))]
 	[HarmonyPatch("Launch")]
-	[HarmonyPatch(new Type[] { typeof(Thing), typeof(Vector3), typeof(LocalTargetInfo), typeof(Thing) })]
+	[HarmonyPatch(new Type[] { typeof(Thing), typeof(Vector3), typeof(LocalTargetInfo), typeof(Thing), typeof(Thing) })]
 	static class Projectile_Launch_Patch
 	{
 		static void Prefix(Projectile __instance, Thing launcher, Vector3 origin, LocalTargetInfo targ, Thing equipment)

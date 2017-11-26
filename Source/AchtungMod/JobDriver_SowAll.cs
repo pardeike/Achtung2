@@ -260,5 +260,10 @@ namespace AchtungMod
 			string name = currentPlantDef == null ? "" : " " + currentPlantDef.label;
 			return (GetPrefix() + "Report").Translate(new object[] { name, Math.Floor(Progress() * 100f) + "%" });
 		}
+
+		public override bool TryMakePreToilReservations()
+		{
+			return true;
+		}
 	}
 }

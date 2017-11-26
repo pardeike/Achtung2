@@ -162,27 +162,27 @@ namespace AchtungMod
 		{
 			if (pawn.Dead || pawn.Downed || pawn.HasAttachment(ThingDefOf.Fire))
 			{
-				Find.VisibleMap.pawnDestinationManager.UnreserveAllFor(pawn);
+				Find.VisibleMap.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
 				EndJobWith(JobCondition.Incompletable);
 				return;
 			}
 
 			if (GetPawnBreakLevel()())
 			{
-				Find.VisibleMap.pawnDestinationManager.UnreserveAllFor(pawn);
+				Find.VisibleMap.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
 				EndJobWith(JobCondition.Incompletable);
 				string jobName = (GetPrefix() + "Label").Translate();
 				string label = "JobInterruptedLabel".Translate(jobName);
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(pawn.NameStringShort), LetterDefOf.BadNonUrgent, pawn));
+				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(pawn.NameStringShort), LetterDefOf.NegativeEvent, pawn));
 				return;
 			}
 
 			if (GetPawnHealthLevel()())
 			{
-				Find.VisibleMap.pawnDestinationManager.UnreserveAllFor(pawn);
+				Find.VisibleMap.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
 				EndJobWith(JobCondition.Incompletable);
 				string jobName = (GetPrefix() + "Label").Translate();
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter("JobInterruptedLabel".Translate(jobName), "JobInterruptedBadHealth".Translate(pawn.NameStringShort), LetterDefOf.BadNonUrgent, pawn));
+				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter("JobInterruptedLabel".Translate(jobName), "JobInterruptedBadHealth".Translate(pawn.NameStringShort), LetterDefOf.NegativeEvent, pawn));
 				return;
 			}
 		}
@@ -197,7 +197,7 @@ namespace AchtungMod
 				currentItem = FindNextWorkItem();
 				if (CurrentItemInvalid() == false)
 				{
-					Find.VisibleMap.reservationManager.Reserve(pawn, currentItem);
+					Find.VisibleMap.reservationManager.Reserve(pawn, job, currentItem);
 					pawn.CurJob.SetTarget(TargetIndex.A, currentItem);
 				}
 			}

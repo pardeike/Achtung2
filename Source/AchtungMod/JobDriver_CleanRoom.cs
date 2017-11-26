@@ -91,5 +91,10 @@ namespace AchtungMod
 
 			yield return toil;
 		}
+
+		public override bool TryMakePreToilReservations()
+		{
+			return true;
+		}
 	}
 }
