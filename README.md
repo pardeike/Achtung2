@@ -36,7 +36,7 @@ Within RimWorld in combat, you want your colonists neatly positioned along a lin
 ##### Important tasks
 
 Some tasks are too important to be interrupted. Like cleaning that hospital room so nobody gets infected. That's why Achtung! has a few extra commands that will make sure that something is really done well.
-For now, this is "Clean Room", "Fight Fire", "Sow Zone/Room" and the new "Auto Combat". More are planned in the future.
+For now, this is "Clean Room", "Fight Fire", and "Sow Zone/Room". More are planned in the future.
 
 When you choose "Clean Room", the colonist(s) will start cleaning the room until you stop them or the room is really clean. They will check the room while cleaning so that it doesn't matter if other colonists might introduce new filth while the cleaning is ongoing.
 
@@ -44,13 +44,11 @@ The command "Fight Fire" works outside the home area and is useful if you don't 
 
 Choosing "Sow Zone/Room" will make sure that the zone selected or all growing inside a room will be sowed completely. Time consuming tasks like removing other large plants like trees or hauling away objects are not performed to avoid exhaustion.
 
-A completely novel feature is "Auto Combat". Achtung! has its own build in artificial intelligence that controls your colonists for you. All you have to do is to order a few colonists to their targets and they will get there on their own, keep a safe distance and shoot/position themselves intelligently until the job is done. Perfect for those occasions where you are busy dealing with a bigger issue. For now, this is an experimental feature and with more than a handful colonists or opponents will probably force your computer to its knees. But used smart it will be a useful feature!
-
 ---
 
-##### Flexibility
+##### Settings
 
-A few commands have different way to behave. Achtung! uses both: the ALT and the SHIFT key to modify the way it works. Hold SHIFT to move colonists relative to their current position. Hold ALT while right-clicking to draft your selected colonists before the operation and to suppress the context menu.
+Achtung uses the default way to access mod settings. There, you find switches to turn certain features on/off and you can change the default keys to your liking.
 
 ---
 
@@ -64,13 +62,11 @@ Here are the current problems and their workarounds for the current version:
 
 - The jobs in Achtung have 1st priority (that's the whole point). They all force the colonist to work until done and if you don't keep an eye on them, they become unhappy or injured. Currently, there is a build-in prevention to avoid the worst but this option is not yet configurable and kicks only in as a last resort and cancels the job. But that's how we roll here at Achtung! Workaround: if you want the soft solution just schedule stuff and hope for the best ;-)
 
-- The new "Auto Combat" system is not optimized and will eat your CPU for breakfast. It probably will do stupid things and may not work as expected if you have exotic locations or mods that change the basic combat. Workaround: use it wisely and avoid too many colonists/enemies at the same time.
-
 ---
 
 ##### Requirements
 
-Achtung! Mod works with RimWorld Alpha 17 and will get updated tightly with new RimWorld versions. I does not depend on any other mods and is known to work in any mod order you like.
+Achtung! Mod works with RimWorld B18 and will get updated in-sync with RimWorld. I does not depend on any other mods and is known to work in any mod order you like.
 
 ---
 
@@ -109,10 +105,6 @@ Most likely. I don't know of any mods altering the selection mechanism. The cont
 ###### Why is this called "Achtung!" ?
 
 It's german for "Attention!" and used in the military as a command to line up soldiers.
-
-###### Why do I need Auto Combat? Isn't this just the auto response thing already in the game?
-
-Not at all. For example: Once you get a raid or siege you cannot auto respond to it. First, those raiders are usually out of sight and second even if you get your colonists there they are usually drafted which means that they will just stand still once they're done. All this and a super smart positioning system will beat the living hell out of the build in auto response.
 
 ###### I think this should work different/better. Are you open for changes or improvement requests?
 
