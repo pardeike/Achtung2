@@ -20,9 +20,9 @@ namespace AchtungMod
 			base.CanStart(pawn, clickPos);
 			if (pawn.workSettings.GetPriority(WorkTypeDefOf.Firefighter) == 0) return null;
 			LocalTargetInfo cell = IntVec3.FromVector3(clickPos);
-			Thing item = Find.VisibleMap.thingGrid.ThingAt(cell.Cell, ThingDefOf.Fire);
+			var item = pawn.Map.thingGrid.ThingAt(cell.Cell, ThingDefOf.Fire);
 			if (item == null) return null;
-			bool canFight = item.Destroyed == false && pawn.CanReach(item, PathEndMode.Touch, pawn.NormalMaxDanger()) && pawn.CanReserve(item, 1);
+			var canFight = item.Destroyed == false && pawn.CanReach(item, PathEndMode.Touch, pawn.NormalMaxDanger()) && pawn.CanReserve(item, 1);
 			return canFight ? new List<LocalTargetInfo> { cell } : null;
 		}
 
@@ -30,10 +30,10 @@ namespace AchtungMod
 		{
 			workLocations.ToList().Do(pos =>
 			{
-				if (Find.VisibleMap.thingGrid.CellContains(pos, ThingDefOf.Fire) == false) workLocations.Remove(pos);
+				if (pawn.Map.thingGrid.CellContains(pos, ThingDefOf.Fire) == false) workLocations.Remove(pos);
 				GenAdj.CellsAdjacent8Way(new LocalTargetInfo(pos).ToTargetInfo(pawn.Map))
 					.Where(loc => workLocations.Contains(loc) == false)
-					.Where(loc => Find.VisibleMap.thingGrid.CellContains(loc, ThingDefOf.Fire))
+					.Where(loc => pawn.Map.thingGrid.CellContains(loc, ThingDefOf.Fire))
 					.Do(loc => workLocations.Add(loc));
 			});
 			currentWorkCount = workLocations.Count();
@@ -44,9 +44,8 @@ namespace AchtungMod
 		{
 			return workLocations
 				.OrderBy(loc => Math.Abs(loc.x - pawn.Position.x) + Math.Abs(loc.z - pawn.Position.z))
-				.Select(loc => Find.VisibleMap.thingGrid.ThingAt(loc, ThingDefOf.Fire) as Fire)
-				.Where(f => f.Destroyed == false && pawn.CanReach(f, PathEndMode.Touch, pawn.NormalMaxDanger()) && pawn.CanReserve(f, 1))
-				.FirstOrDefault();
+				.Select(loc => pawn.Map.thingGrid.ThingAt(loc, ThingDefOf.Fire) as Fire)
+				.FirstOrDefault(f => f.Destroyed == false && pawn.CanReach(f, PathEndMode.Touch, pawn.NormalMaxDanger()) && pawn.CanReserve(f, 1));
 		}
 
 		public override bool DoWorkToItem()

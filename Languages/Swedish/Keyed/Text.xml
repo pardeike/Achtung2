@@ -1,26 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
-	<AchtungVersion>Med stöd från Achtung! Mod {0} {1}</AchtungVersion>
-	<AchtungOff>(AV)</AchtungOff>
-	<AchtungOptions>Tryck Shift-Return för Inställningar</AchtungOptions>
-
-	<AchtungSettingsTitle>Achtung! Mod</AchtungSettingsTitle>
-
-	<AchtungEnabledTitle>Aktivt</AchtungEnabledTitle>
-	<AchtungEnabledExplained>Den här Modden kan aktiveras/avaktiveras utan att man måste starta om RimWorld</AchtungEnabledExplained>
-
 	<ForceDraftTitle>Tvinga kontroll</ForceDraftTitle>
-	<ForceDraftExplained>För att ertvinga kontroll öve en kolonist, håll i följande knapp när du högerklicker</ForceDraftExplained>
+	<ForceDraftExplained>För att ertvinga kontroll öve en kolonist, välj det här alternativet</ForceDraftExplained>
 
-	<IgnoreMenuTitle>Ignorera kontextmenyn</IgnoreMenuTitle>
-	<IgnoreMenuExplained>För att ignorera kontextmenyn när du vill positionera kolonister, håll i följande knapp när du högerklicker</IgnoreMenuExplained>
+	<ForceCommandMenuTitle>Tvinga kontextmenyn</ForceCommandMenuTitle>
+	<ForceCommandMenuExplained>För att visa kontextmenyn när du vill positionera kolonister, håll i följande knapp när du högerklicker</ForceCommandMenuExplained>
 
-	<ReverseIgnoreMenuTitle>Ignorera kontextmenyn omvänd</ReverseIgnoreMenuTitle>
-	<ReverseIgnoreMenuExplained>Kontextmenyn ignoreras när knappen INTE hålls i</ReverseIgnoreMenuExplained>
-
-	<RelativeMovement>Flytta kolonister relativt</RelativeMovement>
+	<RelativeMovementTitle>Flytta kolonister relativt</RelativeMovement>
 	<RelativeMovementExplained>För att flytta kolonister relativt till deras nuvarande position, håll i följande knapp samtidigt när du håller högre musknappen</RelativeMovementExplained>
+
+	<ShowWeaponRangesTitle>Visa vapenräckvidden</ShowWeaponRangesTitle>
+	<ShowWeaponRangesExplained>För att visa räckvidden av alla utrustade vapen, håll i följande knapp samtidigt när du håller högre musknappen</ShowWeaponRangesExplained>
 
 	<ModKeyOptionNone>Av</ModKeyOptionNone>
 	<ModKeyOptionAlt>Alt</ModKeyOptionAlt>
@@ -44,9 +35,6 @@
 	<HealthLevelOptionNeedsMedicalRest>Notwendige Bettruhe</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>Schockzustand</HealthLevelOptionInPainShock>
 
-	<DebugPositionsTitle>Visa Auto Combat positionering</DebugPositionsTitle>
-	<DebugPositionsExplained>När inställningen är vald, visas positioneringsinformation för markerade kolonister</DebugPositionsExplained>
-
 	<JobInterruptedLabel>{0} avbruten</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0} står inför ett sammanbrott</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} har låg hälsa</JobInterruptedBadHealth>
@@ -65,16 +53,6 @@
 	<SowZoneInfoText>Så en zon/rum</SowZoneInfoText>
 	<SowZoneDescription>Så en hel zon eller rum</SowZoneDescription>
 	<SowZoneReport>Så{0}: {1}</SowZoneReport>
-
-	<AutoCombatLabel>Angripa {0} automatiskt</AutoCombatLabel>
-	<AutoCombatInfoText>Angriper automatiskt</AutoCombatInfoText>
-	<AutoCombatDescription>Angriper fienden eller ett mål automatiskt</AutoCombatDescription>
-	<AutoCombatReport>Angripa automatiskt: {0}</AutoCombatReport>
-	<AutoCombatAdvancing>Flytta fram till {0}</AutoCombatAdvancing>
-	<AutoCombatMoving>Positionering ({0})</AutoCombatMoving>
-	<AutoCombatShooting>Skjuta på {0}</AutoCombatShooting>
-	<AutoCombatHitting>Närstrid med {0}</AutoCombatHitting>
-	<AutoCombatReady>Siktar på {0}</AutoCombatReady>
 
 	<AlreadyDoing>(Job #{0})</AlreadyDoing>
 

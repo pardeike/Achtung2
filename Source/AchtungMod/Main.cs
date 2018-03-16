@@ -10,9 +10,9 @@ using Harmony;
 namespace AchtungMod
 {
 	[StaticConstructorOnStartup]
-	static class Main
+	class AchtungLoader
 	{
-		static Main()
+		static AchtungLoader()
 		{
 			Controller.getInstance().InstallJobDefs();
 
@@ -21,16 +21,23 @@ namespace AchtungMod
 		}
 	}
 
-	// start of game/map
-	//
-	[HarmonyPatch(typeof(Root_Play))]
-	[HarmonyPatch("Start")]
-	static class Root_Play_Start_Patch
+	class Achtung : Mod
 	{
-		static void Postfix()
+		public static AchtungSettings Settings;
+
+		public Achtung(ModContentPack content) : base(content)
 		{
-			Settings.Load();
-			Controller.getInstance().Initialize();
+			Settings = GetSettings<AchtungSettings>();
+		}
+
+		public override void DoSettingsWindowContents(Rect inRect)
+		{
+			Settings.DoWindowContents(inRect);
+		}
+
+		public override string SettingsCategory()
+		{
+			return "Achtung!";
 		}
 	}
 
@@ -80,7 +87,7 @@ namespace AchtungMod
 		{
 			var fromMethod = AccessTools.Method(typeof(Log), "Error", new Type[] { typeof(string) });
 			var toMethod = AccessTools.Method(typeof(Log), "Warning", new Type[] { typeof(string) });
-			return Transpilers.MethodReplacer(instructions, fromMethod, toMethod);
+			return instructions.MethodReplacer(fromMethod, toMethod);
 		}
 	}
 
@@ -92,20 +99,8 @@ namespace AchtungMod
 	{
 		static void Postfix(List<FloatMenuOption> __result, Vector3 clickPos, Pawn pawn)
 		{
-			__result.AddRange(Controller.getInstance().AchtungChoicesAtFor(clickPos, pawn));
-		}
-	}
-
-	// track projectiles
-	//
-	[HarmonyPatch(typeof(Projectile))]
-	[HarmonyPatch("Launch")]
-	[HarmonyPatch(new Type[] { typeof(Thing), typeof(Vector3), typeof(LocalTargetInfo), typeof(Thing), typeof(Thing) })]
-	static class Projectile_Launch_Patch
-	{
-		static void Prefix(Projectile __instance, Thing launcher, Vector3 origin, LocalTargetInfo targ, Thing equipment)
-		{
-			Controller.getInstance().AddProjectile(__instance, launcher, origin, targ, equipment);
+			if (pawn != null && pawn.Drafted == false)
+				__result.AddRange(Controller.getInstance().AchtungChoicesAtFor(clickPos, pawn));
 		}
 	}
 }

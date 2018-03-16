@@ -1,26 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
-	<AchtungVersion>Powered by Achtung! Mod {0} {1}</AchtungVersion>
-	<AchtungOff>(OFF)</AchtungOff>
-	<AchtungOptions>Press Shift-Return for configuration</AchtungOptions>
-
-	<AchtungSettingsTitle>Achtung! Mod</AchtungSettingsTitle>
-
-	<AchtungEnabledTitle>Active</AchtungEnabledTitle>
-	<AchtungEnabledExplained>This mod can be turned on/off without restarting RimWorld</AchtungEnabledExplained>
-
 	<ForceDraftTitle>Force draft</ForceDraftTitle>
-	<ForceDraftExplained>To draft an undrafted colonist while right-clicking, hold the selected key</ForceDraftExplained>
+	<ForceDraftExplained>To draft an undrafted colonist while right-clicking, select this option</ForceDraftExplained>
 
-	<IgnoreMenuTitle>Ignore context menu</IgnoreMenuTitle>
-	<IgnoreMenuExplained>To ignore the context menu while positioning colonists, hold the selected key while right-clicking</IgnoreMenuExplained>
-
-	<ReverseIgnoreMenuTitle>Reverse context menu key</ReverseIgnoreMenuTitle>
-	<ReverseIgnoreMenuExplained>If checked, the context menu is ignored when you are NOT holding the selected key</ReverseIgnoreMenuExplained>
+	<ForceCommandMenuTitle>Force context menu</ForceCommandMenuTitle>
+	<ForceCommandMenuExplained>To show the context menu instead of positioning, hold the selected key while right-clicking</ForceCommandMenuExplained>
 
 	<RelativeMovementTitle>Move colonists relative</RelativeMovementTitle>
 	<RelativeMovementExplained>To move selected colonists relative to their current position, hold the selected key while right-click-dragging</RelativeMovementExplained>
+
+	<ShowWeaponRangesTitle>Show weapon ranges</ShowWeaponRangesTitle>
+	<ShowWeaponRangesExplained>To show the range of primary weapons, hold the selected key while right-click-dragging</ShowWeaponRangesExplained>
 
 	<ModKeyOptionNone>Disabled</ModKeyOptionNone>
 	<ModKeyOptionAlt>Alt</ModKeyOptionAlt>
@@ -44,9 +35,6 @@
 	<HealthLevelOptionNeedsMedicalRest>Needs medical rest</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>In pain shock</HealthLevelOptionInPainShock>
 
-	<DebugPositionsTitle>Show Auto Combat positions</DebugPositionsTitle>
-	<DebugPositionsExplained>If enabled will show auto combat positioning for selected colonists</DebugPositionsExplained>
-
 	<JobInterruptedLabel>{0} was cancelled</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0} is facing an imminent breakdown</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} is in bad shape</JobInterruptedBadHealth>
@@ -65,16 +53,6 @@
 	<SowZoneInfoText>Sowing zone/room</SowZoneInfoText>
 	<SowZoneDescription>Sow a growing zone or room until it is completely sowed</SowZoneDescription>
 	<SowZoneReport>Sowing{0}: {1}</SowZoneReport>
-
-	<AutoCombatLabel>Auto combat {0}</AutoCombatLabel>
-	<AutoCombatInfoText>Fighting automatically</AutoCombatInfoText>
-	<AutoCombatDescription>Fight an enemy or target automatically</AutoCombatDescription>
-	<AutoCombatReport>Auto combat: {0}</AutoCombatReport>
-	<AutoCombatAdvancing>Advancing to {0}</AutoCombatAdvancing>
-	<AutoCombatMoving>Positioning ({0})</AutoCombatMoving>
-	<AutoCombatShooting>Shooting at {0}</AutoCombatShooting>
-	<AutoCombatHitting>Hitting {0}</AutoCombatHitting>
-	<AutoCombatReady>Aiming at {0}</AutoCombatReady>
 
 	<AlreadyDoing>(Job #{0})</AlreadyDoing>
 

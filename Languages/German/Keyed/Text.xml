@@ -1,26 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
-	<AchtungVersion>Unterstützt von Achtung! Mod {0} {1}</AchtungVersion>
-	<AchtungOff>(AUS)</AchtungOff>
-	<AchtungOptions>Drücke Shift-Return für Einstellungen</AchtungOptions>
-
-	<AchtungSettingsTitle>Achtung! Mod</AchtungSettingsTitle>
-
-	<AchtungEnabledTitle>Aktiv</AchtungEnabledTitle>
-	<AchtungEnabledExplained>Dieser Mod kan an- und ausgeschaltet werden ohne RimWorld neu zu starten</AchtungEnabledExplained>
-
 	<ForceDraftTitle>Kontrolle erzwingen</ForceDraftTitle>
-	<ForceDraftExplained>Um ein Kolonisten in den kontrollierten Zustand zu bringen drücken Sie während des Rechtsklicks folgende Taste</ForceDraftExplained>
+	<ForceDraftExplained>Um ein Kolonisten in den kontrollierten Zustand zu bringen aktivieren Sie bitte diese Option</ForceDraftExplained>
 
-	<IgnoreMenuTitle>Das Kontextmenü ignorieren</IgnoreMenuTitle>
-	<IgnoreMenuExplained>Um das Kontextmenü während des Positionierens zu ignorieren drücken Sie während des Rechtsklicks folgende Taste</IgnoreMenuExplained>
+	<ForceCommandMenuTitle>Das Kontextmenü erzwingen</ForceCommandMenuTitle>
+	<ForceCommandMenuExplained>Um das Kontextmenü während des Positionierens anzuzeigen drücken Sie während des Rechtsklicks folgende Taste</ForceCommandMenuExplained>
 
-	<ReverseIgnoreMenuTitle>Kontextmenü ignorieren umkehren</ReverseIgnoreMenuTitle>
-	<ReverseIgnoreMenuExplained>Kontextmenü wird ignoriert wenn die Taste NICHT gedrückt wird</ReverseIgnoreMenuExplained>
-
-	<RelativeMovement>Kolonisten relativ bewegen</RelativeMovement>
+	<RelativeMovementTitle>Kolonisten relativ bewegen</RelativeMovementTitle>
 	<RelativeMovementExplained>Um Kolonisten relativ zu sich selbst zu bewegen drücken Sie zusätzlich zur gedrückten rechten Maustaste folgende Taste</RelativeMovementExplained>
+
+	<ShowWeaponRangesTitle>Zeige Waffenreichweiten</ShowWeaponRangesTitle>
+	<ShowWeaponRangesExplained>Um die Reichweiten der ausgerüsteten Waffen während des Positionierens anzuzeigen drücken Sie während des Rechtsklicks folgende Taste</ShowWeaponRangesExplained>
 
 	<ModKeyOptionNone>Keine</ModKeyOptionNone>
 	<ModKeyOptionAlt>Alt</ModKeyOptionAlt>
@@ -44,9 +35,6 @@
 	<HealthLevelOptionNeedsMedicalRest>Sängbunden</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>I shock</HealthLevelOptionInPainShock>
 
-	<DebugPositionsTitle>Zeige Auto Combat Positionen</DebugPositionsTitle>
-	<DebugPositionsExplained>When aktiviert, zeigt diese Einstellung die Positionsdaten für die markierten Kolonisten an</DebugPositionsExplained>
-
 	<JobInterruptedLabel>{0} wurde abgebrochen</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0} steht kurz vor dem Zusammenbruch</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} ist in schlechter gesundheitlicher Verfassung</JobInterruptedBadHealth>
@@ -65,16 +53,6 @@
 	<SowZoneInfoText>Sähe eine Zone/Raum</SowZoneInfoText>
 	<SowZoneDescription>Säht eine komplette Zone oder Raum</SowZoneDescription>
 	<SowZoneReport>Sähe{0}: {1}</SowZoneReport>
-
-	<AutoCombatLabel>Automatisch mit {0} kämpfen</AutoCombatLabel>
-	<AutoCombatInfoText>Kämpfe automatisch</AutoCombatInfoText>
-	<AutoCombatDescription>Automatisch einen Gegner oder ein Ziel bekämpfen</AutoCombatDescription>
-	<AutoCombatReport>Automatisch kämpfen: {0}</AutoCombatReport>
-	<AutoCombatAdvancing>Vorrücken zu {0}</AutoCombatAdvancing>
-	<AutoCombatMoving>Positionieren ({0})</AutoCombatMoving>
-	<AutoCombatShooting>Auf {0} schiessen</AutoCombatShooting>
-	<AutoCombatHitting>Nahkampf mit {0}</AutoCombatHitting>
-	<AutoCombatReady>Auf {0} zielen</AutoCombatReady>
 
 	<AlreadyDoing>(Job #{0})</AlreadyDoing>
 

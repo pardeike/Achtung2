@@ -1,26 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
 
-  <AchtungVersion>来自[Achtung! Mod]的技术支持{0} {1}</AchtungVersion>
-  <AchtungOff>（关闭）</AchtungOff>
-  <AchtungOptions>通过按Shift+Enter键来进行配置</AchtungOptions>
+  <ForceDraftTitle>迫使殖民者起草</ForceDraftTitle>
+  <ForceDraftExplained>选择此选项可自动起草殖民者</ForceDraftExplained>
 
-  <AchtungSettingsTitle>Achtung! Mod</AchtungSettingsTitle>
+  <ForceCommandMenuTitle>显示右键单击菜单</ForceCommandMenuTitle>
+  <ForceCommandMenuExplained>要显示上下文菜单而不是定位，请在右键单击时按住所选键</ForceCommandMenuExplained>
 
-  <AchtungEnabledTitle>激活</AchtungEnabledTitle>
-  <AchtungEnabledExplained>开启/关闭此Mod时无需重启RimWorld</AchtungEnabledExplained>
+  <RelativeMovementTitle>相对移动的殖民者</RelativeMovementTitle>
+  <RelativeMovementExplained>要将选定的殖民者相对于当前位置移动，请在按住右键并拖动的同时按住所选键</RelativeMovementExplained>
 
-  <ForceDraftTitle>组合移动</ForceDraftTitle>
-  <ForceDraftExplained>按住指定键并右键拖动来实现选中的已征召殖民者的组合移动。</ForceDraftExplained>
-
-  <IgnoreMenuTitle>忽略右键菜单</IgnoreMenuTitle>
-  <IgnoreMenuExplained>按住指定键并右键点击来实现在安排已征召殖民者到达防御位置时忽略可能弹出的右键菜单。</IgnoreMenuExplained>
-
-  <ReverseIgnoreMenuTitle>反向忽略右键菜单</ReverseIgnoreMenuTitle>
-  <ReverseIgnoreMenuExplained>选中后，当你未按住指定键时，右键菜单的弹出会被忽略。</ReverseIgnoreMenuExplained>
-
-  <RelativeMovementTitle>殖民者同步移动</RelativeMovementTitle>
-  <RelativeMovementExplained>按住指定键并右键拖动来实现选中的已征召殖民者同步移动至当前位置。</RelativeMovementExplained>
+  <ShowWeaponRangesTitle>显示武器范围</ShowWeaponRangesTitle>
+  <ShowWeaponRangesExplained>按住指定的键并右键拖动以显示主武器的范围。</ShowWeaponRangesExplained>
 
   <ModKeyOptionNone>未激活</ModKeyOptionNone>
   <ModKeyOptionAlt>Alt</ModKeyOptionAlt>
@@ -44,9 +35,6 @@
   <HealthLevelOptionNeedsMedicalRest>需要卧床养伤</HealthLevelOptionNeedsMedicalRest>
   <HealthLevelOptionInPainShock>因疼痛而休克</HealthLevelOptionInPainShock>
 
-  <DebugPositionsTitle>显示自动作战位置</DebugPositionsTitle>
-  <DebugPositionsExplained>启用后会显示选中殖民者在自动作战中将到达的位置</DebugPositionsExplained>
-
   <JobInterruptedLabel>{0} 已取消</JobInterruptedLabel>
   <JobInterruptedBreakdown>{0} 即将崩溃</JobInterruptedBreakdown>
   <JobInterruptedBadHealth>{0} 处于劣势</JobInterruptedBadHealth>
@@ -65,16 +53,6 @@
   <SowZoneInfoText>正在播种这个区域/房间</SowZoneInfoText>
   <SowZoneDescription>播种区域/房间直到全部播种完成</SowZoneDescription>
   <SowZoneReport>播种{0}中：{1}</SowZoneReport>
-
-  <AutoCombatLabel>自动作战 {0}</AutoCombatLabel>
-  <AutoCombatInfoText>自动作战中</AutoCombatInfoText>
-  <AutoCombatDescription>自动攻击敌人/目标</AutoCombatDescription>
-  <AutoCombatReport>自动作战：{0}</AutoCombatReport>
-  <AutoCombatAdvancing>接近{0}</AutoCombatAdvancing>
-  <AutoCombatMoving>前往({0})</AutoCombatMoving>
-  <AutoCombatShooting>射击{0}</AutoCombatShooting>
-  <AutoCombatHitting>近身攻击{0}</AutoCombatHitting>
-  <AutoCombatReady>瞄准{0}</AutoCombatReady>
 
   <AlreadyDoing>(指令 #{0})</AlreadyDoing>
 

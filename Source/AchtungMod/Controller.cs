@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -10,38 +9,14 @@ namespace AchtungMod
 {
 	public class Controller
 	{
-		public IEnumerable<Colonist> colonists;
+		public List<Colonist> colonists;
 		public Vector3 lineStart;
 		public Vector3 lineEnd;
 		public bool isDragging;
 		public bool relativeMovement;
 		public bool drawColonistPreviews;
-		public static Dictionary<Projectile, ProjectileInfo> projectiles = new Dictionary<Projectile, ProjectileInfo>();
 
-		public static HashSet<ScoredPosition> debugPositions = new HashSet<ScoredPosition>();
-		public static bool debugPositionNeedsClear = true;
-		public static void AddDebugPositions(IEnumerable<ScoredPosition> pos)
-		{
-			if (Settings.instance.debugPositions == false) return;
-			if (debugPositionNeedsClear) debugPositions = new HashSet<ScoredPosition>();
-			debugPositionNeedsClear = false;
-			if (pos != null) debugPositions.UnionWith(pos);
-		}
-		public static void AddDebugPositions(IEnumerable<IntVec3> vecs)
-		{
-			if (Settings.instance.debugPositions == false) return;
-			if (debugPositionNeedsClear) debugPositions = new HashSet<ScoredPosition>();
-			debugPositionNeedsClear = false;
-			if (vecs != null) debugPositions.UnionWith(vecs.Select(v => new ScoredPosition(v)));
-		}
-		public static void ClearDebugPositions()
-		{
-			if (Settings.instance.debugPositions == false) return;
-			if (debugPositionNeedsClear) debugPositions = new HashSet<ScoredPosition>();
-			debugPositionNeedsClear = false;
-		}
-
-		public static Controller controller = null;
+		public static Controller controller;
 		public static Controller getInstance()
 		{
 			if (controller == null) controller = new Controller();
@@ -57,120 +32,100 @@ namespace AchtungMod
 			drawColonistPreviews = true;
 		}
 
-		public void Initialize()
-		{
-			Messages.Message("AchtungOptions".Translate(), MessageTypeDefOf.PositiveEvent);
-			string state = Settings.instance.modActive ? "" : "AchtungOff".Translate();
-			Messages.Message("AchtungVersion".Translate(Tools.Version, state), MessageTypeDefOf.SilentInput);
-		}
-
 		public void InstallJobDefs()
 		{
 			new List<JobDef> {
 					 new JobDriver_CleanRoom().MakeJobDef(),
 					 new JobDriver_FightFire().MakeJobDef(),
-					 new JobDriver_SowAll().MakeJobDef(),
-					 new JobDriver_AutoCombat().MakeJobDef()
+					new JobDriver_SowAll().MakeJobDef()
 				}
 			.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, def => DefDatabase<JobDef>.Add(def));
 		}
 
-		public IEnumerable<Colonist> GetSelectedColonists(bool forceDraft)
-		{
-			List<Colonist> temp = new List<Colonist>();
-			foreach (Pawn tempPawn in Tools.UserSelectedAndReadyPawns()) temp.Add(new Colonist(tempPawn, forceDraft));
-			return temp;
-		}
-
-		public IEnumerable<Colonist> GetAllColonists(bool forceDraft)
-		{
-			List<Colonist> temp = new List<Colonist>();
-
-			IEnumerable<Pawn> pawns = Find.VisibleMap.listerThings.ThingsInGroup(ThingRequestGroup.Pawn)
-				.Cast<Pawn>()
-				.Where(pawn =>
-					pawn.Faction == Faction.OfPlayer
-					&& pawn.drafter != null
-					&& pawn.IsColonistPlayerControlled
-					&& pawn.Downed == false
-					&& pawn.jobs.IsCurrentJobPlayerInterruptible()
-				);
-
-			foreach (Pawn tempPawn in pawns) temp.Add(new Colonist(tempPawn, forceDraft));
-			return temp;
-		}
-
 		public void MouseDown(Vector3 pos)
 		{
-			if (Event.current.button == 1)
+			if (Event.current.button != 1) // right button
+				return;
+
+			colonists = Tools.GetSelectedColonists();
+			if (colonists.Count() == 0)
+				return;
+
+			relativeMovement = Tools.IsModKeyPressed(Achtung.Settings.relativeMovementKey);
+			var forceMenu = Tools.IsModKeyPressed(Achtung.Settings.forceCommandMenuKey);
+
+			var clickLoc = UI.MouseMapPosition();
+
+			if (colonists.Count() == 1)
 			{
-				Vector3 where = UI.MouseMapPosition();
-
-				relativeMovement = Tools.IsModKeyPressed(Settings.instance.relativeMovementKey);
-
-				bool forceDraft = Tools.IsModKeyPressed(Settings.instance.forceDraftKey);
-				colonists = GetSelectedColonists(forceDraft);
-				if (colonists.Count() > 0)
+				if (relativeMovement)
 				{
-					bool ignoreMenu = Tools.IsModKeyPressed(Settings.instance.ignoreMenuKey);
-					if (colonists.Count() == 1 && ignoreMenu == Settings.instance.reverseMenuKey)
-					{
-						IEnumerable<FloatMenuOption> choices = FloatMenuMakerMap.ChoicesAtFor(where, colonists.First().pawn);
-						if (choices.Count() > 0)
-						{
-							// don't overwrite existing floating menu
-							return;
-						}
-					}
-
-					// build multi menu from existing commands
-					MultiActions actions = new MultiActions(colonists, where);
-
-					// present combined menu to the user
-					if (actions.Count() > 0 && ignoreMenu == Settings.instance.reverseMenuKey)
-					{
-						Find.WindowStack.Add(actions.GetWindow());
-						Event.current.Use();
-						return;
-					}
-
-					if (colonists.Count() == 1 && Tools.GetDraftingStatus(colonists.First().pawn) == false)
-					{
-						// don't drag if neither standard menu nor multi menu have any choices and it's a single colonist
-						return;
-					}
-
-					// start dragging
-					lineStart = pos;
-					lineStart.y = Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays);
-
-					isDragging = true;
-					Event.current.Use();
+					StartDragging(pos);
+					return;
 				}
+
+				var selectedPawn = colonists[0].pawn;
+				if (selectedPawn.Drafted == false && Achtung.Settings.forceDraft)
+				{
+					if (Tools.HasNonEmptyFloatMenu(clickLoc, colonists[0].pawn) == false)
+					{
+						Tools.SetDraftStatus(colonists[0].pawn, true);
+						if (Tools.HasNonEmptyFloatMenu(clickLoc, colonists[0].pawn) == false)
+							Tools.SetDraftStatus(colonists[0].pawn, false);
+					}
+				}
+
+				return;
 			}
+
+			if (Achtung.Settings.forceDraft)
+				colonists.DoIf(colonist => colonist.pawn.Drafted == false, colonist => Tools.SetDraftStatus(colonist.pawn, true));
+
+			var actions = new MultiActions(colonists, clickLoc);
+			if (actions.Count() > 0 && (forceMenu || Tools.PawnsUnderMouse()))
+			{
+				// present combined menu to the user
+				Find.WindowStack.Add(actions.GetWindow());
+				Event.current.Use();
+				return;
+			}
+
+			StartDragging(pos);
+		}
+
+		private void StartDragging(Vector3 pos)
+		{
+			lineStart = pos;
+			lineStart.y = Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays);
+
+			isDragging = true;
+			Event.current.Use();
 		}
 
 		public void MouseDrag(Vector3 pos)
 		{
-			if (isDragging == true)
+			if (Event.current.button != 1) // right button
+				return;
+
+			if (isDragging)
 			{
 				lineEnd = pos;
 				lineEnd.y = Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays);
-				int count = colonists.Count();
-				Vector3 dragVector = lineEnd - lineStart;
+				var count = colonists.Count();
+				var dragVector = lineEnd - lineStart;
 
 				if (relativeMovement)
 				{
 					colonists.Do(colonist =>
 					{
-						Vector3 delta = lineEnd - lineStart;
+						var delta = lineEnd - lineStart;
 						colonist.OrderTo(colonist.startPosition + delta);
 					});
 				}
 				else
 				{
-					Vector3 delta = count > 1 ? dragVector / (float)(count - 1) : Vector3.zero;
-					Vector3 linePosition = count == 1 ? lineEnd : lineStart;
+					var delta = count > 1 ? dragVector / (count - 1) : Vector3.zero;
+					var linePosition = count == 1 ? lineEnd : lineStart;
 					colonists.Do(colonist =>
 					{
 						colonist.OrderTo(linePosition);
@@ -182,97 +137,36 @@ namespace AchtungMod
 			}
 		}
 
-		/*
-		public bool TryCopyElement(Vector3 where)
-		{
-			BuildableDef buildDef = null;
-			ThingDef thingDef = null;
-
-			Thing thing = Find.VisibleMap.thingGrid.ThingAt<Building>(where.ToIntVec3());
-			if (thing != null)
-			{
-				buildDef = thing.def;
-				thingDef = thing.Stuff;
-			}
-			else
-			{
-				Blueprint_Build blueprint = Find.VisibleMap.thingGrid.ThingAt<Blueprint_Build>(where.ToIntVec3());
-				if (blueprint != null)
-				{
-					thing = blueprint;
-					buildDef = blueprint.def.entityDefToBuild;
-					thingDef = blueprint.stuffToUse;
-				}
-			}
-
-			if (thing != null && buildDef != null)
-			{
-				Designator_Build designator = DefDatabase<DesignationCategoryDef>.AllDefs
-					.SelectMany(catdef => catdef.ResolvedAllowedDesignators)
-					.Where(d => d is Designator_Build && (d as Designator_Build).PlacingDef == buildDef)
-					.Cast<Designator_Build>()
-					.FirstOrDefault();
-				if (designator != null)
-				{
-					Find.Selector.ClearSelection();
-					Find.Selector.Select(thing, true, true);
-
-					SoundDefOf.SelectDesignator.PlayOneShotOnCamera();
-					designator.SetStuffDef(thingDef);
-					Find.DesignatorManager.Select(designator);
-
-					Find.MainTabsRoot.SetCurrentTab(MainTabDefOf.Inspect, true);
-
-					FieldInfo placingRot = designator.GetType().GetField("placingRot", BindingFlags.Instance | BindingFlags.NonPublic);
-					if (placingRot != null) placingRot.SetValue(designator, thing.Rotation);
-
-					return true;
-				}
-			}
-
-			return false;
-		}
-		*/
-
 		public void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType)
 		{
-			JobDriver_Thoroughly driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
-			IEnumerable<LocalTargetInfo> targets = driver.CanStart(pawn, clickPos);
+			var driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
+			var targets = driver.CanStart(pawn, clickPos);
 			if (targets != null)
 			{
-				List<Job> existingJobs = driver.SameJobTypesOngoing();
+				var existingJobs = driver.SameJobTypesOngoing();
 				targets.Do(target =>
 				{
-					Action action = delegate
-					{
-						driver.StartJob(pawn, target);
-					};
-					string suffix = existingJobs.Count() > 0 ? " " + ("AlreadyDoing".Translate(existingJobs.Count() + 1)) : "";
-					options.Add(new FloatMenuOption(driver.GetLabel() + suffix, action, MenuOptionPriority.Low));
+					var suffix = existingJobs.Count() > 0 ? " " + ("AlreadyDoing".Translate(existingJobs.Count() + 1)) : "";
+					options.Add(new FloatMenuOption(driver.GetLabel() + suffix, () => driver.StartJob(pawn, target), MenuOptionPriority.Low));
 				});
 			}
 		}
 
 		public IEnumerable<FloatMenuOption> AchtungChoicesAtFor(Vector3 clickPos, Pawn pawn)
 		{
-			List<FloatMenuOption> options = new List<FloatMenuOption>();
-			if (Settings.instance.modActive == false) return options;
-
-			bool ignoreMenu = Tools.IsModKeyPressed(Settings.instance.ignoreMenuKey);
-			if (ignoreMenu == Settings.instance.reverseMenuKey)
-			{
-				AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_CleanRoom));
-				AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_FightFire));
-				AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_SowAll));
-				AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_AutoCombat));
-			}
-
+			var options = new List<FloatMenuOption>();
+			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_CleanRoom));
+			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_FightFire));
+			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_SowAll));
 			return options;
 		}
 
 		public void MouseUp(Vector3 pos)
 		{
-			if (isDragging == true)
+			if (Event.current.button != 1) // right button
+				return;
+
+			if (isDragging)
 			{
 				colonists.Clear();
 				Event.current.Use();
@@ -282,7 +176,7 @@ namespace AchtungMod
 
 		public void KeyDown(KeyCode key)
 		{
-			if (isDragging == true)
+			if (isDragging)
 			{
 				if (key == KeyCode.Escape)
 				{
@@ -306,64 +200,49 @@ namespace AchtungMod
 
 		public void HandleDrawing()
 		{
-			if (Settings.instance.modActive == false) return;
-
-			if (Settings.instance.debugPositions)
-			{
-				// if (Find.Selector.SelectedObjects.Count() == 0) debugPositions = new HashSet<ScoredPosition>();
-				if (debugPositions.Count() > 0)
-				{
-					float min = debugPositions.Min(sp => sp.score);
-					float max = debugPositions.Max(sp => sp.score);
-					debugPositions.Do(sp => Tools.DebugPosition(sp.v.ToVector3(), new Color(1f, 0f, 0f, GenMath.LerpDouble(min, max, 0.1f, 0.8f, sp.score))));
-					debugPositionNeedsClear = true;
-				}
-			}
-
 			if (isDragging)
 			{
 				if (colonists.Count() > 1) Tools.DrawLineBetween(lineStart, lineEnd, 1.0f);
 
-				colonists.DoIf(c => (c.designation != Vector3.zero), c =>
+				colonists.Do(c =>
 				{
-					Tools.DrawMarker(c.designation);
+					var pos = c.designation;
+					if (pos == Vector3.zero)
+						return;
+
+					Tools.DrawMarker(pos);
 					if (drawColonistPreviews)
 					{
-						c.pawn.Drawer.renderer.RenderPawnAt(c.designation);
+						c.pawn.Drawer.renderer.RenderPawnAt(pos);
 						c.pawn.DrawExtraSelectionOverlays();
+					}
+
+					if (Tools.IsModKeyPressed(Achtung.Settings.showWeaponRangesKey))
+					{
+						var verb = c.pawn.equipment?.PrimaryEq?.PrimaryVerb;
+						if (verb != null && verb.verbProps.MeleeRange == false)
+						{
+							var range = verb.verbProps.range;
+							if (range < 90f)
+								GenDraw.DrawRadiusRing(pos.ToIntVec3(), range);
+						}
 					}
 				});
 			}
-
-			UpdateProjectiles();
 		}
 
 		public void HandleDrawingOnGUI()
 		{
-			if (Settings.instance.modActive == false) return;
-
 			colonists.DoIf(c => (c.designation != Vector3.zero), c =>
 			{
-				Vector2 labelPos = Tools.LabelDrawPosFor(c.designation, -0.6f);
+				var labelPos = Tools.LabelDrawPosFor(c.designation, -0.6f);
 				GenMapUI.DrawPawnLabel(c.pawn, labelPos, 1f, 9999f, null);
 			});
 		}
 
 		public void HandleEvents()
 		{
-			bool shiftKey = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-			if (shiftKey && Input.GetKeyDown(KeyCode.Return))
-			{
-				Event.current.Use();
-				if (Find.WindowStack.IsOpen(typeof(PreferenceDialog)) == false)
-				{
-					Find.WindowStack.Add(new PreferenceDialog());
-				}
-			}
-
-			if (Settings.instance.modActive == false) return;
-
-			Vector3 pos = UI.MouseMapPosition();
+			var pos = UI.MouseMapPosition();
 			switch (Event.current.type)
 			{
 				case EventType.mouseDown:
@@ -382,38 +261,6 @@ namespace AchtungMod
 				default:
 					break;
 			}
-		}
-
-		public void AddProjectile(Projectile projectile, Thing launcher, Vector3 origin, LocalTargetInfo targ, Thing equipment)
-		{
-			Bullet bullet = projectile as Bullet;
-			Projectile_Explosive explosive = projectile as Projectile_Explosive;
-			if (bullet != null || explosive != null)
-			{
-				projectiles.Add(projectile, new ProjectileInfo(launcher, origin, targ, equipment));
-			}
-		}
-
-		public void UpdateProjectiles()
-		{
-			HashSet<Projectile> activeProjectiles = new HashSet<Projectile>();
-
-			Find.VisibleMap.mapPawns.AllPawnsSpawned
-				.Where(p => p.Spawned == true && p.Destroyed == false && p.Downed == false && p.Dead == false)
-				.DoIf(p => p.equipment != null && p.equipment.Primary != null, p =>
-				{
-					var projectile = p.CurrentEffectiveVerb.GetProjectile();
-					if (projectile != null) activeProjectiles.UnionWith(
-						Find.VisibleMap.listerThings
-							.ThingsOfDef(projectile)
-							.Select(t => t as Projectile)
-							.Where(t => t != null)
-					);
-				});
-
-			Dictionary<Projectile, ProjectileInfo> remaining = new Dictionary<Projectile, ProjectileInfo>();
-			projectiles.Keys.DoIf(p => activeProjectiles.Contains(p), p => remaining.Add(p, projectiles[p]));
-			projectiles = remaining;
 		}
 	}
 }

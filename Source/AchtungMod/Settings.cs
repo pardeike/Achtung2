@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using UnityEngine;
 using Verse;
 
 namespace AchtungMod
@@ -30,59 +30,45 @@ namespace AchtungMod
 		InPainShock
 	}
 
-	public class Settings : IExposable
+	public class AchtungSettings : ModSettings
 	{
-		public bool modActive = true;
-		public ModKey forceDraftKey = ModKey.Alt;
-		public ModKey ignoreMenuKey = ModKey.Alt;
-		public bool reverseMenuKey = false;
-		public ModKey relativeMovementKey = ModKey.Shift;
+		public bool forceDraft = false;
+		public ModKey forceCommandMenuKey = ModKey.Ctrl;
+		public ModKey relativeMovementKey = ModKey.Alt;
+		public ModKey showWeaponRangesKey = ModKey.Ctrl;
 		public BreakLevel breakLevel = BreakLevel.AlmostExtreme;
 		public HealthLevel healthLevel = HealthLevel.InPainShock;
-		public float aggressiveness = 0.5f;
-		public bool debugPositions = false;
 
-		public void ExposeData()
+		public override void ExposeData()
 		{
-			Scribe_Values.Look(ref modActive, "Active", true, true);
-			Scribe_Values.Look(ref forceDraftKey, "ForceDraft", ModKey.Alt, true);
-			Scribe_Values.Look(ref ignoreMenuKey, "IgnoreMenu", ModKey.Alt, true);
-			Scribe_Values.Look(ref reverseMenuKey, "ReverseMenu", false, true);
-			Scribe_Values.Look(ref relativeMovementKey, "RelativeMovement", ModKey.Shift, true);
+			base.ExposeData();
+			Scribe_Values.Look(ref forceDraft, "forceDraft", false, true);
+			Scribe_Values.Look(ref forceCommandMenuKey, "forceCommandMenuKey", ModKey.Ctrl, true);
+			Scribe_Values.Look(ref relativeMovementKey, "relativeMovementKey", ModKey.Alt, true);
+			Scribe_Values.Look(ref showWeaponRangesKey, "showWeaponRangesKey", ModKey.Ctrl, true);
 			Scribe_Values.Look(ref breakLevel, "BreakLevel", BreakLevel.AlmostExtreme, true);
 			Scribe_Values.Look(ref healthLevel, "HealthLevel", HealthLevel.InPainShock, true);
-			Scribe_Values.Look(ref aggressiveness, "Aggressiveness", 0.5f, true);
-			Scribe_Values.Look(ref debugPositions, "DebugPositions", false, true);
 		}
 
-		//
-
-		public static Settings instance = new Settings();
-		public static string settingsPath = Path.Combine(Path.GetDirectoryName(GenFilePaths.ModsConfigFilePath), "AchtungModSettings.xml");
-
-		public static void Load()
+		public void DoWindowContents(Rect canvas)
 		{
-			if (File.Exists(settingsPath))
-			{
-				Scribe.loader.InitLoading(settingsPath);
-				if (Scribe.mode == LoadSaveMode.LoadingVars)
-				{
-					Scribe_Deep.Look(ref Settings.instance, "Settings", new object[0]);
-				}
-				Scribe.loader.FinalizeLoading();
-				Scribe.mode = LoadSaveMode.Inactive;
-			}
-		}
+			var list = new Listing_Standard { ColumnWidth = canvas.width / 2 };
+			list.Begin(canvas);
+			list.Gap();
 
-		public static void Save()
-		{
-			Scribe.saver.InitSaving(settingsPath, "AchtungConfiguration");
-			if (Scribe.mode == LoadSaveMode.Saving)
-			{
-				Scribe_Deep.Look(ref Settings.instance, "Settings", new object[0]);
-			}
-			Scribe.saver.FinalizeSaving();
-			Scribe.mode = LoadSaveMode.Inactive;
+			list.CheckboxEnhanced("ForceDraft", ref Achtung.Settings.forceDraft);
+			list.Gap();
+			list.ValueLabeled("ForceCommandMenu", ref Achtung.Settings.forceCommandMenuKey);
+			list.Gap();
+			list.ValueLabeled("RelativeMovement", ref Achtung.Settings.relativeMovementKey);
+			list.Gap();
+			list.ValueLabeled("ShowWeaponRanges", ref Achtung.Settings.showWeaponRangesKey);
+			list.Gap();
+			list.ValueLabeled("BreakLevel", ref Achtung.Settings.breakLevel);
+			list.Gap();
+			list.ValueLabeled("HealthLevel", ref Achtung.Settings.healthLevel);
+
+			list.End();
 		}
 	}
 }

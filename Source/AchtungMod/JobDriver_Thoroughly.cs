@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Verse;
 using Verse.AI;
 using UnityEngine;
@@ -28,7 +29,7 @@ namespace AchtungMod
 
 		public virtual JobDef MakeJobDef()
 		{
-			JobDef def = new JobDef();
+			var def = new JobDef();
 			def.driverClass = GetType();
 			def.collideWithPawns = false;
 			def.defName = GetPrefix();
@@ -62,21 +63,22 @@ namespace AchtungMod
 
 		public List<Job> SameJobTypesOngoing()
 		{
-			List<Job> jobs = new List<Job>();
+			var jobs = new List<Job>();
 			if (pawn.jobs == null) return jobs;
-			JobQueue queue = pawn.jobs.jobQueue;
+			var queue = pawn.jobs.jobQueue;
 			if (queue == null) return jobs;
-			for (int i = -1; i < queue.Count; i++)
+			for (var i = -1; i < queue.Count; i++)
 			{
-				Job job = i == -1 && pawn.CurJob != null ? pawn.CurJob : queue[i].job;
-				if (job.def.driverClass.IsInstanceOfType(this)) jobs.Add(job);
+				var job = i == -1 ? pawn.CurJob : queue[i].job;
+				if (job?.def.driverClass.IsInstanceOfType(this) ?? false)
+					jobs.Add(job);
 			}
 			return jobs;
 		}
 
 		public virtual void StartJob(Pawn pawn, LocalTargetInfo target)
 		{
-			Job job = new Job(MakeJobDef(), target);
+			var job = new Job(MakeJobDef(), target);
 			job.playerForced = true;
 			pawn.jobs.StartJob(job, JobCondition.InterruptForced, null, true, true, null);
 		}
@@ -116,6 +118,10 @@ namespace AchtungMod
 			return true;
 		}
 
+		public virtual void CleanupLastItem()
+		{
+		}
+
 		public virtual bool CurrentItemInvalid()
 		{
 			return
@@ -127,8 +133,8 @@ namespace AchtungMod
 
 		public Func<bool> GetPawnBreakLevel()
 		{
-			MentalBreaker mb = pawn.mindState.mentalBreaker;
-			switch (Settings.instance.breakLevel)
+			var mb = pawn.mindState.mentalBreaker;
+			switch (Achtung.Settings.breakLevel)
 			{
 				case BreakLevel.Minor:
 					return () => mb.BreakMinorIsImminent;
@@ -144,7 +150,7 @@ namespace AchtungMod
 
 		public Func<bool> GetPawnHealthLevel()
 		{
-			switch (Settings.instance.healthLevel)
+			switch (Achtung.Settings.healthLevel)
 			{
 				case HealthLevel.ShouldBeTendedNow:
 					return () => HealthAIUtility.ShouldBeTendedNow(pawn) || HealthAIUtility.ShouldHaveSurgeryDoneNow(pawn);
@@ -162,26 +168,26 @@ namespace AchtungMod
 		{
 			if (pawn.Dead || pawn.Downed || pawn.HasAttachment(ThingDefOf.Fire))
 			{
-				Find.VisibleMap.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
+				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
 				EndJobWith(JobCondition.Incompletable);
 				return;
 			}
 
 			if (GetPawnBreakLevel()())
 			{
-				Find.VisibleMap.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
+				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
 				EndJobWith(JobCondition.Incompletable);
-				string jobName = (GetPrefix() + "Label").Translate();
-				string label = "JobInterruptedLabel".Translate(jobName);
+				var jobName = (GetPrefix() + "Label").Translate();
+				var label = "JobInterruptedLabel".Translate(jobName);
 				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(pawn.NameStringShort), LetterDefOf.NegativeEvent, pawn));
 				return;
 			}
 
 			if (GetPawnHealthLevel()())
 			{
-				Find.VisibleMap.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
+				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
 				EndJobWith(JobCondition.Incompletable);
-				string jobName = (GetPrefix() + "Label").Translate();
+				var jobName = (GetPrefix() + "Label").Translate();
 				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter("JobInterruptedLabel".Translate(jobName), "JobInterruptedBadHealth".Translate(pawn.NameStringShort), LetterDefOf.NegativeEvent, pawn));
 				return;
 			}
@@ -197,7 +203,7 @@ namespace AchtungMod
 				currentItem = FindNextWorkItem();
 				if (CurrentItemInvalid() == false)
 				{
-					Find.VisibleMap.reservationManager.Reserve(pawn, job, currentItem);
+					pawn.Map.reservationManager.Reserve(pawn, job, currentItem);
 					pawn.CurJob.SetTarget(TargetIndex.A, currentItem);
 				}
 			}
@@ -209,7 +215,7 @@ namespace AchtungMod
 
 			if (pawn.Position.AdjacentTo8WayOrInside(currentItem))
 			{
-				bool itemCompleted = DoWorkToItem();
+				var itemCompleted = DoWorkToItem();
 				if (itemCompleted) currentItem = null;
 			}
 			else if (!isMoving)
@@ -226,11 +232,31 @@ namespace AchtungMod
 
 		protected override IEnumerable<Toil> MakeNewToils()
 		{
-			Toil toil = new Toil();
+			var progressBar = EffecterDefOf.ProgressBar;
+			var effecter = progressBar.Spawn();
+
+			var toil = new Toil();
 			toil.initAction = new Action(InitAction);
 			toil.tickAction = new Action(TickAction);
-			toil.WithProgressBar(TargetIndex.A, Progress, true, -0.5f);
+			toil.AddPreTickAction(delegate
+			{
+				effecter.EffectTick(toil.actor, TargetInfo.Invalid);
+				var mote = ((SubEffecter_ProgressBar)effecter.children[0]).mote;
+				if (mote != null)
+				{
+					mote.progress = Mathf.Clamp01(Progress());
+					mote.Position = toil.actor.Position;
+					mote.offsetZ = -1.1f;
+				}
+			});
 			toil.defaultCompleteMode = ToilCompleteMode.Never;
+			toil.AddFinishAction(CleanupLastItem);
+			toil.AddFinishAction(delegate
+			{
+				effecter.Cleanup();
+				effecter = null;
+			});
+
 			yield return toil;
 		}
 	}

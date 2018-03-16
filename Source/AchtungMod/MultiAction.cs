@@ -33,30 +33,26 @@ namespace AchtungMod
 
 		public string EnhancedLabel(IEnumerable<Colonist> colonists)
 		{
-			string suffix = "";
+			var suffix = "";
 			if (colonists != null)
-				suffix = (colonists.Count() == 1) ? " (" + colonists.First().pawn.NameStringShort + ")" : " (" + colonists.Count() + "x)";
+			{
+				var names = colonists.ToArray();
+				suffix = (names.Length == 1) ? " (" + names[0].pawn.NameStringShort + ")" : " (" + names.Length + "x)";
+			}
 			return option.Label + suffix;
-		}
-
-		public static bool Enabled(MultiAction action)
-		{
-			return action.option.Disabled == false;
 		}
 
 		public Action GetAction()
 		{
-			return new Action(delegate
+			return delegate
 			{
 				if (option.Disabled == false)
 				{
 					if (IsForced())
-					{
 						Tools.SetDraftStatus(colonist.pawn, draftMode);
-					}
 					option.action();
 				}
-			});
+			};
 		}
 	}
 }
