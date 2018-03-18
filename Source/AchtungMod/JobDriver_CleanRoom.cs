@@ -27,23 +27,23 @@ namespace AchtungMod
 			return "CleanRoom";
 		}
 
-		public override IEnumerable<LocalTargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
+		public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, Vector3 clickPos)
 		{
-			base.CanStart(pawn, clickPos);
+			base.CanStart(thePawn, clickPos);
 			var cleanDef = DefDatabase<WorkTypeDef>.GetNamed("Cleaning");
-			if (pawn.workSettings.GetPriority(cleanDef) == 0) return null;
+			if (thePawn.workSettings.GetPriority(cleanDef) == 0) return null;
 			LocalTargetInfo cell = IntVec3.FromVector3(clickPos);
-			var info = WorkInfoAt(pawn, cell);
+			var info = WorkInfoAt(thePawn, cell);
 			return (info.valid && info.room != null) ? new List<LocalTargetInfo> { cell } : null;
 		}
 
 		// filth in room
-		public IEnumerable<Thing> AllWorkInRoom(Room room, Pawn pawn)
+		public IEnumerable<Thing> AllWorkInRoom(Room room, Pawn thePawn)
 		{
 			return room
 				.ContainedAndAdjacentThings.OfType<Filth>().Cast<Thing>()
-				.Where(f => f.Destroyed == false && pawn.CanReach(f, PathEndMode.Touch, pawn.NormalMaxDanger()) && pawn.CanReserve(f, 1))
-				.OrderBy(f => Math.Abs(f.Position.x - pawn.Position.x) + Math.Abs(f.Position.z - pawn.Position.z));
+				.Where(f => f.Destroyed == false && thePawn.CanReach(f, PathEndMode.Touch, thePawn.NormalMaxDanger()) && thePawn.CanReserve(f, 1))
+				.OrderBy(f => Math.Abs(f.Position.x - thePawn.Position.x) + Math.Abs(f.Position.z - thePawn.Position.z));
 		}
 
 		// room info
@@ -60,7 +60,7 @@ namespace AchtungMod
 			var info = WorkInfoAt(pawn, TargetA);
 			if (info.valid == false) return null;
 			var items = AllWorkInRoom(info.room, pawn).ToList();
-			currentWorkCount = items.Count();
+			currentWorkCount = items.Count;
 			if (totalWorkCount < currentWorkCount) totalWorkCount = currentWorkCount;
 			return items.FirstOrDefault();
 		}
@@ -71,7 +71,7 @@ namespace AchtungMod
 			if (subCounter > currentItem.Thing.def.filth.cleaningWorkToReduceThickness)
 			{
 				var filth = currentItem.Thing as Filth;
-				if (filth != null) filth.ThinFilth();
+				filth?.ThinFilth();
 				subCounter = 0f;
 			}
 			return currentItem.Thing.Destroyed;
@@ -81,7 +81,7 @@ namespace AchtungMod
 		{
 			var info = WorkInfoAt(pawn, TargetA);
 			var name = info.room == null ? "" : " " + info.room.Role.label;
-			return (GetPrefix() + "Report").Translate(new object[] { name, info.valid ? Math.Floor(Progress() * 100f) + "%" : "-" });
+			return (GetPrefix() + "Report").Translate(name, info.valid ? Math.Floor(Progress() * 100f) + "%" : "-");
 		}
 
 		protected override IEnumerable<Toil> MakeNewToils()

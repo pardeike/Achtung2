@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
-	<ForceDraftTitle>Force draft</ForceDraftTitle>
-	<ForceDraftExplained>To draft an undrafted colonist while right-clicking, select this option</ForceDraftExplained>
+	<AchtungModifierTitle>Achtung! key</AchtungModifierTitle>
+	<AchtungModifierExplained>Holding this key will Force Draft colonists when they're given Move or Move-in-Formation commands.
+When held it will allow the selected colonists to be moved in their current formation at your cursor by holding and dragging the right mouse button. Once the right mouse button is held the Achtung! Key may be released.
+The formation can be rotated using Q and E</AchtungModifierExplained>
 
 	<ForceCommandMenuTitle>Force context menu</ForceCommandMenuTitle>
-	<ForceCommandMenuExplained>To show the context menu instead of positioning, hold the selected key while right-clicking</ForceCommandMenuExplained>
+	<ForceCommandMenuExplained>Shows the context menu instead of moving colonists</ForceCommandMenuExplained>
 
-	<RelativeMovementTitle>Move colonists relative</RelativeMovementTitle>
-	<RelativeMovementExplained>To move selected colonists relative to their current position, hold the selected key while right-click-dragging</RelativeMovementExplained>
-
-	<ShowWeaponRangesTitle>Show weapon ranges</ShowWeaponRangesTitle>
-	<ShowWeaponRangesExplained>To show the range of primary weapons, hold the selected key while right-click-dragging</ShowWeaponRangesExplained>
+	<Notes>Notes</Notes>
+	<Note1>When using Achtung the context menu contains both: drafted and undrafted commands</Note1>
+	<Note2>When positioning undrafted colonists along a line, a left click drafts colonists to their current positions</Note2>
 
 	<ModKeyOptionNone>Disabled</ModKeyOptionNone>
 	<ModKeyOptionAlt>Alt</ModKeyOptionAlt>

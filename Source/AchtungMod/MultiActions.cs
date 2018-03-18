@@ -39,8 +39,10 @@ namespace AchtungMod
 			if (Tools.IsGoHereOption(option) == false) allActions.Add(new MultiAction(colonist, draftMode, option));
 		}
 
-		public int Count()
+		public int Count(bool onlyActive)
 		{
+			if (onlyActive)
+				return allActions.Count(action => action.option.Disabled == false);
 			return allActions.Count();
 		}
 

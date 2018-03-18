@@ -11,10 +11,10 @@ namespace AchtungMod
 {
 	public class JobDriver_SowAll : JobDriver_Thoroughly
 	{
-		public ThingDef currentPlantDef = null;
-		public float xpPerTick = 0.154f;
+		public ThingDef currentPlantDef;
+		public float xpPerTick = 0.11f;
 
-		public static MethodInfo _ThrowTextMethod = null;
+		public static MethodInfo _ThrowTextMethod;
 		public static MethodInfo ThrowTextMethod
 		{
 			get
@@ -34,60 +34,15 @@ namespace AchtungMod
 			return "SowZone";
 		}
 
-		public override IEnumerable<LocalTargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
+		public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, Vector3 clickPos)
 		{
-			base.CanStart(pawn, clickPos);
-			if (pawn.workSettings.GetPriority(WorkTypeDefOf.Growing) == 0) return null;
+			base.CanStart(thePawn, clickPos);
+			if (thePawn.workSettings.GetPriority(WorkTypeDefOf.Growing) == 0) return null;
 			LocalTargetInfo cell = IntVec3.FromVector3(clickPos);
-			var cells = AllWorkAt(cell, pawn, true);
+			var cells = AllWorkAt(cell, thePawn, true);
 			IEnumerable<LocalTargetInfo> result = (cells != null && cells.Count() > 0) ? new List<LocalTargetInfo> { cell } : null;
 
 			return result;
-		}
-
-		public static bool CanEverPlantAtDummy(ThingDef plantDef, IntVec3 c, Map map)
-		{
-			if (plantDef.category != ThingCategory.Plant)
-				Verse.Log.Error("Checking CanGrowAt with " + (object)plantDef + " which is not a plant.");
-			Log.Warning("0");
-			if (!c.InBounds(map) || (double)map.fertilityGrid.FertilityAt(c) < (double)plantDef.plant.fertilityMin)
-				return false;
-			Log.Warning("1");
-			List<Thing> thingList = map.thingGrid.ThingsListAt(c);
-			for (int index = 0; index < thingList.Count; ++index)
-			{
-				Log.Warning("2 " + index);
-				Thing thing = thingList[index];
-				Log.Warning("2b");
-				if (thing.def.BlockPlanting || plantDef.passability == Traversability.Impassable && (thing.def.category == ThingCategory.Pawn || thing.def.category == ThingCategory.Item || (thing.def.category == ThingCategory.Building || thing.def.category == ThingCategory.Plant)))
-				{
-					Log.Warning("2c");
-					return false;
-				}
-			}
-			Log.Warning("3");
-			if (plantDef.passability == Traversability.Impassable)
-			{
-				Log.Warning("4");
-				for (int index = 0; index < 4; ++index)
-				{
-					Log.Warning("5 " + index);
-					IntVec3 c1 = c + GenAdj.CardinalDirections[index];
-					Log.Warning("6");
-					if (c1.InBounds(map))
-					{
-						Log.Warning("7");
-						Building edifice = c1.GetEdifice(map);
-						Log.Warning("8");
-						if (edifice != null && edifice.def.IsDoor)
-						{
-							Log.Warning("9");
-							return false;
-						}
-					}
-				}
-			}
-			return true;
 		}
 
 		private bool CanSowHere(IntVec3 cell, ThingDef def, bool fastMode)
@@ -110,17 +65,17 @@ namespace AchtungMod
 		}
 
 		// work in zone/room
-		public IEnumerable<IntVec3> AllWorkAt(LocalTargetInfo target, Pawn pawn, bool fastMode = false)
+		public IEnumerable<IntVec3> AllWorkAt(LocalTargetInfo target, Pawn thePawn, bool fastMode = false)
 		{
-			if (pawn.skills == null) return null;
+			if (thePawn.skills == null) return null;
 
-			var room = RegionAndRoomQuery.RoomAt(target.Cell, pawn.Map);
+			var room = RegionAndRoomQuery.RoomAt(target.Cell, thePawn.Map);
 			if (room != null && room.IsHuge == false && room.Group.AnyRoomTouchesMapEdge == false)
 			{
-				var growerCells = new HashSet<IntVec3>(pawn.Map.listerBuildings.allBuildingsColonist
+				var growerCells = new HashSet<IntVec3>(thePawn.Map.listerBuildings.allBuildingsColonist
 					 .Where(b =>
 					 {
-						 if (b == null || b.GetRoom() != room || b.Faction != pawn.Faction) return false;
+						 if (b == null || b.GetRoom() != room || b.Faction != thePawn.Faction) return false;
 
 						 var grower = b as IPlantToGrowSettable;
 						 if (grower == null) return false;
@@ -129,7 +84,7 @@ namespace AchtungMod
 						 var def1 = grower.GetPlantDefToGrow();
 						 if (def1 == null) return false;
 
-						 var growSkills1 = pawn.skills.GetSkill(SkillDefOf.Growing).Level;
+						 var growSkills1 = thePawn.skills.GetSkill(SkillDefOf.Growing).Level;
 						 return (def1.plant.sowMinSkill <= 0 || growSkills1 >= def1.plant.sowMinSkill);
 					 })
 					 .Cast<IPlantToGrowSettable>()
@@ -144,7 +99,7 @@ namespace AchtungMod
 				while (roomCells.Count > 0)
 				{
 					var cell = roomCells.First();
-					var zone = pawn.Map.zoneManager.ZoneAt(cell) as Zone_Growing;
+					var zone = thePawn.Map.zoneManager.ZoneAt(cell) as Zone_Growing;
 					if (zone != null && zone.cells.Count > 0)
 					{
 						if (zone.CanAcceptSowNow() && zone.allowSow)
@@ -152,7 +107,7 @@ namespace AchtungMod
 							var def2 = zone.GetPlantDefToGrow();
 							if (def2 != null)
 							{
-								var growSkills2 = pawn.skills.GetSkill(SkillDefOf.Growing).Level;
+								var growSkills2 = thePawn.skills.GetSkill(SkillDefOf.Growing).Level;
 								if (def2.plant.sowMinSkill <= 0 || growSkills2 >= def2.plant.sowMinSkill)
 								{
 									zone.cells
@@ -167,28 +122,28 @@ namespace AchtungMod
 				}
 
 				return zoneCells.Union(growerCells).Distinct()
-					 .OrderBy(c => Math.Abs(c.x - pawn.Position.x) + Math.Abs(c.z - pawn.Position.z));
+					 .OrderBy(c => Math.Abs(c.x - thePawn.Position.x) + Math.Abs(c.z - thePawn.Position.z));
 			}
 
-			var outdoorZone = pawn.Map.zoneManager.ZoneAt(target.Cell) as Zone_Growing;
+			var outdoorZone = thePawn.Map.zoneManager.ZoneAt(target.Cell) as Zone_Growing;
 			if (outdoorZone == null || outdoorZone.cells.Count == 0) return null;
 			if (outdoorZone.CanAcceptSowNow() == false || outdoorZone.allowSow == false) return null;
 			var def3 = outdoorZone.GetPlantDefToGrow();
 			if (def3 == null) return null;
 
-			var growSkills3 = pawn.skills.GetSkill(SkillDefOf.Growing).Level;
+			var growSkills3 = thePawn.skills.GetSkill(SkillDefOf.Growing).Level;
 			if (def3.plant.sowMinSkill > 0 && growSkills3 < def3.plant.sowMinSkill) return null;
 
 			return outdoorZone.Cells
 				 .Where(c => CanSowHere(c, outdoorZone.GetPlantDefToGrow(), fastMode))
-				 .OrderBy(c => Math.Abs(c.x - pawn.Position.x) + Math.Abs(c.z - pawn.Position.z));
+				 .OrderBy(c => Math.Abs(c.x - thePawn.Position.x) + Math.Abs(c.z - thePawn.Position.z));
 		}
 
 		public override LocalTargetInfo FindNextWorkItem()
 		{
-			var cells = AllWorkAt(TargetA, pawn);
-			if (cells == null || cells.Count() == 0) return null;
-			currentWorkCount = cells.Count();
+			var cells = AllWorkAt(TargetA, pawn)?.ToList();
+			if (cells == null || cells.Count == 0) return null;
+			currentWorkCount = cells.Count;
 			if (totalWorkCount < currentWorkCount) totalWorkCount = currentWorkCount;
 			var c = cells.First();
 
@@ -227,7 +182,7 @@ namespace AchtungMod
 				{
 					if (pawn.RaceProps.Humanlike && plant.def.plant.harvestFailable && Rand.Value > pawn.GetStatValue(StatDefOf.PlantHarvestYield, true))
 					{
-						var loc = (Vector3)((pawn.DrawPos + plant.DrawPos) / 2f);
+						var loc = (pawn.DrawPos + plant.DrawPos) / 2f;
 						ThrowText(loc, "HarvestFailed".Translate());
 					}
 					else
@@ -275,7 +230,7 @@ namespace AchtungMod
 				plant.sown = true;
 			}
 
-			pawn.skills?.Learn(SkillDefOf.Growing, 0.11f, false);
+			pawn.skills?.Learn(SkillDefOf.Growing, xpPerTick, false);
 
 			var workSpeed = pawn.GetStatValue(StatDefOf.PlantWorkSpeed, true);
 			subCounter += workSpeed;
@@ -307,7 +262,7 @@ namespace AchtungMod
 		public override string GetReport()
 		{
 			var name = currentPlantDef == null ? "" : " " + currentPlantDef.label;
-			return (GetPrefix() + "Report").Translate(new object[] { name, Math.Floor(Progress() * 100f) + "%" });
+			return (GetPrefix() + "Report").Translate(name, Math.Floor(Progress() * 100f) + "%");
 		}
 
 		protected override IEnumerable<Toil> MakeNewToils()

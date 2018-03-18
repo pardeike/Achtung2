@@ -5,6 +5,8 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 using System;
+using Verse.AI;
+using Verse.Sound;
 
 namespace AchtungMod
 {
@@ -17,7 +19,7 @@ namespace AchtungMod
 
 		public static FieldInfo draftHandlerField = typeof(Pawn_DraftController).GetField("draftedInt", BindingFlags.NonPublic | BindingFlags.Instance);
 
-		private static string _version = null;
+		private static string _version;
 		public static string Version
 		{
 			get
@@ -42,6 +44,38 @@ namespace AchtungMod
 			goHereLabel = "GoHere".Translate();
 		}
 
+		public static Vector3 RotateBy(Vector3 offsetFromCenter, int rotation, bool was45)
+		{
+			var offset = new Vector3(offsetFromCenter.x, offsetFromCenter.y, offsetFromCenter.z);
+			if ((Math.Abs(rotation) % 90) != 0)
+			{
+				if (was45)
+					offset /= Mathf.Sqrt(2);
+				else
+					offset *= Mathf.Sqrt(2);
+			}
+			offset = offset.RotatedBy(rotation);
+			return offset;
+		}
+
+		public static bool IsModKey(KeyCode code, ModKey key)
+		{
+			switch (key)
+			{
+				case ModKey.Alt:
+					return code == KeyCode.LeftAlt || code == KeyCode.RightAlt;
+				case ModKey.Ctrl:
+					return code == KeyCode.LeftControl || code == KeyCode.RightControl;
+				case ModKey.Shift:
+					return code == KeyCode.LeftShift || code == KeyCode.RightShift;
+				case ModKey.Meta:
+					return code == KeyCode.LeftWindows || code == KeyCode.RightWindows
+						|| code == KeyCode.LeftCommand || code == KeyCode.RightCommand
+						|| code == KeyCode.LeftApple || code == KeyCode.RightApple;
+			}
+			return false;
+		}
+
 		public static bool IsModKeyPressed(ModKey key)
 		{
 			switch (key)
@@ -56,18 +90,20 @@ namespace AchtungMod
 					return Input.GetKey(KeyCode.LeftWindows) || Input.GetKey(KeyCode.RightWindows)
 						|| Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand)
 						|| Input.GetKey(KeyCode.LeftApple) || Input.GetKey(KeyCode.RightApple);
-				default:
-					break;
 			}
 			return false;
 		}
 
-		public static bool PawnsUnderMouse()
+		public static bool Has45DegreeOffset(List<Colonist> colonists)
 		{
-			return UI.MouseCell()
-				.GetThingList(Find.VisibleMap)
-				.OfType<Pawn>()
-				.Any();
+			return colonists.All(c1 =>
+			{
+				return colonists.All(c2 =>
+				{
+					var delta = c1.pawn.Position - c2.pawn.Position;
+					return ((Math.Abs(delta.x) + Math.Abs(delta.z)) % 2 == 0);
+				});
+			});
 		}
 
 		public static IEnumerable<T> Do<T>(this IEnumerable<T> sequence, Action<T> action)
@@ -100,10 +136,49 @@ namespace AchtungMod
 			return option.Label == goHereLabel;
 		}
 
-		public static bool HasNonEmptyFloatMenu(Vector3 clickLoc, Pawn pawn)
+		public static void DraftWithSound(List<Colonist> colonists, bool draftStatus)
 		{
-			var choices = FloatMenuMakerMap.ChoicesAtFor(clickLoc, pawn);
-			return choices.Any(option => Tools.IsGoHereOption(option) == false);
+			var gotDrafted = false;
+			var gotUndrafted = false;
+			colonists.DoIf(colonist => colonist.pawn.Drafted == false,
+				colonist =>
+				{
+					var oldStatus = SetDraftStatus(colonist.pawn, draftStatus);
+					if (oldStatus != draftStatus)
+					{
+						if (draftStatus)
+							gotDrafted = true;
+						else
+							gotUndrafted = true;
+					}
+				});
+			if (gotDrafted)
+				SoundDefOf.DraftOn.PlayOneShotOnCamera(null);
+			if (gotUndrafted)
+				SoundDefOf.DraftOff.PlayOneShotOnCamera(null);
+		}
+
+		public static void CancelDrafting(List<Colonist> colonists)
+		{
+			var gotDrafted = false;
+			var gotUndrafted = false;
+			colonists.Do(colonist =>
+			{
+				var newDraftStatus = SetDraftStatus(colonist.pawn, colonist.originalDraftStatus);
+				if (colonist.originalDraftStatus && !newDraftStatus)
+					gotDrafted = true;
+				if (colonist.originalDraftStatus == false && newDraftStatus)
+					gotUndrafted = true;
+				colonist.pawn.mindState.priorityWork.Clear();
+				if (colonist.pawn.jobs.curJob != null && colonist.pawn.jobs.IsCurrentJobPlayerInterruptible())
+				{
+					colonist.pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
+				}
+			});
+			if (gotDrafted)
+				SoundDefOf.DraftOn.PlayOneShotOnCamera(null);
+			if (gotUndrafted)
+				SoundDefOf.DraftOff.PlayOneShotOnCamera(null);
 		}
 
 		public static bool GetDraftingStatus(Pawn pawn)
@@ -147,9 +222,9 @@ namespace AchtungMod
 
 		public static void DrawLineBetween(Vector3 A, Vector3 B, float thickness)
 		{
-			if ((Mathf.Abs((float)(A.x - B.x)) >= 0.01f) || (Mathf.Abs((float)(A.z - B.z)) >= 0.01f))
+			if (Mathf.Abs(A.x - B.x) >= 0.01f || Mathf.Abs(A.z - B.z) >= 0.01f)
 			{
-				var pos = (Vector3)((A + B) / 2f);
+				var pos = (A + B) / 2f;
 				if (A != B)
 				{
 					A.y = B.y;
@@ -161,6 +236,30 @@ namespace AchtungMod
 					DrawScaledMesh(MeshPool.pies[180], lineMaterial, A, q1, w, w);
 					DrawScaledMesh(MeshPool.pies[180], lineMaterial, B, q2, w, w);
 				}
+			}
+		}
+
+		public static IEnumerable<Colonist> OrderColonistsAlongLine(IEnumerable<Colonist> colonists, Vector3 lineStart, Vector3 lineEnd)
+		{
+			var vector = lineEnd - lineStart;
+			vector.y = 0;
+			var rotation = Quaternion.FromToRotation(vector, Vector3.right);
+			return colonists.OrderBy(colonist =>
+			{
+				var vec = rotation * colonist.pawn.DrawPos;
+				return vec.x * 1000 + vec.z;
+			});
+		}
+
+		public static void Note(this Listing_Standard listing, string name)
+		{
+			if (name.CanTranslate())
+			{
+				Text.Font = GameFont.Tiny;
+				listing.ColumnWidth -= 34;
+				GUI.color = Color.white;
+				listing.Label(name.Translate());
+				listing.ColumnWidth += 34;
 			}
 		}
 

@@ -32,20 +32,16 @@ namespace AchtungMod
 
 	public class AchtungSettings : ModSettings
 	{
-		public bool forceDraft = false;
+		public ModKey achtungKey = ModKey.Alt;
 		public ModKey forceCommandMenuKey = ModKey.Ctrl;
-		public ModKey relativeMovementKey = ModKey.Alt;
-		public ModKey showWeaponRangesKey = ModKey.Ctrl;
 		public BreakLevel breakLevel = BreakLevel.AlmostExtreme;
 		public HealthLevel healthLevel = HealthLevel.InPainShock;
 
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Values.Look(ref forceDraft, "forceDraft", false, true);
+			Scribe_Values.Look(ref achtungKey, "achtungKey", ModKey.Alt, true);
 			Scribe_Values.Look(ref forceCommandMenuKey, "forceCommandMenuKey", ModKey.Ctrl, true);
-			Scribe_Values.Look(ref relativeMovementKey, "relativeMovementKey", ModKey.Alt, true);
-			Scribe_Values.Look(ref showWeaponRangesKey, "showWeaponRangesKey", ModKey.Ctrl, true);
 			Scribe_Values.Look(ref breakLevel, "BreakLevel", BreakLevel.AlmostExtreme, true);
 			Scribe_Values.Look(ref healthLevel, "HealthLevel", HealthLevel.InPainShock, true);
 		}
@@ -56,17 +52,20 @@ namespace AchtungMod
 			list.Begin(canvas);
 			list.Gap();
 
-			list.CheckboxEnhanced("ForceDraft", ref Achtung.Settings.forceDraft);
+			list.ValueLabeled("AchtungModifier", ref Achtung.Settings.achtungKey);
 			list.Gap();
 			list.ValueLabeled("ForceCommandMenu", ref Achtung.Settings.forceCommandMenuKey);
-			list.Gap();
-			list.ValueLabeled("RelativeMovement", ref Achtung.Settings.relativeMovementKey);
-			list.Gap();
-			list.ValueLabeled("ShowWeaponRanges", ref Achtung.Settings.showWeaponRangesKey);
 			list.Gap();
 			list.ValueLabeled("BreakLevel", ref Achtung.Settings.breakLevel);
 			list.Gap();
 			list.ValueLabeled("HealthLevel", ref Achtung.Settings.healthLevel);
+
+			list.Gap(18f);
+			list.Note("Notes");
+			list.Gap(6f);
+			list.Note("Note1");
+			list.Gap(6f);
+			list.Note("Note2");
 
 			list.End();
 		}

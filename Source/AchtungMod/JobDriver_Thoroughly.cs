@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Verse;
 using Verse.AI;
 using UnityEngine;
@@ -22,12 +21,12 @@ namespace AchtungMod
 			return "DoThoroughly";
 		}
 
-		public virtual string GetLabel()
+		public string GetLabel()
 		{
 			return (GetPrefix() + "Label").Translate();
 		}
 
-		public virtual JobDef MakeJobDef()
+		public JobDef MakeJobDef()
 		{
 			var def = new JobDef();
 			def.driverClass = GetType();
@@ -55,9 +54,9 @@ namespace AchtungMod
 			Scribe_Values.Look(ref totalWorkCount, "totalWorkCount", -1f, false);
 		}
 
-		public virtual IEnumerable<LocalTargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
+		public virtual IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, Vector3 clickPos)
 		{
-			this.pawn = pawn;
+			pawn = thePawn;
 			return null;
 		}
 
@@ -69,21 +68,20 @@ namespace AchtungMod
 			if (queue == null) return jobs;
 			for (var i = -1; i < queue.Count; i++)
 			{
-				var job = i == -1 ? pawn.CurJob : queue[i].job;
-				if (job?.def.driverClass.IsInstanceOfType(this) ?? false)
-					jobs.Add(job);
+				var aJob = i == -1 ? pawn.CurJob : queue[i].job;
+				if (aJob?.def.driverClass.IsInstanceOfType(this) ?? false)
+					jobs.Add(aJob);
 			}
 			return jobs;
 		}
 
-		public virtual void StartJob(Pawn pawn, LocalTargetInfo target)
+		public void StartJob(Pawn targetPawn, LocalTargetInfo target)
 		{
-			var job = new Job(MakeJobDef(), target);
-			job.playerForced = true;
-			pawn.jobs.StartJob(job, JobCondition.InterruptForced, null, true, true, null);
+			var newJob = new Job(MakeJobDef(), target);
+			targetPawn.jobs.TryTakeOrderedJob(newJob);
 		}
 
-		public virtual float Progress()
+		public float Progress()
 		{
 			if (currentWorkCount <= 0f || totalWorkCount <= 0f) return 0f;
 			return (totalWorkCount - currentWorkCount) / totalWorkCount;
@@ -103,7 +101,7 @@ namespace AchtungMod
 			isMoving = false;
 		}
 
-		public virtual void InitAction()
+		public void InitAction()
 		{
 			workLocations = new HashSet<IntVec3>() { TargetA.Cell };
 			currentItem = null;
@@ -122,7 +120,7 @@ namespace AchtungMod
 		{
 		}
 
-		public virtual bool CurrentItemInvalid()
+		public bool CurrentItemInvalid()
 		{
 			return
 				currentItem == null ||
@@ -164,7 +162,7 @@ namespace AchtungMod
 			return () => false;
 		}
 
-		public virtual void CheckJobCancelling()
+		public void CheckJobCancelling()
 		{
 			if (pawn.Dead || pawn.Downed || pawn.HasAttachment(ThingDefOf.Fire))
 			{
@@ -193,7 +191,7 @@ namespace AchtungMod
 			}
 		}
 
-		public virtual void TickAction()
+		public void TickAction()
 		{
 			CheckJobCancelling();
 			UpdateVerbAndWorkLocations();

@@ -15,14 +15,14 @@ namespace AchtungMod
 			return "FireFight";
 		}
 
-		public override IEnumerable<LocalTargetInfo> CanStart(Pawn pawn, Vector3 clickPos)
+		public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, Vector3 clickPos)
 		{
-			base.CanStart(pawn, clickPos);
-			if (pawn.workSettings.GetPriority(WorkTypeDefOf.Firefighter) == 0) return null;
+			base.CanStart(thePawn, clickPos);
+			if (thePawn.workSettings.GetPriority(WorkTypeDefOf.Firefighter) == 0) return null;
 			LocalTargetInfo cell = IntVec3.FromVector3(clickPos);
-			var item = pawn.Map.thingGrid.ThingAt(cell.Cell, ThingDefOf.Fire);
+			var item = thePawn.Map.thingGrid.ThingAt(cell.Cell, ThingDefOf.Fire);
 			if (item == null) return null;
-			var canFight = item.Destroyed == false && pawn.CanReach(item, PathEndMode.Touch, pawn.NormalMaxDanger()) && pawn.CanReserve(item, 1);
+			var canFight = item.Destroyed == false && thePawn.CanReach(item, PathEndMode.Touch, thePawn.NormalMaxDanger()) && thePawn.CanReserve(item, 1);
 			return canFight ? new List<LocalTargetInfo> { cell } : null;
 		}
 
@@ -45,7 +45,7 @@ namespace AchtungMod
 			return workLocations
 				.OrderBy(loc => Math.Abs(loc.x - pawn.Position.x) + Math.Abs(loc.z - pawn.Position.z))
 				.Select(loc => pawn.Map.thingGrid.ThingAt(loc, ThingDefOf.Fire) as Fire)
-				.FirstOrDefault(f => f.Destroyed == false && pawn.CanReach(f, PathEndMode.Touch, pawn.NormalMaxDanger()) && pawn.CanReserve(f, 1));
+				.FirstOrDefault(f => f != null && f.Destroyed == false && pawn.CanReach(f, PathEndMode.Touch, pawn.NormalMaxDanger()) && pawn.CanReserve(f, 1));
 		}
 
 		public override bool DoWorkToItem()

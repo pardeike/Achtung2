@@ -3,23 +3,33 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
-using Verse.AI;
 
 namespace AchtungMod
 {
 	public class Controller
 	{
+		private enum Button
+		{
+			left = 0,
+			right = 1
+		}
+
 		public List<Colonist> colonists;
 		public Vector3 lineStart;
 		public Vector3 lineEnd;
+		public bool groupMovement;
+		public Vector3 groupCenter;
+		public int groupRotation;
+		public bool groupRotationWas45;
 		public bool isDragging;
-		public bool relativeMovement;
+		public bool achtungPressed;
 		public bool drawColonistPreviews;
 
 		public static Controller controller;
 		public static Controller getInstance()
 		{
-			if (controller == null) controller = new Controller();
+			if (controller == null)
+				controller = new Controller();
 			return controller;
 		}
 
@@ -34,110 +44,176 @@ namespace AchtungMod
 
 		public void InstallJobDefs()
 		{
-			new List<JobDef> {
-					 new JobDriver_CleanRoom().MakeJobDef(),
-					 new JobDriver_FightFire().MakeJobDef(),
+			new List<JobDef>
+				{
+					new JobDriver_CleanRoom().MakeJobDef(),
+					new JobDriver_FightFire().MakeJobDef(),
 					new JobDriver_SowAll().MakeJobDef()
 				}
-			.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, def => DefDatabase<JobDef>.Add(def));
+				.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
 		}
 
 		public void MouseDown(Vector3 pos)
 		{
-			if (Event.current.button != 1) // right button
-				return;
-
 			colonists = Tools.GetSelectedColonists();
-			if (colonists.Count() == 0)
+			if (colonists.Count == 0)
 				return;
 
-			relativeMovement = Tools.IsModKeyPressed(Achtung.Settings.relativeMovementKey);
+			if (isDragging && Event.current.button == (int)Button.left && groupMovement == false)
+			{
+				Tools.DraftWithSound(colonists, true);
+				EndDragging();
+				return;
+			}
+
+			if (Event.current.button != (int)Button.right)
+				return;
+
+			achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
 			var forceMenu = Tools.IsModKeyPressed(Achtung.Settings.forceCommandMenuKey);
+			var actions = new MultiActions(colonists, UI.MouseMapPosition());
 
-			var clickLoc = UI.MouseMapPosition();
-
-			if (colonists.Count() == 1)
+			if (forceMenu == false && (achtungPressed || actions.Count(achtungPressed) == 0))
 			{
-				if (relativeMovement)
+				var alreadyDrafted = colonists.All(colonist => colonist.pawn.Drafted);
+				if (achtungPressed || alreadyDrafted || colonists.Count > 1)
 				{
-					StartDragging(pos);
-					return;
+					if (achtungPressed)
+						Tools.DraftWithSound(colonists, true);
+					StartDragging(pos, achtungPressed);
 				}
-
-				var selectedPawn = colonists[0].pawn;
-				if (selectedPawn.Drafted == false && Achtung.Settings.forceDraft)
-				{
-					if (Tools.HasNonEmptyFloatMenu(clickLoc, colonists[0].pawn) == false)
-					{
-						Tools.SetDraftStatus(colonists[0].pawn, true);
-						if (Tools.HasNonEmptyFloatMenu(clickLoc, colonists[0].pawn) == false)
-							Tools.SetDraftStatus(colonists[0].pawn, false);
-					}
-				}
-
 				return;
 			}
 
-			if (Achtung.Settings.forceDraft)
-				colonists.DoIf(colonist => colonist.pawn.Drafted == false, colonist => Tools.SetDraftStatus(colonist.pawn, true));
-
-			var actions = new MultiActions(colonists, clickLoc);
-			if (actions.Count() > 0 && (forceMenu || Tools.PawnsUnderMouse()))
-			{
-				// present combined menu to the user
-				Find.WindowStack.Add(actions.GetWindow());
-				Event.current.Use();
-				return;
-			}
-
-			StartDragging(pos);
+			Find.WindowStack.Add(actions.GetWindow());
+			Event.current.Use();
 		}
 
-		private void StartDragging(Vector3 pos)
+		private void StartDragging(Vector3 pos, bool asGroup)
 		{
-			lineStart = pos;
-			lineStart.y = Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays);
+			groupMovement = asGroup;
+
+			if (groupMovement)
+			{
+				groupCenter.x = colonists.Sum(colonist => colonist.startPosition.x) / colonists.Count;
+				groupCenter.z = colonists.Sum(colonist => colonist.startPosition.z) / colonists.Count;
+				groupRotation = 0;
+				groupRotationWas45 = Tools.Has45DegreeOffset(colonists);
+			}
+			else
+			{
+				lineStart = pos;
+				lineStart.y = Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays);
+			}
+
+			colonists.Do(colonist => colonist.offsetFromCenter = colonist.startPosition - groupCenter);
 
 			isDragging = true;
 			Event.current.Use();
 		}
 
-		public void MouseDrag(Vector3 pos)
+		private void EndDragging()
 		{
-			if (Event.current.button != 1) // right button
-				return;
-
+			groupMovement = false;
 			if (isDragging)
 			{
-				lineEnd = pos;
-				lineEnd.y = Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays);
-				var count = colonists.Count();
-				var dragVector = lineEnd - lineStart;
-
-				if (relativeMovement)
-				{
-					colonists.Do(colonist =>
-					{
-						var delta = lineEnd - lineStart;
-						colonist.OrderTo(colonist.startPosition + delta);
-					});
-				}
-				else
-				{
-					var delta = count > 1 ? dragVector / (count - 1) : Vector3.zero;
-					var linePosition = count == 1 ? lineEnd : lineStart;
-					colonists.Do(colonist =>
-					{
-						colonist.OrderTo(linePosition);
-						linePosition += delta;
-					});
-				}
-
+				colonists.Clear();
 				Event.current.Use();
+			}
+			isDragging = false;
+		}
+
+		public void MouseDrag(Vector3 pos)
+		{
+			if (Event.current.button != (int)Button.right)
+				return;
+
+			if (isDragging == false)
+				return;
+
+			if (groupMovement)
+			{
+				colonists.Do(colonist => colonist.OrderTo(pos + Tools.RotateBy(colonist.offsetFromCenter, groupRotation, groupRotationWas45)));
+				Event.current.Use();
+				return;
+			}
+
+			lineEnd = pos;
+			lineEnd.y = Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays);
+			var count = colonists.Count;
+			var dragVector = lineEnd - lineStart;
+
+			var delta = count > 1 ? dragVector / (count - 1) : Vector3.zero;
+			var linePosition = count == 1 ? lineEnd : lineStart;
+			Tools.OrderColonistsAlongLine(colonists, lineStart, lineEnd).Do(colonist =>
+			{
+				colonist.OrderTo(linePosition);
+				linePosition += delta;
+			});
+
+			Event.current.Use();
+		}
+
+		public void MouseUp()
+		{
+			if (Event.current.button != (int)Button.right)
+				return;
+
+			EndDragging();
+		}
+
+		public void KeyDown(KeyCode key)
+		{
+			if (isDragging)
+			{
+				if (groupMovement == false && Tools.IsModKey(key, Achtung.Settings.achtungKey))
+				{
+					var undraftedColonists = colonists.Where(colonist => colonist.originalDraftStatus == false).ToList();
+					if (undraftedColonists.Count > 0)
+					{
+						Tools.DraftWithSound(undraftedColonists, true);
+						EndDragging();
+						return;
+					}
+				}
+
+				switch (key)
+				{
+					case KeyCode.Q:
+						if (groupMovement)
+						{
+							groupRotation -= 45;
+
+							var pos = UI.MouseMapPosition();
+							colonists.Do(colonist => colonist.OrderTo(pos + Tools.RotateBy(colonist.offsetFromCenter, groupRotation, groupRotationWas45)));
+
+							Event.current.Use();
+						}
+						break;
+
+					case KeyCode.E:
+						if (groupMovement)
+						{
+							groupRotation += 45;
+
+							var pos = UI.MouseMapPosition();
+							colonists.Do(colonist => colonist.OrderTo(pos + Tools.RotateBy(colonist.offsetFromCenter, groupRotation, groupRotationWas45)));
+
+							Event.current.Use();
+						}
+						break;
+
+					case KeyCode.Escape:
+						isDragging = false;
+						Tools.CancelDrafting(colonists);
+						colonists.Clear();
+						Event.current.Use();
+						break;
+				}
 			}
 		}
 
-		public void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType)
+		private void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType)
 		{
 			var driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
 			var targets = driver.CanStart(pawn, clickPos);
@@ -146,7 +222,7 @@ namespace AchtungMod
 				var existingJobs = driver.SameJobTypesOngoing();
 				targets.Do(target =>
 				{
-					var suffix = existingJobs.Count() > 0 ? " " + ("AlreadyDoing".Translate(existingJobs.Count() + 1)) : "";
+					var suffix = existingJobs.Count > 0 ? " " + ("AlreadyDoing".Translate(existingJobs.Count + 1)) : "";
 					options.Add(new FloatMenuOption(driver.GetLabel() + suffix, () => driver.StartJob(pawn, target), MenuOptionPriority.Low));
 				});
 			}
@@ -161,48 +237,12 @@ namespace AchtungMod
 			return options;
 		}
 
-		public void MouseUp(Vector3 pos)
-		{
-			if (Event.current.button != 1) // right button
-				return;
-
-			if (isDragging)
-			{
-				colonists.Clear();
-				Event.current.Use();
-			}
-			isDragging = false;
-		}
-
-		public void KeyDown(KeyCode key)
-		{
-			if (isDragging)
-			{
-				if (key == KeyCode.Escape)
-				{
-					isDragging = false;
-
-					colonists.Do(colonist =>
-					{
-						Tools.SetDraftStatus(colonist.pawn, colonist.originalDraftStatus);
-						colonist.pawn.mindState.priorityWork.Clear();
-						if (colonist.pawn.jobs.curJob != null && colonist.pawn.jobs.IsCurrentJobPlayerInterruptible())
-						{
-							colonist.pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
-						}
-					});
-
-					colonists.Clear();
-					Event.current.Use();
-				}
-			}
-		}
-
 		public void HandleDrawing()
 		{
 			if (isDragging)
 			{
-				if (colonists.Count() > 1) Tools.DrawLineBetween(lineStart, lineEnd, 1.0f);
+				if (colonists.Count > 1 && groupMovement == false)
+					Tools.DrawLineBetween(lineStart, lineEnd, 1.0f);
 
 				colonists.Do(c =>
 				{
@@ -215,17 +255,6 @@ namespace AchtungMod
 					{
 						c.pawn.Drawer.renderer.RenderPawnAt(pos);
 						c.pawn.DrawExtraSelectionOverlays();
-					}
-
-					if (Tools.IsModKeyPressed(Achtung.Settings.showWeaponRangesKey))
-					{
-						var verb = c.pawn.equipment?.PrimaryEq?.PrimaryVerb;
-						if (verb != null && verb.verbProps.MeleeRange == false)
-						{
-							var range = verb.verbProps.range;
-							if (range < 90f)
-								GenDraw.DrawRadiusRing(pos.ToIntVec3(), range);
-						}
 					}
 				});
 			}
@@ -249,16 +278,17 @@ namespace AchtungMod
 					MouseDown(pos);
 					MouseDrag(pos);
 					break;
+
 				case EventType.MouseDrag:
 					MouseDrag(pos);
 					break;
+
 				case EventType.mouseUp:
-					MouseUp(pos);
+					MouseUp();
 					break;
+
 				case EventType.KeyDown:
 					KeyDown(Event.current.keyCode);
-					break;
-				default:
 					break;
 			}
 		}
