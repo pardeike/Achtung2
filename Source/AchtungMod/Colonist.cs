@@ -27,11 +27,15 @@ namespace AchtungMod
 		public IntVec3 UpdateOrderPos(Vector3 pos)
 		{
 			var cell = pos.ToIntVec3();
-			if (cell.Standable(pawn.Map) && pawn.CanReach(cell, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+
+			if (AchtungLoader.IsSameSpotInstalled)
 			{
-				designation = cell.ToVector3Shifted();
-				designation.y = Altitudes.AltitudeFor(AltitudeLayer.Pawn);
-				return cell;
+				if (cell.Standable(pawn.Map) && pawn.CanReach(cell, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+				{
+					designation = cell.ToVector3Shifted();
+					designation.y = Altitudes.AltitudeFor(AltitudeLayer.Pawn);
+					return cell;
+				}
 			}
 
 			var bestCell = RCellFinder.BestOrderedGotoDestNear(cell, pawn);

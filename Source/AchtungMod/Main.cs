@@ -6,22 +6,29 @@ using Verse.AI;
 using System.Reflection;
 using System;
 using Harmony;
+using System.Linq;
 
 namespace AchtungMod
 {
 	[StaticConstructorOnStartup]
-	class AchtungLoader
+	public class AchtungLoader
 	{
+		public static bool IsSameSpotInstalled;
+
 		static AchtungLoader()
 		{
 			Controller.getInstance().InstallJobDefs();
 
 			var harmony = HarmonyInstance.Create("net.pardeike.rimworld.mods.achtung");
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
+
+			const string sameSpotId = "net.pardeike.rimworld.mod.samespot";
+			IsSameSpotInstalled = harmony.GetPatchedMethods()
+				.Any(method => harmony.IsPatched(method).Transpilers.Any(transpiler => transpiler.owner == sameSpotId));
 		}
 	}
 
-	class Achtung : Mod
+	public class Achtung : Mod
 	{
 		public static AchtungSettings Settings;
 
