@@ -34,6 +34,11 @@ namespace AchtungMod
 			return "SowZone";
 		}
 
+		public override EffecterDef GetWorkIcon()
+		{
+			return EffecterDefOf.Sow;
+		}
+
 		public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, Vector3 clickPos)
 		{
 			base.CanStart(thePawn, clickPos);
@@ -268,7 +273,6 @@ namespace AchtungMod
 		protected override IEnumerable<Toil> MakeNewToils()
 		{
 			var toil = base.MakeNewToils().First();
-			toil.WithEffect(EffecterDefOf.Sow, TargetIndex.A);
 			toil.PlaySustainerOrSound(() => SoundDefOf.Interact_Sow);
 			yield return toil;
 		}

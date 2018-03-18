@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Harmony;
 using Verse;
 using Verse.AI;
 using UnityEngine;
@@ -19,6 +20,11 @@ namespace AchtungMod
 		public virtual string GetPrefix()
 		{
 			return "DoThoroughly";
+		}
+
+		public virtual EffecterDef GetWorkIcon()
+		{
+			return null;
 		}
 
 		public string GetLabel()
@@ -230,29 +236,50 @@ namespace AchtungMod
 
 		protected override IEnumerable<Toil> MakeNewToils()
 		{
-			var progressBar = EffecterDefOf.ProgressBar;
-			var effecter = progressBar.Spawn();
+			var effecterProgresBar = EffecterDefOf.ProgressBar.Spawn();
+			var effecterWorkIcon = GetWorkIcon()?.Spawn();
 
-			var toil = new Toil();
-			toil.initAction = new Action(InitAction);
-			toil.tickAction = new Action(TickAction);
+			var toil = new Toil
+			{
+				initAction = InitAction,
+				tickAction = TickAction
+			};
+
 			toil.AddPreTickAction(delegate
 			{
-				effecter.EffectTick(toil.actor, TargetInfo.Invalid);
-				var mote = ((SubEffecter_ProgressBar)effecter.children[0]).mote;
+				effecterProgresBar.EffectTick(toil.actor, TargetInfo.Invalid);
+				var mote = ((SubEffecter_ProgressBar)effecterProgresBar.children[0]).mote;
 				if (mote != null)
 				{
 					mote.progress = Mathf.Clamp01(Progress());
 					mote.Position = toil.actor.Position;
 					mote.offsetZ = -1.1f;
 				}
+
+				if (effecterWorkIcon != null)
+				{
+					effecterWorkIcon.EffectTick(toil.actor, TargetInfo.Invalid);
+					var interactSymbol = (SubEffecter_InteractSymbol)effecterWorkIcon.children[0];
+					var dualMode = Traverse.Create(interactSymbol).Field("interactMote").GetValue<MoteDualAttached>();
+					dualMode.Attach(toil.actor, currentItem.ToTargetInfo(toil.actor.Map));
+				}
 			});
+
 			toil.defaultCompleteMode = ToilCompleteMode.Never;
 			toil.AddFinishAction(CleanupLastItem);
+
 			toil.AddFinishAction(delegate
 			{
-				effecter.Cleanup();
-				effecter = null;
+				if (effecterProgresBar != null)
+				{
+					effecterProgresBar.Cleanup();
+					effecterProgresBar = null;
+				}
+				if (effecterWorkIcon != null)
+				{
+					effecterWorkIcon.Cleanup();
+					effecterWorkIcon = null;
+				}
 			});
 
 			yield return toil;
