@@ -84,6 +84,7 @@ namespace AchtungMod
 		public void StartJob(Pawn targetPawn, LocalTargetInfo target)
 		{
 			var newJob = new Job(MakeJobDef(), target);
+			newJob.playerForced = true;
 			targetPawn.jobs.TryTakeOrderedJob(newJob);
 		}
 

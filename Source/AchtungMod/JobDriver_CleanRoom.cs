@@ -27,6 +27,11 @@ namespace AchtungMod
 			return "CleanRoom";
 		}
 
+		public override EffecterDef GetWorkIcon()
+		{
+			return EffecterDefOf.Clean;
+		}
+
 		public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, Vector3 clickPos)
 		{
 			base.CanStart(thePawn, clickPos);
@@ -82,14 +87,6 @@ namespace AchtungMod
 			var info = WorkInfoAt(pawn, TargetA);
 			var name = info.room == null ? "" : " " + info.room.Role.label;
 			return (GetPrefix() + "Report").Translate(name, info.valid ? Math.Floor(Progress() * 100f) + "%" : "-");
-		}
-
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			var toil = base.MakeNewToils().First();
-			toil.WithEffect(EffecterDefOf.Clean, TargetIndex.A);
-
-			yield return toil;
 		}
 
 		public override bool TryMakePreToilReservations()

@@ -73,9 +73,9 @@ namespace AchtungMod
 			var forceMenu = Tools.IsModKeyPressed(Achtung.Settings.forceCommandMenuKey);
 			var actions = new MultiActions(colonists, UI.MouseMapPosition());
 
-			if (forceMenu == false && (achtungPressed || actions.Count(achtungPressed) == 0))
+			var alreadyDrafted = colonists.All(colonist => colonist.pawn.Drafted);
+			if (forceMenu == false && (achtungPressed || actions.Count(achtungPressed) == 0 || alreadyDrafted))
 			{
-				var alreadyDrafted = colonists.All(colonist => colonist.pawn.Drafted);
 				if (achtungPressed || alreadyDrafted || colonists.Count > 1)
 				{
 					if (achtungPressed)
@@ -85,7 +85,8 @@ namespace AchtungMod
 				return;
 			}
 
-			Find.WindowStack.Add(actions.GetWindow());
+			if (actions.Count(false) > 0)
+				Find.WindowStack.Add(actions.GetWindow());
 			Event.current.Use();
 		}
 
