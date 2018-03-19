@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -69,19 +70,51 @@ namespace AchtungMod
 			if (Event.current.button != (int)Button.right)
 				return;
 
-			achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
-			var forceMenu = Tools.IsModKeyPressed(Achtung.Settings.forceCommandMenuKey);
 			var actions = new MultiActions(colonists, UI.MouseMapPosition());
+			achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
 
-			var alreadyDrafted = colonists.All(colonist => colonist.pawn.Drafted);
-			if (forceMenu == false && (achtungPressed || actions.Count(achtungPressed) == 0 || alreadyDrafted))
+			var forceMenu = Tools.IsModKeyPressed(Achtung.Settings.forceCommandMenuKey);
+			var thingsClicked = Find.VisibleMap.thingGrid.ThingsListAt(IntVec3.FromVector3(pos));
+			var pawnClicked = thingsClicked.OfType<Pawn>().Any();
+			var weaponClicked = thingsClicked.Any(thing => thing.def.IsWeapon);
+			var medicineClicked = thingsClicked.Any(thing => thing.def.IsMedicine);
+			var bedClicked = thingsClicked.Any(thing => thing.def.IsBed);
+			var fireClicked = thingsClicked.Any(thing => thing.def == ThingDefOf.Fire);
+
+			if (pawnClicked && colonists.Count > 1 && achtungPressed == false && forceMenu == false)
 			{
-				if (achtungPressed || alreadyDrafted || colonists.Count > 1)
+				var allHaveWeapons = colonists.All(colonist =>
 				{
-					if (achtungPressed)
-						Tools.DraftWithSound(colonists, true);
-					StartDragging(pos, achtungPressed);
-				}
+					var rangedVerb = colonist.pawn.TryGetAttackVerb(false);
+					return rangedVerb != null && rangedVerb.verbProps.range > 0;
+				});
+				if (allHaveWeapons)
+					return;
+			}
+
+			if ((weaponClicked || medicineClicked || bedClicked || fireClicked) && achtungPressed == false)
+			{
+				if (actions.Count(false) > 0)
+					Find.WindowStack.Add(actions.GetWindow());
+				Event.current.Use();
+				return;
+			}
+
+			if (forceMenu || (pawnClicked && achtungPressed == false))
+			{
+				if (actions.Count(false) > 0)
+					Find.WindowStack.Add(actions.GetWindow());
+				Event.current.Use();
+				return;
+			}
+
+			if (achtungPressed)
+				Tools.DraftWithSound(colonists, true);
+
+			var allDrafted = colonists.All(colonist => colonist.pawn.Drafted);
+			if (allDrafted)
+			{
+				StartDragging(pos, achtungPressed);
 				return;
 			}
 
