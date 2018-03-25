@@ -32,7 +32,7 @@ namespace AchtungMod
 			return (GetPrefix() + "Label").Translate();
 		}
 
-		public JobDef MakeJobDef()
+		public JobDef MakeDef()
 		{
 			var def = new JobDef();
 			def.driverClass = GetType();
@@ -83,7 +83,7 @@ namespace AchtungMod
 
 		public void StartJob(Pawn targetPawn, LocalTargetInfo target)
 		{
-			var newJob = new Job(MakeJobDef(), target);
+			var newJob = new Job(MakeDef(), target);
 			newJob.playerForced = true;
 			targetPawn.jobs.TryTakeOrderedJob(newJob);
 		}
@@ -136,39 +136,6 @@ namespace AchtungMod
 				(currentItem.Cell.x == 0 && currentItem.Cell.z == 0);
 		}
 
-		public Func<bool> GetPawnBreakLevel()
-		{
-			var mb = pawn.mindState.mentalBreaker;
-			switch (Achtung.Settings.breakLevel)
-			{
-				case BreakLevel.Minor:
-					return () => mb.BreakMinorIsImminent;
-				case BreakLevel.Major:
-					return () => mb.BreakMajorIsImminent;
-				case BreakLevel.AlmostExtreme:
-					return () => mb.BreakExtremeIsApproaching;
-				case BreakLevel.Extreme:
-					return () => mb.BreakExtremeIsImminent;
-			}
-			return () => false;
-		}
-
-		public Func<bool> GetPawnHealthLevel()
-		{
-			switch (Achtung.Settings.healthLevel)
-			{
-				case HealthLevel.ShouldBeTendedNow:
-					return () => HealthAIUtility.ShouldBeTendedNow(pawn) || HealthAIUtility.ShouldHaveSurgeryDoneNow(pawn);
-				case HealthLevel.PrefersMedicalRest:
-					return () => HealthAIUtility.ShouldSeekMedicalRest(pawn);
-				case HealthLevel.NeedsMedicalRest:
-					return () => HealthAIUtility.ShouldSeekMedicalRestUrgent(pawn);
-				case HealthLevel.InPainShock:
-					return () => pawn.health.InPainShock;
-			}
-			return () => false;
-		}
-
 		public void CheckJobCancelling()
 		{
 			if (pawn.Dead || pawn.Downed || pawn.HasAttachment(ThingDefOf.Fire))
@@ -178,7 +145,7 @@ namespace AchtungMod
 				return;
 			}
 
-			if (GetPawnBreakLevel()())
+			if (Tools.GetPawnBreakLevel(pawn)())
 			{
 				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
 				EndJobWith(JobCondition.Incompletable);
@@ -188,7 +155,7 @@ namespace AchtungMod
 				return;
 			}
 
-			if (GetPawnHealthLevel()())
+			if (Tools.GetPawnHealthLevel(pawn)())
 			{
 				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
 				EndJobWith(JobCondition.Incompletable);

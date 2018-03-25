@@ -7,6 +7,8 @@ using Verse;
 using System;
 using Verse.AI;
 using Verse.Sound;
+using Harmony;
+using Verse.AI.Group;
 
 namespace AchtungMod
 {
@@ -42,6 +44,106 @@ namespace AchtungMod
 			markerMaterial = MaterialPool.MatFrom("AchtungMarker", ShaderDatabase.Transparent);
 			lineMaterial = MaterialPool.MatFrom(GenDraw.LineTexPath, ShaderDatabase.Transparent, new Color(1f, 0.5f, 0.5f));
 			goHereLabel = "GoHere".Translate();
+		}
+
+		public static Func<bool> GetPawnBreakLevel(Pawn pawn)
+		{
+			var mb = pawn.mindState.mentalBreaker;
+			switch (Achtung.Settings.breakLevel)
+			{
+				case BreakLevel.Minor:
+					return () => mb.BreakMinorIsImminent;
+				case BreakLevel.Major:
+					return () => mb.BreakMajorIsImminent;
+				case BreakLevel.AlmostExtreme:
+					return () => mb.BreakExtremeIsApproaching;
+				case BreakLevel.Extreme:
+					return () => mb.BreakExtremeIsImminent;
+			}
+			return () => false;
+		}
+
+		public static Func<bool> GetPawnHealthLevel(Pawn pawn)
+		{
+			switch (Achtung.Settings.healthLevel)
+			{
+				case HealthLevel.ShouldBeTendedNow:
+					return () => HealthAIUtility.ShouldBeTendedNow(pawn) || HealthAIUtility.ShouldHaveSurgeryDoneNow(pawn);
+				case HealthLevel.PrefersMedicalRest:
+					return () => HealthAIUtility.ShouldSeekMedicalRest(pawn);
+				case HealthLevel.NeedsMedicalRest:
+					return () => HealthAIUtility.ShouldSeekMedicalRestUrgent(pawn);
+				case HealthLevel.InPainShock:
+					return () => pawn.health.InPainShock;
+			}
+			return () => false;
+		}
+
+		public static WorkGiverDef MakeWorkGiverDef(WorkGiver_Scanner workGiver, out WorkGiverDef original)
+		{
+			var type = workGiver.GetType();
+			original = DefDatabase<WorkGiverDef>.AllDefs.First(def => def.giverClass == type.BaseType);
+			var destDef = new WorkGiverDef();
+			var dest = Traverse.Create(destDef);
+			Traverse.IterateFields(original, destDef, (src, dst) => dst.SetValue(src.GetValue()));
+			destDef.giverClass = type;
+			return destDef;
+		}
+
+		public static bool FromColonist(this Pawn_JobTracker tracker)
+		{
+			var pawn = Traverse.Create(tracker).Field("pawn").GetValue<Pawn>();
+			return pawn.IsColonist;
+		}
+
+		public static ThoroughlyLord IsThoroughly(this Job job)
+		{
+			// JobDefOf.FinishFrame
+			// JobDefOf.HaulToContainer
+			// JobDefOf.HaulToCell
+			//
+			return job?.lord as ThoroughlyLord;
+		}
+
+		public static IEnumerable<Thing> GetFramesOrBlueprints(Pawn pawn, IntVec3 cell)
+		{
+			return pawn.Map.thingGrid
+				.ThingsAt(cell)
+				.Where(thing => (thing is Frame || thing is Blueprint) && thing.IsForbidden(pawn) == false);
+		}
+
+		public static List<Thing> UpdateCells(List<Thing> things, Pawn pawn, IntVec3 closeToCell)
+		{
+			var thingsToCheck = new HashSet<Thing>(things);
+			while (true)
+			{
+				var newAdjactedThings = new HashSet<Thing>();
+				foreach (var thing in thingsToCheck)
+				{
+					var pos = thing.Position;
+					var surrounding = GenAdj.AdjacentCellsAround
+						.SelectMany(vec => GetFramesOrBlueprints(pawn, vec + pos))
+						.Except(things);
+					newAdjactedThings.UnionWith(surrounding);
+				}
+				var newCount = newAdjactedThings.Count;
+				if (newCount == 0)
+					break;
+
+				things.AddRange(newAdjactedThings);
+				thingsToCheck = newAdjactedThings;
+			}
+
+			return things
+				.Where(thing => thing.DestroyedOrNull() == false && thing.Spawned)
+				.OrderBy(thing =>
+				{
+					var isPowerConduitBlueprint = (thing as Blueprint_Build)?.def.entityDefToBuild == ThingDefOf.PowerConduit;
+					var isPowerConduitFrame = (thing as Frame)?.resourceContainer.ElementAtOrDefault(0)?.def == ThingDefOf.PowerConduit;
+					var isNormalBlueprint = isPowerConduitBlueprint == false && (thing is Blueprint);
+					return (isPowerConduitFrame ? -20000 : 0) + (isPowerConduitBlueprint ? -10000 : 0) + (isNormalBlueprint ? 10000 : 0) + thing.Position.DistanceToSquared(closeToCell);
+				})
+				.ToList();
 		}
 
 		public static Vector3 RotateBy(Vector3 offsetFromCenter, int rotation, bool was45)
@@ -210,6 +312,13 @@ namespace AchtungMod
 		{
 			pos.y = Altitudes.AltitudeFor(AltitudeLayer.Pawn - 1);
 			DrawScaledMesh(MeshPool.plane10, markerMaterial, pos, Quaternion.identity, 1.25f, 1.25f);
+		}
+
+		public static void DebugPosition(Vector3 pos, Color color)
+		{
+			pos.y = Altitudes.AltitudeFor(AltitudeLayer.Pawn - 1);
+			var material = SolidColorMaterials.SimpleSolidColorMaterial(color);
+			DrawScaledMesh(MeshPool.plane10, material, pos + new Vector3(0.5f, 0f, 0.5f), Quaternion.identity, 1.0f, 1.0f);
 		}
 
 		public static void DrawScaledMesh(Mesh mesh, Material mat, Vector3 pos, Quaternion q, float mx, float mz, float my = 1f)

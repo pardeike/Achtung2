@@ -11,13 +11,7 @@ namespace AchtungMod
 		public bool draftMode;
 		public FloatMenuOption option;
 
-		public string Key
-		{
-			get
-			{
-				return option.Label;
-			}
-		}
+		public string Key => option.Label;
 
 		public MultiAction(Colonist colonist, bool draftMode, FloatMenuOption option)
 		{

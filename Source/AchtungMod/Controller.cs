@@ -4,6 +4,7 @@ using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Verse.AI;
 
 namespace AchtungMod
 {
@@ -26,6 +27,10 @@ namespace AchtungMod
 		public bool achtungPressed;
 		public bool drawColonistPreviews;
 
+		public static WorkGiverDef WorkGiver_ConstructFinishFramesAllDef = new WorkGiver_ConstructFinishFramesAll().MakeDef();
+		public static WorkGiverDef WorkGiver_ConstructDeliverResourcesToBlueprintsAllDef = new WorkGiver_ConstructDeliverResourcesToBlueprintsAll().MakeDef();
+		public static WorkGiverDef WorkGiver_ConstructDeliverResourcesToFramesAllDef = new WorkGiver_ConstructDeliverResourcesToFramesAll().MakeDef();
+
 		public static Controller controller;
 		public static Controller getInstance()
 		{
@@ -43,15 +48,28 @@ namespace AchtungMod
 			drawColonistPreviews = true;
 		}
 
-		public void InstallJobDefs()
+		public void InstallDefs()
 		{
 			new List<JobDef>
-				{
-					new JobDriver_CleanRoom().MakeJobDef(),
-					new JobDriver_FightFire().MakeJobDef(),
-					new JobDriver_SowAll().MakeJobDef()
-				}
-				.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
+			{
+				new JobDriver_CleanRoom().MakeDef(),
+				new JobDriver_FightFire().MakeDef(),
+				new JobDriver_SowAll().MakeDef()
+			}
+			.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
+
+			var workTypeConstruction = DefDatabase<WorkTypeDef>.GetNamed("Construction");
+			new List<WorkGiverDef>
+			{
+				WorkGiver_ConstructFinishFramesAllDef,
+				WorkGiver_ConstructDeliverResourcesToBlueprintsAllDef,
+				WorkGiver_ConstructDeliverResourcesToFramesAllDef
+			}
+			.DoIf(def => DefDatabase<WorkGiverDef>.GetNamedSilentFail(def.defName) == null, def =>
+			{
+				DefDatabase<WorkGiverDef>.Add(def);
+				workTypeConstruction.workGiversByPriority.Add(def);
+			});
 		}
 
 		public void MouseDown(Vector3 pos)
@@ -273,6 +291,25 @@ namespace AchtungMod
 
 		public void HandleDrawing()
 		{
+			// for debugging
+			/*
+			Find.Selector.SelectedObjectsListForReading
+				.OfType<Pawn>()
+				.Where(p => p != null && p.IsColonist)
+				.Do(pawn =>
+				{
+					var lord = pawn.jobs.curJob?.lord as ThoroughlyLord;
+				lord?.extraForbiddenThings
+					.Do(thing => Tools.DebugPosition(thing.Position.ToVector3(), new Color(0f, 0f, 1f, 0.1f)));
+				});
+
+			Find.VisibleMap?.reservationManager?.AllReservedThings()?.Do(thing =>
+			{
+				if (thing != null)
+					Tools.DebugPosition(thing.Position.ToVector3(), new Color(1f, 0f, 0f, 0.2f));
+			});
+			*/
+
 			if (isDragging)
 			{
 				if (colonists.Count > 1 && groupMovement == false)

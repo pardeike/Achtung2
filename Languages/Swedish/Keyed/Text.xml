@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+	<AchtungModifierTitle>Achtung! knapp</AchtungModifierTitle>
+	<AchtungModifierExplained>Trygg knappen för att försätta kolonister i kampmodus när du positionera dem.
+Höll i för att flytta kolonister i deras formation. Formationen kan roteras med Q och E</AchtungModifierExplained>
+
+	<ForceCommandMenuTitle>Tvinga kontextmenyn</ForceCommandMenuTitle>
+	<ForceCommandMenuExplained>Visa kontextmenyn istället for att positionera kolonister</ForceCommandMenuExplained>
+
+	<WorkUninterrupted>Tvinga konstruktion</WorkUninterrupted>
+
+	<Notes>Anmärkningar</Notes>
+	<Note1>Med Achtung innehåller kontextmenyn såväl normala som kampkommandos</Note1>
+	<Note2>Vid positionering av kolonister längs en rad kommer en vänsterklick sätta dem i kamppositioner</Note2>
+
+	<ModKeyOptionNone>Av</ModKeyOptionNone>
+	<ModKeyOptionAlt>Alt</ModKeyOptionAlt>
+	<ModKeyOptionCtrl>Ctrl</ModKeyOptionCtrl>
+	<ModKeyOptionShift>Shift</ModKeyOptionShift>
+	<ModKeyOptionMeta>Win/Cmd</ModKeyOptionMeta>
+
+	<BreakLevelTitle>Mental sammanbrottsgräns för arbete</BreakLevelTitle>
+	<BreakLevelExplained>Sätter ein övre gräns för utförda Achtung! jobs</BreakLevelExplained>
+	<BreakLevelOptionNone>Ignorera</BreakLevelOptionNone>
+	<BreakLevelOptionMinor>Obetydande</BreakLevelOptionMinor>
+	<BreakLevelOptionMajor>Betydande</BreakLevelOptionMajor>
+	<BreakLevelOptionAlmostExtreme>Nästan extrem</BreakLevelOptionAlmostExtreme>
+	<BreakLevelOptionExtreme>Extrem</BreakLevelOptionExtreme>
+
+	<HealthLevelTitle>Tillåten hälsotillstånd</HealthLevelTitle>
+	<HealthLevelExplained>Sätter ein hälsotillståndsgräns för utförda Achtung! jobs</HealthLevelExplained>
+	<HealthLevelOptionNone>Ignorera</HealthLevelOptionNone>
+	<HealthLevelOptionShouldBeTendedNow>Behöver enkel hjälp</HealthLevelOptionShouldBeTendedNow>
+	<HealthLevelOptionPrefersMedicalRest>Medicinisk vård</HealthLevelOptionPrefersMedicalRest>
+	<HealthLevelOptionNeedsMedicalRest>Sängbunden</HealthLevelOptionNeedsMedicalRest>
+	<HealthLevelOptionInPainShock>I shock</HealthLevelOptionInPainShock>
+
+	<JobInterruptedLabel>{0} avbruten</JobInterruptedLabel>
+	<JobInterruptedBreakdown>{0} står inför ett sammanbrott</JobInterruptedBreakdown>
+	<JobInterruptedBadHealth>{0} har låg hälsa</JobInterruptedBadHealth>
+
+	<CleanRoomLabel>Städa rummet</CleanRoomLabel>
+	<CleanRoomInfoText>Städar rummet</CleanRoomInfoText>
+	<CleanRoomDescription>Städar ett rum tills det är rent</CleanRoomDescription>
+	<CleanRoomReport>Städa{0}: {1}</CleanRoomReport>
+
+	<FireFightLabel>Släck brand</FireFightLabel>
+	<FireFightInfoText>Släcker en brand</FireFightInfoText>
+	<FireFightDescription>Släcker brand (även utanför hemområde)</FireFightDescription>
+	<FireFightReport>Släcker brand: {0}</FireFightReport>
+
+	<SowZoneLabel>Så zonen/rummet</SowZoneLabel>
+	<SowZoneInfoText>Så en zon/rum</SowZoneInfoText>
+	<SowZoneDescription>Så en hel zon eller rum</SowZoneDescription>
+	<SowZoneReport>Så{0}: {1}</SowZoneReport>
+
+	<AlreadyDoing>(Job #{0})</AlreadyDoing>
+
+</LanguageData>
