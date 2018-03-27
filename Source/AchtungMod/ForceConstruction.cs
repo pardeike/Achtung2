@@ -29,7 +29,7 @@ namespace AchtungMod
 
 		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
-			var job = base.JobOnThing(pawn, t, true);
+			var job = base.JobOnThing(pawn, t, forced);
 			if (job != null)
 			{
 				job.lord = new ThoroughlyLord();
@@ -64,7 +64,7 @@ namespace AchtungMod
 
 		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
-			var job = base.JobOnThing(pawn, t, true);
+			var job = base.JobOnThing(pawn, t, forced);
 			if (job != null)
 			{
 				job.lord = new ThoroughlyLord();
@@ -99,7 +99,7 @@ namespace AchtungMod
 
 		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
-			var job = base.JobOnThing(pawn, t, true);
+			var job = base.JobOnThing(pawn, t, forced);
 			if (job != null)
 			{
 				job.lord = new ThoroughlyLord();
