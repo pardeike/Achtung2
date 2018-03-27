@@ -100,19 +100,19 @@ namespace AchtungMod
 				if (thing is Frame)
 				{
 					workGiverScanner = (WorkGiver_Scanner)Controller.WorkGiver_ConstructDeliverResourcesToFramesAllDef.Worker;
-					job = workGiverScanner.JobOnThing(pawn, thing, true);
+					job = workGiverScanner.JobOnThing(pawn, thing, false);
 
 					if (job == null)
 					{
 						workGiverScanner = (WorkGiver_Scanner)Controller.WorkGiver_ConstructFinishFramesAllDef.Worker;
-						job = workGiverScanner.JobOnThing(pawn, thing, true);
+						job = workGiverScanner.JobOnThing(pawn, thing, false);
 					}
 				}
 
 				if (thing is Blueprint)
 				{
 					workGiverScanner = (WorkGiver_Scanner)Controller.WorkGiver_ConstructDeliverResourcesToBlueprintsAllDef.Worker;
-					job = workGiverScanner.JobOnThing(pawn, thing, true);
+					job = workGiverScanner.JobOnThing(pawn, thing, false);
 				}
 
 				if (job != null)

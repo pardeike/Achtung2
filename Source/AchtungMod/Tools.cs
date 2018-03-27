@@ -82,7 +82,12 @@ namespace AchtungMod
 		public static WorkGiverDef MakeWorkGiverDef(WorkGiver_Scanner workGiver, out WorkGiverDef original)
 		{
 			var type = workGiver.GetType();
-			original = DefDatabase<WorkGiverDef>.AllDefs.First(def => def.giverClass == type.BaseType);
+			original = DefDatabase<WorkGiverDef>.AllDefs.FirstOrDefault(def => type.BaseType.IsAssignableFrom(def.giverClass));
+			if (original == null)
+			{
+				Log.Error("Cannot find any WorkGiverDef for " + type.FullName);
+				return null;
+			}
 			var destDef = new WorkGiverDef();
 			var dest = Traverse.Create(destDef);
 			Traverse.IterateFields(original, destDef, (src, dst) => dst.SetValue(src.GetValue()));

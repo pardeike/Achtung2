@@ -27,9 +27,9 @@ namespace AchtungMod
 		public bool achtungPressed;
 		public bool drawColonistPreviews;
 
-		public static WorkGiverDef WorkGiver_ConstructFinishFramesAllDef = new WorkGiver_ConstructFinishFramesAll().MakeDef();
-		public static WorkGiverDef WorkGiver_ConstructDeliverResourcesToBlueprintsAllDef = new WorkGiver_ConstructDeliverResourcesToBlueprintsAll().MakeDef();
-		public static WorkGiverDef WorkGiver_ConstructDeliverResourcesToFramesAllDef = new WorkGiver_ConstructDeliverResourcesToFramesAll().MakeDef();
+		public static WorkGiverDef WorkGiver_ConstructFinishFramesAllDef;
+		public static WorkGiverDef WorkGiver_ConstructDeliverResourcesToBlueprintsAllDef;
+		public static WorkGiverDef WorkGiver_ConstructDeliverResourcesToFramesAllDef;
 
 		public static Controller controller;
 		public static Controller getInstance()
@@ -57,6 +57,10 @@ namespace AchtungMod
 				new JobDriver_SowAll().MakeDef()
 			}
 			.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
+
+			WorkGiver_ConstructFinishFramesAllDef = new WorkGiver_ConstructFinishFramesAll().MakeDef();
+			WorkGiver_ConstructDeliverResourcesToBlueprintsAllDef = new WorkGiver_ConstructDeliverResourcesToBlueprintsAll().MakeDef();
+			WorkGiver_ConstructDeliverResourcesToFramesAllDef = new WorkGiver_ConstructDeliverResourcesToFramesAll().MakeDef();
 
 			var workTypeConstruction = DefDatabase<WorkTypeDef>.GetNamed("Construction");
 			new List<WorkGiverDef>

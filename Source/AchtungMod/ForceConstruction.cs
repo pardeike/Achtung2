@@ -21,6 +21,7 @@ namespace AchtungMod
 		{
 			WorkGiverDef original;
 			var def = Tools.MakeWorkGiverDef(this, out original);
+			if (def == null) return null;
 			def.defName = original.defName + "All";
 			def.description = original.description + " (All)";
 			def.label = original.label + " ALl";
@@ -56,6 +57,7 @@ namespace AchtungMod
 		{
 			WorkGiverDef original;
 			var def = Tools.MakeWorkGiverDef(this, out original);
+			if (def == null) return null;
 			def.defName = original.defName + "All";
 			def.description = original.description + " (All)";
 			def.label = original.label + " ALl";
@@ -91,6 +93,7 @@ namespace AchtungMod
 		{
 			WorkGiverDef original;
 			var def = Tools.MakeWorkGiverDef(this, out original);
+			if (def == null) return null;
 			def.defName = original.defName + "All";
 			def.description = original.description + " (All)";
 			def.label = original.label + " ALl";
