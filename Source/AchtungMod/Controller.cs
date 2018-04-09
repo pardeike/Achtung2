@@ -4,7 +4,6 @@ using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
-using Verse.AI;
 
 namespace AchtungMod
 {
@@ -27,12 +26,8 @@ namespace AchtungMod
 		public bool achtungPressed;
 		public bool drawColonistPreviews;
 
-		public static WorkGiverDef WorkGiver_ConstructFinishFramesAllDef;
-		public static WorkGiverDef WorkGiver_ConstructDeliverResourcesToBlueprintsAllDef;
-		public static WorkGiverDef WorkGiver_ConstructDeliverResourcesToFramesAllDef;
-
 		public static Controller controller;
-		public static Controller getInstance()
+		public static Controller GetInstance()
 		{
 			if (controller == null)
 				controller = new Controller();
@@ -57,29 +52,12 @@ namespace AchtungMod
 				new JobDriver_SowAll().MakeDef()
 			}
 			.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
-
-			WorkGiver_ConstructFinishFramesAllDef = new WorkGiver_ConstructFinishFramesAll().MakeDef();
-			WorkGiver_ConstructDeliverResourcesToBlueprintsAllDef = new WorkGiver_ConstructDeliverResourcesToBlueprintsAll().MakeDef();
-			WorkGiver_ConstructDeliverResourcesToFramesAllDef = new WorkGiver_ConstructDeliverResourcesToFramesAll().MakeDef();
-
-			var workTypeConstruction = DefDatabase<WorkTypeDef>.GetNamed("Construction");
-			new List<WorkGiverDef>
-			{
-				WorkGiver_ConstructFinishFramesAllDef,
-				WorkGiver_ConstructDeliverResourcesToBlueprintsAllDef,
-				WorkGiver_ConstructDeliverResourcesToFramesAllDef
-			}
-			.DoIf(def => DefDatabase<WorkGiverDef>.GetNamedSilentFail(def.defName) == null, def =>
-			{
-				DefDatabase<WorkGiverDef>.Add(def);
-				workTypeConstruction.workGiversByPriority.Add(def);
-			});
 		}
 
 		public void MouseDown(Vector3 pos)
 		{
 			colonists = Tools.GetSelectedColonists();
-			if (colonists.Count == 0)
+			if (colonists.Count == 0 || Achtung.Settings.positioningEnabled == false)
 				return;
 
 			if (isDragging && Event.current.button == (int)Button.left && groupMovement == false)
@@ -287,9 +265,12 @@ namespace AchtungMod
 		public IEnumerable<FloatMenuOption> AchtungChoicesAtFor(Vector3 clickPos, Pawn pawn)
 		{
 			var options = new List<FloatMenuOption>();
+
 			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_CleanRoom));
 			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_FightFire));
 			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_SowAll));
+			ForceConstruction.AddForcedBuild(options, clickPos, pawn);
+
 			return options;
 		}
 

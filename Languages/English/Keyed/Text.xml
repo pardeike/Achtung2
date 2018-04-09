@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
+	<PositioningEnabledTitle>Custom mouse positioning</PositioningEnabledTitle>
+	<PositioningEnabledExplained>Enables combat positioning for your mouse clicks/drags (see settings below)</PositioningEnabledExplained>
+
 	<AchtungModifierTitle>Achtung! key</AchtungModifierTitle>
 	<AchtungModifierExplained>Holding this key will Force Draft colonists when they're given Move or Move-in-Formation commands.
 When held it will allow the selected colonists to be moved in their current formation at your cursor by holding and dragging the right mouse button. Once the right mouse button is held the Achtung! Key may be released.

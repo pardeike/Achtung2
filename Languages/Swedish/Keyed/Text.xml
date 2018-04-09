@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
+	<PositioningEnabledTitle>Aktivera positioningen för kolonister</PositioningEnabledTitle>
+	<PositioningEnabledExplained>Aktiverar muskommandos för positioneringen av kolonister (se inställningar nere)</PositioningEnabledExplained>
+
 	<AchtungModifierTitle>Achtung! knapp</AchtungModifierTitle>
 	<AchtungModifierExplained>Trygg knappen för att försätta kolonister i kampmodus när du positionera dem.
 Höll i för att flytta kolonister i deras formation. Formationen kan roteras med Q och E</AchtungModifierExplained>

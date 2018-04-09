@@ -1,8 +1,11 @@
-﻿using Verse;
-using RimWorld;
-using Verse.AI;
-using Verse.AI.Group;
+﻿using System;
 using System.Collections.Generic;
+using Verse;
+using Verse.AI;
+using UnityEngine;
+using RimWorld;
+using Verse.AI.Group;
+using System.Linq;
 
 namespace AchtungMod
 {
@@ -15,111 +18,58 @@ namespace AchtungMod
 		}
 	}
 
-	public class WorkGiver_ConstructFinishFramesAll : WorkGiver_ConstructFinishFrames
+	public class ForceConstruction
 	{
-		public WorkGiverDef MakeDef()
+		static HashSet<Type> workGiverTypes = new HashSet<Type>()
 		{
-			WorkGiverDef original;
-			var def = Tools.MakeWorkGiverDef(this, out original);
-			if (def == null) return null;
-			def.defName = original.defName + "All";
-			def.description = original.description + " (All)";
-			def.label = original.label + " ALl";
-			return def;
+				typeof(WorkGiver_ConstructDeliverResourcesToBlueprints),
+				typeof(WorkGiver_ConstructDeliverResourcesToFrames),
+				typeof(WorkGiver_ConstructFinishFrames)
+		};
+
+		static IEnumerable<WorkGiver_Scanner> GetWorkGivers(Pawn pawn)
+		{
+			return DefDatabase<WorkTypeDef>.AllDefsListForReading
+				.SelectMany(def => def.workGiversByPriority)
+				.Select(workGiverDef => workGiverDef.Worker)
+				.OfType<WorkGiver_Scanner>()
+				.Where(workGiver => workGiverTypes.Contains(workGiver?.GetType()) && workGiver.def.directOrderable && !workGiver.ShouldSkip(pawn));
 		}
 
-		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+		public static Job JobOnThing(Pawn pawn, Thing thing, bool forced)
 		{
-			var job = base.JobOnThing(pawn, t, forced);
-			if (job != null)
+			foreach (var workGiver in GetWorkGivers(pawn))
 			{
-				job.lord = new ThoroughlyLord();
-				job.lord.extraForbiddenThings.Add(t);
-				job.lord.extraForbiddenThings = Tools.UpdateCells(job.lord.extraForbiddenThings, pawn, t.Position);
+				var disabled1 = pawn.story?.WorkTagIsDisabled(workGiver.def.workTags) ?? false;
+				var disabled2 = pawn.story?.WorkTypeIsDisabled(workGiver.def.workType) ?? false;
+				if (disabled1 == false && disabled2 == false)
+				{
+					if (thing.IsForbidden(pawn) == false && pawn.CanReach(thing, workGiver.PathEndMode, Danger.Deadly, false, TraverseMode.ByPawn))
+					{
+						var job = workGiver.JobOnThing(pawn, thing, forced);
+						if (job != null)
+						{
+							job.lord = new ThoroughlyLord();
+							job.lord.extraForbiddenThings.Add(thing);
+							job.lord.extraForbiddenThings = Tools.UpdateCells(job.lord.extraForbiddenThings, pawn, thing.Position);
+							return job;
+						}
+					}
+				}
 			}
-			return job;
+			return null;
 		}
 
-		public override Danger MaxPathDanger(Pawn pawn)
+		public static void AddForcedBuild(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn)
 		{
-			return Danger.Deadly;
-		}
-
-		public override float GetPriority(Pawn pawn, TargetInfo t)
-		{
-			return 100000f;
-		}
-	}
-
-	public class WorkGiver_ConstructDeliverResourcesToBlueprintsAll : WorkGiver_ConstructDeliverResourcesToBlueprints
-	{
-		public WorkGiverDef MakeDef()
-		{
-			WorkGiverDef original;
-			var def = Tools.MakeWorkGiverDef(this, out original);
-			if (def == null) return null;
-			def.defName = original.defName + "All";
-			def.description = original.description + " (All)";
-			def.label = original.label + " ALl";
-			return def;
-		}
-
-		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
-		{
-			var job = base.JobOnThing(pawn, t, forced);
-			if (job != null)
+			var clickCell = IntVec3.FromVector3(clickPos);
+			var driver = (JobDriver_Thoroughly)Activator.CreateInstance(typeof(JobDriver_SowAll));
+			foreach (var thing in pawn.Map.thingGrid.ThingsAt(clickCell))
 			{
-				job.lord = new ThoroughlyLord();
-				job.lord.extraForbiddenThings.Add(t);
-				job.lord.extraForbiddenThings = Tools.UpdateCells(job.lord.extraForbiddenThings, pawn, t.Position);
+				var job = JobOnThing(pawn, thing, true);
+				if (job != null)
+					options.Add(new FloatMenuOption("WorkUninterrupted".Translate(), () => pawn.jobs.TryTakeOrderedJob(job), MenuOptionPriority.Low));
 			}
-			return job;
-		}
-
-		public override Danger MaxPathDanger(Pawn pawn)
-		{
-			return Danger.Deadly;
-		}
-
-		public override float GetPriority(Pawn pawn, TargetInfo t)
-		{
-			return 100000f;
-		}
-	}
-
-	public class WorkGiver_ConstructDeliverResourcesToFramesAll : WorkGiver_ConstructDeliverResourcesToFrames
-	{
-		public WorkGiverDef MakeDef()
-		{
-			WorkGiverDef original;
-			var def = Tools.MakeWorkGiverDef(this, out original);
-			if (def == null) return null;
-			def.defName = original.defName + "All";
-			def.description = original.description + " (All)";
-			def.label = original.label + " ALl";
-			return def;
-		}
-
-		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
-		{
-			var job = base.JobOnThing(pawn, t, forced);
-			if (job != null)
-			{
-				job.lord = new ThoroughlyLord();
-				job.lord.extraForbiddenThings.Add(t);
-				job.lord.extraForbiddenThings = Tools.UpdateCells(job.lord.extraForbiddenThings, pawn, t.Position);
-			}
-			return job;
-		}
-
-		public override Danger MaxPathDanger(Pawn pawn)
-		{
-			return Danger.Deadly;
-		}
-
-		public override float GetPriority(Pawn pawn, TargetInfo t)
-		{
-			return 100000f;
 		}
 	}
 }

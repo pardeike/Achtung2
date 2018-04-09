@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
+	<PositioningEnabledTitle>Spezielle Positionierung von Kolonisten</PositioningEnabledTitle>
+	<PositioningEnabledExplained>Aktiviert die Mauskommandos für die Kampfpositionen (siehe Einstellungen unten)</PositioningEnabledExplained>
+
 	<AchtungModifierTitle>Achtung! Taste</AchtungModifierTitle>
 	<AchtungModifierExplained>Diese Taste versetzt beim Positionieren Kolonisten in den Kampfmodus.
 Während des Rechtsklicks gedrückt halten um die Formation beim Bewegen an die Mausposition beizubehalten

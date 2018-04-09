@@ -18,7 +18,7 @@ namespace AchtungMod
 
 		static AchtungLoader()
 		{
-			Controller.getInstance().InstallDefs();
+			Controller.GetInstance().InstallDefs();
 
 			var harmony = HarmonyInstance.Create("net.pardeike.rimworld.mods.achtung");
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
@@ -94,27 +94,7 @@ namespace AchtungMod
 				if (pawn.CanReserveAndReach(thing, PathEndMode.ClosestTouch, Danger.Deadly) == false)
 					continue;
 
-				WorkGiver_Scanner workGiverScanner = null;
-				Job job = null;
-
-				if (thing is Frame)
-				{
-					workGiverScanner = (WorkGiver_Scanner)Controller.WorkGiver_ConstructDeliverResourcesToFramesAllDef.Worker;
-					job = workGiverScanner.JobOnThing(pawn, thing, false);
-
-					if (job == null)
-					{
-						workGiverScanner = (WorkGiver_Scanner)Controller.WorkGiver_ConstructFinishFramesAllDef.Worker;
-						job = workGiverScanner.JobOnThing(pawn, thing, false);
-					}
-				}
-
-				if (thing is Blueprint)
-				{
-					workGiverScanner = (WorkGiver_Scanner)Controller.WorkGiver_ConstructDeliverResourcesToBlueprintsAllDef.Worker;
-					job = workGiverScanner.JobOnThing(pawn, thing, false);
-				}
-
+				var job = ForceConstruction.JobOnThing(pawn, thing, false);
 				if (job != null)
 				{
 					job.lord = lastLord;
@@ -122,7 +102,7 @@ namespace AchtungMod
 					job.ignoreJoyTimeAssignment = true;
 					job.locomotionUrgency = LocomotionUrgency.Sprint;
 					job.playerForced = true;
-					tracker.StartJob(job, JobCondition.Succeeded, null, false, false, null, JobTag.MiscWork, false);
+					tracker.TryTakeOrderedJob(job);
 					return true;
 				}
 			}
@@ -216,8 +196,6 @@ namespace AchtungMod
 			var lord = job?.IsThoroughly();
 			if (lord == null)
 				return;
-
-
 		}
 	}
 
@@ -237,96 +215,6 @@ namespace AchtungMod
 		}
 	}
 
-	// better context menu labels for uninterrupted jobs
-	//
-	[HarmonyPatch(typeof(FloatMenuMakerMap))]
-	[HarmonyPatch("AddUndraftedOrders")]
-	static class FloatMenuMakerMap_AddUndraftedOrders_Patch
-	{
-		static MethodInfo m_GetLabelText = AccessTools.Method(typeof(FloatMenuMakerMap_AddUndraftedOrders_Patch), "GetLabelText");
-
-		static string GetLabelText(WorkGiver workGiver, Job job, Thing thing)
-		{
-			if (job.lord is ThoroughlyLord)
-				return "WorkUninterrupted".Translate();
-
-			return "PrioritizeGeneric".Translate(new object[] { workGiver.def.gerund, thing.Label });
-		}
-
-		// ordersCAnonStorey15.label = "PrioritizeGeneric".Translate((object) workGiverScanner.def.gerund, (object) t.Label);
-		// ordersCAnonStorey15.label = FloatMenuMakerMap_AddUndraftedOrders_Patch.GetLabelText(workGiverScanner, other, t);
-		// ------------------------------------------------------------------------------------------------------------------
-
-		// start
-
-		// 00: IL_0538: ldloc.s ordersCAnonStorey15
-
-		// 01: IL_053a: ldstr "PrioritizeGeneric"
-		// 02: IL_053f: ldc.i4.2     
-		// 03: IL_0540: newarr[mscorlib] System.Object
-
-		// 04: IL_0545: dup
-		// 05: IL_0546: ldc.i4.0     
-
-		// 06: IL_0547: ldloc.s workGiverScanner
-
-		// 07: IL_0549: ldfld WorkGiverDef WorkGiver::def
-
-		// 08: IL_054e: ldfld WorkGiverDef::gerund
-		// 09: IL_0553: stelem.ref
-		// 10: IL_0554: dup
-		// 11: IL_0555: ldc.i4.1     
-
-		// 12: IL_0556: ldloc.s t
-
-		// 13: IL_0558: callvirt Entity::get_Label()
-		// 14: IL_055d: stelem.ref
-		// 15: IL_055e: call Translator::Translate(string, object[])
-		// 16: IL_0563: stfld FloatMenuMakerMap/'<AddUndraftedOrders>c__AnonStorey15'::label
-
-		// end
-
-		// 17: IL_0568: ldloc.s ordersCAnonStorey14
-		// 18: IL_056a: ldloc.s other
-		// 19: IL_056c: stfld FloatMenuMakerMap/'<AddUndraftedOrders>c__AnonStorey14'::localJob
-
-		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instr)
-		{
-			var instructions = instr.ToList();
-			var start = instructions.FindIndex(ins => ((ins.operand as string) == "PrioritizeGeneric")) - 1;
-
-			var end = -1;
-			for (var i = start; start > 0 && i < instructions.Count(); i++)
-				if (instructions[i].opcode == OpCodes.Stfld) { end = i + 1; break; }
-
-			if (start < 0 || end < 0)
-				Log.Error("Cannot find expected 'PrioritizeGeneric' section in AddUndraftedOrders (" + start + ", " + end + ")");
-			else
-			{
-				var original = instructions.GetRange(start, end - start + 2); // +2 to get original[18]
-				var extra = new List<CodeInstruction>()
-				{
-					original[0],  // ldloc.s ordersCAnonStorey15
-					original[6],  // ldloc.s workGiverScanner
-					original[18], // ldloc.s other
-					original[12], // ldloc.s t
-					new CodeInstruction(OpCodes.Call, m_GetLabelText),
-					original[16]  // stfld FloatMenuMakerMap/'<AddUndraftedOrders>c__AnonStorey15'::label
-				};
-
-				var prefix = instructions.GetRange(0, start);
-				var postfix = instructions.GetRange(end, instructions.Count - end);
-				instructions = new List<CodeInstruction>();
-				instructions.AddRange(prefix);
-				instructions.AddRange(extra);
-				instructions.AddRange(postfix);
-			}
-
-			foreach (var instruction in instructions)
-				yield return instruction;
-		}
-	}
-
 	// handle events early
 	//
 	[HarmonyPatch(typeof(MainTabsRoot))]
@@ -335,7 +223,7 @@ namespace AchtungMod
 	{
 		static void Prefix()
 		{
-			Controller.getInstance().HandleEvents();
+			Controller.GetInstance().HandleEvents();
 		}
 	}
 
@@ -347,7 +235,7 @@ namespace AchtungMod
 	{
 		static void Prefix()
 		{
-			Controller.getInstance().HandleDrawing();
+			Controller.GetInstance().HandleDrawing();
 		}
 	}
 
@@ -359,7 +247,7 @@ namespace AchtungMod
 	{
 		static void Postfix()
 		{
-			Controller.getInstance().HandleDrawingOnGUI();
+			Controller.GetInstance().HandleDrawingOnGUI();
 		}
 	}
 
@@ -386,7 +274,7 @@ namespace AchtungMod
 		static void Postfix(List<FloatMenuOption> __result, Vector3 clickPos, Pawn pawn)
 		{
 			if (pawn != null && pawn.Drafted == false)
-				__result.AddRange(Controller.getInstance().AchtungChoicesAtFor(clickPos, pawn));
+				__result.AddRange(Controller.GetInstance().AchtungChoicesAtFor(clickPos, pawn));
 		}
 	}
 }

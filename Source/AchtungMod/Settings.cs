@@ -32,6 +32,7 @@ namespace AchtungMod
 
 	public class AchtungSettings : ModSettings
 	{
+		public bool positioningEnabled = true;
 		public ModKey achtungKey = ModKey.Alt;
 		public ModKey forceCommandMenuKey = ModKey.Ctrl;
 		public BreakLevel breakLevel = BreakLevel.AlmostExtreme;
@@ -40,6 +41,7 @@ namespace AchtungMod
 		public override void ExposeData()
 		{
 			base.ExposeData();
+			Scribe_Values.Look(ref positioningEnabled, "positioningEnabled", true, true);
 			Scribe_Values.Look(ref achtungKey, "achtungKey", ModKey.Alt, true);
 			Scribe_Values.Look(ref forceCommandMenuKey, "forceCommandMenuKey", ModKey.Ctrl, true);
 			Scribe_Values.Look(ref breakLevel, "BreakLevel", BreakLevel.AlmostExtreme, true);
@@ -52,6 +54,8 @@ namespace AchtungMod
 			list.Begin(canvas);
 			list.Gap();
 
+			list.CheckboxEnhanced("PositioningEnabled", ref Achtung.Settings.positioningEnabled);
+			list.Gap();
 			list.ValueLabeled("AchtungModifier", ref Achtung.Settings.achtungKey);
 			list.Gap();
 			list.ValueLabeled("ForceCommandMenu", ref Achtung.Settings.forceCommandMenuKey);

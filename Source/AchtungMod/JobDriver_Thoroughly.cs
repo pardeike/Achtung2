@@ -34,19 +34,21 @@ namespace AchtungMod
 
 		public JobDef MakeDef()
 		{
-			var def = new JobDef();
-			def.driverClass = GetType();
-			def.collideWithPawns = false;
-			def.defName = GetPrefix();
-			def.label = GetLabel();
-			def.reportString = (GetPrefix() + "InfoText").Translate();
-			def.description = (GetPrefix() + "Description").Translate();
-			def.playerInterruptible = true;
-			def.checkOverrideOnDamage = CheckJobOverrideOnDamageMode.Always;
-			def.suspendable = true;
-			def.alwaysShowWeapon = false;
-			def.neverShowWeapon = true;
-			def.casualInterruptible = true;
+			var def = new JobDef
+			{
+				driverClass = GetType(),
+				collideWithPawns = false,
+				defName = GetPrefix(),
+				label = GetLabel(),
+				reportString = (GetPrefix() + "InfoText").Translate(),
+				description = (GetPrefix() + "Description").Translate(),
+				playerInterruptible = true,
+				checkOverrideOnDamage = CheckJobOverrideOnDamageMode.Always,
+				suspendable = true,
+				alwaysShowWeapon = false,
+				neverShowWeapon = true,
+				casualInterruptible = true
+			};
 			return def;
 		}
 
@@ -83,8 +85,7 @@ namespace AchtungMod
 
 		public void StartJob(Pawn targetPawn, LocalTargetInfo target)
 		{
-			var newJob = new Job(MakeDef(), target);
-			newJob.playerForced = true;
+			var newJob = new Job(MakeDef(), target) { playerForced = true };
 			targetPawn.jobs.TryTakeOrderedJob(newJob);
 		}
 
