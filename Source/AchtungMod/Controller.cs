@@ -269,31 +269,25 @@ namespace AchtungMod
 			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_CleanRoom));
 			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_FightFire));
 			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_SowAll));
-			ForceConstruction.AddForcedBuild(options, clickPos, pawn);
+			ForcedJob.AddToJobMenu(options, clickPos, pawn);
 
 			return options;
 		}
 
 		public void HandleDrawing()
 		{
-			// for debugging
-			/*
-			Find.Selector.SelectedObjectsListForReading
-				.OfType<Pawn>()
-				.Where(p => p != null && p.IsColonist)
-				.Do(pawn =>
-				{
-					var lord = pawn.jobs.curJob?.lord as ThoroughlyLord;
-				lord?.extraForbiddenThings
-					.Do(thing => Tools.DebugPosition(thing.Position.ToVector3(), new Color(0f, 0f, 1f, 0.1f)));
-				});
+			ForcedWork.SettingsForMap(Find.VisibleMap)
+				.SelectMany(item => item.Value)
+				.SelectMany(setting => setting?.Cells ?? new List<IntVec3>())
+				.Distinct()
+				.Do(cell => Tools.DrawForceIcon(cell.ToVector3()));
 
-			Find.VisibleMap?.reservationManager?.AllReservedThings()?.Do(thing =>
-			{
-				if (thing != null)
-					Tools.DebugPosition(thing.Position.ToVector3(), new Color(1f, 0f, 0f, 0.2f));
-			});
-			*/
+#if DEBUG
+			Find.VisibleMap?.reservationManager?
+				.AllReservedThings()?
+				.Where(t => t != null)
+				.Do(thing => Tools.DebugPosition(thing.Position.ToVector3(), new Color(1f, 0f, 0f, 0.2f)));
+#endif
 
 			if (isDragging)
 			{

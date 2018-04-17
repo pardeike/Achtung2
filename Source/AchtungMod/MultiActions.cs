@@ -78,8 +78,8 @@ namespace AchtungMod
 					var colonistAction = multiAction.GetAction();
 					colonistAction();
 				});
-			}, priority);
-			option.Disabled = actions.All(a => a.option.Disabled);
+			}, priority)
+			{ Disabled = actions.All(a => a.option.Disabled) };
 			return option;
 		}
 

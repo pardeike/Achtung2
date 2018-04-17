@@ -11,8 +11,11 @@ Die Formation kann während der Bewegung mit Q und E rotiert werden</AchtungModi
 
 	<ForceCommandMenuTitle>Kontextmenü erzwingen</ForceCommandMenuTitle>
 	<ForceCommandMenuExplained>Zeigt das Kontextmenü anstatt Kolonisten zu positionieren</ForceCommandMenuExplained>
+	<ForcedCommandState>Angewiesen bis zum Ende zu arbeiten.</ForcedCommandState>
 
-	<WorkUninterrupted>Erzwinge Konstruktion</WorkUninterrupted>
+	<ForcedConstruction>Erzwinge Konstruktion</ForcedConstruction>
+	<ForcedGeneric1>Erzwinge {0}</ForcedGeneric1>
+	<ForcedGeneric2>Erzwinge {0} {1}</ForcedGeneric2>
 
 	<Notes>Notizen</Notes>
 	<Note1>Mit Achtung enthält das Kontextmenu sowohl normale als auch Kampfkommandos</Note1>

@@ -14,6 +14,7 @@ namespace AchtungMod
 	[StaticConstructorOnStartup]
 	static class Tools
 	{
+		public static Material forceIconMaterial;
 		public static Material markerMaterial;
 		public static Material lineMaterial;
 		public static string goHereLabel;
@@ -40,10 +41,26 @@ namespace AchtungMod
 
 		static Tools()
 		{
+			forceIconMaterial = MaterialPool.MatFrom("ForceIcon", ShaderDatabase.Cutout);
 			markerMaterial = MaterialPool.MatFrom("AchtungMarker", ShaderDatabase.Transparent);
 			lineMaterial = MaterialPool.MatFrom(GenDraw.LineTexPath, ShaderDatabase.Transparent, new Color(1f, 0.5f, 0.5f));
 			goHereLabel = "GoHere".Translate();
 		}
+
+#if DEBUG
+		public static void Debug(string text)
+		{
+			Log.Warning(text);
+		}
+		public static void Debug(Thing thing, string text)
+		{
+			if (text != null && Find.Selector.IsSelected(thing))
+				Log.Warning(text);
+		}
+#else
+		public static void Debug(string text) { }
+		public static void Debug(Thing thing, string text) { }
+#endif
 
 		public static Func<bool> GetPawnBreakLevel(Pawn pawn)
 		{
@@ -84,53 +101,39 @@ namespace AchtungMod
 			return pawn.IsColonist;
 		}
 
-		public static ThoroughlyLord IsThoroughly(this Job job)
+		public static List<IntVec3> UpdateCells(Job job, IntVec3 closeToCell, JobFunctions jobFuncs)
 		{
-			// JobDefOf.FinishFrame
-			// JobDefOf.HaulToContainer
-			// JobDefOf.HaulToCell
-			//
-			return job?.lord as ThoroughlyLord;
+			return UpdateCells(job, closeToCell, jobFuncs.hasJobOnThingFunc, jobFuncs.hasJobOnCellFunc, jobFuncs.thingScoreFunc);
 		}
 
-		public static IEnumerable<Thing> GetFramesOrBlueprints(Pawn pawn, IntVec3 cell)
+		public static List<IntVec3> UpdateCells(Job job, IntVec3 closeToCell, Func<WorkGiver_Scanner, Pawn, LocalTargetInfo, bool> hasJobOnThing, Func<WorkGiver_Scanner, Pawn, IntVec3, bool> hasJobOnCell, Func<LocalTargetInfo, IntVec3, int> thingScore)
 		{
-			return pawn.Map.thingGrid
-				.ThingsAt(cell)
-				.Where(thing => (thing is Frame || thing is Blueprint) && thing.IsForbidden(pawn) == false);
-		}
+			var settings = ForcedWork.GetSettings(job);
+			if (settings == null) return new List<IntVec3>();
+			var workGiver = settings.WorkGiver;
 
-		public static List<Thing> UpdateCells(List<Thing> things, Pawn pawn, IntVec3 closeToCell)
-		{
-			var thingsToCheck = new HashSet<Thing>(things);
-			while (true)
-			{
-				var newAdjactedThings = new HashSet<Thing>();
-				foreach (var thing in thingsToCheck)
-				{
-					var pos = thing.Position;
-					var surrounding = GenAdj.AdjacentCellsAround
-						.SelectMany(vec => GetFramesOrBlueprints(pawn, vec + pos))
-						.Except(things);
-					newAdjactedThings.UnionWith(surrounding);
-				}
-				var newCount = newAdjactedThings.Count;
-				if (newCount == 0)
-					break;
+			bool IsJobCell(IntVec3 cell) => hasJobOnCell(workGiver, settings.pawn, cell)
+				|| settings.pawn.Map.thingGrid.ThingsAt(cell).Any(thing => hasJobOnThing(workGiver, settings.pawn, thing));
 
-				things.AddRange(newAdjactedThings);
-				thingsToCheck = newAdjactedThings;
-			}
+			var expandedCells = settings.Cells
+				.SelectMany(cell => GenAdj.AdjacentCellsAround.Select(vec => cell + vec))
+				.Distinct()
+				.ToList();
 
-			return things
-				.Where(thing => thing.DestroyedOrNull() == false && thing.Spawned)
-				.OrderBy(thing =>
-				{
-					var isPowerConduitBlueprint = (thing as Blueprint_Build)?.def.entityDefToBuild == ThingDefOf.PowerConduit;
-					var isPowerConduitFrame = (thing as Frame)?.resourceContainer.ElementAtOrDefault(0)?.def == ThingDefOf.PowerConduit;
-					var isNormalBlueprint = isPowerConduitBlueprint == false && (thing is Blueprint);
-					return (isPowerConduitFrame ? -20000 : 0) + (isPowerConduitBlueprint ? -10000 : 0) + (isNormalBlueprint ? 10000 : 0) + thing.Position.DistanceToSquared(closeToCell);
-				})
+			var newCells = expandedCells
+				.Except(settings.Cells)
+				.Where(cell => IsJobCell(cell))
+				.ToList();
+			settings.AddCells(newCells);
+
+			var activeCells = workGiver.PotentialWorkCellsGlobal(settings.pawn).ToList();
+			var workThingsGlobal = workGiver.PotentialWorkThingsGlobal(settings.pawn) ?? new List<Thing>();
+			var activeThingCells = workThingsGlobal.Select(thing => thing.Position).Distinct().ToList();
+			settings.RestrictCells(activeCells.Union(activeThingCells));
+			settings.Cells.RemoveAll(cell => IsJobCell(cell) == false);
+
+			return settings.Cells
+				.OrderBy(thing => { return thingScore(thing, closeToCell); })
 				.ToList();
 		}
 
@@ -300,6 +303,15 @@ namespace AchtungMod
 		{
 			pos.y = Altitudes.AltitudeFor(AltitudeLayer.Pawn - 1);
 			DrawScaledMesh(MeshPool.plane10, markerMaterial, pos, Quaternion.identity, 1.25f, 1.25f);
+		}
+
+		public static void DrawForceIcon(Vector3 pos)
+		{
+			pos += new Vector3(0.75f, Altitudes.AltitudeFor(AltitudeLayer.MoteOverhead), 0.75f);
+			var q = Quaternion.identity;
+			var a = 0.08f * (GenTicks.TicksAbs + 13 * pos.x + 7 * pos.z);
+			var rot = Quaternion.Euler(0f, Mathf.Sin(a) * 10f, 0f);
+			DrawScaledMesh(MeshPool.plane05, forceIconMaterial, pos, rot, 0.8f, 0.8f);
 		}
 
 		public static void DebugPosition(Vector3 pos, Color color)

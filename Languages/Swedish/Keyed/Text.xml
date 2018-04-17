@@ -10,8 +10,11 @@ Höll i för att flytta kolonister i deras formation. Formationen kan roteras me
 
 	<ForceCommandMenuTitle>Tvinga kontextmenyn</ForceCommandMenuTitle>
 	<ForceCommandMenuExplained>Visa kontextmenyn istället for att positionera kolonister</ForceCommandMenuExplained>
+	<ForcedCommandState>Kommenderad att slutföra sitt arbete.</ForcedCommandState>
 
-	<WorkUninterrupted>Tvinga konstruktion</WorkUninterrupted>
+	<ForcedConstruction>Tvinga konstruktion</ForcedConstruction>
+	<ForcedGeneric1>Tvinga {0}</ForcedGeneric1>
+	<ForcedGeneric2>Tvinga {0} {1}</ForcedGeneric2>
 
 	<Notes>Anmärkningar</Notes>
 	<Note1>Med Achtung innehåller kontextmenyn såväl normala som kampkommandos</Note1>

@@ -177,7 +177,7 @@ namespace AchtungMod
 				if (CurrentItemInvalid() == false)
 				{
 					pawn.Map.reservationManager.Reserve(pawn, job, currentItem);
-					pawn.CurJob.SetTarget(TargetIndex.A, currentItem);
+					pawn.CurJob?.SetTarget(TargetIndex.A, currentItem);
 				}
 			}
 			if (CurrentItemInvalid())

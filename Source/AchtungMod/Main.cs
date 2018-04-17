@@ -52,63 +52,23 @@ namespace AchtungMod
 	// Building uninterrupted
 	//
 	[HarmonyPatch(typeof(Pawn_JobTracker))]
+	[HarmonyPatch("EndJob")]
+	static class Pawn_JobTracker_EndJob_Patch
+	{
+		static bool Prefix(Pawn_JobTracker __instance, Job job, JobCondition condition)
+		{
+			var skip = ForcedJob.ContinueJob(__instance, job, __instance.curDriver.pawn, condition);
+			return skip == false;
+		}
+	}
+	//
+	[HarmonyPatch(typeof(Pawn_JobTracker))]
 	[HarmonyPatch("EndCurrentJob")]
 	static class Pawn_JobTracker_EndCurrentJob_Patch
 	{
 		static MethodInfo m_CleanupCurrentJob = AccessTools.Method(typeof(Pawn_JobTracker), "CleanupCurrentJob");
-		static MethodInfo m_ContinueJob = AccessTools.Method(typeof(Pawn_JobTracker_EndCurrentJob_Patch), "ContinueJob");
+		static MethodInfo m_ContinueJob = AccessTools.Method(typeof(ForcedJob), "ContinueJob");
 		static FieldInfo f_pawn = AccessTools.Field(typeof(Pawn_JobTracker), "pawn");
-
-		static bool ContinueJob(Pawn_JobTracker tracker, Job lastJob, Pawn pawn, JobCondition condition)
-		{
-			if (tracker.FromColonist() == false) return false;
-			var lastLord = lastJob.IsThoroughly();
-			if (lastLord == null) return false;
-			if (condition == JobCondition.InterruptForced) return false;
-
-			pawn.ClearReservationsForJob(lastJob);
-
-			if (Tools.GetPawnBreakLevel(pawn)())
-			{
-				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
-				var jobName = "WorkUninterrupted".Translate();
-				var label = "JobInterruptedLabel".Translate(jobName);
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(pawn.NameStringShort), LetterDefOf.NegativeEvent, pawn));
-				return false;
-			}
-
-			if (Tools.GetPawnHealthLevel(pawn)())
-			{
-				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
-				var jobName = "WorkUninterrupted".Translate();
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter("JobInterruptedLabel".Translate(jobName), "JobInterruptedBadHealth".Translate(pawn.NameStringShort), LetterDefOf.NegativeEvent, pawn));
-				return false;
-			}
-
-			var things = Tools.UpdateCells(lastLord.extraForbiddenThings, pawn, lastJob.targetB.Cell);
-			foreach (var thing in things)
-			{
-				if (pawn.Position.IsInside(thing) && lastLord.extraForbiddenThings.Count > 1)
-					continue;
-
-				if (pawn.CanReserveAndReach(thing, PathEndMode.ClosestTouch, Danger.Deadly) == false)
-					continue;
-
-				var job = ForceConstruction.JobOnThing(pawn, thing, false);
-				if (job != null)
-				{
-					job.lord = lastLord;
-					job.expiryInterval = 0;
-					job.ignoreJoyTimeAssignment = true;
-					job.locomotionUrgency = LocomotionUrgency.Sprint;
-					job.playerForced = true;
-					tracker.TryTakeOrderedJob(job);
-					return true;
-				}
-			}
-
-			return false;
-		}
 
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
@@ -150,11 +110,12 @@ namespace AchtungMod
 	[HarmonyPatch("ReserveAsManyAsPossible")]
 	static class ReservationUtility_ReserveAsManyAsPossible_Patch
 	{
-		static void Prefix(Pawn p, ref List<LocalTargetInfo> target, Job job)
+		static void Prefix(ref List<LocalTargetInfo> target, Job job)
 		{
-			var lord = job?.IsThoroughly();
-			if (lord != null && p.Spawned)
-				target = new List<LocalTargetInfo>();
+			var settings = ForcedWork.GetSettings(job);
+			if (settings == null)
+				return;
+			target = new List<LocalTargetInfo>();
 		}
 	}
 	//
@@ -164,8 +125,8 @@ namespace AchtungMod
 	{
 		static bool Prefix(ReservationManager __instance, ref bool __result, Pawn claimant, Job job, LocalTargetInfo target)
 		{
-			var lord = job?.IsThoroughly();
-			if (lord != null && target.IsValid && target.ThingDestroyed == false)
+			var settings = ForcedWork.GetSettings(job);
+			if (settings != null && target.IsValid && target.ThingDestroyed == false)
 			{
 				if (__instance.ReservedBy(target, claimant, job))
 				{
@@ -183,21 +144,6 @@ namespace AchtungMod
 			return true;
 		}
 	}
-	//
-	[HarmonyPatch(typeof(Pawn_JobTracker))]
-	[HarmonyPatch("TryTakeOrderedJobPrioritizedWork")]
-	static class Pawn_JobTracker_TryTakeOrderedJobPrioritizedWork_Patch
-	{
-		static void Postfix(Pawn_JobTracker __instance, bool __result, Job job, WorkGiver giver, IntVec3 cell)
-		{
-			if (__result)
-				return;
-
-			var lord = job?.IsThoroughly();
-			if (lord == null)
-				return;
-		}
-	}
 
 	// ignore think treee when building uninterrupted
 	//
@@ -205,13 +151,31 @@ namespace AchtungMod
 	[HarmonyPatch("ShouldStartJobFromThinkTree")]
 	static class Pawn_JobTracker_ShouldStartJobFromThinkTree_Patch
 	{
-		static bool Prefix(Pawn_JobTracker __instance, ref bool __result)
+		static bool OverwriteResult(bool result, Pawn pawn)
 		{
-			if (__instance.curJob?.IsThoroughly() == null)
-				return true;
+			if (result && ForcedWork.GetSettings(pawn.CurJob) != null)
+				result = false;
+			return result;
+		}
 
-			__result = false;
-			return false;
+		static IEnumerable<CodeInstruction> Transpiler(ILGenerator generator, IEnumerable<CodeInstruction> instructions)
+		{
+			var endLabel = generator.DefineLabel();
+
+			foreach (var instruction in instructions)
+			{
+				if (instruction.opcode == OpCodes.Ret)
+				{
+					instruction.opcode = OpCodes.Br;
+					instruction.operand = endLabel;
+				}
+				yield return instruction;
+			}
+
+			yield return new CodeInstruction(OpCodes.Ldarg_0) { labels = new List<Label>() { endLabel } };
+			yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(Pawn_JobTracker), "pawn"));
+			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Pawn_JobTracker_ShouldStartJobFromThinkTree_Patch), "OverwriteResult"));
+			yield return new CodeInstruction(OpCodes.Ret);
 		}
 	}
 
@@ -233,7 +197,7 @@ namespace AchtungMod
 	[HarmonyPatch("DrawSelectionOverlays")]
 	static class SelectionDrawer_DrawSelectionOverlays_Patch
 	{
-		static void Prefix()
+		static void Postfix()
 		{
 			Controller.GetInstance().HandleDrawing();
 		}
@@ -262,6 +226,20 @@ namespace AchtungMod
 			var fromMethod = AccessTools.Method(typeof(Log), "Error", new Type[] { typeof(string) });
 			var toMethod = AccessTools.Method(typeof(Log), "Warning", new Type[] { typeof(string) });
 			return instructions.MethodReplacer(fromMethod, toMethod);
+		}
+	}
+
+	// pawn inspector panel
+	//
+	[HarmonyPatch(typeof(Pawn))]
+	[HarmonyPatch("GetInspectString")]
+	static class Pawn_GetInspectString_Patch
+	{
+		static void Postfix(Pawn __instance, ref string __result)
+		{
+			var job = __instance.jobs?.curJob;
+			if (ForcedWork.GetSettings(job) != null)
+				__result = __result + "\n" + "ForcedCommandState".Translate();
 		}
 	}
 

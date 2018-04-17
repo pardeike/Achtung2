@@ -11,8 +11,11 @@ The formation can be rotated using Q and E</AchtungModifierExplained>
 
 	<ForceCommandMenuTitle>Force context menu</ForceCommandMenuTitle>
 	<ForceCommandMenuExplained>Shows the context menu instead of moving colonists</ForceCommandMenuExplained>
+	<ForcedCommandState>Ordered to work until done.</ForcedCommandState>
 
-	<WorkUninterrupted>Force construction</WorkUninterrupted>
+	<ForcedConstruction>Force construction</ForcedConstruction>
+	<ForcedGeneric1>Force {0}</ForcedGeneric1>
+	<ForcedGeneric2>Force {0} {1}</ForcedGeneric2>
 
 	<Notes>Notes</Notes>
 	<Note1>When using Achtung the context menu contains both: drafted and undrafted commands</Note1>
