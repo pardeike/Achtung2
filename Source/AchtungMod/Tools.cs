@@ -95,46 +95,9 @@ namespace AchtungMod
 			return () => false;
 		}
 
-		public static bool FromColonist(this Pawn_JobTracker tracker)
+		public static Pawn GetColonist(this Pawn_JobTracker tracker)
 		{
-			var pawn = Traverse.Create(tracker).Field("pawn").GetValue<Pawn>();
-			return pawn.IsColonist;
-		}
-
-		public static List<IntVec3> UpdateCells(Job job, IntVec3 closeToCell, JobFunctions jobFuncs)
-		{
-			return UpdateCells(job, closeToCell, jobFuncs.hasJobOnThingFunc, jobFuncs.hasJobOnCellFunc, jobFuncs.thingScoreFunc);
-		}
-
-		public static List<IntVec3> UpdateCells(Job job, IntVec3 closeToCell, Func<WorkGiver_Scanner, Pawn, LocalTargetInfo, bool> hasJobOnThing, Func<WorkGiver_Scanner, Pawn, IntVec3, bool> hasJobOnCell, Func<LocalTargetInfo, IntVec3, int> thingScore)
-		{
-			var settings = ForcedWork.GetSettings(job);
-			if (settings == null) return new List<IntVec3>();
-			var workGiver = settings.WorkGiver;
-
-			bool IsJobCell(IntVec3 cell) => hasJobOnCell(workGiver, settings.pawn, cell)
-				|| settings.pawn.Map.thingGrid.ThingsAt(cell).Any(thing => hasJobOnThing(workGiver, settings.pawn, thing));
-
-			var expandedCells = settings.Cells
-				.SelectMany(cell => GenAdj.AdjacentCellsAround.Select(vec => cell + vec))
-				.Distinct()
-				.ToList();
-
-			var newCells = expandedCells
-				.Except(settings.Cells)
-				.Where(cell => IsJobCell(cell))
-				.ToList();
-			settings.AddCells(newCells);
-
-			var activeCells = workGiver.PotentialWorkCellsGlobal(settings.pawn).ToList();
-			var workThingsGlobal = workGiver.PotentialWorkThingsGlobal(settings.pawn) ?? new List<Thing>();
-			var activeThingCells = workThingsGlobal.Select(thing => thing.Position).Distinct().ToList();
-			settings.RestrictCells(activeCells.Union(activeThingCells));
-			settings.Cells.RemoveAll(cell => IsJobCell(cell) == false);
-
-			return settings.Cells
-				.OrderBy(thing => { return thingScore(thing, closeToCell); })
-				.ToList();
+			return Traverse.Create(tracker).Field("pawn").GetValue<Pawn>();
 		}
 
 		public static Vector3 RotateBy(Vector3 offsetFromCenter, int rotation, bool was45)
@@ -187,6 +150,21 @@ namespace AchtungMod
 			return false;
 		}
 
+		public static bool IsForcedJob()
+		{
+			return IsModKeyPressed(ModKey.Alt);
+		}
+
+		public static bool IsOfType<T>(this WorkGiver workgiver) where T : class
+		{
+			return ((workgiver as T) != null);
+		}
+
+		public static bool IsOfType<T>(this WorkGiverDef def) where T : class
+		{
+			return ((def.Worker as T) != null);
+		}
+
 		public static bool Has45DegreeOffset(List<Colonist> colonists)
 		{
 			return colonists.All(c1 =>
@@ -199,17 +177,42 @@ namespace AchtungMod
 			});
 		}
 
-		public static IEnumerable<T> Do<T>(this IEnumerable<T> sequence, Action<T> action)
+		public static IEnumerable<IntVec3> AllCells(this LocalTargetInfo item)
 		{
-			if (sequence == null) return null;
-			var enumerator = sequence.GetEnumerator();
-			while (enumerator.MoveNext()) action(enumerator.Current);
-			return sequence;
+			if (item.HasThing)
+			{
+				var thing = item.Thing;
+				var size = thing.def.size;
+				if (size.x + size.z == 1)
+					yield return thing.Position;
+				else
+					foreach (var cell in thing.OccupiedRect().Cells)
+						yield return cell;
+				yield break;
+			}
+			yield return item.Cell;
 		}
 
-		public static IEnumerable<T> DoIf<T>(this IEnumerable<T> sequence, Func<T, bool> condition, Action<T> action)
+		public static IEnumerable<IntVec3> AllCells(this Thing thing)
 		{
-			return sequence.Where(condition).Do(action);
+			var size = thing.def.size;
+			if (size.x + size.z == 1)
+				yield return thing.Position;
+			else
+				foreach (var cell in thing.OccupiedRect().Cells)
+					yield return cell;
+		}
+
+		public static void Do<T>(this IEnumerable<T> sequence, Action<T> action)
+		{
+			if (sequence == null) return;
+			var enumerator = sequence.GetEnumerator();
+			while (enumerator.MoveNext()) action(enumerator.Current);
+		}
+
+		public static void DoIf<T>(this IEnumerable<T> sequence, Func<T, bool> condition, Action<T> action)
+		{
+			sequence.Where(condition).Do(action);
 		}
 
 		public static List<Colonist> GetSelectedColonists()
@@ -307,11 +310,14 @@ namespace AchtungMod
 
 		public static void DrawForceIcon(Vector3 pos)
 		{
+			// for strong visual debugging
+			// DebugPosition(pos, new Color(1f, 1f, 0f, 0.3f));
+
 			pos += new Vector3(0.75f, Altitudes.AltitudeFor(AltitudeLayer.MoteOverhead), 0.75f);
 			var q = Quaternion.identity;
 			var a = 0.08f * (GenTicks.TicksAbs + 13 * pos.x + 7 * pos.z);
 			var rot = Quaternion.Euler(0f, Mathf.Sin(a) * 10f, 0f);
-			DrawScaledMesh(MeshPool.plane05, forceIconMaterial, pos, rot, 0.8f, 0.8f);
+			DrawScaledMesh(MeshPool.plane10, forceIconMaterial, pos, rot, 0.5f, 0.5f);
 		}
 
 		public static void DebugPosition(Vector3 pos, Color color)

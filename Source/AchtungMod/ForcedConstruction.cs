@@ -30,11 +30,11 @@ namespace AchtungMod
 		}
 	}
 
-	public class ForcedConstruction : ForcedJob
+	public class ForcedConstruction /* : ForcedJob */
 	{
 		public static JobDef constructionJobDef = new JobDef();
 
-		static HashSet<Type> workGiverTypes = new HashSet<Type>()
+		public static HashSet<Type> workGiverTypes = new HashSet<Type>()
 		{
 				typeof(WorkGiver_ConstructDeliverResourcesToBlueprints),
 				typeof(WorkGiver_ConstructDeliverResourcesToFrames),
@@ -50,13 +50,13 @@ namespace AchtungMod
 				.Where(workGiver => workGiverTypes.Contains(workGiver?.GetType()) && workGiver.def.directOrderable && !workGiver.ShouldSkip(pawn));
 		}
 
-		internal override Type GetWorkGiverType() { return null; }
-		internal override WorkGiver_Scanner GetWorkGiver()
+		internal /*override*/ Type GetWorkGiverType() { return null; }
+		internal /*override*/ WorkGiver_Scanner GetWorkGiver()
 		{
 			return ForcedConstructionWorkGiver.Instance;
 		}
 
-		internal override int ThingScore(LocalTargetInfo thing, IntVec3 closeToCell)
+		internal /*override*/ int ThingScore(LocalTargetInfo thing, IntVec3 closeToCell)
 		{
 			var isPowerConduitBlueprint = (thing.Thing as Blueprint_Build)?.def.entityDefToBuild == ThingDefOf.PowerConduit;
 			var isPowerConduitFrame = (thing.Thing as Frame)?.resourceContainer.ElementAtOrDefault(0)?.def == ThingDefOf.PowerConduit;
@@ -66,7 +66,7 @@ namespace AchtungMod
 
 		// construction needs to pick the right workgiver so we cannot use the base JobOnThing
 		//
-		internal override bool HasJobOnThing(WorkGiver_Scanner unused, Pawn pawn, LocalTargetInfo thing)
+		internal /*override*/ bool HasJobOnThing(WorkGiver_Scanner unused, Pawn pawn, LocalTargetInfo thing)
 		{
 			foreach (var workGiver in GetWorkGivers(pawn))
 			{
@@ -86,7 +86,7 @@ namespace AchtungMod
 
 		// construction needs to pick the right workgiver so we cannot use the base JobOnThing
 		//
-		internal override Job JobOnThing(WorkGiver_Scanner unused, Pawn pawn, LocalTargetInfo thing, bool forced)
+		internal /*override*/ Job JobOnThing(WorkGiver_Scanner unused, Pawn pawn, LocalTargetInfo thing, bool forced)
 		{
 			foreach (var workGiver in GetWorkGivers(pawn))
 			{
@@ -114,7 +114,7 @@ namespace AchtungMod
 			*/
 		}
 
-		internal override string MenuLabel(LocalTargetInfo thing)
+		internal /*override*/ string MenuLabel(LocalTargetInfo thing)
 		{
 			return "ForcedConstruction".Translate();
 		}

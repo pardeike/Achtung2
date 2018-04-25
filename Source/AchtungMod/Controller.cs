@@ -269,25 +269,39 @@ namespace AchtungMod
 			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_CleanRoom));
 			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_FightFire));
 			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_SowAll));
-			ForcedJob.AddToJobMenu(options, clickPos, pawn);
 
 			return options;
 		}
 
-		public void HandleDrawing()
+		private void DrawForcedJobs()
 		{
-			ForcedWork.SettingsForMap(Find.VisibleMap)
-				.SelectMany(item => item.Value)
-				.SelectMany(setting => setting?.Cells ?? new List<IntVec3>())
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			forcedWork.ForcedJobsForMap(Find.VisibleMap)
+				.SelectMany(forcedJob =>
+				{
+					if (forcedJob.isThingJob)
+						return forcedJob.targets.SelectMany(target => target.item.Thing.AllCells());
+					else
+						return forcedJob.targets.Select(target => target.item.Cell);
+				})
 				.Distinct()
 				.Do(cell => Tools.DrawForceIcon(cell.ToVector3()));
+		}
 
-#if DEBUG
+		private void DrawReservations()
+		{
 			Find.VisibleMap?.reservationManager?
 				.AllReservedThings()?
 				.Where(t => t != null)
 				.Do(thing => Tools.DebugPosition(thing.Position.ToVector3(), new Color(1f, 0f, 0f, 0.2f)));
-#endif
+		}
+
+		public void HandleDrawing()
+		{
+			DrawForcedJobs();
+
+			// for debugging reservations
+			// DrawReservations();
 
 			if (isDragging)
 			{

@@ -14,8 +14,7 @@ The formation can be rotated using Q and E</AchtungModifierExplained>
 	<ForcedCommandState>Ordered to work until done.</ForcedCommandState>
 
 	<ForcedConstruction>Force construction</ForcedConstruction>
-	<ForcedGeneric1>Force {0}</ForcedGeneric1>
-	<ForcedGeneric2>Force {0} {1}</ForcedGeneric2>
+	<ForceMenuButtonText>Force</ForceMenuButtonText>
 
 	<Notes>Notes</Notes>
 	<Note1>When using Achtung the context menu contains both: drafted and undrafted commands</Note1>

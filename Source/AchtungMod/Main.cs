@@ -20,12 +20,13 @@ namespace AchtungMod
 		{
 			Controller.GetInstance().InstallDefs();
 
+			HarmonyInstance.DEBUG = true;
 			var harmony = HarmonyInstance.Create("net.pardeike.rimworld.mods.achtung");
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
 
 			const string sameSpotId = "net.pardeike.rimworld.mod.samespot";
 			IsSameSpotInstalled = harmony.GetPatchedMethods()
-				.Any(method => harmony.IsPatched(method).Transpilers.Any(transpiler => transpiler.owner == sameSpotId));
+				.Any(method => harmony.GetPatchInfo(method).Transpilers.Any(transpiler => transpiler.owner == sameSpotId));
 		}
 	}
 
@@ -49,16 +50,93 @@ namespace AchtungMod
 		}
 	}
 
-	// Building uninterrupted
+	// build-in "Ignore Me Passing" functionality
+	//
+	[HarmonyPatch(typeof(GenConstruct))]
+	[HarmonyPatch("BlocksConstruction")]
+	static class GenConstruct_BlocksConstruction_Patch
+	{
+		static bool Prefix(ref bool __result, Thing constructible, Thing t)
+		{
+			if (t is Pawn)
+			{
+				__result = false;
+				return false;
+			}
+			return true;
+		}
+	}
+
+	[HarmonyPatch(typeof(FloatMenuMakerMap))]
+	[HarmonyPatch("AddUndraftedOrders")]
+	static class FloatMenuMakerMap_AddUndraftedOrders_Patch
+	{
+		static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions)
+		{
+			object lastLocalVar = null;
+			var nextIsVar = false;
+
+			var c_FloatMenuOption = AccessTools.FirstConstructor(typeof(FloatMenuOption), c => c.GetParameters().Count() > 1);
+			var m_ForcedFloatMenuOption = AccessTools.Method(typeof(ForcedFloatMenuOption), nameof(ForcedFloatMenuOption.CreateForcedMenuItem));
+			foreach (var instruction in instructions)
+			{
+				if (instruction.opcode == OpCodes.Isinst && instruction.operand == typeof(WorkGiver_Scanner))
+				{
+					yield return instruction;
+					nextIsVar = true;
+					continue;
+				}
+				if (nextIsVar)
+				{
+					lastLocalVar = instruction.operand;
+					nextIsVar = false;
+				}
+
+				if (instruction.opcode == OpCodes.Newobj && instruction.operand == c_FloatMenuOption && lastLocalVar != null)
+				{
+					instruction.opcode = OpCodes.Call;
+					instruction.operand = m_ForcedFloatMenuOption;
+					yield return new CodeInstruction(OpCodes.Ldarg_1);
+					yield return new CodeInstruction(OpCodes.Ldarg_0);
+					yield return new CodeInstruction(OpCodes.Ldloc_S, lastLocalVar);
+				}
+
+				yield return instruction;
+			}
+		}
+	}
 	//
 	[HarmonyPatch(typeof(Pawn_JobTracker))]
 	[HarmonyPatch("EndJob")]
 	static class Pawn_JobTracker_EndJob_Patch
 	{
-		static bool Prefix(Pawn_JobTracker __instance, Job job, JobCondition condition)
+		static bool HandleForcedAndSkipQueue(Pawn_JobTracker tracker, Pawn pawn, JobCondition condition)
 		{
-			var skip = ForcedJob.ContinueJob(__instance, job, __instance.curDriver.pawn, condition);
-			return skip == false;
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			if (forcedWork.HasForcedJob(pawn))
+			{
+				tracker.EndCurrentJob(condition, true);
+				return true;
+			}
+			return false;
+		}
+
+		static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions)
+		{
+			var label = il.DefineLabel();
+
+			yield return new CodeInstruction(OpCodes.Ldarg_0);
+			yield return new CodeInstruction(OpCodes.Ldarg_0);
+			yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(Pawn_JobTracker), "pawn"));
+			yield return new CodeInstruction(OpCodes.Ldarg_2);
+			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Pawn_JobTracker_EndJob_Patch), nameof(Pawn_JobTracker_EndJob_Patch.HandleForcedAndSkipQueue)));
+			yield return new CodeInstruction(OpCodes.Brfalse, label);
+			yield return new CodeInstruction(OpCodes.Ret);
+
+			var instr = instructions.ToList();
+			instr[0].labels.Add(label);
+			foreach (var inst in instr)
+				yield return inst;
 		}
 	}
 	//
@@ -104,44 +182,14 @@ namespace AchtungMod
 		}
 	}
 
-	// ignore failures in reservations
-	//
-	[HarmonyPatch(typeof(ReservationUtility))]
-	[HarmonyPatch("ReserveAsManyAsPossible")]
-	static class ReservationUtility_ReserveAsManyAsPossible_Patch
+	[HarmonyPatch(typeof(Pawn))]
+	[HarmonyPatch("DeSpawn")]
+	static class Pawn_DeSpawn_Patch
 	{
-		static void Prefix(ref List<LocalTargetInfo> target, Job job)
+		static void Postfix(Pawn __instance)
 		{
-			var settings = ForcedWork.GetSettings(job);
-			if (settings == null)
-				return;
-			target = new List<LocalTargetInfo>();
-		}
-	}
-	//
-	[HarmonyPatch(typeof(ReservationManager))]
-	[HarmonyPatch("Reserve")]
-	static class ReservationManager_Reserve_Patch
-	{
-		static bool Prefix(ReservationManager __instance, ref bool __result, Pawn claimant, Job job, LocalTargetInfo target)
-		{
-			var settings = ForcedWork.GetSettings(job);
-			if (settings != null && target.IsValid && target.ThingDestroyed == false)
-			{
-				if (__instance.ReservedBy(target, claimant, job))
-				{
-					__result = true;
-					return false;
-				}
-
-				if (__instance.CanReserve(claimant, target) == false)
-				{
-					claimant.jobs.EndJob(job, JobCondition.Incompletable);
-					__result = true;
-					return false;
-				}
-			}
-			return true;
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			forcedWork.Remove(__instance);
 		}
 	}
 
@@ -153,7 +201,8 @@ namespace AchtungMod
 	{
 		static bool OverwriteResult(bool result, Pawn pawn)
 		{
-			if (result && ForcedWork.GetSettings(pawn.CurJob) != null)
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			if (result && forcedWork.HasForcedJob(pawn))
 				result = false;
 			return result;
 		}
@@ -237,8 +286,8 @@ namespace AchtungMod
 	{
 		static void Postfix(Pawn __instance, ref string __result)
 		{
-			var job = __instance.jobs?.curJob;
-			if (ForcedWork.GetSettings(job) != null)
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			if (forcedWork.HasForcedJob(__instance))
 				__result = __result + "\n" + "ForcedCommandState".Translate();
 		}
 	}

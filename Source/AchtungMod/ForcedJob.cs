@@ -2,83 +2,123 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using Verse;
 using Verse.AI;
 
 namespace AchtungMod
 {
-	public abstract class ForcedJob
+	public class ForcedJob : IExposable
 	{
-		static bool FindNextJob(Pawn pawn, List<IntVec3> cells, ForcedSettings settings, JobFunctions jobFuncs, out Job job, out IntVec3 atCell)
+		public Pawn pawn = null;
+		public List<WorkGiverDef> workgiverDefs = new List<WorkGiverDef>();
+		public HashSet<ForcedTarget> targets = new HashSet<ForcedTarget>();
+		public bool isThingJob = false;
+		public bool initialized = false;
+
+		public ForcedJob()
 		{
-			job = null;
-			atCell = IntVec3.Invalid;
-
-			foreach (var cell in cells)
-			{
-				var workGiver = settings.WorkGiver;
-
-				var things = pawn.Map.thingGrid.ThingsAt(cell);
-				foreach (var thing in things)
-				{
-					Tools.Debug(pawn, "Testing " + thing + " at " + cell + " (" + pawn.Position.DistanceTo(cell) + ")");
-
-					if (pawn.Position.IsInside(thing) && cells.Count > 1)
-						continue;
-					if (pawn.CanReserveAndReach(thing, workGiver.PathEndMode, Danger.Deadly) == false)
-						continue;
-					job = jobFuncs.jobOnThingFunc(workGiver, pawn, thing, false);
-				}
-
-				if (job == null)
-				{
-					Tools.Debug(pawn, "Testing " + cell + " (" + pawn.Position.DistanceTo(cell) + ")");
-
-					if (pawn.CanReach(cell, workGiver.PathEndMode, Danger.Deadly))
-						job = jobFuncs.jobOnCellFunc(workGiver, pawn, cell, false);
-				}
-
-				if (job != null)
-				{
-					atCell = cell;
-					break;
-				}
-			}
-
-			return job != null;
+			pawn = null;
+			workgiverDefs = new List<WorkGiverDef>();
+			targets = new HashSet<ForcedTarget>();
 		}
 
-		static JobFunctions GetJobFunctions(ForcedWork forcedWork, ForcedSettings settings)
+		public IEnumerable<WorkGiver_Scanner> WorkGivers => workgiverDefs.Select(wgd => (WorkGiver_Scanner)wgd.Worker);
+
+		static Dictionary<BuildableDef, int> scores = new Dictionary<BuildableDef, int>
 		{
-			var workGiver = settings.WorkGiver;
-			if (workGiver == null) workGiver = ForcedConstructionWorkGiver.Instance;
+			{ ThingDefOf.PowerConduit, 1000000 },
+			{ ThingDefOf.Sandbags, 200000 },
+			{ ThingDefOf.TurretGun, 150000 },
+			{ ThingDefOf.Wall, 100000 },
+			{ ThingDefOf.Door, 50000 },
+			{ ThingDefOf.TrapDeadfall, 20000 },
+			{ ThingDefOf.Bed, 10000 },
+			{ ThingDefOf.Bedroll, 9000 },
+			{ ThingDefOf.WoodFiredGenerator, 5000 },
+			{ ThingDefOf.Battery, 5000 },
+			{ ThingDefOf.SolarGenerator, 5000 },
+			{ ThingDefOf.WindTurbine, 5000 },
+			{ ThingDefOf.GeothermalGenerator, 5000 },
+			{ ThingDefOf.Cooler, 2000 },
+			{ ThingDefOf.Heater, 2000 },
+			{ ThingDefOf.PassiveCooler, 2000 },
+			{ ThingDefOf.StandingLamp, 1000 },
+			{ ThingDefOf.TorchLamp, 1000 },
+		};
+		public static int ItemPriority(LocalTargetInfo item, IntVec3 nearTo)
+		{
+			var score = nearTo.DistanceToSquared(item.Cell);
+			var thing = item.Thing;
+			if (thing != null)
+			{
+				var blueprint = thing as Blueprint_Build;
+				if (blueprint != null)
+				{
+					if (scores.TryGetValue(blueprint.def.entityDefToBuild, out var n))
+						score -= n;
+				}
 
-			var jobFunctions = forcedWork.AllJobFunctions;
-			var result = jobFunctions[ForcedConstructionWorkGiver.Instance];
-			if (jobFunctions.TryGetValue(workGiver, out var functions))
-				result = functions;
+				var frame = thing as Frame;
+				if (frame != null)
+				{
+					if (scores.TryGetValue(frame.def.entityDefToBuild, out var n))
+						score -= n;
+				}
+			}
+			return score;
+		}
 
-			return result;
+		public bool GetNextJob(out Job job, out LocalTargetInfo atItem)
+		{
+			job = null;
+			atItem = LocalTargetInfo.Invalid;
+
+			var thingGrid = pawn.Map.thingGrid;
+			var nearTo = pawn.Position;
+			var sorteditems = targets.Select(target => target.item).OrderBy(item => ItemPriority(item, nearTo));
+			foreach (var item in sorteditems)
+			{
+				foreach (var workgiver in WorkGivers)
+				{
+					if (isThingJob)
+						job = item.Thing.GetThingJob(pawn, workgiver);
+					else
+						job = item.Cell.GetCellJob(pawn, workgiver);
+
+					if (job != null)
+					{
+						atItem = item;
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		public static bool ContinueJob(Pawn_JobTracker tracker, Job lastJob, Pawn pawn, JobCondition condition)
 		{
-			if (tracker.FromColonist() == false) return false;
-
+			if (pawn.IsColonist == false) return false;
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
-			var settings = forcedWork.Settings(lastJob);
-			if (settings == null) return false;
 
-			var lastCell = settings.target;
-
-			Tools.Debug(pawn, "- " + pawn.NameStringShort + " ended forced job " + lastJob.def + " (" + condition + ")");
+			var forcedJob = forcedWork.GetForcedJob(pawn);
+			if (forcedJob == null) return false;
+			if (forcedJob.initialized == false)
+			{
+				forcedJob.initialized = true;
+				return false;
+			}
 
 			if (condition == JobCondition.InterruptForced)
 			{
-				forcedWork.RemoveSettings(pawn, lastJob, "#### " + pawn.NameStringShort + " stopped forced job because it was interrupted");
+				forcedWork.Remove(pawn);
 				return false;
 			}
+
+			/*if (condition == JobCondition.Incompletable)
+			{
+				forcedWork.Remove(pawn);
+				return false;
+			}*/
 
 			pawn.ClearReservationsForJob(lastJob);
 
@@ -89,7 +129,7 @@ namespace AchtungMod
 				var label = "JobInterruptedLabel".Translate(jobName);
 				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(pawn.NameStringShort), LetterDefOf.NegativeEvent, pawn));
 
-				forcedWork.RemoveSettings(pawn, lastJob, "#### " + pawn.NameStringShort + " stopped forced job because of break level");
+				forcedWork.Remove(pawn);
 				return false;
 			}
 
@@ -99,144 +139,186 @@ namespace AchtungMod
 				var jobName = "WorkUninterrupted".Translate();
 				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter("JobInterruptedLabel".Translate(jobName), "JobInterruptedBadHealth".Translate(pawn.NameStringShort), LetterDefOf.NegativeEvent, pawn));
 
-				forcedWork.RemoveSettings(pawn, lastJob, "#### " + pawn.NameStringShort + " stopped forced job because of health level");
+				forcedWork.Remove(pawn);
 				return false;
 			}
 
-			var jobFunctions = GetJobFunctions(forcedWork, settings);
-			var cells = Tools.UpdateCells(lastJob, settings.target, jobFunctions);
-			Tools.Debug(pawn, "Finding next cell for " + pawn.NameStringShort + " at " + pawn.Position + " (" + cells.Count + ")");
-
-			if (FindNextJob(pawn, cells, settings, jobFunctions, out var job, out var cell))
+			while (true)
 			{
-				job.expiryInterval = 0;
-				job.ignoreJoyTimeAssignment = true;
-				job.locomotionUrgency = LocomotionUrgency.Sprint;
-				job.playerForced = true;
-				forcedWork.NextJob(lastJob, job, cell);
-				forcedWork.AddJob(pawn, job);
-				// tracker.StartJob(job, JobCondition.Succeeded, null/*pawn.mindState.lastJobGiver*/, false, false, null, null/*pawn.mindState.lastJobTag*/, true);
-				Tools.Debug(pawn, "# " + pawn.NameStringShort + " got new forced job " + job.def + " on " + cell);
-				return true;
+				forcedJob.UpdateCells();
+
+				if (forcedJob.GetNextJob(out var job, out var item))
+				{
+					job.expiryInterval = 0;
+					job.ignoreJoyTimeAssignment = true;
+					job.locomotionUrgency = LocomotionUrgency.Sprint;
+					job.playerForced = true;
+					forcedWork.QueueJob(pawn, job);
+					return true;
+				}
+
+				forcedWork.RemoveForcedJob(pawn);
+				forcedJob = forcedWork.GetForcedJob(pawn);
+				if (forcedJob == null)
+					break;
+				forcedJob.initialized = true;
 			}
 
-			forcedWork.RemoveSettings(pawn, lastJob, "#### " + pawn.NameStringShort + " back to normal jobs (last thing #" + cells.Count + ")");
+			forcedWork.Remove(pawn);
 			return false;
 		}
 
-		public static void AddToJobMenu(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn)
+		public bool HasJob(Thing thing)
 		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
-			var jobFunctions = forcedWork.AllJobFunctions.Values;
+			return WorkGivers.Any(workgiver => thing.GetThingJob(pawn, workgiver) != null);
+		}
 
-			var clickCell = IntVec3.FromVector3(clickPos);
+		public bool HasJob(IntVec3 cell)
+		{
+			return WorkGivers.Any(workgiver => cell.GetCellJob(pawn, workgiver) != null);
+		}
 
-			foreach (var thing in pawn.Map.thingGrid.ThingsAt(clickCell))
-				foreach (var jobFunction in jobFunctions)
-				{
-					var workGiver = jobFunction.WorkGiver;
-					if (jobFunction.hasJobOnThingFunc(workGiver, pawn, thing))
-					{
-						Tools.Debug(pawn, "Possible thing-job with " + workGiver);
+		private IEnumerable<IntVec3> Nearby(IntVec3 cell)
+		{
+			// TODO: replace dynamically with extended range of cells depending on workgiver type
+			// var radius = 1f;
+			// if(radius <= GenRadial.MaxRadialPatternRadius)
+			//		return GenRadial.RadialCellsAround(cell, radius, true);
+			//
+			return GenAdj.AdjacentCellsAndInside.Select(vec => cell + vec);
+		}
 
-						var label = jobFunction.menuLabelFunc(thing);
-						options.Add(new FloatMenuOption(label, () =>
-						{
-							var job = jobFunction.jobOnThingFunc(workGiver, pawn, thing, false);
-							if (job != null)
-							{
-								Tools.Debug(pawn, "# " + pawn.NameStringShort + " got new forced job " + job.def + " with " + workGiver + " on " + thing);
-								forcedWork.CreateSettings(pawn, workGiver, job, clickCell);
-								forcedWork.Settings(job).AddCell(clickCell);
-								// var cells = Tools.UpdateCells(job, clickCell, jobFunction.hasJobOnThingFunc, jobFunction.hasJobOnCellFunc, jobFunction.thingScoreFunc);
-								//Tools.Debug(pawn, "Adding " + cells.Count + " things to job");
-								//forcedWork.Settings(job).AddCells(cells);
-								pawn.jobs.TryTakeOrderedJob(job);
-							}
-						}, MenuOptionPriority.Low));
-					}
-				}
-			foreach (var jobFunction in jobFunctions)
+		public void UpdateCells()
+		{
+			var count = 0;
+			if (isThingJob)
 			{
-				var workGiver = jobFunction.WorkGiver;
-				if (jobFunction.hasJobOnCellFunc(workGiver, pawn, clickCell))
-				{
-					Tools.Debug(pawn, "Possible cell-job with " + workGiver);
+				var thingGrid = pawn.Map.thingGrid;
 
-					var label = jobFunction.menuLabelFunc(null);
-					options.Add(new FloatMenuOption(label, () =>
+				var things = targets.Select(target => target.item.Thing);
+				var addedThings = things.ToList();
+				do
+				{
+					count = addedThings.Count();
+
+					var currentThingCells = addedThings
+						.SelectMany(thing => thing.AllCells())
+						.Distinct();
+
+					var surroundingCells = currentThingCells
+						.SelectMany(cell => Nearby(cell))
+						.Distinct();
+					// reinclude current cells so non-complete items are completed
+					//.Except(currentThingCells);
+
+					var newThings = surroundingCells
+						.SelectMany(cell => thingGrid.ThingsAt(cell))
+						.Distinct()
+						.Except(addedThings);
+
+					addedThings.AddRange(newThings.Where(HasJob).ToList()); // need termination with 'ToList()' here
+				}
+				while (count < addedThings.Count());
+				things = things.Where(thing => thing.Spawned).Where(HasJob).Union(addedThings.Except(things));
+				targets = new HashSet<ForcedTarget>(things.Select(thing => new ForcedTarget(new LocalTargetInfo(thing))));
+
+				return;
+			}
+
+			var cells = targets.Select(target => target.item.Cell);
+			var addedCells = cells.ToList();
+			do
+			{
+				count = addedCells.Count();
+
+				var surroundingCells = addedCells
+					.SelectMany(cell => Nearby(cell))
+					.Distinct()
+					.Except(addedCells);
+
+				var addCells = surroundingCells
+					.Where(cell => HasJob(cell));
+
+				addedCells.AddRange(addCells.ToList());
+			}
+			while (count < addedCells.Count());
+			cells = cells.Where(cell => HasJob(cell)).Union(addedCells.Except(cells));
+			targets = new HashSet<ForcedTarget>(cells.Select(cell => new ForcedTarget(new LocalTargetInfo(cell))));
+		}
+
+		public void ExposeData()
+		{
+			Scribe_References.Look(ref pawn, "pawn");
+			Scribe_Collections.Look(ref workgiverDefs, "workgivers", LookMode.Def);
+			Scribe_Collections.Look(ref targets, "targets", LookMode.Deep);
+			Scribe_Values.Look(ref initialized, "inited", false, true);
+			Scribe_Values.Look(ref isThingJob, "thingJob", false, true);
+		}
+	}
+
+	public class ForcedTarget : IExposable, IEquatable<ForcedTarget>
+	{
+		public LocalTargetInfo item = LocalTargetInfo.Invalid;
+		public int lastChecked = 0;
+
+		public ForcedTarget()
+		{
+			item = LocalTargetInfo.Invalid;
+			lastChecked = 0;
+		}
+
+		public ForcedTarget(LocalTargetInfo item)
+		{
+			this.item = item;
+			lastChecked = Find.TickManager.TicksGame;
+		}
+
+		public void ExposeData()
+		{
+			Scribe_TargetInfo.Look(ref item, false, "item", LocalTargetInfo.Invalid);
+			Scribe_Values.Look(ref lastChecked, "checked", 0, true);
+		}
+
+		public bool Equals(ForcedTarget other)
+		{
+			return item.Equals(other.item);
+		}
+
+		public override string ToString()
+		{
+			return item.ToString() + "#" + lastChecked;
+		}
+	}
+
+	public static class ForcedExtensions
+	{
+		public static Job GetThingJob(this Thing thing, Pawn pawn, WorkGiver_Scanner workgiver)
+		{
+			if (workgiver.PotentialWorkThingRequest.Accepts(thing) || (workgiver.PotentialWorkThingsGlobal(pawn) != null && workgiver.PotentialWorkThingsGlobal(pawn).Contains(thing)))
+				if (workgiver.MissingRequiredCapacity(pawn) == null)
+					if (workgiver.HasJobOnThing(pawn, thing, true))
 					{
-						var job = jobFunction.jobOnCellFunc(workGiver, pawn, clickCell, false);
+						var job = workgiver.JobOnThing(pawn, thing, true);
 						if (job != null)
-						{
-							Tools.Debug(pawn, "# " + pawn.NameStringShort + " got new forced job " + job.def + " with " + workGiver + " on " + clickCell);
-							forcedWork.CreateSettings(pawn, workGiver, job, clickCell);
-							forcedWork.Settings(job).AddCell(clickCell);
-							//var cells = Tools.UpdateCells(job, clickCell, jobFunction.hasJobOnThingFunc, jobFunction.hasJobOnCellFunc, jobFunction.thingScoreFunc);
-							//Tools.Debug(pawn, "Adding " + cells.Count + " things to job");
-							//forcedWork.Settings(job).AddCells(cells);
-							pawn.jobs.TryTakeOrderedJob(job);
-						}
-					}, MenuOptionPriority.Low));
-				}
-			}
+							if (thing.IsForbidden(pawn) == false)
+								if (thing.Position.InAllowedArea(pawn))
+									if (pawn.CanReserveAndReach(thing, workgiver.PathEndMode, Danger.Deadly))
+										return job;
+					}
+			return null;
 		}
 
-		internal abstract Type GetWorkGiverType();
-
-		WorkGiver_Scanner cachedWorkGiver = null;
-		internal virtual WorkGiver_Scanner GetWorkGiver()
+		public static Job GetCellJob(this IntVec3 cell, Pawn pawn, WorkGiver_Scanner workgiver)
 		{
-			if (cachedWorkGiver == null)
-			{
-				cachedWorkGiver = DefDatabase<WorkGiverDef>.AllDefsListForReading
-					.Select(def => def.Worker)
-					.OfType<WorkGiver_Scanner>()
-					.FirstOrDefault(workGiver => GetWorkGiverType() == workGiver.GetType());
-			}
-			return cachedWorkGiver;
-		}
-
-		internal virtual int ThingScore(LocalTargetInfo thing, IntVec3 closeToCell)
-		{
-			return thing.Cell.DistanceToSquared(closeToCell);
-		}
-
-		internal virtual bool HasJobOnCell(WorkGiver_Scanner workGiver, Pawn pawn, IntVec3 cell)
-		{
-			return workGiver.HasJobOnCell(pawn, cell);
-		}
-
-		internal virtual Job JobOnCell(WorkGiver_Scanner workGiver, Pawn pawn, IntVec3 cell, bool forced)
-		{
-			if (workGiver == null)
-				return null;
-			if (workGiver.HasJobOnCell(pawn, cell) == false)
-				return null;
-			return workGiver.JobOnCell(pawn, cell);
-		}
-
-		internal virtual bool HasJobOnThing(WorkGiver_Scanner workGiver, Pawn pawn, LocalTargetInfo thing)
-		{
-			return workGiver.HasJobOnThing(pawn, thing.Thing, false);
-		}
-
-		internal virtual Job JobOnThing(WorkGiver_Scanner workGiver, Pawn pawn, LocalTargetInfo thing, bool forced)
-		{
-			if (workGiver == null)
-				return null;
-			if (workGiver.HasJobOnThing(pawn, thing.Thing, forced) == false)
-				return null;
-			return workGiver.JobOnThing(pawn, thing.Thing, forced);
-		}
-
-		internal virtual string MenuLabel(LocalTargetInfo thing)
-		{
-			var workGiver = GetWorkGiver();
-			if (workGiver == null) return "";
-			if (thing == null || thing.Thing == null)
-				return "ForcedGeneric1".Translate(new object[] { workGiver.def.gerund });
-			return "ForcedGeneric2".Translate(new object[] { workGiver.def.gerund, thing.Thing.Label });
+			if (workgiver.PotentialWorkCellsGlobal(pawn).Contains(cell))
+				if (workgiver.MissingRequiredCapacity(pawn) == null)
+					if (workgiver.HasJobOnCell(pawn, cell))
+					{
+						var job = workgiver.JobOnCell(pawn, cell);
+						if (pawn.CanReach(cell, workgiver.PathEndMode, Danger.Deadly))
+							return job;
+					}
+			return null;
 		}
 	}
 }

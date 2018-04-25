@@ -1,6 +1,5 @@
 ﻿using RimWorld;
 using RimWorld.Planet;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
@@ -10,215 +9,138 @@ namespace AchtungMod
 {
 	public class ForcedWork : WorldComponent
 	{
-		Queue<KeyValuePair<Pawn, Job>> JobQueue = new Queue<KeyValuePair<Pawn, Job>>();
+		Queue<KeyValuePair<Pawn, Job>> jobQueue = new Queue<KeyValuePair<Pawn, Job>>();
 
-		Dictionary<Job, ForcedSettings> forcedJobs = new Dictionary<Job, ForcedSettings>();
-		private List<Job> forcedJobsKeysWorkingList;
-		private List<ForcedSettings> forcedJobsValuesWorkingList;
-
-		public Dictionary<WorkGiver, JobFunctions> AllJobFunctions = new Dictionary<WorkGiver, JobFunctions>(); // not saved
+		Dictionary<Pawn, List<ForcedJob>> allForcedJobs = new Dictionary<Pawn, List<ForcedJob>>();
+		private List<Pawn> forcedJobsKeysWorkingList;
+		private List<List<ForcedJob>> forcedJobsValuesWorkingList;
 
 		public ForcedWork(World world) : base(world) { }
 
-		public override void FinalizeInit()
+		private static List<WorkGiverDef> AllWorkerDefs<T>() where T : class
 		{
-			AllJobFunctions = new Dictionary<WorkGiver, JobFunctions>();
-			typeof(ForcedWork).Assembly.GetTypes()
-				.Where(type => (type.IsAbstract == false && typeof(ForcedJob).IsAssignableFrom(type)))
-				.Select(type => new JobFunctions(type))
-				.ToList().Do(jobFunction =>
-				{
-					var workGiver = jobFunction.WorkGiver;
-					if (workGiver != null)
-					{
-						Tools.Debug("Registering forced job handling for " + workGiver.GetType().Name);
-						AllJobFunctions[jobFunction.WorkGiver] = jobFunction;
-					}
-				});
+			return DefDatabase<WorkGiverDef>.AllDefsListForReading
+					.Where(def => def.IsOfType<T>()).ToList();
 		}
 
-		public void AddJob(Pawn pawn, Job job)
+		static HashSet<WorkGiverDef> constructionDefs = new HashSet<WorkGiverDef>(AllWorkerDefs<WorkGiver_ConstructFinishFrames>().Union(AllWorkerDefs<WorkGiver_ConstructDeliverResources>()));
+		public List<WorkGiverDef> GetCombinedDefs(WorkGiver baseWorkgiver)
 		{
-			JobQueue.Enqueue(new KeyValuePair<Pawn, Job>(pawn, job));
+			if (constructionDefs.Contains(baseWorkgiver.def))
+				return constructionDefs.ToList();
+
+			if (baseWorkgiver.IsOfType<WorkGiver_Warden>())
+				return AllWorkerDefs<WorkGiver_Warden>();
+
+			return new List<WorkGiverDef> { baseWorkgiver.def };
+		}
+
+		public void QueueJob(Pawn pawn, Job job)
+		{
+			// TODO: find out if we still get stackoverflows if we start jobs directly
+			// tracker.StartJob(job, JobCondition.Succeeded, null/*pawn.mindState.lastJobGiver*/, false, false, null, null/*pawn.mindState.lastJobTag*/, true);
+
+			jobQueue.Enqueue(new KeyValuePair<Pawn, Job>(pawn, job));
 		}
 
 		public override void WorldComponentTick()
 		{
-			if (JobQueue.Count > 0)
+			if (jobQueue.Count > 0)
 			{
-				var item = JobQueue.Dequeue();
+				var item = jobQueue.Dequeue();
+				// TODO: setting last lastJobGiver and lastJobTag lead to errors when loading a saved game
 				item.Key.jobs.StartJob(item.Value, JobCondition.Succeeded, null/*pawn.mindState.lastJobGiver*/, false, false, null, null/*pawn.mindState.lastJobTag*/, true);
 			}
 		}
 
-		public ForcedSettings Settings(Job job)
+		public List<ForcedJob> GetForcedJobs(Pawn pawn)
 		{
-			if (job == null || forcedJobs.TryGetValue(job, out var settings) == false)
+			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
+				return new List<ForcedJob>();
+			return forcedJobs;
+		}
+
+		public bool HasForcedJob(Pawn pawn)
+		{
+			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
+				return false;
+			return (forcedJobs.Count > 0);
+		}
+
+		public ForcedJob GetForcedJob(Pawn pawn)
+		{
+			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
 				return null;
-			return settings;
+			if (forcedJobs.Count == 0)
+				return null;
+			return forcedJobs.First();
 		}
 
-		public ForcedSettings CreateSettings(Pawn pawn, WorkGiver_Scanner workGiver, Job job, IntVec3 target)
+		public void RemoveForcedJob(Pawn pawn)
 		{
-			var settings = new ForcedSettings(pawn, workGiver, job, target);
-			forcedJobs[job] = settings;
-			return settings;
+			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
+				return;
+			if (forcedJobs.Count == 0)
+				return;
+			forcedJobs.RemoveAt(0);
+			if (forcedJobs.Count == 0)
+				Remove(pawn);
 		}
 
-		internal void NextJob(Job lastJob, Job job, IntVec3 target)
+		public void Remove(Pawn pawn)
 		{
-			var oldSettings = forcedJobs[lastJob];
-			var pawn = oldSettings.pawn;
-			var workGiver = oldSettings.WorkGiver;
-			var newSettings = CreateSettings(pawn, workGiver, job, target);
-			newSettings.AddCells(oldSettings.Cells);
-			RemoveSettings(pawn, lastJob, "Moving settings from " + lastJob + " to " + job);
+			allForcedJobs.Remove(pawn);
 		}
 
-		public static Dictionary<Pawn, List<ForcedSettings>> SettingsForMap(Map map)
+		public bool AddForcedJob(Pawn pawn, List<WorkGiverDef> workgiverDefs, LocalTargetInfo item)
 		{
-			var result = new Dictionary<Pawn, List<ForcedSettings>>();
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
-			var settings = Find.VisibleMap.mapPawns.AllPawnsSpawned
-				.Where(pawn => pawn.IsColonist)
-				.Select(pawn =>
+			var forcedJob = new ForcedJob() { pawn = pawn, workgiverDefs = workgiverDefs, isThingJob = item.HasThing };
+			forcedJob.targets.Add(new ForcedTarget(item));
+			forcedJob.UpdateCells();
+			if (allForcedJobs.ContainsKey(pawn) == false)
+				allForcedJobs[pawn] = new List<ForcedJob>();
+			allForcedJobs[pawn].Add(forcedJob);
+			return allForcedJobs[pawn].Count == 1;
+		}
+
+		public LocalTargetInfo HasJobItem(Pawn pawn, WorkGiver_Scanner workgiver, IntVec3 pos)
+		{
+			var radial = GenRadial.ManualRadialPattern;
+			for (var i = 0; i < radial.Length; i++)
+			{
+				var cell = pos + radial[i];
+
+				if (cell.GetCellJob(pawn, workgiver) != null)
+					return new LocalTargetInfo(cell);
+				var things = pawn.Map.thingGrid.ThingsAt(cell);
+				foreach (var thing in things)
 				{
-					var settingsList = pawn.jobs.jobQueue.Select(item => forcedWork.Settings(item.job))
-						.Union(new List<ForcedSettings>() { forcedWork.Settings(pawn.CurJob) })
-						.Where(setting => setting != null)
-						.ToList();
-					return new KeyValuePair<Pawn, List<ForcedSettings>>(pawn, settingsList);
-				})
-				.Do(item => { result[item.Key] = item.Value; });
-			return result;
+					if (thing.GetThingJob(pawn, workgiver) != null)
+						return new LocalTargetInfo(thing);
+				}
+			}
+			return null;
 		}
 
-		public static ForcedSettings GetSettings(Job job)
+		public Job GetJobItem(Pawn pawn, WorkGiver_Scanner workgiver, LocalTargetInfo item)
 		{
-			if (job == null) return null;
-			return Find.World.GetComponent<ForcedWork>().Settings(job);
+			if (item.HasThing)
+				return item.Thing.GetThingJob(pawn, workgiver);
+			return item.Cell.GetCellJob(pawn, workgiver);
 		}
 
-		public void RemoveSettings(Pawn pawn, Job job, string reason)
+		public IEnumerable<ForcedJob> ForcedJobsForMap(Map map)
 		{
-			Tools.Debug(pawn, reason);
-			forcedJobs.Remove(job);
+			return allForcedJobs
+				.Where(pair => pair.Key.Map == map)
+				.SelectMany(pair => pair.Value);
 		}
 
 		public override void ExposeData()
 		{
-			Scribe_Collections.Look(ref forcedJobs, "ForcedJobs", LookMode.Reference, LookMode.Deep, ref forcedJobsKeysWorkingList, ref forcedJobsValuesWorkingList);
-		}
-	}
-
-	//
-
-	public class ForcedSettings : IExposable
-	{
-		public Pawn pawn;
-		public IntVec3 target;
-		List<IntVec3> cells = new List<IntVec3>();
-		WorkGiverDef workGiverDef = null;
-		JobDef jobDef = null;
-
-		public ForcedSettings()
-		{
-			cells = new List<IntVec3>();
-		}
-
-		public ForcedSettings(Pawn pawn, WorkGiver workGiver, Job job, IntVec3 target)
-		{
-			this.pawn = pawn;
-			this.target = target;
-			workGiverDef = workGiver.def;
-			jobDef = job.def;
-			cells = new List<IntVec3>();
-		}
-
-		public void ExposeData()
-		{
-			Scribe_References.Look(ref pawn, "Pawn", false);
-			Scribe_Values.Look(ref target, "Target");
-			Scribe_Collections.Look(ref cells, "Cells", LookMode.Value);
-			Scribe_Defs.Look(ref workGiverDef, "WorkGiver");
-			Scribe_Defs.Look(ref jobDef, "Job");
-
-			/*if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				var forcedWork = Find.World.GetComponent<ForcedWork>();
-				var jobFunctions = forcedWork.JobFunctions.Values;
-				var jobFunction = jobFunctions.FirstOrDefault(jf => jf.WorkGiver.def == workGiverDef);
-				var workGiver = jobFunction.WorkGiver;
-				if (jobFunction != null)
-				{
-					if (jobFunction.hasJobOnThingFunc(workGiver, pawn, target))
-					{
-						Tools.Debug(pawn, "Restoring thing-job with " + workGiver);
-
-						var job = jobFunction.jobOnThingFunc(workGiver, pawn, target, false);
-						if (job != null)
-						{
-							Tools.Debug(pawn, "# " + pawn.NameStringShort + " got new forced job " + job.def + " with " + workGiver + " on " + thing);
-							forcedWork.CreateSettings(pawn, workGiver, job, target);
-							forcedWork.Settings(job).AddThing(target);
-							var things = Tools.UpdateCells(job, target.Cell, jobFunction.hasJobOnThingFunc, jobFunction.hasJobOnCellFunc, jobFunction.thingScoreFunc);
-							Tools.Debug(pawn, "Adding " + things.Count + " things to job");
-							forcedWork.Settings(job).AddThings(things);
-							pawn.jobs.TryTakeOrderedJob(job);
-						}
-					}
-					else if (jobFunction.hasJobOnCellFunc(workGiver, pawn, target.Cell))
-					{
-						Tools.Debug(pawn, "Restoring cell-job with " + workGiver);
-
-						var job = jobFunction.jobOnCellFunc(workGiver, pawn, target.Cell, false);
-						if (job != null)
-						{
-							Tools.Debug(pawn, "# " + pawn.NameStringShort + " got new forced job " + job.def + " with " + workGiver + " on " + target.Cell);
-							forcedWork.CreateSettings(pawn, workGiver, job, target);
-							forcedWork.Settings(job).AddCell(target.Cell);
-							var things = Tools.UpdateCells(job, target.Cell, jobFunction.hasJobOnThingFunc, jobFunction.hasJobOnCellFunc, jobFunction.thingScoreFunc);
-							Tools.Debug(pawn, "Adding " + things.Count + " things to job");
-							forcedWork.Settings(job).AddThings(things);
-							pawn.jobs.TryTakeOrderedJob(job);
-						}
-					}
-				}
-			}*/
-		}
-
-		public WorkGiver_Scanner WorkGiver => workGiverDef?.Worker as WorkGiver_Scanner;
-		public List<IntVec3> Cells => cells;
-
-		public void AddCell(IntVec3 cell)
-		{
-			if (cells.Contains(cell) == false)
-				cells.Add(cell);
-		}
-
-		public void AddCells(IEnumerable<IntVec3> newCells)
-		{
-			cells = cells.Union(newCells).ToList();
-		}
-
-		public void RestrictCells(IEnumerable<IntVec3> onlyCells)
-		{
-			cells = cells.Intersect(onlyCells).ToList();
-		}
-
-		public void RemoveCell(IntVec3 oldCell)
-		{
-			cells.Remove(oldCell);
-		}
-
-		public void RemoveCells(IEnumerable<IntVec3> oldCells)
-		{
-			cells = cells.Except(oldCells).ToList();
-		}
-
-		public string Description()
-		{
-			return pawn.NameStringShort + "-" + workGiverDef + "." + jobDef + "#" + cells.Count;
+			Scribe_Collections.Look(ref allForcedJobs, "jobs", LookMode.Reference, LookMode.Deep, ref forcedJobsKeysWorkingList, ref forcedJobsValuesWorkingList);
+			if (allForcedJobs == null)
+				allForcedJobs = new Dictionary<Pawn, List<ForcedJob>>();
 		}
 	}
 }
