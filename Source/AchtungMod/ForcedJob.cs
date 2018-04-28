@@ -14,6 +14,7 @@ namespace AchtungMod
 		public HashSet<ForcedTarget> targets = new HashSet<ForcedTarget>();
 		public bool isThingJob = false;
 		public bool initialized = false;
+		public int cellRadius = 0;
 
 		public ForcedJob()
 		{
@@ -26,24 +27,24 @@ namespace AchtungMod
 
 		static Dictionary<BuildableDef, int> scores = new Dictionary<BuildableDef, int>
 		{
-			{ ThingDefOf.PowerConduit, 1000000 },
-			{ ThingDefOf.Sandbags, 200000 },
-			{ ThingDefOf.TurretGun, 150000 },
-			{ ThingDefOf.Wall, 100000 },
-			{ ThingDefOf.Door, 50000 },
-			{ ThingDefOf.TrapDeadfall, 20000 },
-			{ ThingDefOf.Bed, 10000 },
-			{ ThingDefOf.Bedroll, 9000 },
-			{ ThingDefOf.WoodFiredGenerator, 5000 },
-			{ ThingDefOf.Battery, 5000 },
-			{ ThingDefOf.SolarGenerator, 5000 },
-			{ ThingDefOf.WindTurbine, 5000 },
-			{ ThingDefOf.GeothermalGenerator, 5000 },
-			{ ThingDefOf.Cooler, 2000 },
-			{ ThingDefOf.Heater, 2000 },
-			{ ThingDefOf.PassiveCooler, 2000 },
-			{ ThingDefOf.StandingLamp, 1000 },
-			{ ThingDefOf.TorchLamp, 1000 },
+			{ ThingDefOf.PowerConduit, 1000 },
+			{ ThingDefOf.Sandbags, 200 },
+			{ ThingDefOf.TurretGun, 150 },
+			{ ThingDefOf.Wall, 100 },
+			{ ThingDefOf.Door, 50 },
+			{ ThingDefOf.TrapDeadfall, 20 },
+			{ ThingDefOf.Bed, 10 },
+			{ ThingDefOf.Bedroll, 9 },
+			{ ThingDefOf.WoodFiredGenerator, 5 },
+			{ ThingDefOf.Battery, 5 },
+			{ ThingDefOf.SolarGenerator, 5 },
+			{ ThingDefOf.WindTurbine, 5 },
+			{ ThingDefOf.GeothermalGenerator, 5 },
+			{ ThingDefOf.Cooler, 2 },
+			{ ThingDefOf.Heater, 2 },
+			{ ThingDefOf.PassiveCooler, 2 },
+			{ ThingDefOf.StandingLamp, 1 },
+			{ ThingDefOf.TorchLamp, 1 },
 		};
 		public static int ItemPriority(LocalTargetInfo item, IntVec3 nearTo)
 		{
@@ -55,14 +56,14 @@ namespace AchtungMod
 				if (blueprint != null)
 				{
 					if (scores.TryGetValue(blueprint.def.entityDefToBuild, out var n))
-						score -= n;
+						score -= n * 1000;
 				}
 
 				var frame = thing as Frame;
 				if (frame != null)
 				{
 					if (scores.TryGetValue(frame.def.entityDefToBuild, out var n))
-						score -= n;
+						score -= n * 1000;
 				}
 			}
 			return score;
@@ -114,12 +115,6 @@ namespace AchtungMod
 				return false;
 			}
 
-			/*if (condition == JobCondition.Incompletable)
-			{
-				forcedWork.Remove(pawn);
-				return false;
-			}*/
-
 			pawn.ClearReservationsForJob(lastJob);
 
 			if (Tools.GetPawnBreakLevel(pawn)())
@@ -168,6 +163,12 @@ namespace AchtungMod
 			return false;
 		}
 
+		public void ChangeCellRadius(int delta)
+		{
+			cellRadius += delta;
+			UpdateCells();
+		}
+
 		public bool HasJob(Thing thing)
 		{
 			return WorkGivers.Any(workgiver => thing.GetThingJob(pawn, workgiver) != null);
@@ -180,11 +181,8 @@ namespace AchtungMod
 
 		private IEnumerable<IntVec3> Nearby(IntVec3 cell)
 		{
-			// TODO: replace dynamically with extended range of cells depending on workgiver type
-			// var radius = 1f;
-			// if(radius <= GenRadial.MaxRadialPatternRadius)
-			//		return GenRadial.RadialCellsAround(cell, radius, true);
-			//
+			if (cellRadius > 0 && cellRadius <= GenRadial.MaxRadialPatternRadius)
+				return GenRadial.RadialCellsAround(cell, cellRadius, true);
 			return GenAdj.AdjacentCellsAndInside.Select(vec => cell + vec);
 		}
 
@@ -251,8 +249,9 @@ namespace AchtungMod
 			Scribe_References.Look(ref pawn, "pawn");
 			Scribe_Collections.Look(ref workgiverDefs, "workgivers", LookMode.Def);
 			Scribe_Collections.Look(ref targets, "targets", LookMode.Deep);
-			Scribe_Values.Look(ref initialized, "inited", false, true);
 			Scribe_Values.Look(ref isThingJob, "thingJob", false, true);
+			Scribe_Values.Look(ref initialized, "inited", false, true);
+			Scribe_Values.Look(ref cellRadius, "radius", 0, true);
 		}
 	}
 

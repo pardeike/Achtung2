@@ -314,7 +314,6 @@ namespace AchtungMod
 			// DebugPosition(pos, new Color(1f, 1f, 0f, 0.3f));
 
 			pos += new Vector3(0.75f, Altitudes.AltitudeFor(AltitudeLayer.MoteOverhead), 0.75f);
-			var q = Quaternion.identity;
 			var a = 0.08f * (GenTicks.TicksAbs + 13 * pos.x + 7 * pos.z);
 			var rot = Quaternion.Euler(0f, Mathf.Sin(a) * 10f, 0f);
 			DrawScaledMesh(MeshPool.plane10, forceIconMaterial, pos, rot, 0.5f, 0.5f);

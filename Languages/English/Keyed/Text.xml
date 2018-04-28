@@ -13,8 +13,12 @@ The formation can be rotated using Q and E</AchtungModifierExplained>
 	<ForceCommandMenuExplained>Shows the context menu instead of moving colonists</ForceCommandMenuExplained>
 	<ForcedCommandState>Ordered to work until done.</ForcedCommandState>
 
-	<ForcedConstruction>Force construction</ForcedConstruction>
 	<ForceMenuButtonText>Force</ForceMenuButtonText>
+
+	<IncreaseForceRadius>Increase Radius</IncreaseForceRadius>
+	<IncreaseForceRadiusDesc>Increase the search distance for forced work (current radius is {0})</IncreaseForceRadiusDesc>
+	<DecreaseForceRadius>Decrease Radius</DecreaseForceRadius>
+	<DecreaseForceRadiusDesc>Decrease the search distance for forced work (current radius is {0})</DecreaseForceRadiusDesc>
 
 	<Notes>Notes</Notes>
 	<Note1>When using Achtung the context menu contains both: drafted and undrafted commands</Note1>

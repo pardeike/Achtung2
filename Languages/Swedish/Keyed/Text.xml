@@ -12,8 +12,12 @@ Höll i för att flytta kolonister i deras formation. Formationen kan roteras me
 	<ForceCommandMenuExplained>Visa kontextmenyn istället for att positionera kolonister</ForceCommandMenuExplained>
 	<ForcedCommandState>Kommenderad att slutföra sitt arbete.</ForcedCommandState>
 
-	<ForcedConstruction>Tvinga konstruktion</ForcedConstruction>
 	<ForceMenuButtonText>Tvinga</ForceMenuButtonText>
+
+	<IncreaseForceRadius>Öka avstånd</IncreaseForceRadius>
+	<IncreaseForceRadiusDesc>Öka sökavståndet för tvångsarbete (just nu {0})</IncreaseForceRadiusDesc>
+	<DecreaseForceRadius>Minska avstånd</DecreaseForceRadius>
+	<DecreaseForceRadiusDesc>Minska sökavståndet för tvångsarbete (just nu {0})</DecreaseForceRadiusDesc>
 
 	<Notes>Anmärkningar</Notes>
 	<Note1>Med Achtung innehåller kontextmenyn såväl normala som kampkommandos</Note1>

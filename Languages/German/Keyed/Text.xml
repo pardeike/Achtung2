@@ -13,8 +13,12 @@ Die Formation kann während der Bewegung mit Q und E rotiert werden</AchtungModi
 	<ForceCommandMenuExplained>Zeigt das Kontextmenü anstatt Kolonisten zu positionieren</ForceCommandMenuExplained>
 	<ForcedCommandState>Angewiesen bis zum Ende zu arbeiten.</ForcedCommandState>
 
-	<ForcedConstruction>Erzwinge Konstruktion</ForcedConstruction>
 	<ForceMenuButtonText>Erzwinge</ForceMenuButtonText>
+
+	<IncreaseForceRadius>Radius größer</IncreaseForceRadius>
+	<IncreaseForceRadiusDesc>Erhöht die Suchentfernung für erzwungene Arbeit (momentan {0})</IncreaseForceRadiusDesc>
+	<DecreaseForceRadius>Radius kleiner</DecreaseForceRadius>
+	<DecreaseForceRadiusDesc>Verringert die Suchentfernung für erzwungene Arbeit (momentan {0})</DecreaseForceRadiusDesc>
 
 	<Notes>Notizen</Notes>
 	<Note1>Mit Achtung enthält das Kontextmenu sowohl normale als auch Kampfkommandos</Note1>
