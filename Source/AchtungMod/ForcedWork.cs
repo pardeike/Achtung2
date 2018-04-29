@@ -11,11 +11,14 @@ namespace AchtungMod
 	{
 		Queue<KeyValuePair<Pawn, Job>> jobQueue = new Queue<KeyValuePair<Pawn, Job>>();
 
-		Dictionary<Pawn, List<ForcedJob>> allForcedJobs = new Dictionary<Pawn, List<ForcedJob>>();
+		Dictionary<Pawn, ForcedJobs> allForcedJobs = new Dictionary<Pawn, ForcedJobs>();
 		private List<Pawn> forcedJobsKeysWorkingList;
-		private List<List<ForcedJob>> forcedJobsValuesWorkingList;
+		private List<ForcedJobs> forcedJobsValuesWorkingList;
 
-		public ForcedWork(World world) : base(world) { }
+		public ForcedWork(World world) : base(world)
+		{
+			jobQueue = new Queue<KeyValuePair<Pawn, Job>>();
+		}
 
 		private static List<WorkGiverDef> AllWorkerDefs<T>() where T : class
 		{
@@ -57,33 +60,33 @@ namespace AchtungMod
 		{
 			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
 				return new List<ForcedJob>();
-			return forcedJobs;
+			return forcedJobs.jobs;
 		}
 
 		public bool HasForcedJob(Pawn pawn)
 		{
 			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
 				return false;
-			return (forcedJobs.Count > 0);
+			return (forcedJobs.jobs.Count > 0);
 		}
 
 		public ForcedJob GetForcedJob(Pawn pawn)
 		{
 			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
 				return null;
-			if (forcedJobs.Count == 0)
+			if (forcedJobs.jobs.Count == 0)
 				return null;
-			return forcedJobs.First();
+			return forcedJobs.jobs.First();
 		}
 
 		public void RemoveForcedJob(Pawn pawn)
 		{
 			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
 				return;
-			if (forcedJobs.Count == 0)
+			if (forcedJobs.jobs.Count == 0)
 				return;
-			forcedJobs.RemoveAt(0);
-			if (forcedJobs.Count == 0)
+			forcedJobs.jobs.RemoveAt(0);
+			if (forcedJobs.jobs.Count == 0)
 				Remove(pawn);
 		}
 
@@ -98,9 +101,9 @@ namespace AchtungMod
 			forcedJob.targets.Add(new ForcedTarget(item));
 			forcedJob.UpdateCells();
 			if (allForcedJobs.ContainsKey(pawn) == false)
-				allForcedJobs[pawn] = new List<ForcedJob>();
-			allForcedJobs[pawn].Add(forcedJob);
-			return allForcedJobs[pawn].Count == 1;
+				allForcedJobs[pawn] = new ForcedJobs();
+			allForcedJobs[pawn].jobs.Add(forcedJob);
+			return allForcedJobs[pawn].jobs.Count == 1;
 		}
 
 		public LocalTargetInfo HasJobItem(Pawn pawn, WorkGiver_Scanner workgiver, IntVec3 pos)
@@ -133,14 +136,18 @@ namespace AchtungMod
 		{
 			return allForcedJobs
 				.Where(pair => pair.Key.Map == map)
-				.SelectMany(pair => pair.Value);
+				.SelectMany(pair => pair.Value.jobs);
 		}
 
 		public override void ExposeData()
 		{
-			Scribe_Collections.Look(ref allForcedJobs, "jobs", LookMode.Reference, LookMode.Deep, ref forcedJobsKeysWorkingList, ref forcedJobsValuesWorkingList);
-			if (allForcedJobs == null)
-				allForcedJobs = new Dictionary<Pawn, List<ForcedJob>>();
+			Scribe_Collections.Look(ref allForcedJobs, "joblist", LookMode.Reference, LookMode.Deep, ref forcedJobsKeysWorkingList, ref forcedJobsValuesWorkingList);
+
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				if (allForcedJobs == null)
+					allForcedJobs = new Dictionary<Pawn, ForcedJobs>();
+			}
 		}
 	}
 }

@@ -45,7 +45,7 @@ Höll i för att flytta kolonister i deras formation. Formationen kan roteras me
 	<HealthLevelOptionNeedsMedicalRest>Sängbunden</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>I shock</HealthLevelOptionInPainShock>
 
-	<JobInterruptedLabel>{0} avbruten</JobInterruptedLabel>
+	<JobInterruptedLabel>Avbruten: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0} står inför ett sammanbrott</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} har låg hälsa</JobInterruptedBadHealth>
 

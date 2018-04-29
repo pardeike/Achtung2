@@ -7,6 +7,27 @@ using Verse.AI;
 
 namespace AchtungMod
 {
+	public class ForcedJobs : IExposable
+	{
+		public List<ForcedJob> jobs = new List<ForcedJob>();
+
+		public ForcedJobs()
+		{
+			jobs = new List<ForcedJob>();
+		}
+
+		public void ExposeData()
+		{
+			Scribe_Collections.Look(ref jobs, "jobs", LookMode.Deep);
+
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				if (jobs == null)
+					jobs = new List<ForcedJob>();
+			}
+		}
+	}
+
 	public class ForcedJob : IExposable
 	{
 		public Pawn pawn = null;
@@ -21,6 +42,9 @@ namespace AchtungMod
 			pawn = null;
 			workgiverDefs = new List<WorkGiverDef>();
 			targets = new HashSet<ForcedTarget>();
+			isThingJob = false;
+			initialized = false;
+			cellRadius = 0;
 		}
 
 		public IEnumerable<WorkGiver_Scanner> WorkGivers => workgiverDefs.Select(wgd => (WorkGiver_Scanner)wgd.Worker);
@@ -120,7 +144,7 @@ namespace AchtungMod
 			if (Tools.GetPawnBreakLevel(pawn)())
 			{
 				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
-				var jobName = "WorkUninterrupted".Translate();
+				var jobName = lastJob.GetReport(pawn).CapitalizeFirst();
 				var label = "JobInterruptedLabel".Translate(jobName);
 				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(pawn.NameStringShort), LetterDefOf.NegativeEvent, pawn));
 
@@ -131,8 +155,9 @@ namespace AchtungMod
 			if (Tools.GetPawnHealthLevel(pawn)())
 			{
 				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
-				var jobName = "WorkUninterrupted".Translate();
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter("JobInterruptedLabel".Translate(jobName), "JobInterruptedBadHealth".Translate(pawn.NameStringShort), LetterDefOf.NegativeEvent, pawn));
+				var jobName = lastJob.GetReport(pawn).CapitalizeFirst();
+				var label = "JobInterruptedLabel".Translate(jobName);
+				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBadHealth".Translate(pawn.NameStringShort), LetterDefOf.NegativeEvent, pawn));
 
 				forcedWork.Remove(pawn);
 				return false;
@@ -252,6 +277,9 @@ namespace AchtungMod
 			Scribe_Values.Look(ref isThingJob, "thingJob", false, true);
 			Scribe_Values.Look(ref initialized, "inited", false, true);
 			Scribe_Values.Look(ref cellRadius, "radius", 0, true);
+
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+				targets.RemoveWhere(target => target.item.IsValid == false);
 		}
 	}
 

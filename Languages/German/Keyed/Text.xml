@@ -46,7 +46,7 @@ Die Formation kann während der Bewegung mit Q und E rotiert werden</AchtungModi
 	<HealthLevelOptionNeedsMedicalRest>Notwendige Bettruhe</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>Schockzustand</HealthLevelOptionInPainShock>
 
-	<JobInterruptedLabel>{0} wurde abgebrochen</JobInterruptedLabel>
+	<JobInterruptedLabel>Abgebrochen: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0} steht kurz vor dem Zusammenbruch</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} ist in schlechter gesundheitlicher Verfassung</JobInterruptedBadHealth>
 
