@@ -20,7 +20,7 @@ namespace AchtungMod
 		{
 			Controller.GetInstance().InstallDefs();
 
-			HarmonyInstance.DEBUG = true;
+			// HarmonyInstance.DEBUG = true;
 			var harmony = HarmonyInstance.Create("net.pardeike.rimworld.mods.achtung");
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
 
