@@ -109,7 +109,7 @@ namespace AchtungMod
 			isMoving = false;
 		}
 
-		public void InitAction()
+		public virtual void InitAction()
 		{
 			workLocations = new HashSet<IntVec3>() { TargetA.Cell };
 			currentItem = null;
@@ -189,7 +189,7 @@ namespace AchtungMod
 			if (pawn.Position.AdjacentTo8WayOrInside(currentItem))
 			{
 				var itemCompleted = DoWorkToItem();
-				if (itemCompleted) currentItem = null;
+				// if (itemCompleted) currentItem = null;
 			}
 			else if (!isMoving)
 			{

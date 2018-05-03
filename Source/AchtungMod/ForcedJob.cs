@@ -20,7 +20,7 @@ namespace AchtungMod
 		{
 			Scribe_Collections.Look(ref jobs, "jobs", LookMode.Deep);
 
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
 			{
 				if (jobs == null)
 					jobs = new List<ForcedJob>();
@@ -278,7 +278,7 @@ namespace AchtungMod
 			Scribe_Values.Look(ref initialized, "inited", false, true);
 			Scribe_Values.Look(ref cellRadius, "radius", 0, true);
 
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
 				targets.RemoveWhere(target => target.item.IsValid == false);
 		}
 	}

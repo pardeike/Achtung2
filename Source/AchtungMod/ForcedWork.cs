@@ -143,7 +143,7 @@ namespace AchtungMod
 		{
 			Scribe_Collections.Look(ref allForcedJobs, "joblist", LookMode.Reference, LookMode.Deep, ref forcedJobsKeysWorkingList, ref forcedJobsValuesWorkingList);
 
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
 			{
 				if (allForcedJobs == null)
 					allForcedJobs = new Dictionary<Pawn, ForcedJobs>();

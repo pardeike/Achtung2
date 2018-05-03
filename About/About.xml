@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-	<name>Achtung!</name>
+	<name>Achtung! v2</name>
 	<author>Andreas Pardeike</author>
 	<url>https://ludeon.com/forums/index.php?topic=22130.0</url>
 	<targetVersion>0.18.0</targetVersion>
@@ -15,7 +15,8 @@ In a nutshell you can:
 - give orders to multiple colonists at once
 - force jobs so they get uninterrupted attention
 
-Examples of what you can do:
+
+EXAMPLES
 
 (*) Save time by issuing a command with more than one colonist selected. For example: select three brawlers and right click an enemy, then choose "melee". Done.
 
@@ -31,11 +32,13 @@ Examples of what you can do:
 
 The original three Achtung! commands "Clean Room", "Fight Fire" or "Sow Zone/Room" still exist because they do stuff a bit smarter than the build in prioritized work commands.
 
--  Settings
+
+SETTINGS
 
 Achtung uses the default way to access mod settings. There, you find switches to turn certain features on/off and you can change the default keys to your liking.
 
--  Compatibility
+
+COMPATIBILITY
 
 Achtung! is developed with the user in mind. To stay compatible with other mods, Achtung! was developed to stay out of its way and does not overwrite any essential functions. Instead, it reuses existing functionality and probably works with 99% of other mods out of the box.
 
@@ -43,24 +46,33 @@ Here are the current problems and their workarounds for the current version:
 
 Achtung! usually does not modify save state for saved games to avoid a dependency on it. However, a side effect of the provided custom jobs is that when save the game and your colonists are actively running an Achtung job this will be saved too thus creating a dependency to Achtung. Workaround: open the saved game with Achtung, cancel all Achtung jobs and save it again. This will "clean" the save and remove the dependency.
 
--  Requirements
+
+REQUIREMENTS
 
 Achtung! Mod works with RimWorld B18 and will get updated in-sync with RimWorld. I does not depend on any other mods and is known to work in any mod order you like.
 
-- Feedback
 
-Without feedback, this mod would have never come so far. So please, send me feedback and rate and recommend my mod whenever possible. The three main places to do so are
+FEEDBACK
 
-  - Ludeon Forums (https://ludeon.com/forums/index.php?topic=22130.0)
-  - Steam Workshop (http://steamcommunity.com/sharedfiles/filedetails/comments/730936602)
-  - GitHub (https://github.com/pardeike/RimWorld-Achtung-Mod/releases/download/v2.0.1/Achtung.zip)
+Please send me feedback and rate and recommend my mod whenever possible. The three main places to do so are
 
-- License
+Ludeon Forums:
+https://ludeon.com/forums/index.php?topic=22130.0
+
+Steam Workshop:
+http://steamcommunity.com/sharedfiles/filedetails/comments/730936602
+
+GitHub:
+https://github.com/pardeike/RimWorld-Achtung-Mod/releases/download/v2.0.1/Achtung.zip
+
+
+LICENSE
 
 Free. As in free beer. Copy, learn and be respectful.
 Powered by Harmony Patch Library
 
-- Contact
+
+CONTACT
 
 Andreas Pardeike
 Email: andreas@pardeike.net

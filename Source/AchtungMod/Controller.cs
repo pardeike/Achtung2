@@ -254,11 +254,11 @@ namespace AchtungMod
 			if (targets != null)
 			{
 				var existingJobs = driver.SameJobTypesOngoing();
-				targets.Do(target =>
+				foreach (var target in targets)
 				{
 					var suffix = existingJobs.Count > 0 ? " " + ("AlreadyDoing".Translate(existingJobs.Count + 1)) : "";
 					options.Add(new FloatMenuOption(driver.GetLabel() + suffix, () => driver.StartJob(pawn, target), MenuOptionPriority.Low));
-				});
+				}
 			}
 		}
 

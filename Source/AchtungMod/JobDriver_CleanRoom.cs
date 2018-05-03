@@ -10,17 +10,7 @@ namespace AchtungMod
 {
 	public class JobDriver_CleanRoom : JobDriver_Thoroughly
 	{
-		public class RoomInfo
-		{
-			public Room room;
-			public bool valid;
-
-			public RoomInfo(Room room, bool valid)
-			{
-				this.room = room;
-				this.valid = valid;
-			}
-		}
+		private IntVec3 initialClickPosition = IntVec3.Invalid;
 
 		public override string GetPrefix()
 		{
@@ -32,42 +22,35 @@ namespace AchtungMod
 			return EffecterDefOf.Clean;
 		}
 
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref initialClickPosition, "roomLocation", IntVec3.Invalid, false);
+		}
+
 		public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, Vector3 clickPos)
 		{
 			base.CanStart(thePawn, clickPos);
 			var cleanDef = DefDatabase<WorkTypeDef>.GetNamed("Cleaning");
-			if (thePawn.workSettings.GetPriority(cleanDef) == 0) return null;
-			LocalTargetInfo cell = IntVec3.FromVector3(clickPos);
-			var info = WorkInfoAt(thePawn, cell);
-			return (info.valid && info.room != null) ? new List<LocalTargetInfo> { cell } : null;
-		}
+			if (thePawn.workSettings.GetPriority(cleanDef) == 0)
+				return null;
 
-		// filth in room
-		public IEnumerable<Thing> AllWorkInRoom(Room room, Pawn thePawn)
-		{
-			return room
-				.ContainedAndAdjacentThings.OfType<Filth>().Cast<Thing>()
-				.Where(f => f.Destroyed == false && thePawn.CanReach(f, PathEndMode.Touch, thePawn.NormalMaxDanger()) && thePawn.CanReserve(f, 1))
-				.OrderBy(f => Math.Abs(f.Position.x - thePawn.Position.x) + Math.Abs(f.Position.z - thePawn.Position.z));
-		}
-
-		// room info
-		public RoomInfo WorkInfoAt(Pawn targetPawn, LocalTargetInfo target)
-		{
-			var room = RegionAndRoomQuery.RoomAt(target.Cell, targetPawn.Map);
-			if (room == null || room.IsHuge || room.Group.AnyRoomTouchesMapEdge) return new RoomInfo(room, false);
-			if (AllWorkInRoom(room, targetPawn).Count() == 0) return new RoomInfo(room, false);
-			return new RoomInfo(room, true);
+			initialClickPosition = IntVec3.FromVector3(clickPos);
+			var filthToClean = AllFilth();
+			if (filthToClean.Any())
+				return new List<LocalTargetInfo> { filthToClean.First() };
+			return null;
 		}
 
 		public override LocalTargetInfo FindNextWorkItem()
 		{
-			var info = WorkInfoAt(pawn, TargetA);
-			if (info.valid == false) return null;
-			var items = AllWorkInRoom(info.room, pawn).ToList();
-			currentWorkCount = items.Count;
+			if (initialClickPosition.IsValid == false)
+				initialClickPosition = workLocations.First();
+
+			var filth = AllFilth();
+			currentWorkCount = filth.Count();
 			if (totalWorkCount < currentWorkCount) totalWorkCount = currentWorkCount;
-			return items.FirstOrDefault();
+			return filth.FirstOrDefault();
 		}
 
 		public override bool DoWorkToItem()
@@ -77,6 +60,8 @@ namespace AchtungMod
 			{
 				var filth = currentItem.Thing as Filth;
 				filth?.ThinFilth();
+				if (filth?.Destroyed ?? false)
+					pawn.records.Increment(RecordDefOf.MessesCleaned);
 				subCounter = 0f;
 			}
 			return currentItem.Thing.Destroyed;
@@ -84,14 +69,56 @@ namespace AchtungMod
 
 		public override string GetReport()
 		{
-			var info = WorkInfoAt(pawn, TargetA);
-			var name = info.room == null ? "" : " " + info.room.Role.label;
-			return (GetPrefix() + "Report").Translate(name, info.valid ? Math.Floor(Progress() * 100f) + "%" : "-");
+			var room = RoomAt(initialClickPosition);
+			var name = room == null ? "" : " " + room.Role.label;
+			return (GetPrefix() + "Report").Translate(name, room == null ? "-" : Math.Floor(Progress() * 100f) + "%");
 		}
 
 		public override bool TryMakePreToilReservations()
 		{
 			return true;
+		}
+
+		//
+
+		private Filth FirstFilthAt(IntVec3 cell)
+		{
+			return pawn.Map.thingGrid.ThingAt<Filth>(cell);
+		}
+
+		private IEnumerable<Filth> AllFilth()
+		{
+			var room = RoomAt(initialClickPosition);
+			if (room == null)
+				return new List<Filth>();
+
+			var filth = room
+				.ContainedAndAdjacentThings.OfType<Filth>()
+				.Where(f =>
+					f.Destroyed == false
+					&& pawn.CanReach(f, PathEndMode.Touch, pawn.NormalMaxDanger())
+					&& pawn.CanReserve(f, 1)
+				);
+
+			var filthCount = filth.Count();
+			if (filthCount > 0)
+			{
+				var center = filth.Aggregate(IntVec3.Zero, (prev, f) => prev + f.Position);
+				center = new IntVec3(center.x / filthCount, 0, center.z / filthCount);
+				filth = filth.OrderBy(f => (currentItem.Cell - f.Position).LengthHorizontalSquared - 2 * (center - f.Position).LengthHorizontalSquared);
+			}
+
+			return filth;
+		}
+
+		private Room RoomAt(IntVec3 cell)
+		{
+			if (cell.IsValid == false)
+				return null;
+			var theRoom = RegionAndRoomQuery.RoomAt(cell, pawn.Map);
+			if (theRoom == null || theRoom.IsHuge || theRoom.Group.AnyRoomTouchesMapEdge)
+				return null;
+			return theRoom;
 		}
 	}
 }
