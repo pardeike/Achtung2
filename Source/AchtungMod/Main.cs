@@ -67,10 +67,62 @@ namespace AchtungMod
 		}
 	}
 
+	// forced hauling outside of allowed area
+	//
+	[HarmonyPatch(typeof(HaulAIUtility))]
+	[HarmonyPatch("PawnCanAutomaticallyHaulFast")]
+	static class HaulAIUtility_PawnCanAutomaticallyHaulFast_Patch
+	{
+		static bool Prefix(Pawn p, Thing t, bool forced, ref bool __result)
+		{
+			Log.Warning("PawnCanAutomaticallyHaulFast: " + p.NameStringShort + " forced =" + forced);
+			if (forced)
+			{
+				var job = HaulAIUtility.HaulToStorageJob(p, t);
+				Log.Warning("job=" + job);
+
+				__result = true;
+				return false;
+			}
+			return true;
+		}
+	}
+
+	// forced repair outside of allowed area
+	//
+	[HarmonyPatch(typeof(WorkGiver_Repair))]
+	[HarmonyPatch("HasJobOnThing")]
+	static class WorkGiver_Repair_HasJobOnThing_Patch
+	{
+		static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions)
+		{
+			var instr = instructions.ToList();
+
+			var f_NotInHomeAreaTrans = AccessTools.Field(typeof(WorkGiver_FixBrokenDownBuilding), "NotInHomeAreaTrans");
+			var i = instr.FirstIndexOf(inst => inst.opcode == OpCodes.Ldsfld && inst.operand == f_NotInHomeAreaTrans);
+			if (i > 0 && instr[i - 1].opcode == OpCodes.Brtrue)
+			{
+				var label = instr[i - 1].operand;
+				instr.Insert(i++, new CodeInstruction(OpCodes.Ldarg_3));
+				instr.Insert(i++, new CodeInstruction(OpCodes.Brtrue, label));
+			}
+			else
+				Log.Error("Cannot find ldsfld RimWorld.WorkGiver_FixBrokenDownBuilding::NotInHomeAreaTrans");
+
+			foreach (var inst in instr)
+				yield return inst;
+		}
+	}
+
 	[HarmonyPatch(typeof(FloatMenuMakerMap))]
 	[HarmonyPatch("AddUndraftedOrders")]
 	static class FloatMenuMakerMap_AddUndraftedOrders_Patch
 	{
+		static bool IsForbidden(Thing thing, Pawn pawn)
+		{
+			return false;
+		}
+
 		static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions)
 		{
 			object lastLocalVar = null;
@@ -78,6 +130,9 @@ namespace AchtungMod
 
 			var c_FloatMenuOption = AccessTools.FirstConstructor(typeof(FloatMenuOption), c => c.GetParameters().Count() > 1);
 			var m_ForcedFloatMenuOption = AccessTools.Method(typeof(ForcedFloatMenuOption), nameof(ForcedFloatMenuOption.CreateForcedMenuItem));
+			var m_IsForbidden = AccessTools.Method(typeof(ForbidUtility), nameof(ForbidUtility.IsForbidden), new Type[] { typeof(Thing), typeof(Pawn) });
+			var m_IsNeverForbidden = AccessTools.Method(typeof(FloatMenuMakerMap_AddUndraftedOrders_Patch), "IsForbidden");
+
 			foreach (var instruction in instructions)
 			{
 				if (instruction.opcode == OpCodes.Isinst && instruction.operand == typeof(WorkGiver_Scanner))
@@ -100,6 +155,9 @@ namespace AchtungMod
 					yield return new CodeInstruction(OpCodes.Ldarg_0);
 					yield return new CodeInstruction(OpCodes.Ldloc_S, lastLocalVar);
 				}
+
+				if (instruction.operand == m_IsForbidden)
+					instruction.operand = m_IsNeverForbidden;
 
 				yield return instruction;
 			}

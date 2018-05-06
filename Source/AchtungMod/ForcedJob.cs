@@ -321,14 +321,16 @@ namespace AchtungMod
 	{
 		public static Job GetThingJob(this Thing thing, Pawn pawn, WorkGiver_Scanner workgiver)
 		{
+			var ignoreRestrictions = ((workgiver as WorkGiver_Haul) != null || (workgiver as WorkGiver_Repair) != null);
+
 			if (workgiver.PotentialWorkThingRequest.Accepts(thing) || (workgiver.PotentialWorkThingsGlobal(pawn) != null && workgiver.PotentialWorkThingsGlobal(pawn).Contains(thing)))
 				if (workgiver.MissingRequiredCapacity(pawn) == null)
 					if (workgiver.HasJobOnThing(pawn, thing, true))
 					{
 						var job = workgiver.JobOnThing(pawn, thing, true);
 						if (job != null)
-							if (thing.IsForbidden(pawn) == false)
-								if (thing.Position.InAllowedArea(pawn))
+							if (ignoreRestrictions || thing.IsForbidden(pawn) == false)
+								if (ignoreRestrictions || thing.Position.InAllowedArea(pawn))
 									if (pawn.CanReserveAndReach(thing, workgiver.PathEndMode, Danger.Deadly))
 										return job;
 					}
