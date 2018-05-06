@@ -20,7 +20,7 @@ namespace AchtungMod
 		{
 			Controller.GetInstance().InstallDefs();
 
-			// HarmonyInstance.DEBUG = true;
+			HarmonyInstance.DEBUG = true;
 			var harmony = HarmonyInstance.Create("net.pardeike.rimworld.mods.achtung");
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
 
@@ -168,33 +168,15 @@ namespace AchtungMod
 	[HarmonyPatch("EndJob")]
 	static class Pawn_JobTracker_EndJob_Patch
 	{
-		static bool HandleForcedAndSkipQueue(Pawn_JobTracker tracker, Pawn pawn, JobCondition condition)
+		static bool Prefix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition)
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
-			if (forcedWork.HasForcedJob(pawn))
+			if (forcedWork.HasForcedJob(___pawn))
 			{
-				tracker.EndCurrentJob(condition, true);
-				return true;
+				__instance.EndCurrentJob(condition, true);
+				return false;
 			}
-			return false;
-		}
-
-		static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions)
-		{
-			var label = il.DefineLabel();
-
-			yield return new CodeInstruction(OpCodes.Ldarg_0);
-			yield return new CodeInstruction(OpCodes.Ldarg_0);
-			yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(Pawn_JobTracker), "pawn"));
-			yield return new CodeInstruction(OpCodes.Ldarg_2);
-			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Pawn_JobTracker_EndJob_Patch), nameof(Pawn_JobTracker_EndJob_Patch.HandleForcedAndSkipQueue)));
-			yield return new CodeInstruction(OpCodes.Brfalse, label);
-			yield return new CodeInstruction(OpCodes.Ret);
-
-			var instr = instructions.ToList();
-			instr[0].labels.Add(label);
-			foreach (var inst in instr)
-				yield return inst;
+			return true;
 		}
 	}
 	//
@@ -260,14 +242,14 @@ namespace AchtungMod
 		public static readonly Texture2D ForceRadiusShrink = ContentFinder<Texture2D>.Get("ForceRadiusShrink", true);
 		public static readonly Texture2D ForceRadiusShrinkOff = ContentFinder<Texture2D>.Get("ForceRadiusShrinkOff", true);
 
-		static IEnumerable<Gizmo> AddForceGizmo(IEnumerable<Gizmo> gizmos, Pawn pawn)
+		static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> gizmos, Pawn ___pawn)
 		{
 			var gizmoList = gizmos.ToList();
 			foreach (var gizmo in gizmos)
 				yield return gizmo;
 
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
-			var forcedJob = forcedWork.GetForcedJob(pawn);
+			var forcedJob = forcedWork.GetForcedJob(___pawn);
 			if (forcedJob == null)
 				yield break;
 
@@ -281,7 +263,7 @@ namespace AchtungMod
 				activateSound = SoundDefOf.DesignateAreaAdd,
 				action = delegate
 				{
-					forcedJob = forcedWork.GetForcedJob(pawn);
+					forcedJob = forcedWork.GetForcedJob(___pawn);
 					forcedJob?.ChangeCellRadius(1);
 				}
 			};
@@ -294,25 +276,11 @@ namespace AchtungMod
 				activateSound = radius > 0 ? SoundDefOf.DesignateAreaAdd : SoundDefOf.DesignateFailed,
 				action = delegate
 				{
-					forcedJob = forcedWork.GetForcedJob(pawn);
+					forcedJob = forcedWork.GetForcedJob(___pawn);
 					if (forcedJob != null && forcedJob.cellRadius > 0)
 						forcedJob.ChangeCellRadius(-1);
 				}
 			};
-		}
-
-		static IEnumerable<CodeInstruction> Transpiler(ILGenerator generator, IEnumerable<CodeInstruction> instructions)
-		{
-			foreach (var instruction in instructions)
-			{
-				if (instruction.opcode == OpCodes.Ret)
-				{
-					yield return new CodeInstruction(OpCodes.Ldarg_0);
-					yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(PriorityWork), "pawn"));
-					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PriorityWork_GetGizmos_Patch), "AddForceGizmo"));
-				}
-				yield return instruction;
-			}
 		}
 	}
 
@@ -322,32 +290,11 @@ namespace AchtungMod
 	[HarmonyPatch("ShouldStartJobFromThinkTree")]
 	static class Pawn_JobTracker_ShouldStartJobFromThinkTree_Patch
 	{
-		static bool OverwriteResult(bool result, Pawn pawn)
+		static void Postfix(Pawn ___pawn, ref bool __result)
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
-			if (result && forcedWork.HasForcedJob(pawn))
-				result = false;
-			return result;
-		}
-
-		static IEnumerable<CodeInstruction> Transpiler(ILGenerator generator, IEnumerable<CodeInstruction> instructions)
-		{
-			var endLabel = generator.DefineLabel();
-
-			foreach (var instruction in instructions)
-			{
-				if (instruction.opcode == OpCodes.Ret)
-				{
-					instruction.opcode = OpCodes.Br;
-					instruction.operand = endLabel;
-				}
-				yield return instruction;
-			}
-
-			yield return new CodeInstruction(OpCodes.Ldarg_0) { labels = new List<Label>() { endLabel } };
-			yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(Pawn_JobTracker), "pawn"));
-			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Pawn_JobTracker_ShouldStartJobFromThinkTree_Patch), "OverwriteResult"));
-			yield return new CodeInstruction(OpCodes.Ret);
+			if (__result && forcedWork.HasForcedJob(___pawn))
+				__result = false;
 		}
 	}
 
