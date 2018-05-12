@@ -20,7 +20,7 @@ namespace AchtungMod
 		{
 			Controller.GetInstance().InstallDefs();
 
-			HarmonyInstance.DEBUG = true;
+			// HarmonyInstance.DEBUG = true;
 			var harmony = HarmonyInstance.Create("net.pardeike.rimworld.mods.achtung");
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
 
@@ -75,12 +75,9 @@ namespace AchtungMod
 	{
 		static bool Prefix(Pawn p, Thing t, bool forced, ref bool __result)
 		{
-			Log.Warning("PawnCanAutomaticallyHaulFast: " + p.NameStringShort + " forced =" + forced);
-			if (forced)
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			if (forced || forcedWork.HasForcedJob(p))
 			{
-				var job = HaulAIUtility.HaulToStorageJob(p, t);
-				Log.Warning("job=" + job);
-
 				__result = true;
 				return false;
 			}
@@ -114,13 +111,52 @@ namespace AchtungMod
 		}
 	}
 
+	[HarmonyPatch(typeof(ReservationManager))]
+	[HarmonyPatch("CanReserve")]
+	static class ReservationUtility_CanReserve_Patch
+	{
+		static bool Prefix(Pawn claimant, LocalTargetInfo target, bool ignoreOtherReservations, ref bool __result)
+		{
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			if (forcedWork.HasForcedJob(claimant))
+			{
+				__result = true;
+				return false;
+			}
+			return true;
+		}
+	}
+
+	[HarmonyPatch(typeof(ForbidUtility))]
+	[HarmonyPatch("IsForbidden")]
+	[HarmonyPatch(new Type[] { typeof(Thing), typeof(Pawn) })]
+	static class ForbidUtility_IsForbidden_Patch
+	{
+		static bool Prefix(Thing t, Pawn pawn, ref bool __result)
+		{
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			if (forcedWork.HasForcedJob(pawn))
+			{
+				__result = false;
+				return false;
+			}
+			return true;
+		}
+	}
+
 	[HarmonyPatch(typeof(FloatMenuMakerMap))]
 	[HarmonyPatch("AddUndraftedOrders")]
 	static class FloatMenuMakerMap_AddUndraftedOrders_Patch
 	{
-		static bool IsForbidden(Thing thing, Pawn pawn)
+		static void Prefix(Pawn pawn, out ForcedWork __state)
 		{
-			return false;
+			__state = Find.World.GetComponent<ForcedWork>();
+			__state.Prepare(pawn);
+		}
+
+		static void Postfix(Pawn pawn, ForcedWork __state)
+		{
+			__state.Unprepare(pawn);
 		}
 
 		static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions)
@@ -130,8 +166,6 @@ namespace AchtungMod
 
 			var c_FloatMenuOption = AccessTools.FirstConstructor(typeof(FloatMenuOption), c => c.GetParameters().Count() > 1);
 			var m_ForcedFloatMenuOption = AccessTools.Method(typeof(ForcedFloatMenuOption), nameof(ForcedFloatMenuOption.CreateForcedMenuItem));
-			var m_IsForbidden = AccessTools.Method(typeof(ForbidUtility), nameof(ForbidUtility.IsForbidden), new Type[] { typeof(Thing), typeof(Pawn) });
-			var m_IsNeverForbidden = AccessTools.Method(typeof(FloatMenuMakerMap_AddUndraftedOrders_Patch), "IsForbidden");
 
 			foreach (var instruction in instructions)
 			{
@@ -155,9 +189,6 @@ namespace AchtungMod
 					yield return new CodeInstruction(OpCodes.Ldarg_0);
 					yield return new CodeInstruction(OpCodes.Ldloc_S, lastLocalVar);
 				}
-
-				if (instruction.operand == m_IsForbidden)
-					instruction.operand = m_IsNeverForbidden;
 
 				yield return instruction;
 			}

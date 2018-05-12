@@ -15,6 +15,8 @@ namespace AchtungMod
 		private List<Pawn> forcedJobsKeysWorkingList;
 		private List<ForcedJobs> forcedJobsValuesWorkingList;
 
+		readonly HashSet<Pawn> preparing = new HashSet<Pawn>();
+
 		public ForcedWork(World world) : base(world)
 		{
 			jobQueue = new Queue<KeyValuePair<Pawn, Job>>();
@@ -63,10 +65,27 @@ namespace AchtungMod
 			return forcedJobs.jobs;
 		}
 
+		public void Prepare(Pawn pawn)
+		{
+			preparing.Add(pawn);
+		}
+
+		public void Unprepare(Pawn pawn)
+		{
+			preparing.Remove(pawn);
+		}
+
 		public bool HasForcedJob(Pawn pawn)
 		{
-			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
+			if (pawn == null)
 				return false;
+
+			if (preparing.Contains(pawn))
+				return true;
+
+			if (allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
+				return false;
+
 			return (forcedJobs.jobs.Count > 0);
 		}
 
@@ -97,6 +116,8 @@ namespace AchtungMod
 
 		public bool AddForcedJob(Pawn pawn, List<WorkGiverDef> workgiverDefs, LocalTargetInfo item)
 		{
+			Unprepare(pawn);
+
 			var forcedJob = new ForcedJob() { pawn = pawn, workgiverDefs = workgiverDefs, isThingJob = item.HasThing };
 			forcedJob.targets.Add(new ForcedTarget(item));
 			forcedJob.UpdateCells();

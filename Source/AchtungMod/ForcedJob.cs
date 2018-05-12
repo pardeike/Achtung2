@@ -322,6 +322,19 @@ namespace AchtungMod
 		public static Job GetThingJob(this Thing thing, Pawn pawn, WorkGiver_Scanner workgiver)
 		{
 			var ignoreRestrictions = ((workgiver as WorkGiver_Haul) != null || (workgiver as WorkGiver_Repair) != null);
+			ignoreRestrictions |= (
+				(workgiver as WorkGiver_ConstructAffectFloor) != null
+				|| (workgiver as WorkGiver_ConstructDeliverResources) != null
+				|| (workgiver as WorkGiver_ConstructFinishFrames) != null
+				|| (workgiver as WorkGiver_Flick) != null
+				|| (workgiver as WorkGiver_Miner) != null
+				|| (workgiver as WorkGiver_RearmTraps) != null
+				|| (workgiver as WorkGiver_Refuel) != null
+				|| (workgiver as WorkGiver_RemoveRoof) != null
+				|| (workgiver as WorkGiver_Strip) != null
+				|| (workgiver as WorkGiver_TakeToBed) != null
+				|| (workgiver as WorkGiver_RemoveBuilding) != null
+			);
 
 			if (workgiver.PotentialWorkThingRequest.Accepts(thing) || (workgiver.PotentialWorkThingsGlobal(pawn) != null && workgiver.PotentialWorkThingsGlobal(pawn).Contains(thing)))
 				if (workgiver.MissingRequiredCapacity(pawn) == null)

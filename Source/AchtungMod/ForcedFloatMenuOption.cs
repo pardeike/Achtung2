@@ -136,6 +136,8 @@ namespace AchtungMod
 		public virtual bool ForceAction()
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			forcedWork.Prepare(forcePawn);
+
 			var workgiverDefs = forcedWork.GetCombinedDefs(forceWorkgiver);
 			foreach (var workgiverDef in workgiverDefs)
 			{
@@ -151,13 +153,16 @@ namespace AchtungMod
 					var success = job == null ? false : forcePawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, forceCell);
 					if (success == false)
 					{
-						Log.Error("Cannot execute job at " + forceCell + " with " + workgiverDef + " even if HasJobItem returned " + item);
+						Log.Error("Cannot execute job with " + forcePawn.NameStringShort + " at " + forceCell + " with " + workgiverDef + " even if HasJobItem returned " + item);
+						forcedWork.Prepare(forcePawn);
 						continue;
 					}
 				}
 				return true;
 			}
-			Log.Error("Cannot find job at " + forceCell + " with " + string.Join(",", workgiverDefs.Select(def => def.ToString()).ToArray()));
+
+			forcedWork.Unprepare(forcePawn);
+			Log.Error("Cannot find job for " + forcePawn.NameStringShort + " at " + forceCell + " with " + string.Join(",", workgiverDefs.Select(def => def.ToString()).ToArray()));
 			return false;
 		}
 	}
