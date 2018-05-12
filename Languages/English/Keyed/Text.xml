@@ -47,7 +47,7 @@ The formation can be rotated using Q and E</AchtungModifierExplained>
 	<HealthLevelOptionInPainShock>In pain shock</HealthLevelOptionInPainShock>
 
 	<JobInterruptedLabel>Cancelled: {0}</JobInterruptedLabel>
-	<JobInterruptedBreakdown>{0} is facing an imminent breakdown</JobInterruptedBreakdown>
+	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} is in bad shape</JobInterruptedBadHealth>
 
 	<CleanRoomLabel>Clean this room</CleanRoomLabel>

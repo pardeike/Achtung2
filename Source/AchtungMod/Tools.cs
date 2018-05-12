@@ -62,37 +62,37 @@ namespace AchtungMod
 		public static void Debug(Thing thing, string text) { }
 #endif
 
-		public static Func<bool> GetPawnBreakLevel(Pawn pawn)
+		public static string PawnOverBreakLevel(Pawn pawn)
 		{
 			var mb = pawn.mindState.mentalBreaker;
 			switch (Achtung.Settings.breakLevel)
 			{
 				case BreakLevel.Minor:
-					return () => mb.BreakMinorIsImminent;
+					return mb.BreakMinorIsImminent ? "BreakRiskMinor".Translate() : null;
 				case BreakLevel.Major:
-					return () => mb.BreakMajorIsImminent;
+					return mb.BreakMajorIsImminent ? "BreakRiskMajor".Translate() : null;
 				case BreakLevel.AlmostExtreme:
-					return () => mb.BreakExtremeIsApproaching;
+					return mb.BreakExtremeIsApproaching ? "BreakRiskExtreme".Translate() : null;
 				case BreakLevel.Extreme:
-					return () => mb.BreakExtremeIsImminent;
+					return mb.BreakExtremeIsImminent ? "BreakRiskExtreme".Translate() : null;
 			}
-			return () => false;
+			return null;
 		}
 
-		public static Func<bool> GetPawnHealthLevel(Pawn pawn)
+		public static bool PawnOverHealthLevel(Pawn pawn)
 		{
 			switch (Achtung.Settings.healthLevel)
 			{
 				case HealthLevel.ShouldBeTendedNow:
-					return () => HealthAIUtility.ShouldBeTendedNow(pawn) || HealthAIUtility.ShouldHaveSurgeryDoneNow(pawn);
+					return HealthAIUtility.ShouldBeTendedNow(pawn) || HealthAIUtility.ShouldHaveSurgeryDoneNow(pawn);
 				case HealthLevel.PrefersMedicalRest:
-					return () => HealthAIUtility.ShouldSeekMedicalRest(pawn);
+					return HealthAIUtility.ShouldSeekMedicalRest(pawn);
 				case HealthLevel.NeedsMedicalRest:
-					return () => HealthAIUtility.ShouldSeekMedicalRestUrgent(pawn);
+					return HealthAIUtility.ShouldSeekMedicalRestUrgent(pawn);
 				case HealthLevel.InPainShock:
-					return () => pawn.health.InPainShock;
+					return pawn.health.InPainShock;
 			}
-			return () => false;
+			return false;
 		}
 
 		public static Pawn GetColonist(this Pawn_JobTracker tracker)

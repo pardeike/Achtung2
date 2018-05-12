@@ -146,17 +146,18 @@ namespace AchtungMod
 				return;
 			}
 
-			if (Tools.GetPawnBreakLevel(pawn)())
+			var breakNote = Tools.PawnOverBreakLevel(pawn);
+			if (breakNote != null)
 			{
 				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
 				EndJobWith(JobCondition.Incompletable);
 				var jobName = (GetPrefix() + "Label").Translate();
 				var label = "JobInterruptedLabel".Translate(jobName);
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(pawn.NameStringShort), LetterDefOf.NegativeEvent, pawn));
+				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(pawn.NameStringShort, breakNote), LetterDefOf.NegativeEvent, pawn));
 				return;
 			}
 
-			if (Tools.GetPawnHealthLevel(pawn)())
+			if (Tools.PawnOverHealthLevel(pawn))
 			{
 				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
 				EndJobWith(JobCondition.Incompletable);

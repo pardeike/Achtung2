@@ -141,28 +141,6 @@ namespace AchtungMod
 
 			pawn.ClearReservationsForJob(lastJob);
 
-			if (Tools.GetPawnBreakLevel(pawn)())
-			{
-				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
-				var jobName = lastJob.GetReport(pawn).CapitalizeFirst();
-				var label = "JobInterruptedLabel".Translate(jobName);
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(pawn.NameStringShort), LetterDefOf.NegativeEvent, pawn));
-
-				forcedWork.Remove(pawn);
-				return false;
-			}
-
-			if (Tools.GetPawnHealthLevel(pawn)())
-			{
-				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
-				var jobName = lastJob.GetReport(pawn).CapitalizeFirst();
-				var label = "JobInterruptedLabel".Translate(jobName);
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBadHealth".Translate(pawn.NameStringShort), LetterDefOf.NegativeEvent, pawn));
-
-				forcedWork.Remove(pawn);
-				return false;
-			}
-
 			while (true)
 			{
 				forcedJob.UpdateCells();
