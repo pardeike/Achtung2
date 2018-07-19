@@ -97,11 +97,22 @@ namespace AchtungMod
 
 			var f_NotInHomeAreaTrans = AccessTools.Field(typeof(WorkGiver_FixBrokenDownBuilding), "NotInHomeAreaTrans");
 			var i = instr.FirstIndexOf(inst => inst.opcode == OpCodes.Ldsfld && inst.operand == f_NotInHomeAreaTrans);
-			if (i > 0 && instr[i - 1].opcode == OpCodes.Brtrue)
+			if (i > 0)
 			{
-				var label = instr[i - 1].operand;
-				instr.Insert(i++, new CodeInstruction(OpCodes.Ldarg_3));
-				instr.Insert(i++, new CodeInstruction(OpCodes.Brtrue, label));
+				object label = null;
+				for (var j = i - 1; j >= 0; j--)
+					if (instr[j].opcode == OpCodes.Brtrue)
+					{
+						label = instr[j].operand;
+						break;
+					}
+				if (label != null)
+				{
+					instr.Insert(i++, new CodeInstruction(OpCodes.Ldarg_3));
+					instr.Insert(i++, new CodeInstruction(OpCodes.Brtrue, label));
+				}
+				else
+					Log.Error("Cannot find Brtrue before NotInHomeAreaTrans");
 			}
 			else
 				Log.Error("Cannot find ldsfld RimWorld.WorkGiver_FixBrokenDownBuilding::NotInHomeAreaTrans");
@@ -145,8 +156,8 @@ namespace AchtungMod
 	}
 
 	[HarmonyPatch(typeof(FloatMenuMakerMap))]
-	[HarmonyPatch("AddUndraftedOrders")]
-	static class FloatMenuMakerMap_AddUndraftedOrders_Patch
+	[HarmonyPatch("AddJobGiverWorkOrders")]
+	static class FloatMenuMakerMap_AddJobGiverWorkOrders_Patch
 	{
 		static void Prefix(Pawn pawn, out ForcedWork __state)
 		{
@@ -161,37 +172,44 @@ namespace AchtungMod
 
 		static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions)
 		{
-			object lastLocalVar = null;
-			var nextIsVar = false;
-
 			var c_FloatMenuOption = AccessTools.FirstConstructor(typeof(FloatMenuOption), c => c.GetParameters().Count() > 1);
 			var m_ForcedFloatMenuOption = AccessTools.Method(typeof(ForcedFloatMenuOption), nameof(ForcedFloatMenuOption.CreateForcedMenuItem));
 
-			foreach (var instruction in instructions)
-			{
-				if (instruction.opcode == OpCodes.Isinst && instruction.operand == typeof(WorkGiver_Scanner))
-				{
-					yield return instruction;
-					nextIsVar = true;
-					continue;
-				}
-				if (nextIsVar)
-				{
-					lastLocalVar = instruction.operand;
-					nextIsVar = false;
-				}
+			var list = instructions.ToList();
 
-				if (instruction.opcode == OpCodes.Newobj && instruction.operand == c_FloatMenuOption && lastLocalVar != null)
+			var foundCount = 0;
+			Enumerable.Range(0, list.Count)
+				.DoIf(i => list[i].opcode == OpCodes.Isinst && list[i].operand == typeof(WorkGiver_Scanner), i =>
 				{
-					instruction.opcode = OpCodes.Call;
-					instruction.operand = m_ForcedFloatMenuOption;
-					yield return new CodeInstruction(OpCodes.Ldarg_1);
-					yield return new CodeInstruction(OpCodes.Ldarg_0);
-					yield return new CodeInstruction(OpCodes.Ldloc_S, lastLocalVar);
-				}
+					var index = i + 1;
+					if (list[index].opcode == OpCodes.Stloc_S)
+					{
+						var localVar = list[index].operand;
 
+						index = list.FindIndex(index, code => code.opcode == OpCodes.Newobj && code.operand == c_FloatMenuOption);
+						if (index < 0)
+							Log.Error("Cannot find 'Isinst WorkGiver_Scanner' in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
+						else
+						{
+							list[index].opcode = OpCodes.Call;
+							list[index].operand = m_ForcedFloatMenuOption;
+							list.InsertRange(index, new CodeInstruction[]
+							{
+								new CodeInstruction(OpCodes.Ldarg_1),
+								new CodeInstruction(OpCodes.Ldarg_0),
+								new CodeInstruction(OpCodes.Ldloc_S, localVar)
+							});
+
+							foundCount++;
+						}
+					}
+				});
+
+			if (foundCount != 2)
+				Log.Error("Cannot find 2x 'Isinst WorkGiver_Scanner', 'Stloc_S n' -> 'Newobj FloatMenuOption()' in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
+
+			foreach (var instruction in list)
 				yield return instruction;
-			}
 		}
 	}
 	//
@@ -272,7 +290,7 @@ namespace AchtungMod
 				___pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(___pawn);
 				var jobName = ___pawn.jobs.curJob.GetReport(___pawn).CapitalizeFirst();
 				var label = "JobInterruptedLabel".Translate(jobName);
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(___pawn.NameStringShort, breakNote), LetterDefOf.NegativeEvent, ___pawn));
+				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(___pawn.Name.ToStringShort, breakNote), LetterDefOf.NegativeEvent, ___pawn));
 
 				forcedWork.Remove(___pawn);
 				___pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, true);
@@ -284,7 +302,7 @@ namespace AchtungMod
 				___pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(___pawn);
 				var jobName = ___pawn.jobs.curJob.GetReport(___pawn).CapitalizeFirst();
 				var label = "JobInterruptedLabel".Translate(jobName);
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBadHealth".Translate(___pawn.NameStringShort), LetterDefOf.NegativeEvent, ___pawn));
+				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBadHealth".Translate(___pawn.Name.ToStringShort), LetterDefOf.NegativeEvent, ___pawn));
 
 				forcedWork.Remove(___pawn);
 				___pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, true);
@@ -331,7 +349,7 @@ namespace AchtungMod
 				defaultLabel = "IncreaseForceRadius".Translate(),
 				defaultDesc = "IncreaseForceRadiusDesc".Translate(radius),
 				icon = ForceRadiusExpand,
-				activateSound = SoundDefOf.DesignateAreaAdd,
+				activateSound = SoundDefOf.Designate_AreaAdd,
 				action = delegate
 				{
 					forcedJob = forcedWork.GetForcedJob(___pawn);
@@ -344,7 +362,7 @@ namespace AchtungMod
 				defaultLabel = "DecreaseForceRadius".Translate(),
 				defaultDesc = "DecreaseForceRadiusDesc".Translate(radius),
 				icon = radius > 0 ? ForceRadiusShrink : ForceRadiusShrinkOff,
-				activateSound = radius > 0 ? SoundDefOf.DesignateAreaAdd : SoundDefOf.DesignateFailed,
+				activateSound = radius > 0 ? SoundDefOf.Designate_AreaAdd : SoundDefOf.Designate_Failed,
 				action = delegate
 				{
 					forcedJob = forcedWork.GetForcedJob(___pawn);
@@ -413,8 +431,8 @@ namespace AchtungMod
 	{
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
-			var fromMethod = AccessTools.Method(typeof(Log), "Error", new Type[] { typeof(string) });
-			var toMethod = AccessTools.Method(typeof(Log), "Warning", new Type[] { typeof(string) });
+			var fromMethod = AccessTools.Method(typeof(Log), "Error", new Type[] { typeof(string), typeof(bool) });
+			var toMethod = AccessTools.Method(typeof(Log), "Warning", new Type[] { typeof(string), typeof(bool) });
 			return instructions.MethodReplacer(fromMethod, toMethod);
 		}
 	}

@@ -103,7 +103,14 @@ namespace AchtungMod
 			var extraPartOnGUI = AllEqual(options, o => o.extraPartOnGUI?.Method, o => o.extraPartOnGUI, null);
 			var revalidateWorldClickTarget = AllEqual(options, o => o.revalidateWorldClickTarget, o => o.revalidateWorldClickTarget, null);
 
-			var option = new FloatMenuOption(priority);
+			var option = new FloatMenuOption(title, delegate
+			{
+				actions.Do(multiAction =>
+				{
+					var colonistAction = multiAction.GetAction();
+					colonistAction();
+				});
+			}, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget);
 
 			// support for our special force menu options. we need to call all internal
 			// subactions from when the extra buttons calls them
@@ -111,14 +118,13 @@ namespace AchtungMod
 			var forcedOptions = options.OfType<ForcedFloatMenuOption>().ToList();
 			if (extraPartOnGUI != null && forcedOptions.Count > 0)
 			{
-				option = new ForcedMultiFloatMenuOption
+				option = new ForcedMultiFloatMenuOption(title)
 				{
 					options = options.OfType<ForcedFloatMenuOption>().ToList(),
 				};
 				option.extraPartOnGUI = drawRect => ((ForcedMultiFloatMenuOption)option).RenderExtraPartOnGui(drawRect);
 			}
 
-			option.Label = title;
 			option.action = delegate
 			{
 				actions.Do(multiAction =>

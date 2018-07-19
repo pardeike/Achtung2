@@ -52,8 +52,8 @@ namespace AchtungMod
 
 		private bool CanSowHere(IntVec3 cell, ThingDef def, bool fastMode)
 		{
-			if (GenPlant.GrowthSeasonNow(cell, pawn.Map) == false) return false;
-			if (GenPlant.AdjacentSowBlocker(def, cell, pawn.Map) != null) return false;
+			if (PlantUtility.GrowthSeasonNow(cell, pawn.Map) == false) return false;
+			if (PlantUtility.AdjacentSowBlocker(def, cell, pawn.Map) != null) return false;
 			if (def.CanEverPlantAt(cell, pawn.Map) == false) return false;
 			if (fastMode == false && pawn.CanReach(cell, PathEndMode.Touch, pawn.NormalMaxDanger()) == false) return false;
 			if (fastMode == false && pawn.CanReserve(cell, 1) == false) return false;
@@ -89,7 +89,7 @@ namespace AchtungMod
 						 var def1 = grower.GetPlantDefToGrow();
 						 if (def1 == null) return false;
 
-						 var growSkills1 = thePawn.skills.GetSkill(SkillDefOf.Growing).Level;
+						 var growSkills1 = thePawn.skills.GetSkill(SkillDefOf.Plants).Level;
 						 return (def1.plant.sowMinSkill <= 0 || growSkills1 >= def1.plant.sowMinSkill);
 					 })
 					 .Cast<IPlantToGrowSettable>()
@@ -112,7 +112,7 @@ namespace AchtungMod
 							var def2 = zone.GetPlantDefToGrow();
 							if (def2 != null)
 							{
-								var growSkills2 = thePawn.skills.GetSkill(SkillDefOf.Growing).Level;
+								var growSkills2 = thePawn.skills.GetSkill(SkillDefOf.Plants).Level;
 								if (def2.plant.sowMinSkill <= 0 || growSkills2 >= def2.plant.sowMinSkill)
 								{
 									zone.cells
@@ -136,7 +136,7 @@ namespace AchtungMod
 			var def3 = outdoorZone.GetPlantDefToGrow();
 			if (def3 == null) return null;
 
-			var growSkills3 = thePawn.skills.GetSkill(SkillDefOf.Growing).Level;
+			var growSkills3 = thePawn.skills.GetSkill(SkillDefOf.Plants).Level;
 			if (def3.plant.sowMinSkill > 0 && growSkills3 < def3.plant.sowMinSkill) return null;
 
 			return outdoorZone.Cells
@@ -176,7 +176,7 @@ namespace AchtungMod
 
 		public bool Harvest(Plant plant)
 		{
-			pawn.skills?.Learn(SkillDefOf.Growing, xpPerTick);
+			pawn.skills?.Learn(SkillDefOf.Plants, xpPerTick);
 
 			var workSpeed = pawn.GetStatValue(StatDefOf.PlantWorkSpeed, true);
 			subCounter += workSpeed;
@@ -235,7 +235,7 @@ namespace AchtungMod
 				plant.sown = true;
 			}
 
-			pawn.skills?.Learn(SkillDefOf.Growing, xpPerTick, false);
+			pawn.skills?.Learn(SkillDefOf.Plants, xpPerTick, false);
 
 			var workSpeed = pawn.GetStatValue(StatDefOf.PlantWorkSpeed, true);
 			subCounter += workSpeed;
@@ -245,9 +245,6 @@ namespace AchtungMod
 				plant.Growth = 0.05f;
 				pawn.Map.mapDrawer.MapMeshDirty(plant.Position, MapMeshFlag.Things);
 				pawn.records.Increment(RecordDefOf.PlantsSown);
-
-				if (pawn.story.traits.HasTrait(TraitDefOf.GreenThumb))
-					pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.GreenThumbHappy, null);
 
 				return true;
 			}

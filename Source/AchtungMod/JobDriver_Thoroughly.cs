@@ -153,7 +153,7 @@ namespace AchtungMod
 				EndJobWith(JobCondition.Incompletable);
 				var jobName = (GetPrefix() + "Label").Translate();
 				var label = "JobInterruptedLabel".Translate(jobName);
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(pawn.NameStringShort, breakNote), LetterDefOf.NegativeEvent, pawn));
+				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(pawn.Name.ToStringShort, breakNote), LetterDefOf.NegativeEvent, pawn));
 				return;
 			}
 
@@ -162,7 +162,7 @@ namespace AchtungMod
 				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
 				EndJobWith(JobCondition.Incompletable);
 				var jobName = (GetPrefix() + "Label").Translate();
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter("JobInterruptedLabel".Translate(jobName), "JobInterruptedBadHealth".Translate(pawn.NameStringShort), LetterDefOf.NegativeEvent, pawn));
+				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter("JobInterruptedLabel".Translate(jobName), "JobInterruptedBadHealth".Translate(pawn.Name.ToStringShort), LetterDefOf.NegativeEvent, pawn));
 				return;
 			}
 		}

@@ -84,7 +84,7 @@ namespace AchtungMod
 			switch (Achtung.Settings.healthLevel)
 			{
 				case HealthLevel.ShouldBeTendedNow:
-					return HealthAIUtility.ShouldBeTendedNow(pawn) || HealthAIUtility.ShouldHaveSurgeryDoneNow(pawn);
+					return HealthAIUtility.ShouldBeTendedNowByPlayer(pawn) || HealthAIUtility.ShouldHaveSurgeryDoneNow(pawn);
 				case HealthLevel.PrefersMedicalRest:
 					return HealthAIUtility.ShouldSeekMedicalRest(pawn);
 				case HealthLevel.NeedsMedicalRest:

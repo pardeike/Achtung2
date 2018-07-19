@@ -74,7 +74,7 @@ namespace AchtungMod
 			achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
 
 			var forceMenu = Tools.IsModKeyPressed(Achtung.Settings.forceCommandMenuKey);
-			var thingsClicked = Find.VisibleMap.thingGrid.ThingsListAt(IntVec3.FromVector3(pos));
+			var thingsClicked = Find.CurrentMap.thingGrid.ThingsListAt(IntVec3.FromVector3(pos));
 			var pawnClicked = thingsClicked.OfType<Pawn>().Any();
 			var weaponClicked = thingsClicked.Any(thing => thing.def.IsWeapon);
 			var medicineClicked = thingsClicked.Any(thing => thing.def.IsMedicine);
@@ -85,7 +85,7 @@ namespace AchtungMod
 			{
 				var allHaveWeapons = colonists.All(colonist =>
 				{
-					var rangedVerb = colonist.pawn.TryGetAttackVerb(false);
+					var rangedVerb = colonist.pawn.TryGetAttackVerb(null, false);
 					return rangedVerb != null && rangedVerb.verbProps.range > 0;
 				});
 				if (allHaveWeapons)
@@ -276,7 +276,7 @@ namespace AchtungMod
 		private void DrawForcedJobs()
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
-			forcedWork.ForcedJobsForMap(Find.VisibleMap)
+			forcedWork.ForcedJobsForMap(Find.CurrentMap)
 				.SelectMany(forcedJob =>
 				{
 					if (forcedJob.isThingJob)
@@ -290,7 +290,7 @@ namespace AchtungMod
 
 		private void DrawReservations()
 		{
-			Find.VisibleMap?.reservationManager?
+			Find.CurrentMap?.reservationManager?
 				.AllReservedThings()?
 				.Where(t => t != null)
 				.Do(thing => Tools.DebugPosition(thing.Position.ToVector3(), new Color(1f, 0f, 0f, 0.2f)));

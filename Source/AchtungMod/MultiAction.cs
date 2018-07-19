@@ -31,7 +31,7 @@ namespace AchtungMod
 			if (colonists != null)
 			{
 				var names = colonists.ToArray();
-				suffix = (names.Length == 1) ? " (" + names[0].pawn.NameStringShort + ")" : " (" + names.Length + "x)";
+				suffix = (names.Length == 1) ? " (" + names[0].pawn.Name.ToStringShort + ")" : " (" + names.Length + "x)";
 			}
 			return option.Label + suffix;
 		}

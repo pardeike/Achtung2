@@ -12,6 +12,8 @@ namespace AchtungMod
 	{
 		public List<ForcedFloatMenuOption> options;
 
+		public ForcedMultiFloatMenuOption(string label) : base(label, null, MenuOptionPriority.Default, null, null, 0f, null, null) { }
+
 		public override bool ForceAction()
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
@@ -60,41 +62,49 @@ namespace AchtungMod
 		public IntVec3 forceCell;
 		public WorkGiver_Scanner forceWorkgiver;
 
-		public static string ForcedLabelText => Translator.CanTranslate("ForceMenuButtonText") ? "ForceMenuButtonText".Translate() : " ! ";
-		public static float beforeButtonSpace = 10f;
-		public static float padding = 11f;
+		public static string ForcedLabelText = Translator.CanTranslate("ForceMenuButtonText") ? "ForceMenuButtonText".Translate() : " ! ";
+		public static float buttonSpace = 10f;
+		public static float _buttonWidth = 0f;
+		public static float ButtonWidth
+		{
+			get
+			{
+				if (_buttonWidth == 0f)
+				{
+					Text.Font = GameFont.Tiny;
+					var size = Text.CalcSize(ForcedLabelText);
+					const float padding = 11f;
+					_buttonWidth = size.x + 2f * padding;
+				}
+				return _buttonWidth;
+			}
+		}
 
-		public static FloatMenuOption CreateForcedMenuItem(string label, Action action, MenuOptionPriority priority, Action mouseoverGuiAction, Thing revalidateClickTarget, float extraPartWidth, Func<Rect, bool> extraPartOnGUI, WorldObject revalidateWorldClickTarget, Pawn pawn, Vector3 clickPos, WorkGiver_Scanner workgiver)
+		public static FloatMenuOption CreateForcedMenuItem(string label, Action action, MenuOptionPriority priority, Action mouseoverGuiAction, Thing revalidateClickTarget, float extraPartWidth, Func<Rect, bool> extraPartOnGUI, WorldObject revalidateWorldClickTarget, Pawn pawn, IntVec3 clickCell, WorkGiver_Scanner workgiver)
 		{
 			if (action == null)
 				return new FloatMenuOption(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget);
 
-			Text.Font = GameFont.Tiny;
-			var size = Text.CalcSize(ForcedLabelText);
-			var buttonWidth = size.x + 2f * padding;
+			var option = new ForcedFloatMenuOption(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget) { };
+			option.forcePawn = pawn;
+			option.forceCell = clickCell;
+			option.forceWorkgiver = workgiver;
+			option.extraPartOnGUI = extraPartRect => option.RenderExtraPartOnGui(extraPartRect);
 
-			var option = new ForcedFloatMenuOption(label, action, priority, mouseoverGuiAction, revalidateClickTarget, beforeButtonSpace + buttonWidth, null, revalidateWorldClickTarget)
-			{
-				forcePawn = pawn,
-				forceCell = IntVec3.FromVector3(clickPos),
-				forceWorkgiver = workgiver,
-				extraPartOnGUI = null // needs to be set below
-			};
-			option.extraPartOnGUI = drawRect => option.RenderExtraPartOnGui(drawRect);
 			return option;
 		}
 
-		public ForcedFloatMenuOption()
-		{
-		}
-
 		public ForcedFloatMenuOption(string label, Action action, MenuOptionPriority priority, Action mouseoverGuiAction, Thing revalidateClickTarget, float extraPartWidth, Func<Rect, bool> extraPartOnGUI, WorldObject revalidateWorldClickTarget)
-			: base(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget) { }
+			: base(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget)
+		{
+			// somehow necessary or else 'extraPartWidth' will be 0
+			base.extraPartWidth = buttonSpace + ButtonWidth;
+		}
 
 		public bool RenderExtraPartOnGui(Rect drawRect)
 		{
 			var rect = drawRect;
-			rect.xMin += beforeButtonSpace;
+			rect.xMin += buttonSpace;
 
 			var highlight = Mouse.IsOver(rect);
 			var b_left = highlight ? L_Selected : L_Normal;
@@ -153,7 +163,7 @@ namespace AchtungMod
 					var success = job == null ? false : forcePawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, forceCell);
 					if (success == false)
 					{
-						Log.Error("Cannot execute job with " + forcePawn.NameStringShort + " at " + forceCell + " with " + workgiverDef + " even if HasJobItem returned " + item);
+						Log.Error("Cannot execute job with " + forcePawn.Name.ToStringShort + " at " + forceCell + " with " + workgiverDef + " even if HasJobItem returned " + item);
 						forcedWork.Prepare(forcePawn);
 						continue;
 					}
@@ -162,7 +172,7 @@ namespace AchtungMod
 			}
 
 			forcedWork.Unprepare(forcePawn);
-			Log.Error("Cannot find job for " + forcePawn.NameStringShort + " at " + forceCell + " with " + string.Join(",", workgiverDefs.Select(def => def.ToString()).ToArray()));
+			Log.Error("Cannot find job for " + forcePawn.Name.ToStringShort + " at " + forceCell + " with " + string.Join(",", workgiverDefs.Select(def => def.ToString()).ToArray()));
 			return false;
 		}
 	}

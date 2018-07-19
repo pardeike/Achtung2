@@ -53,7 +53,7 @@ namespace AchtungMod
 		{
 			{ ThingDefOf.PowerConduit, 1000 },
 			{ ThingDefOf.Sandbags, 200 },
-			{ ThingDefOf.TurretGun, 150 },
+			{ ThingDefOf.Turret_MiniTurret, 150 },
 			{ ThingDefOf.Wall, 100 },
 			{ ThingDefOf.Door, 50 },
 			{ ThingDefOf.TrapDeadfall, 20 },
@@ -67,6 +67,7 @@ namespace AchtungMod
 			{ ThingDefOf.Cooler, 2 },
 			{ ThingDefOf.Heater, 2 },
 			{ ThingDefOf.PassiveCooler, 2 },
+			{ ThingDefOf.Turret_Mortar, 2 },
 			{ ThingDefOf.StandingLamp, 1 },
 			{ ThingDefOf.TorchLamp, 1 },
 		};
