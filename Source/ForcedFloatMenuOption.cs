@@ -51,12 +51,12 @@ namespace AchtungMod
 	[StaticConstructorOnStartup]
 	public class ForcedFloatMenuOption : FloatMenuOption
 	{
-		public static readonly Texture2D L_Normal = ContentFinder<Texture2D>.Get("ForceButton-L0", true);
-		public static readonly Texture2D M_Normal = ContentFinder<Texture2D>.Get("ForceButton-M0", true);
-		public static readonly Texture2D R_Normal = ContentFinder<Texture2D>.Get("ForceButton-R0", true);
-		public static readonly Texture2D L_Selected = ContentFinder<Texture2D>.Get("ForceButton-L1", true);
-		public static readonly Texture2D M_Selected = ContentFinder<Texture2D>.Get("ForceButton-M1", true);
-		public static readonly Texture2D R_Selected = ContentFinder<Texture2D>.Get("ForceButton-R1", true);
+		public static readonly Texture2D L_Normal = ContentFinder<Texture2D>.Get("ForceButton0L", true);
+		public static readonly Texture2D M_Normal = ContentFinder<Texture2D>.Get("ForceButton0M", true);
+		public static readonly Texture2D R_Normal = ContentFinder<Texture2D>.Get("ForceButton0R", true);
+		public static readonly Texture2D L_Selected = ContentFinder<Texture2D>.Get("ForceButton1L", true);
+		public static readonly Texture2D M_Selected = ContentFinder<Texture2D>.Get("ForceButton1M", true);
+		public static readonly Texture2D R_Selected = ContentFinder<Texture2D>.Get("ForceButton1R", true);
 
 		public Pawn forcePawn;
 		public IntVec3 forceCell;
@@ -101,30 +101,34 @@ namespace AchtungMod
 			base.extraPartWidth = buttonSpace + ButtonWidth;
 		}
 
+
+
 		public bool RenderExtraPartOnGui(Rect drawRect)
 		{
 			var rect = drawRect;
 			rect.xMin += buttonSpace;
+			rect = new Rect(Mathf.Round(rect.x), Mathf.Round(rect.y), Mathf.Round(rect.width), Mathf.Round(rect.height));
 
 			var highlight = Mouse.IsOver(rect);
 			var b_left = highlight ? L_Selected : L_Normal;
 			var b_middle = highlight ? M_Selected : M_Normal;
 			var b_right = highlight ? R_Selected : R_Normal;
 
-			var r = rect;
-			r.height = b_middle.height;
-			r.y += (rect.height - r.height) / 2f;
+			var yPlus = Mathf.Round((rect.height - b_left.height / 2f) / 2f);
+			var buttonRect = rect;
+			buttonRect.y += yPlus;
+			buttonRect.height -= 2f * yPlus;
 
-			r.width = b_left.width;
-			GUI.DrawTexture(r, b_left);
-			r.x += r.width;
+			buttonRect.width = Mathf.Round(b_left.width / 2f);
+			GUI.DrawTexture(buttonRect, b_left);
+			buttonRect.x += buttonRect.width;
 
-			r.width = rect.width - b_left.width - b_right.width;
-			GUI.DrawTexture(r, b_middle, ScaleMode.StretchToFill);
-			r.x += r.width;
+			buttonRect.width = rect.width - Mathf.Round(b_left.width / 2f) - Mathf.Round(b_right.width / 2f);
+			GUI.DrawTexture(buttonRect, b_middle, ScaleMode.StretchToFill);
+			buttonRect.x += buttonRect.width;
 
-			r.width = b_right.width;
-			GUI.DrawTexture(r, b_right);
+			buttonRect.width = Mathf.Round(b_right.width / 2f);
+			GUI.DrawTexture(buttonRect, b_right);
 
 			Text.Font = GameFont.Tiny;
 			GUI.color = Color.black;

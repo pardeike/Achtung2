@@ -53,7 +53,7 @@ namespace AchtungMod
 	// build-in "Ignore Me Passing" functionality
 	//
 	[HarmonyPatch(typeof(GenConstruct))]
-	[HarmonyPatch("BlocksConstruction")]
+	[HarmonyPatch(nameof(GenConstruct.BlocksConstruction))]
 	static class GenConstruct_BlocksConstruction_Patch
 	{
 		static bool Prefix(ref bool __result, Thing constructible, Thing t)
@@ -70,7 +70,7 @@ namespace AchtungMod
 	// forced hauling outside of allowed area
 	//
 	[HarmonyPatch(typeof(HaulAIUtility))]
-	[HarmonyPatch("PawnCanAutomaticallyHaulFast")]
+	[HarmonyPatch(nameof(HaulAIUtility.PawnCanAutomaticallyHaulFast))]
 	static class HaulAIUtility_PawnCanAutomaticallyHaulFast_Patch
 	{
 		static bool Prefix(Pawn p, Thing t, bool forced, ref bool __result)
@@ -88,7 +88,7 @@ namespace AchtungMod
 	// forced repair outside of allowed area
 	//
 	[HarmonyPatch(typeof(WorkGiver_Repair))]
-	[HarmonyPatch("HasJobOnThing")]
+	[HarmonyPatch(nameof(WorkGiver_Repair.HasJobOnThing))]
 	static class WorkGiver_Repair_HasJobOnThing_Patch
 	{
 		static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions)
@@ -123,7 +123,7 @@ namespace AchtungMod
 	}
 
 	[HarmonyPatch(typeof(ReservationManager))]
-	[HarmonyPatch("CanReserve")]
+	[HarmonyPatch(nameof(ReservationManager.CanReserve))]
 	static class ReservationUtility_CanReserve_Patch
 	{
 		static bool Prefix(Pawn claimant, LocalTargetInfo target, bool ignoreOtherReservations, ref bool __result)
@@ -139,7 +139,7 @@ namespace AchtungMod
 	}
 
 	[HarmonyPatch(typeof(ForbidUtility))]
-	[HarmonyPatch("IsForbidden")]
+	[HarmonyPatch(nameof(ForbidUtility.IsForbidden))]
 	[HarmonyPatch(new Type[] { typeof(Thing), typeof(Pawn) })]
 	static class ForbidUtility_IsForbidden_Patch
 	{
@@ -152,6 +152,30 @@ namespace AchtungMod
 				return false;
 			}
 			return true;
+		}
+	}
+
+	[HarmonyPatch(typeof(Pawn_PathFollower))]
+	[HarmonyPatch(nameof(Pawn_PathFollower.TryRecoverFromUnwalkablePosition))]
+	static class Pawn_PathFollower_TryRecoverFromUnwalkablePosition_Patch
+	{
+		static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions)
+		{
+			var m_Notify_Teleported = AccessTools.Method(typeof(Pawn), nameof(Pawn.Notify_Teleported));
+			var list = instructions.ToList();
+			var idx = list.FirstIndexOf(code => code.operand == m_Notify_Teleported);
+			if (idx > 0)
+			{
+				if (list[idx - 2].opcode == OpCodes.Ldc_I4_1)
+					list[idx - 2].opcode = OpCodes.Ldarg_1;
+				else
+					Log.Error("Cannot find Ldc_I4_1 before Pawn.Notify_Teleported in Pawn_PathFollower.TryRecoverFromUnwalkablePosition");
+			}
+			else
+				Log.Error("Cannot find Pawn.Notify_Teleported in Pawn_PathFollower.TryRecoverFromUnwalkablePosition");
+
+			foreach (var instruction in list)
+				yield return instruction;
 		}
 	}
 
@@ -214,7 +238,7 @@ namespace AchtungMod
 	}
 	//
 	[HarmonyPatch(typeof(Pawn_JobTracker))]
-	[HarmonyPatch("EndJob")]
+	[HarmonyPatch(nameof(Pawn_JobTracker.EndJob))]
 	static class Pawn_JobTracker_EndJob_Patch
 	{
 		static bool Prefix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition)
@@ -230,15 +254,15 @@ namespace AchtungMod
 	}
 	//
 	[HarmonyPatch(typeof(Pawn_JobTracker))]
-	[HarmonyPatch("EndCurrentJob")]
+	[HarmonyPatch(nameof(Pawn_JobTracker.EndCurrentJob))]
 	static class Pawn_JobTracker_EndCurrentJob_Patch
 	{
-		static MethodInfo m_CleanupCurrentJob = AccessTools.Method(typeof(Pawn_JobTracker), "CleanupCurrentJob");
-		static MethodInfo m_ContinueJob = AccessTools.Method(typeof(ForcedJob), "ContinueJob");
-		static FieldInfo f_pawn = AccessTools.Field(typeof(Pawn_JobTracker), "pawn");
-
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
+			var m_CleanupCurrentJob = AccessTools.Method(typeof(Pawn_JobTracker), "CleanupCurrentJob");
+			var m_ContinueJob = AccessTools.Method(typeof(ForcedJob), "ContinueJob");
+			var f_pawn = AccessTools.Field(typeof(Pawn_JobTracker), "pawn");
+
 			var instrList = instructions.ToList();
 			for (var i = 0; i < instrList.Count; i++)
 			{
@@ -272,7 +296,7 @@ namespace AchtungMod
 	}
 
 	[HarmonyPatch(typeof(MentalBreaker))]
-	[HarmonyPatch("MentalBreakerTick")]
+	[HarmonyPatch(nameof(MentalBreaker.MentalBreakerTick))]
 	static class MentalBreaker_MentalBreakerTick_Patch
 	{
 		static void Postfix(Pawn ___pawn)
@@ -312,7 +336,7 @@ namespace AchtungMod
 	}
 
 	[HarmonyPatch(typeof(Pawn))]
-	[HarmonyPatch("DeSpawn")]
+	[HarmonyPatch(nameof(Pawn.DeSpawn))]
 	static class Pawn_DeSpawn_Patch
 	{
 		static void Postfix(Pawn __instance)
@@ -323,7 +347,7 @@ namespace AchtungMod
 	}
 
 	[HarmonyPatch(typeof(PriorityWork))]
-	[HarmonyPatch("GetGizmos")]
+	[HarmonyPatch(nameof(PriorityWork.GetGizmos))]
 	[StaticConstructorOnStartup]
 	static class PriorityWork_GetGizmos_Patch
 	{
@@ -390,7 +414,7 @@ namespace AchtungMod
 	// handle events early
 	//
 	[HarmonyPatch(typeof(MainTabsRoot))]
-	[HarmonyPatch("HandleLowPriorityShortcuts")]
+	[HarmonyPatch(nameof(MainTabsRoot.HandleLowPriorityShortcuts))]
 	static class MainTabsRoot_HandleLowPriorityShortcuts_Patch
 	{
 		static void Prefix()
@@ -402,7 +426,7 @@ namespace AchtungMod
 	// handle drawing
 	//
 	[HarmonyPatch(typeof(SelectionDrawer))]
-	[HarmonyPatch("DrawSelectionOverlays")]
+	[HarmonyPatch(nameof(SelectionDrawer.DrawSelectionOverlays))]
 	static class SelectionDrawer_DrawSelectionOverlays_Patch
 	{
 		static void Postfix()
@@ -414,7 +438,7 @@ namespace AchtungMod
 	// handle gui
 	//
 	[HarmonyPatch(typeof(ThingOverlays))]
-	[HarmonyPatch("ThingOverlaysOnGUI")]
+	[HarmonyPatch(nameof(ThingOverlays.ThingOverlaysOnGUI))]
 	static class ThingOverlays_ThingOverlaysOnGUI_Patch
 	{
 		static void Postfix()
@@ -440,7 +464,7 @@ namespace AchtungMod
 	// pawn inspector panel
 	//
 	[HarmonyPatch(typeof(Pawn))]
-	[HarmonyPatch("GetInspectString")]
+	[HarmonyPatch(nameof(Pawn.GetInspectString))]
 	static class Pawn_GetInspectString_Patch
 	{
 		static void Postfix(Pawn __instance, ref string __result)
@@ -454,7 +478,7 @@ namespace AchtungMod
 	// custom context menu
 	//
 	[HarmonyPatch(typeof(FloatMenuMakerMap))]
-	[HarmonyPatch("ChoicesAtFor")]
+	[HarmonyPatch(nameof(FloatMenuMakerMap.ChoicesAtFor))]
 	static class FloatMenuMakerMap_ChoicesAtFor_Patch
 	{
 		static void Postfix(List<FloatMenuOption> __result, Vector3 clickPos, Pawn pawn)
