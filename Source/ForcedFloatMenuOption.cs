@@ -38,7 +38,7 @@ namespace AchtungMod
 						var jobItem = forcedWork.GetForcedJobs(option.forcePawn).FirstOrDefault();
 						if (jobItem != null)
 						{
-							sharedCells = jobItem.targets.Select(target => target.item.Cell).OrderBy(cell => forceCell.DistanceToSquared(cell)).ToList();
+							sharedCells = jobItem.GetSortedTargets().Select(item => item.Cell).ToList();// targets.Select(target => target.item.Cell).OrderBy(cell => forceCell.DistanceToSquared(cell)).ToList();
 							result = true;
 						}
 					}

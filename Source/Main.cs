@@ -91,7 +91,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(WorkGiver_Repair.HasJobOnThing))]
 	static class WorkGiver_Repair_HasJobOnThing_Patch
 	{
-		static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions)
+		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var instr = instructions.ToList();
 
@@ -122,6 +122,8 @@ namespace AchtungMod
 		}
 	}
 
+	// ignore reservations for forced jobs
+	/*
 	[HarmonyPatch(typeof(ReservationManager))]
 	[HarmonyPatch(nameof(ReservationManager.CanReserve))]
 	static class ReservationUtility_CanReserve_Patch
@@ -136,8 +138,11 @@ namespace AchtungMod
 			}
 			return true;
 		}
-	}
+	}*/
 
+	// ignore forbidden for forced jobs
+	// TODO: make this optional
+	//
 	[HarmonyPatch(typeof(ForbidUtility))]
 	[HarmonyPatch(nameof(ForbidUtility.IsForbidden))]
 	[HarmonyPatch(new Type[] { typeof(Thing), typeof(Pawn) })]
@@ -155,11 +160,13 @@ namespace AchtungMod
 		}
 	}
 
+	// teleporting does not end current job with error condition
+	//
 	[HarmonyPatch(typeof(Pawn_PathFollower))]
 	[HarmonyPatch(nameof(Pawn_PathFollower.TryRecoverFromUnwalkablePosition))]
 	static class Pawn_PathFollower_TryRecoverFromUnwalkablePosition_Patch
 	{
-		static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions)
+		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var m_Notify_Teleported = AccessTools.Method(typeof(Pawn), nameof(Pawn.Notify_Teleported));
 			var list = instructions.ToList();
@@ -179,6 +186,68 @@ namespace AchtungMod
 		}
 	}
 
+	// for forced jobs, do not find work "on the way" to the work cell
+	//
+	[HarmonyPatch(typeof(WorkGiver_ConstructDeliverResources))]
+	[HarmonyPatch("FindNearbyNeeders")]
+	static class WorkGiver_ConstructDeliverResources_FindNearbyNeeders_Patch
+	{
+		public static IEnumerable<Thing> RadialDistinctThingsAround_Patch(IntVec3 center, Map map, float radius, bool useCenter, Pawn pawn)
+		{
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedJob = forcedWork.GetForcedJob(pawn);
+			if (forcedJob != null)
+			{
+				var targets = forcedJob.GetSortedTargets();
+				if (targets.Count > 0)
+				{
+					if (targets[0].HasThing)
+					{
+						foreach (var thing in targets.Select(target => target.Thing))
+							yield return thing;
+						yield break;
+					}
+				}
+			}
+
+			foreach (var thing in GenRadial.RadialDistinctThingsAround(center, map, radius, useCenter))
+				yield return thing;
+		}
+
+		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			var m_RadialDistinctThingsAround = AccessTools.Method(typeof(GenRadial), nameof(GenRadial.RadialDistinctThingsAround));
+			var m_RadialDistinctThingsAround_Patch = AccessTools.Method(typeof(WorkGiver_ConstructDeliverResources_FindNearbyNeeders_Patch), "RadialDistinctThingsAround_Patch");
+
+			var found = 0;
+			var list = instructions.ToList();
+			var count = list.Count;
+			var idx = 0;
+			while (idx < count)
+			{
+				if (list[idx].operand == m_RadialDistinctThingsAround)
+				{
+					list[idx].opcode = OpCodes.Call;
+					list[idx].operand = m_RadialDistinctThingsAround_Patch;
+
+					// add extra 'pawn' before CALL (extra last argument on our method)
+					list.Insert(idx, new CodeInstruction(OpCodes.Ldarg_1));
+					idx++;
+					count++;
+					found++;
+				}
+				idx++;
+			}
+			if (found != 2)
+				Log.Error("Cannot find both calls to RadialDistinctThingsAround in WorkGiver_ConstructDeliverResources.FindNearbyNeeders");
+
+			foreach (var instruction in list)
+				yield return instruction;
+		}
+	}
+
+	// patch in our menu options
+	//
 	[HarmonyPatch(typeof(FloatMenuMakerMap))]
 	[HarmonyPatch("AddJobGiverWorkOrders")]
 	static class FloatMenuMakerMap_AddJobGiverWorkOrders_Patch
@@ -194,7 +263,7 @@ namespace AchtungMod
 			__state.Unprepare(pawn);
 		}
 
-		static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions)
+		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var c_FloatMenuOption = AccessTools.FirstConstructor(typeof(FloatMenuOption), c => c.GetParameters().Count() > 1);
 			var m_ForcedFloatMenuOption = AccessTools.Method(typeof(ForcedFloatMenuOption), nameof(ForcedFloatMenuOption.CreateForcedMenuItem));
@@ -295,6 +364,8 @@ namespace AchtungMod
 		}
 	}
 
+	// check mental levels
+	//
 	[HarmonyPatch(typeof(MentalBreaker))]
 	[HarmonyPatch(nameof(MentalBreaker.MentalBreakerTick))]
 	static class MentalBreaker_MentalBreakerTick_Patch
@@ -335,6 +406,8 @@ namespace AchtungMod
 		}
 	}
 
+	// release forced work when pawn disappears
+	//
 	[HarmonyPatch(typeof(Pawn))]
 	[HarmonyPatch(nameof(Pawn.DeSpawn))]
 	static class Pawn_DeSpawn_Patch
@@ -346,6 +419,8 @@ namespace AchtungMod
 		}
 	}
 
+	// add force radius buttons
+	//
 	[HarmonyPatch(typeof(PriorityWork))]
 	[HarmonyPatch(nameof(PriorityWork.GetGizmos))]
 	[StaticConstructorOnStartup]

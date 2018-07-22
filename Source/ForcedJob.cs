@@ -37,19 +37,7 @@ namespace AchtungMod
 		public bool initialized = false;
 		public int cellRadius = 0;
 
-		public ForcedJob()
-		{
-			pawn = null;
-			workgiverDefs = new List<WorkGiverDef>();
-			targets = new HashSet<ForcedTarget>();
-			isThingJob = false;
-			initialized = false;
-			cellRadius = 0;
-		}
-
-		public IEnumerable<WorkGiver_Scanner> WorkGivers => workgiverDefs.Select(wgd => (WorkGiver_Scanner)wgd.Worker);
-
-		static Dictionary<BuildableDef, int> scores = new Dictionary<BuildableDef, int>
+		static Dictionary<BuildableDef, int> TypeScores = new Dictionary<BuildableDef, int>
 		{
 			{ ThingDefOf.PowerConduit, 1000 },
 			{ ThingDefOf.Sandbags, 200 },
@@ -71,27 +59,88 @@ namespace AchtungMod
 			{ ThingDefOf.StandingLamp, 1 },
 			{ ThingDefOf.TorchLamp, 1 },
 		};
-		public static int ItemPriority(LocalTargetInfo item, IntVec3 nearTo)
+
+		public ForcedJob()
 		{
-			var score = nearTo.DistanceToSquared(item.Cell);
+			pawn = null;
+			workgiverDefs = new List<WorkGiverDef>();
+			targets = new HashSet<ForcedTarget>();
+			isThingJob = false;
+			initialized = false;
+			cellRadius = 0;
+		}
+
+		public IEnumerable<WorkGiver_Scanner> WorkGivers => workgiverDefs.Select(wgd => (WorkGiver_Scanner)wgd.Worker);
+
+		public static int ItemPriority(ref LocalTargetInfo item, Pawn pawn, ref IntVec3 nearTo)
+		{
+			var itemCell = item.Cell;
+			var itemScore = ItemScore(ref itemCell, pawn.Map);
+			var typeScore = TypeScore(ref item, ref nearTo);
+			var otherScore = OthersScore(ref itemCell, pawn);
+			return typeScore + itemScore + otherScore;
+		}
+
+		public static int ItemScore(ref IntVec3 pos, Map map)
+		{
+			var pathGrid = map.pathGrid;
+			var left = pathGrid.Walkable(pos + new IntVec3(-1, 0, 0)) ? 1 : 0;
+			var right = pathGrid.Walkable(pos + new IntVec3(1, 0, 0)) ? 1 : 0;
+			var up = pathGrid.Walkable(pos + new IntVec3(0, 0, -1)) ? 1 : 0;
+			var down = pathGrid.Walkable(pos + new IntVec3(0, 0, 1)) ? 1 : 0;
+			var score = left + right + up + down;
+			if (score == 2 && left == right)
+				return 150;
+			else
+				return score * 100;
+		}
+
+		public static int TypeScore(ref LocalTargetInfo item, ref IntVec3 nearTo)
+		{
+			var typeScore = IntVec3Utility.ManhattanDistanceFlat(item.Cell, nearTo); // nearTo.DistanceToSquared(item.Cell);
 			var thing = item.Thing;
 			if (thing != null)
 			{
 				var blueprint = thing as Blueprint_Build;
 				if (blueprint != null)
 				{
-					if (scores.TryGetValue(blueprint.def.entityDefToBuild, out var n))
-						score -= n * 1000;
+					if (TypeScores.TryGetValue(blueprint.def.entityDefToBuild, out var n))
+						typeScore += (1000 - n) * 10;
 				}
 
 				var frame = thing as Frame;
 				if (frame != null)
 				{
-					if (scores.TryGetValue(frame.def.entityDefToBuild, out var n))
-						score -= n * 1000;
+					if (TypeScores.TryGetValue(frame.def.entityDefToBuild, out var n))
+						typeScore += (1000 - n) * 100;
 				}
 			}
-			return score;
+
+			return typeScore;
+		}
+
+		public static int OthersScore(ref IntVec3 cell, Pawn currentPawn)
+		{
+			var pawnPositions = new HashSet<IntVec3>(currentPawn.Map.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer)
+				.Except(currentPawn)
+				.Select(pawn => pawn.Position));
+
+			var cell2 = cell;
+			return GenRadial.RadialPatternInRadius(3f) //GenAdj.AdjacentCellsAndInside
+				.Select(v => v + cell2)
+				.Count(c => pawnPositions.Contains(c));
+		}
+
+		public List<LocalTargetInfo> GetSortedTargets()
+		{
+			var nearTo = pawn.Position;
+			var items = targets
+				.Select(target => target.item)
+				.Where(item => item.HasThing == false || (item.Thing != null && item.Thing.Spawned && item.Thing.Destroyed == false))
+				.OrderBy(item => ItemPriority(ref item, pawn, ref nearTo))
+				.ToList();
+			// Log.Warning("Items " + items.Select(si => { var pos = pawn.Position; return new KeyValuePair<string, int>($"{si.Cell.x}x{si.Cell.z}", ItemPriority(ref si, pawn, ref pos)); }).Aggregate("", (prev, pair) => $"{prev}{" , ".Substring(0, Math.Min(1, 5 * prev.Length))}{pair.Key}#{pair.Value}"));
+			return items;
 		}
 
 		public bool GetNextJob(out Job job, out LocalTargetInfo atItem)
@@ -100,16 +149,23 @@ namespace AchtungMod
 			atItem = LocalTargetInfo.Invalid;
 
 			var thingGrid = pawn.Map.thingGrid;
-			var nearTo = pawn.Position;
-			var sorteditems = targets.Select(target => target.item).OrderBy(item => ItemPriority(item, nearTo));
-			foreach (var item in sorteditems)
+			var sortedItems = GetSortedTargets();
+			foreach (var item in sortedItems)
 			{
 				foreach (var workgiver in WorkGivers)
 				{
 					if (isThingJob)
+					{
 						job = item.Thing.GetThingJob(pawn, workgiver);
+						// if (job != null)
+						//	Log.Warning($"-> job {job} (A={job.targetA}, B={job.targetB}) on thing {item.Thing} at {item.Thing.Position}");
+					}
 					else
+					{
 						job = item.Cell.GetCellJob(pawn, workgiver);
+						// if (job != null)
+						//	Log.Warning($"-> job {job} (A={job.targetA}, B={job.targetB}) on cell {item.Cell}");
+					}
 
 					if (job != null)
 					{
@@ -118,6 +174,9 @@ namespace AchtungMod
 					}
 				}
 			}
+			if (sortedItems.Count > 0)
+				Find.LetterStack.ReceiveLetter("No forced work", pawn.Name.ToStringShort + " could not find more forced work. The remaining work is most likely reserved or not accessible.", LetterDefOf.NeutralEvent, pawn);
+
 			return false;
 		}
 
@@ -136,6 +195,7 @@ namespace AchtungMod
 
 			if (condition == JobCondition.InterruptForced)
 			{
+				Find.LetterStack.ReceiveLetter("Forced work interrupted", "Forced work of " + pawn.Name.ToStringShort + " was interrupted.", LetterDefOf.NeutralEvent, pawn);
 				forcedWork.Remove(pawn);
 				return false;
 			}
@@ -178,16 +238,18 @@ namespace AchtungMod
 			return WorkGivers.Any(workgiver => thing.GetThingJob(pawn, workgiver) != null);
 		}
 
-		public bool HasJob(IntVec3 cell)
+		public bool HasJob(ref IntVec3 cell)
 		{
-			return WorkGivers.Any(workgiver => cell.GetCellJob(pawn, workgiver) != null);
+			var cell2 = cell;
+			return WorkGivers.Any(workgiver => cell2.GetCellJob(pawn, workgiver) != null);
 		}
 
-		private IEnumerable<IntVec3> Nearby(IntVec3 cell)
+		private IEnumerable<IntVec3> Nearby(ref IntVec3 cell)
 		{
 			if (cellRadius > 0 && cellRadius <= GenRadial.MaxRadialPatternRadius)
 				return GenRadial.RadialCellsAround(cell, cellRadius, true);
-			return GenAdj.AdjacentCellsAndInside.Select(vec => cell + vec);
+			var cell2 = cell;
+			return GenAdj.AdjacentCellsAndInside.Select(vec => cell2 + vec);
 		}
 
 		public void UpdateCells()
@@ -208,7 +270,7 @@ namespace AchtungMod
 						.Distinct();
 
 					var surroundingCells = currentThingCells
-						.SelectMany(cell => Nearby(cell))
+						.SelectMany(cell => Nearby(ref cell))
 						.Distinct();
 					// reinclude current cells so non-complete items are completed
 					//.Except(currentThingCells);
@@ -234,17 +296,17 @@ namespace AchtungMod
 				count = addedCells.Count();
 
 				var surroundingCells = addedCells
-					.SelectMany(cell => Nearby(cell))
+					.SelectMany(cell => Nearby(ref cell))
 					.Distinct()
 					.Except(addedCells);
 
 				var addCells = surroundingCells
-					.Where(cell => HasJob(cell));
+					.Where(cell => HasJob(ref cell));
 
 				addedCells.AddRange(addCells.ToList());
 			}
 			while (count < addedCells.Count());
-			cells = cells.Where(cell => HasJob(cell)).Union(addedCells.Except(cells));
+			cells = cells.Where(cell => HasJob(ref cell)).Union(addedCells.Except(cells));
 			targets = new HashSet<ForcedTarget>(cells.Select(cell => new ForcedTarget(new LocalTargetInfo(cell))));
 		}
 
