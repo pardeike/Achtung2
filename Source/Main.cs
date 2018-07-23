@@ -122,6 +122,29 @@ namespace AchtungMod
 		}
 	}
 
+	[HarmonyPatch(typeof(ReservationManager))]
+	[HarmonyPatch(nameof(ReservationManager.Reserve))]
+	static class ReservationUtility_Reserve_Patch
+	{
+		static void EndJob(Pawn_JobTracker jobTracker, Job job, JobCondition condition)
+		{
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			if (forcedWork.HasForcedJob(jobTracker.curDriver.pawn))
+			{
+				jobTracker.EndJob(job, JobCondition.InterruptOptional);
+				return;
+			}
+			jobTracker.EndJob(job, condition);
+		}
+
+		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			var fromMethod = AccessTools.Method(typeof(Pawn_JobTracker), "EndJob");
+			var toMethod = AccessTools.Method(typeof(ReservationUtility_Reserve_Patch), "EndJob");
+			return instructions.MethodReplacer(fromMethod, toMethod);
+		}
+	}
+
 	// ignore reservations for forced jobs
 	/*
 	[HarmonyPatch(typeof(ReservationManager))]
