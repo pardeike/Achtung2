@@ -34,6 +34,7 @@ namespace AchtungMod
 		public Pawn pawn = null;
 		public List<WorkGiverDef> workgiverDefs = new List<WorkGiverDef>();
 		public HashSet<ForcedTarget> targets = new HashSet<ForcedTarget>();
+		public Dictionary<LocalTargetInfo, int> targetBaseScoreCache = new Dictionary<LocalTargetInfo, int>();
 		public bool isThingJob = false;
 		public bool initialized = false;
 		public int cellRadius = 0;
@@ -66,6 +67,7 @@ namespace AchtungMod
 			pawn = null;
 			workgiverDefs = new List<WorkGiverDef>();
 			targets = new HashSet<ForcedTarget>();
+			targetBaseScoreCache = new Dictionary<LocalTargetInfo, int>();
 			isThingJob = false;
 			initialized = false;
 			cellRadius = 0;
@@ -73,18 +75,24 @@ namespace AchtungMod
 
 		public IEnumerable<WorkGiver_Scanner> WorkGivers => workgiverDefs.Select(wgd => (WorkGiver_Scanner)wgd.Worker);
 
-		public static int ItemPriority(ref LocalTargetInfo item, Pawn pawn, ref IntVec3 nearTo, int totalCount)
+		public static int ItemBasePriority(Map map, ref LocalTargetInfo item, int totalCount)
 		{
 			var itemCell = item.Cell;
-			var itemScore = ItemScore(ref itemCell, pawn, totalCount);
-			var typeScore = TypeScore(ref item, ref nearTo);
-			var otherScore = OthersScore(ref itemCell, pawn);
-			return typeScore + itemScore * 10 + otherScore;
+			return ItemScore(ref itemCell, map, totalCount) * 10;
 		}
 
-		public static int ItemScore(ref IntVec3 pos, Pawn pawn, int totalCount)
+		public static int ItemExtraPriority(ref LocalTargetInfo item, Pawn pawn, ref IntVec3 nearTo, int totalCount)
 		{
-			var pathGrid = pawn.Map.pathGrid;
+			var itemCell = item.Cell;
+			var typeScore = TypeScore(ref item);
+			var nearScore = NearScore(ref item, ref nearTo);
+			//var otherScore = OthersScore(ref itemCell, pawn);
+			return typeScore + nearScore; // + otherScore;
+		}
+
+		public static int ItemScore(ref IntVec3 pos, Map map, int totalCount)
+		{
+			var pathGrid = map.pathGrid;
 			var left = pathGrid.Walkable(pos + new IntVec3(-1, 0, 0)) ? 1 : 0;
 			var right = pathGrid.Walkable(pos + new IntVec3(1, 0, 0)) ? 1 : 0;
 			var up = pathGrid.Walkable(pos + new IntVec3(0, 0, -1)) ? 1 : 0;
@@ -96,7 +104,7 @@ namespace AchtungMod
 			{
 				for (var i = 0; i < 4; i++)
 				{
-					var count = Tools.IsEnclosed(pawn, totalCount, pos, GenAdj.CardinalDirections[i]);
+					var count = Tools.IsEnclosed(map, totalCount, pos, GenAdj.CardinalDirections[i]);
 					if (count > 0 && count < totalCount)
 						return totalCount + count; // 1x - 2x total
 				}
@@ -105,9 +113,14 @@ namespace AchtungMod
 			return 0; // 0
 		}
 
-		public static int TypeScore(ref LocalTargetInfo item, ref IntVec3 nearTo)
+		public static int NearScore(ref LocalTargetInfo item, ref IntVec3 nearTo)
 		{
-			var typeScore = IntVec3Utility.ManhattanDistanceFlat(item.Cell, nearTo); // nearTo.DistanceToSquared(item.Cell);
+			return IntVec3Utility.ManhattanDistanceFlat(item.Cell, nearTo); // nearTo.DistanceToSquared(item.Cell);
+		}
+
+		public static int TypeScore(ref LocalTargetInfo item)
+		{
+			var typeScore = 0;
 			var thing = item.Thing;
 			if (thing != null)
 			{
@@ -129,7 +142,7 @@ namespace AchtungMod
 			return typeScore;
 		}
 
-		public static int OthersScore(ref IntVec3 cell, Pawn currentPawn)
+		/*public static int OthersScore(ref IntVec3 cell, Pawn currentPawn)
 		{
 			var pawnPositions = new HashSet<IntVec3>(currentPawn.Map.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer)
 				.Except(currentPawn)
@@ -139,19 +152,31 @@ namespace AchtungMod
 			return GenRadial.RadialPatternInRadius(3f) //GenAdj.AdjacentCellsAndInside
 				.Select(v => v + cell2)
 				.Count(c => pawnPositions.Contains(c));
+		}*/
+
+		public void PrepareTargets()
+		{
+			targetBaseScoreCache = new Dictionary<LocalTargetInfo, int>();
+			targets
+				.Select(target => target.item)
+				.Where(item => item.HasThing == false || (item.Thing != null && item.Thing.Spawned && item.Thing.Destroyed == false))
+				.Do(item => targetBaseScoreCache.Add(item, ItemBasePriority(pawn.Map, ref item, targets.Count)));
 		}
 
 		public List<LocalTargetInfo> GetSortedTargets()
 		{
-			var stopwatch = new Stopwatch();
 			var nearTo = pawn.Position;
 			var targetCount = targets.Count;
 			var items = targets
 				.Select(target => target.item)
 				.Where(item => item.HasThing == false || (item.Thing != null && item.Thing.Spawned && item.Thing.Destroyed == false))
-				.OrderBy(item => ItemPriority(ref item, pawn, ref nearTo, targetCount))
+				.OrderBy(item =>
+				{
+					var baseScore = 0;
+					targetBaseScoreCache.TryGetValue(item, out baseScore);
+					return baseScore + ItemExtraPriority(ref item, pawn, ref nearTo, targetCount);
+				})
 				.ToList();
-			Log.Warning($"{stopwatch.ElapsedMilliseconds}ms for {items.Count}");
 			// Log.Warning("Items " + items.Select(si => { var pos = pawn.Position; return new KeyValuePair<string, int>($"{si.Cell.x}x{si.Cell.z}", ItemPriority(ref si, pawn, ref pos)); }).Aggregate("", (prev, pair) => $"{prev}{" , ".Substring(0, Math.Min(1, 5 * prev.Length))}{pair.Key}#{pair.Value}"));
 			return items;
 		}
@@ -298,6 +323,7 @@ namespace AchtungMod
 				while (count < addedThings.Count());
 				things = things.Where(thing => thing.Spawned).Where(HasJob).Union(addedThings.Except(things));
 				targets = new HashSet<ForcedTarget>(things.Select(thing => new ForcedTarget(new LocalTargetInfo(thing))));
+				PrepareTargets();
 
 				return;
 			}
@@ -321,6 +347,7 @@ namespace AchtungMod
 			while (count < addedCells.Count());
 			cells = cells.Where(cell => HasJob(ref cell)).Union(addedCells.Except(cells));
 			targets = new HashSet<ForcedTarget>(cells.Select(cell => new ForcedTarget(new LocalTargetInfo(cell))));
+			PrepareTargets();
 		}
 
 		public void ExposeData()
@@ -333,7 +360,10 @@ namespace AchtungMod
 			Scribe_Values.Look(ref cellRadius, "radius", 0, true);
 
 			if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
+			{
 				targets.RemoveWhere(target => target.item.IsValid == false);
+				PrepareTargets();
+			}
 		}
 	}
 

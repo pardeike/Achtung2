@@ -232,11 +232,11 @@ namespace AchtungMod
 			return option.Label == goHereLabel;
 		}
 
-		public static int IsEnclosed(Pawn pawn, int maxCount, IntVec3 pos, IntVec3 direction)
+		public static int IsEnclosed(Map map, int maxCount, IntVec3 pos, IntVec3 direction)
 		{
-			var pathGrid = pawn.Map.pathGrid;
+			var pathGrid = map.pathGrid;
 			var count = 0;
-			(new FloodFiller(pawn.Map)).FloodFill(pos + direction, cell =>
+			(new FloodFiller(map)).FloodFill(pos + direction, cell =>
 			{
 				return cell != pos && pathGrid.Walkable(cell);
 			}, (cell, len) =>
