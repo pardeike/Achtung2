@@ -232,6 +232,21 @@ namespace AchtungMod
 			return option.Label == goHereLabel;
 		}
 
+		public static int IsEnclosed(Pawn pawn, int maxCount, IntVec3 pos, IntVec3 direction)
+		{
+			var pathGrid = pawn.Map.pathGrid;
+			var count = 0;
+			(new FloodFiller(pawn.Map)).FloodFill(pos + direction, cell =>
+			{
+				return cell != pos && pathGrid.Walkable(cell);
+			}, (cell, len) =>
+			{
+				count++;
+				return count >= maxCount;
+			});
+			return count;
+		}
+
 		public static void DraftWithSound(List<Colonist> colonists, bool draftStatus)
 		{
 			var gotDrafted = false;

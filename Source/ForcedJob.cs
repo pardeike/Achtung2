@@ -1,6 +1,7 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Verse;
 using Verse.AI;
@@ -72,27 +73,36 @@ namespace AchtungMod
 
 		public IEnumerable<WorkGiver_Scanner> WorkGivers => workgiverDefs.Select(wgd => (WorkGiver_Scanner)wgd.Worker);
 
-		public static int ItemPriority(ref LocalTargetInfo item, Pawn pawn, ref IntVec3 nearTo)
+		public static int ItemPriority(ref LocalTargetInfo item, Pawn pawn, ref IntVec3 nearTo, int totalCount)
 		{
 			var itemCell = item.Cell;
-			var itemScore = ItemScore(ref itemCell, pawn.Map);
+			var itemScore = ItemScore(ref itemCell, pawn, totalCount);
 			var typeScore = TypeScore(ref item, ref nearTo);
 			var otherScore = OthersScore(ref itemCell, pawn);
-			return typeScore + itemScore + otherScore;
+			return typeScore + itemScore * 10 + otherScore;
 		}
 
-		public static int ItemScore(ref IntVec3 pos, Map map)
+		public static int ItemScore(ref IntVec3 pos, Pawn pawn, int totalCount)
 		{
-			var pathGrid = map.pathGrid;
+			var pathGrid = pawn.Map.pathGrid;
 			var left = pathGrid.Walkable(pos + new IntVec3(-1, 0, 0)) ? 1 : 0;
 			var right = pathGrid.Walkable(pos + new IntVec3(1, 0, 0)) ? 1 : 0;
 			var up = pathGrid.Walkable(pos + new IntVec3(0, 0, -1)) ? 1 : 0;
 			var down = pathGrid.Walkable(pos + new IntVec3(0, 0, 1)) ? 1 : 0;
 			var score = left + right + up + down;
-			if (score == 2 && left == right)
-				return 150;
-			else
-				return score * 100;
+			if (score > 2)
+				return score * totalCount; // 3x or 4x total
+			if (score == 2)
+			{
+				for (var i = 0; i < 4; i++)
+				{
+					var count = Tools.IsEnclosed(pawn, totalCount, pos, GenAdj.CardinalDirections[i]);
+					if (count > 0 && count < totalCount)
+						return totalCount + count; // 1x - 2x total
+				}
+				return totalCount; // 1x total
+			}
+			return 0; // 0
 		}
 
 		public static int TypeScore(ref LocalTargetInfo item, ref IntVec3 nearTo)
@@ -133,12 +143,15 @@ namespace AchtungMod
 
 		public List<LocalTargetInfo> GetSortedTargets()
 		{
+			var stopwatch = new Stopwatch();
 			var nearTo = pawn.Position;
+			var targetCount = targets.Count;
 			var items = targets
 				.Select(target => target.item)
 				.Where(item => item.HasThing == false || (item.Thing != null && item.Thing.Spawned && item.Thing.Destroyed == false))
-				.OrderBy(item => ItemPriority(ref item, pawn, ref nearTo))
+				.OrderBy(item => ItemPriority(ref item, pawn, ref nearTo, targetCount))
 				.ToList();
+			Log.Warning($"{stopwatch.ElapsedMilliseconds}ms for {items.Count}");
 			// Log.Warning("Items " + items.Select(si => { var pos = pawn.Position; return new KeyValuePair<string, int>($"{si.Cell.x}x{si.Cell.z}", ItemPriority(ref si, pawn, ref pos)); }).Aggregate("", (prev, pair) => $"{prev}{" , ".Substring(0, Math.Min(1, 5 * prev.Length))}{pair.Key}#{pair.Value}"));
 			return items;
 		}
@@ -369,7 +382,6 @@ namespace AchtungMod
 				|| (workgiver as WorkGiver_ConstructFinishFrames) != null
 				|| (workgiver as WorkGiver_Flick) != null
 				|| (workgiver as WorkGiver_Miner) != null
-				|| (workgiver as WorkGiver_RearmTraps) != null
 				|| (workgiver as WorkGiver_Refuel) != null
 				|| (workgiver as WorkGiver_RemoveRoof) != null
 				|| (workgiver as WorkGiver_Strip) != null
