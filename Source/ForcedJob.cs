@@ -41,9 +41,9 @@ namespace AchtungMod
 		static Dictionary<BuildableDef, int> TypeScores = new Dictionary<BuildableDef, int>
 		{
 			{ ThingDefOf.PowerConduit, 1000 },
+			{ ThingDefOf.Wall, 900 },
 			{ ThingDefOf.Sandbags, 200 },
 			{ ThingDefOf.Turret_MiniTurret, 150 },
-			{ ThingDefOf.Wall, 100 },
 			{ ThingDefOf.Door, 50 },
 			{ ThingDefOf.TrapDeadfall, 20 },
 			{ ThingDefOf.Bed, 10 },
@@ -87,7 +87,7 @@ namespace AchtungMod
 			var nearScore = NearScore(ref item, ref nearTo2);
 			//var itemCell = item.Cell;
 			//var otherScore = OthersScore(ref itemCell, pawn);
-			return typeScore + nearScore; // + otherScore;
+			return 10000 * typeScore + nearScore; // + otherScore;
 		}
 
 		public static int ItemScore(ref IntVec3 pos, Map map, int totalCount)
@@ -121,6 +121,7 @@ namespace AchtungMod
 		public static int TypeScore(ref LocalTargetInfo item)
 		{
 			var typeScore = 0;
+
 			var thing = item.Thing;
 			if (thing != null)
 			{
@@ -128,18 +129,18 @@ namespace AchtungMod
 				if (blueprint != null)
 				{
 					if (TypeScores.TryGetValue(blueprint.def.entityDefToBuild, out var n))
-						typeScore += (1000 - n) * 10;
+						typeScore += (1000 - n) * 1;
 				}
 
 				var frame = thing as Frame;
 				if (frame != null)
 				{
 					if (TypeScores.TryGetValue(frame.def.entityDefToBuild, out var n))
-						typeScore += (1000 - n) * 100;
+						typeScore += (1000 - n) * 10;
 				}
 			}
 
-			return typeScore;
+			return typeScore == 0 ? 1000 : typeScore;
 		}
 
 		/*public static int OthersScore(ref IntVec3 cell, Pawn currentPawn)
