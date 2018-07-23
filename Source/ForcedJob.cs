@@ -1,7 +1,6 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Verse;
 using Verse.AI;
@@ -81,11 +80,12 @@ namespace AchtungMod
 			return ItemScore(ref itemCell, map, totalCount) * 10;
 		}
 
-		public static int ItemExtraPriority(ref LocalTargetInfo item, Pawn pawn, ref IntVec3 nearTo, int totalCount)
+		public static int ItemExtraPriority(ref LocalTargetInfo item, /* Pawn pawn,*/ ref IntVec3 nearTo)
 		{
-			var itemCell = item.Cell;
 			var typeScore = TypeScore(ref item);
-			var nearScore = NearScore(ref item, ref nearTo);
+			var nearTo2 = nearTo;
+			var nearScore = NearScore(ref item, ref nearTo2);
+			//var itemCell = item.Cell;
 			//var otherScore = OthersScore(ref itemCell, pawn);
 			return typeScore + nearScore; // + otherScore;
 		}
@@ -165,19 +165,22 @@ namespace AchtungMod
 
 		public List<LocalTargetInfo> GetSortedTargets()
 		{
+			int CalcScore(LocalTargetInfo item, ref IntVec3 near)
+			{
+				var baseScore = 0;
+				targetBaseScoreCache.TryGetValue(item, out baseScore);
+				var near2 = near;
+				return baseScore + ItemExtraPriority(ref item, /*pawn,*/ ref near2);
+			}
+
 			var nearTo = pawn.Position;
 			var targetCount = targets.Count;
 			var items = targets
 				.Select(target => target.item)
 				.Where(item => item.HasThing == false || (item.Thing != null && item.Thing.Spawned && item.Thing.Destroyed == false))
-				.OrderBy(item =>
-				{
-					var baseScore = 0;
-					targetBaseScoreCache.TryGetValue(item, out baseScore);
-					return baseScore + ItemExtraPriority(ref item, pawn, ref nearTo, targetCount);
-				})
+				.OrderBy(item => CalcScore(item, ref nearTo))
 				.ToList();
-			// Log.Warning("Items " + items.Select(si => { var pos = pawn.Position; return new KeyValuePair<string, int>($"{si.Cell.x}x{si.Cell.z}", ItemPriority(ref si, pawn, ref pos)); }).Aggregate("", (prev, pair) => $"{prev}{" , ".Substring(0, Math.Min(1, 5 * prev.Length))}{pair.Key}#{pair.Value}"));
+			// Log.Warning("Items " + items.Select(si => { var pos = pawn.Position; return new KeyValuePair<string, int>($"{si.Cell.x}x{si.Cell.z}", CalcScore(si, ref nearTo)); }).Aggregate("", (prev, pair) => $"{prev}{" , ".Substring(0, Math.Min(1, 5 * prev.Length))}{pair.Key}#{pair.Value}"));
 			return items;
 		}
 
