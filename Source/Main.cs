@@ -122,26 +122,59 @@ namespace AchtungMod
 		}
 	}
 
-	[HarmonyPatch(typeof(ReservationManager))]
-	[HarmonyPatch(nameof(ReservationManager.Reserve))]
-	static class ReservationUtility_Reserve_Patch
+	// allow multiple colonists by reserving the exit path from a build place
+	//
+	[HarmonyPatch(typeof(JobDriver_ConstructFinishFrame))]
+	[HarmonyPatch(nameof(JobDriver_ConstructFinishFrame.TryMakePreToilReservations))]
+	static class JobDriver_ConstructFinishFrame_TryMakePreToilReservations_Patch
 	{
-		static void EndJob(Pawn_JobTracker jobTracker, Job job, JobCondition condition)
+		static void Postfix(JobDriver_ConstructFinishFrame __instance, ref bool __result)
 		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
-			if (forcedWork.HasForcedJob(jobTracker.curDriver.pawn))
-			{
-				jobTracker.EndJob(job, JobCondition.InterruptOptional);
+			if (__result == false)
 				return;
-			}
-			jobTracker.EndJob(job, condition);
-		}
 
-		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+			var pawn = __instance.pawn;
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			if (forcedWork.HasForcedJob(pawn) == false)
+				return;
+
+			var job = __instance.job;
+			var buildCell = job.targetA;
+			var map = __instance.pawn.Map;
+			var pathGrid = map.pathGrid;
+			var reserationManager = map.reservationManager;
+
+			void FloodFillReserve(IntVec3 pos, IntVec3 prev, int depth)
+			{
+				var success = reserationManager.Reserve(pawn, job, pos, 1, -1, null, false);
+				var cells = GenAdj.CardinalDirections
+					.Select(v => v + pos)
+					.Where(cell => cell != prev && pathGrid.Walkable(cell));
+				if (cells.Count() == 1)
+				{
+					var cell = cells.First();
+					FloodFillReserve(cell, pos, depth + 1);
+				}
+			}
+			FloodFillReserve(buildCell.Cell, IntVec3.Invalid, 0);
+		}
+	}
+
+	// this is onyl called from ReservationManager.Reserve - make it use
+	// InterruptOptional instead of InterruptForced for forced jobs
+	//
+	[HarmonyPatch(typeof(Pawn_JobTracker))]
+	[HarmonyPatch(nameof(Pawn_JobTracker.EndCurrentOrQueuedJob))]
+	static class ReservationUtility_EndCurrentOrQueuedJob_Patch
+	{
+		static void Prefix(Pawn_JobTracker __instance, ref JobCondition condition)
 		{
-			var fromMethod = AccessTools.Method(typeof(Pawn_JobTracker), "EndJob");
-			var toMethod = AccessTools.Method(typeof(ReservationUtility_Reserve_Patch), "EndJob");
-			return instructions.MethodReplacer(fromMethod, toMethod);
+			if (condition == JobCondition.InterruptForced)
+			{
+				var forcedWork = Find.World.GetComponent<ForcedWork>();
+				if (forcedWork.HasForcedJob(__instance.curDriver.pawn))
+					condition = JobCondition.InterruptOptional;
+			}
 		}
 	}
 
@@ -330,29 +363,13 @@ namespace AchtungMod
 	}
 	//
 	[HarmonyPatch(typeof(Pawn_JobTracker))]
-	[HarmonyPatch(nameof(Pawn_JobTracker.EndJob))]
-	static class Pawn_JobTracker_EndJob_Patch
-	{
-		static bool Prefix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition)
-		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
-			if (forcedWork.HasForcedJob(___pawn))
-			{
-				__instance.EndCurrentJob(condition, true);
-				return false;
-			}
-			return true;
-		}
-	}
-	//
-	[HarmonyPatch(typeof(Pawn_JobTracker))]
 	[HarmonyPatch(nameof(Pawn_JobTracker.EndCurrentJob))]
 	static class Pawn_JobTracker_EndCurrentJob_Patch
 	{
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var m_CleanupCurrentJob = AccessTools.Method(typeof(Pawn_JobTracker), "CleanupCurrentJob");
-			var m_ContinueJob = AccessTools.Method(typeof(ForcedJob), "ContinueJob");
+			var m_ContinueJob = AccessTools.Method(typeof(ForcedJob), nameof(ForcedJob.ContinueJob));
 			var f_pawn = AccessTools.Field(typeof(Pawn_JobTracker), "pawn");
 
 			var instrList = instructions.ToList();
