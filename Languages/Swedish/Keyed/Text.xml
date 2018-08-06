@@ -23,11 +23,11 @@ Höll i för att flytta kolonister i deras formation. Formationen kan roteras me
 	<Note1>Med Achtung innehåller kontextmenyn såväl normala som kampkommandos</Note1>
 	<Note2>Vid positionering av kolonister längs en rad kommer en vänsterklick sätta dem i kamppositioner</Note2>
 
-	<ModKeyOptionNone>Av</ModKeyOptionNone>
-	<ModKeyOptionAlt>Alt</ModKeyOptionAlt>
-	<ModKeyOptionCtrl>Ctrl</ModKeyOptionCtrl>
-	<ModKeyOptionShift>Shift</ModKeyOptionShift>
-	<ModKeyOptionMeta>Win/Cmd</ModKeyOptionMeta>
+	<AchtungModKeyOptionNone>Av</AchtungModKeyOptionNone>
+	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
+	<AchtungModKeyOptionCtrl>Ctrl</AchtungModKeyOptionCtrl>
+	<AchtungModKeyOptionShift>Shift</AchtungModKeyOptionShift>
+	<AchtungModKeyOptionMeta>Win/Cmd</AchtungModKeyOptionMeta>
 
 	<BreakLevelTitle>Mental sammanbrottsgräns för arbete</BreakLevelTitle>
 	<BreakLevelExplained>Sätter ein övre gräns för utförda Achtung! jobs</BreakLevelExplained>

@@ -3,7 +3,7 @@ using Verse;
 
 namespace AchtungMod
 {
-	public enum ModKey
+	public enum AchtungModKey
 	{
 		None,
 		Alt,
@@ -33,8 +33,8 @@ namespace AchtungMod
 	public class AchtungSettings : ModSettings
 	{
 		public bool positioningEnabled = true;
-		public ModKey achtungKey = ModKey.Alt;
-		public ModKey forceCommandMenuKey = ModKey.Ctrl;
+		public AchtungModKey achtungKey = AchtungModKey.Alt;
+		public AchtungModKey forceCommandMenuKey = AchtungModKey.Ctrl;
 		public BreakLevel breakLevel = BreakLevel.AlmostExtreme;
 		public HealthLevel healthLevel = HealthLevel.InPainShock;
 
@@ -42,8 +42,8 @@ namespace AchtungMod
 		{
 			base.ExposeData();
 			Scribe_Values.Look(ref positioningEnabled, "positioningEnabled", true, true);
-			Scribe_Values.Look(ref achtungKey, "achtungKey", ModKey.Alt, true);
-			Scribe_Values.Look(ref forceCommandMenuKey, "forceCommandMenuKey", ModKey.Ctrl, true);
+			Scribe_Values.Look(ref achtungKey, "achtungKey", AchtungModKey.Alt, true);
+			Scribe_Values.Look(ref forceCommandMenuKey, "forceCommandMenuKey", AchtungModKey.Ctrl, true);
 			Scribe_Values.Look(ref breakLevel, "BreakLevel", BreakLevel.AlmostExtreme, true);
 			Scribe_Values.Look(ref healthLevel, "HealthLevel", HealthLevel.InPainShock, true);
 		}

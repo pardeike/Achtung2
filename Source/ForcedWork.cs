@@ -16,6 +16,7 @@ namespace AchtungMod
 		private List<ForcedJobs> forcedJobsValuesWorkingList;
 
 		readonly HashSet<Pawn> preparing = new HashSet<Pawn>();
+		readonly Dictionary<Pawn, HashSet<IntVec3>> forbiddenLocations = new Dictionary<Pawn, HashSet<IntVec3>>();
 
 		public ForcedWork(World world) : base(world)
 		{
@@ -28,7 +29,7 @@ namespace AchtungMod
 					.Where(def => def.IsOfType<T>()).ToList();
 		}
 
-		static HashSet<WorkGiverDef> constructionDefs = new HashSet<WorkGiverDef>(AllWorkerDefs<WorkGiver_ConstructFinishFrames>().Union(AllWorkerDefs<WorkGiver_ConstructDeliverResources>()));
+		static List<WorkGiverDef> constructionDefs = AllWorkerDefs<WorkGiver_ConstructDeliverResources>().Concat(AllWorkerDefs<WorkGiver_ConstructFinishFrames>()).ToList();
 		public List<WorkGiverDef> GetCombinedDefs(WorkGiver baseWorkgiver)
 		{
 			if (constructionDefs.Contains(baseWorkgiver.def))
@@ -119,8 +120,7 @@ namespace AchtungMod
 			Unprepare(pawn);
 
 			var forcedJob = new ForcedJob() { pawn = pawn, workgiverDefs = workgiverDefs, isThingJob = item.HasThing };
-			forcedJob.targets.Add(new ForcedTarget(item));
-			forcedJob.UpdateCells();
+			forcedJob.AddTarget(item);
 			if (allForcedJobs.ContainsKey(pawn) == false)
 				allForcedJobs[pawn] = new ForcedJobs();
 			allForcedJobs[pawn].jobs.Add(forcedJob);
@@ -158,6 +158,34 @@ namespace AchtungMod
 			return allForcedJobs
 				.Where(pair => pair.Key.Map == map)
 				.SelectMany(pair => pair.Value.jobs);
+		}
+
+		public void AddForbiddenLocation(Pawn pawn, IntVec3 cell)
+		{
+			if (forbiddenLocations.TryGetValue(pawn, out var cells) == false)
+			{
+				cells = new HashSet<IntVec3>();
+				forbiddenLocations.Add(pawn, cells);
+			}
+			cells.Add(cell);
+		}
+
+		public void RemoveForbiddenLocations(Pawn pawn)
+		{
+			forbiddenLocations.Remove(pawn);
+		}
+
+		public HashSet<IntVec3> GetForbiddenLocations()
+		{
+			var result = new HashSet<IntVec3>();
+			forbiddenLocations.Do(pair => result.UnionWith(pair.Value));
+			return result;
+		}
+
+		public bool IsForbiddenLocation(IntVec3 cell)
+		{
+			return forbiddenLocations
+				.Any(pair => pair.Value.Contains(cell));
 		}
 
 		public override void ExposeData()

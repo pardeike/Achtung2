@@ -114,17 +114,17 @@ namespace AchtungMod
 			return offset;
 		}
 
-		public static bool IsModKey(KeyCode code, ModKey key)
+		public static bool IsModKey(KeyCode code, AchtungModKey key)
 		{
 			switch (key)
 			{
-				case ModKey.Alt:
+				case AchtungModKey.Alt:
 					return code == KeyCode.LeftAlt || code == KeyCode.RightAlt;
-				case ModKey.Ctrl:
+				case AchtungModKey.Ctrl:
 					return code == KeyCode.LeftControl || code == KeyCode.RightControl;
-				case ModKey.Shift:
+				case AchtungModKey.Shift:
 					return code == KeyCode.LeftShift || code == KeyCode.RightShift;
-				case ModKey.Meta:
+				case AchtungModKey.Meta:
 					return code == KeyCode.LeftWindows || code == KeyCode.RightWindows
 						|| code == KeyCode.LeftCommand || code == KeyCode.RightCommand
 						|| code == KeyCode.LeftApple || code == KeyCode.RightApple;
@@ -132,17 +132,17 @@ namespace AchtungMod
 			return false;
 		}
 
-		public static bool IsModKeyPressed(ModKey key)
+		public static bool IsModKeyPressed(AchtungModKey key)
 		{
 			switch (key)
 			{
-				case ModKey.Alt:
+				case AchtungModKey.Alt:
 					return Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
-				case ModKey.Ctrl:
+				case AchtungModKey.Ctrl:
 					return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-				case ModKey.Shift:
+				case AchtungModKey.Shift:
 					return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-				case ModKey.Meta:
+				case AchtungModKey.Meta:
 					return Input.GetKey(KeyCode.LeftWindows) || Input.GetKey(KeyCode.RightWindows)
 						|| Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand)
 						|| Input.GetKey(KeyCode.LeftApple) || Input.GetKey(KeyCode.RightApple);
@@ -152,7 +152,7 @@ namespace AchtungMod
 
 		public static bool IsForcedJob()
 		{
-			return IsModKeyPressed(ModKey.Alt);
+			return IsModKeyPressed(AchtungModKey.Alt);
 		}
 
 		public static bool IsOfType<T>(this WorkGiver workgiver) where T : class

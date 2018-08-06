@@ -24,11 +24,11 @@ Die Formation kann während der Bewegung mit Q und E rotiert werden</AchtungModi
 	<Note1>Mit Achtung enthält das Kontextmenu sowohl normale als auch Kampfkommandos</Note1>
 	<Note2>Während Kolonisten entlang einer Linie positioniert werden, versetzt ein Rechtsklick sie in die Kampfposition</Note2>
 
-	<ModKeyOptionNone>Keine</ModKeyOptionNone>
-	<ModKeyOptionAlt>Alt</ModKeyOptionAlt>
-	<ModKeyOptionCtrl>Ctrl</ModKeyOptionCtrl>
-	<ModKeyOptionShift>Shift</ModKeyOptionShift>
-	<ModKeyOptionMeta>Win/Cmd</ModKeyOptionMeta>
+	<AchtungModKeyOptionNone>Keine</AchtungModKeyOptionNone>
+	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
+	<AchtungModKeyOptionCtrl>Ctrl</AchtungModKeyOptionCtrl>
+	<AchtungModKeyOptionShift>Shift</AchtungModKeyOptionShift>
+	<AchtungModKeyOptionMeta>Win/Cmd</AchtungModKeyOptionMeta>
 
 	<BreakLevelTitle>Mentale Zusammenbruchsgrenze</BreakLevelTitle>
 	<BreakLevelExplained>Setzt eine obere Grenze für ausgeführte Achtung! Jobs</BreakLevelExplained>

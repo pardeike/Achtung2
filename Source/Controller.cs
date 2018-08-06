@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Harmony;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Verse.AI;
 
 namespace AchtungMod
 {
@@ -277,23 +279,32 @@ namespace AchtungMod
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 			forcedWork.ForcedJobsForMap(Find.CurrentMap)
-				.SelectMany(forcedJob =>
+				.DoIf(forcedJob => Find.Selector.IsSelected(forcedJob.pawn), forcedJob =>
 				{
-					if (forcedJob.isThingJob)
-						return forcedJob.targets.SelectMany(target => target.item.Thing.AllCells());
-					else
-						return forcedJob.targets.Select(target => target.item.Cell);
-				})
-				.Distinct()
-				.Do(cell => Tools.DrawForceIcon(cell.ToVector3()));
+					forcedJob.AllCells().Distinct()
+						.Do(cell => Tools.DrawForceIcon(cell.ToVector3()));
+				});
 		}
 
 		private void DrawReservations()
 		{
-			Find.CurrentMap?.reservationManager?
+			var reservationManager = Find.CurrentMap?.reservationManager;
+			if (reservationManager == null)
+				return;
+
+			var selector = Find.Selector;
+			var allReservations = Traverse.Create(reservationManager).Field("reservations").GetValue<List<ReservationManager.Reservation>>();
+			allReservations
+				.DoIf(res => selector.IsSelected(res.Claimant), res => Tools.DebugPosition(res.Target.Cell.ToVector3(), res.Target.HasThing ? new Color(1f, 0f, 0f, 0.2f) : new Color(0f, 1f, 0f, 0.2f)));
+
+			/*Find.CurrentMap?.reservationManager?
 				.AllReservedThings()?
 				.Where(t => t != null)
-				.Do(thing => Tools.DebugPosition(thing.Position.ToVector3(), new Color(1f, 0f, 0f, 0.2f)));
+				.Do(thing => Tools.DebugPosition(thing.Position.ToVector3(), new Color(1f, 0f, 0f, 0.2f)));*/
+
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			forcedWork.GetForbiddenLocations()
+				.Do(cell => Tools.DebugPosition(cell.ToVector3(), new Color(0f, 0f, 1f, 0.2f)));
 		}
 
 		public void HandleDrawing()
@@ -301,7 +312,7 @@ namespace AchtungMod
 			DrawForcedJobs();
 
 			// for debugging reservations
-			// DrawReservations();
+			DrawReservations();
 
 			if (isDragging)
 			{

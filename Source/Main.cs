@@ -142,11 +142,12 @@ namespace AchtungMod
 			var buildCell = job.targetA;
 			var map = __instance.pawn.Map;
 			var pathGrid = map.pathGrid;
-			var reserationManager = map.reservationManager;
+			// var reserationManager = map.reservationManager;
 
 			void FloodFillReserve(IntVec3 pos, IntVec3 prev, int depth)
 			{
-				var success = reserationManager.Reserve(pawn, job, pos, 1, -1, null, false);
+				//var success = reserationManager.Reserve(pawn, job, pos, 1, -1, null, false);
+				forcedWork.AddForbiddenLocation(pawn, pos);
 				var cells = GenAdj.CardinalDirections
 					.Select(v => v + pos)
 					.Where(cell => cell != prev && pathGrid.Walkable(cell));
@@ -157,6 +158,34 @@ namespace AchtungMod
 				}
 			}
 			FloodFillReserve(buildCell.Cell, IntVec3.Invalid, 0);
+		}
+	}
+
+	[HarmonyPatch(typeof(ReservationManager))]
+	[HarmonyPatch(nameof(ReservationManager.ReleaseClaimedBy))]
+	static class ReservationManager_ReleaseClaimedBy_Patch
+	{
+		static void Postfix(Pawn claimant)
+		{
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			if (forcedWork.HasForcedJob(claimant) == false)
+				return;
+
+			forcedWork.RemoveForbiddenLocations(claimant);
+		}
+	}
+
+	[HarmonyPatch(typeof(ReservationManager))]
+	[HarmonyPatch(nameof(ReservationManager.ReleaseAllClaimedBy))]
+	static class ReservationManager_ReleaseAllClaimedBy_Patch
+	{
+		static void Postfix(Pawn claimant)
+		{
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			if (forcedWork.HasForcedJob(claimant) == false)
+				return;
+
+			forcedWork.RemoveForbiddenLocations(claimant);
 		}
 	}
 
@@ -254,7 +283,8 @@ namespace AchtungMod
 			var forcedJob = forcedWork.GetForcedJob(pawn);
 			if (forcedJob != null)
 			{
-				var targets = forcedJob.GetSortedTargets();
+				var targets = forcedJob.GetSortedTargets()
+					.Where(target => forcedWork.IsForbiddenLocation(target.Cell) == false).ToList();
 				if (targets.Count > 0)
 				{
 					if (targets[0].HasThing)
