@@ -38,7 +38,7 @@ namespace AchtungMod
 						var jobItem = forcedWork.GetForcedJobs(option.forcePawn).FirstOrDefault();
 						if (jobItem != null)
 						{
-							sharedCells = jobItem.GetSortedTargets().Select(item => item.Cell).ToList();// targets.Select(target => target.item.Cell).OrderBy(cell => forceCell.DistanceToSquared(cell)).ToList();
+							sharedCells = jobItem.GetSortedTargets().Select(item => item.Cell).ToList();
 							result = true;
 						}
 					}
@@ -100,8 +100,6 @@ namespace AchtungMod
 			// somehow necessary or else 'extraPartWidth' will be 0
 			base.extraPartWidth = buttonSpace + ButtonWidth;
 		}
-
-
 
 		public bool RenderExtraPartOnGui(Rect drawRect)
 		{
@@ -176,7 +174,7 @@ namespace AchtungMod
 			}
 
 			forcedWork.Unprepare(forcePawn);
-			Log.Error("Cannot find job for " + forcePawn.Name.ToStringShort + " at " + forceCell + " with " + string.Join(",", workgiverDefs.Select(def => def.ToString()).ToArray()));
+			Log.Warning("Cannot find job for " + forcePawn.Name.ToStringShort + " at " + forceCell + " with " + string.Join(",", workgiverDefs.Select(def => def.ToString()).ToArray()));
 			return false;
 		}
 	}

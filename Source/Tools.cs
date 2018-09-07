@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using RimWorld;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using RimWorld;
 using UnityEngine;
 using Verse;
-using System;
 using Verse.AI;
 using Verse.Sound;
-using Harmony;
+using static Harmony.AccessTools;
 
 namespace AchtungMod
 {
@@ -20,6 +20,7 @@ namespace AchtungMod
 		public static string goHereLabel;
 
 		public static FieldInfo draftHandlerField = typeof(Pawn_DraftController).GetField("draftedInt", BindingFlags.NonPublic | BindingFlags.Instance);
+		public static readonly FieldRef<ReservationManager, List<ReservationManager.Reservation>> Reservations = FieldRefAccess<ReservationManager, List<ReservationManager.Reservation>>("reservations");
 
 		private static string _version;
 		public static string Version
@@ -93,11 +94,6 @@ namespace AchtungMod
 					return pawn.health.InPainShock;
 			}
 			return false;
-		}
-
-		public static Pawn GetColonist(this Pawn_JobTracker tracker)
-		{
-			return Traverse.Create(tracker).Field("pawn").GetValue<Pawn>();
 		}
 
 		public static Vector3 RotateBy(Vector3 offsetFromCenter, int rotation, bool was45)

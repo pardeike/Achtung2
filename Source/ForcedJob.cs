@@ -1,5 +1,4 @@
-﻿using Harmony;
-using RimWorld;
+﻿using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,7 +53,7 @@ namespace AchtungMod
 	public class ForcedJob : IExposable
 	{
 		private HashSet<ForcedTarget> targets = new HashSet<ForcedTarget>();
-		private Dictionary<LocalTargetInfo, int> targetBaseScoreCache = new Dictionary<LocalTargetInfo, int>();
+		private readonly Dictionary<LocalTargetInfo, int> targetBaseScoreCache = new Dictionary<LocalTargetInfo, int>();
 
 		public Pawn pawn = null;
 		public List<WorkGiverDef> workgiverDefs = new List<WorkGiverDef>();
@@ -62,27 +61,34 @@ namespace AchtungMod
 		public bool initialized = false;
 		public int cellRadius = 0;
 
-		static Dictionary<BuildableDef, int> TypeScores = new Dictionary<BuildableDef, int>
+		static readonly Dictionary<BuildableDef, int> TypeScores = new Dictionary<BuildableDef, int>
 		{
 			{ ThingDefOf.PowerConduit, 1000 },
 			{ ThingDefOf.Wall, 900 },
+			{ ThingDefOf.TrapSpike, 300 },
 			{ ThingDefOf.Sandbags, 200 },
 			{ ThingDefOf.Turret_MiniTurret, 150 },
 			{ ThingDefOf.Door, 50 },
-			{ ThingDefOf.TrapSpike, 20 },
 			{ ThingDefOf.Bed, 10 },
 			{ ThingDefOf.Bedroll, 9 },
-			{ ThingDefOf.WoodFiredGenerator, 5 },
+			{ ThingDefOf.Campfire, 6 },
+			{ ThingDefOf.TorchLamp, 6 },
+			{ ThingDefOf.Table2x2c, 6 },
+			{ ThingDefOf.DiningChair, 6 },
 			{ ThingDefOf.Battery, 5 },
+			{ ThingDefOf.WoodFiredGenerator, 5 },
 			{ ThingDefOf.SolarGenerator, 5 },
 			{ ThingDefOf.WindTurbine, 5 },
 			{ ThingDefOf.GeothermalGenerator, 5 },
+			{ ThingDefOf.WatermillGenerator, 5 },
 			{ ThingDefOf.Cooler, 2 },
 			{ ThingDefOf.Heater, 2 },
+			{ ThingDefOf.FirefoamPopper, 2 },
 			{ ThingDefOf.PassiveCooler, 2 },
 			{ ThingDefOf.Turret_Mortar, 2 },
 			{ ThingDefOf.StandingLamp, 1 },
-			{ ThingDefOf.TorchLamp, 1 },
+			{ ThingDefOf.PlantPot, 1 },
+			{ ThingDefOf.Grave, 1 },
 		};
 
 		public ForcedJob()
@@ -98,21 +104,25 @@ namespace AchtungMod
 
 		public void AddTarget(LocalTargetInfo item)
 		{
-			targets.Add(new ForcedTarget(item));
+			var target = new ForcedTarget(item);
+			target.materialScore = MaterialScore(target.item);
+			targets.Add(target);
 			UpdateCells();
 		}
 
-		public IEnumerable<IntVec3> AllCells()
+		public IEnumerable<IntVec3> AllCells(bool onlyValid = false)
 		{
+			var validTargets = onlyValid ? targets.Where(target => target.IsValidTarget()) : targets;
 			if (isThingJob)
-				return targets.SelectMany(target => target.item.Thing.AllCells());
+				return validTargets
+					.SelectMany(target => target.item.Thing.AllCells());
 			else
-				return targets.Select(target => target.item.Cell);
+				return validTargets.Select(target => target.item.Cell);
 		}
 
 		public IEnumerable<WorkGiver_Scanner> WorkGivers => workgiverDefs.Select(wgd => (WorkGiver_Scanner)wgd.Worker);
 
-		public static int ItemBasePriority(Map map, ref LocalTargetInfo item, int totalCount)
+		/*public static int ItemBasePriority(Map map, ref LocalTargetInfo item, int totalCount)
 		{
 			var itemCell = item.Cell;
 
@@ -120,9 +130,9 @@ namespace AchtungMod
 			var baseScore = (thing as Blueprint) != null || (thing as Frame) != null ? 0 : 1000;
 
 			return 10000 * (baseScore + ItemScore(ref itemCell, map, totalCount));
-		}
+		}*/
 
-		public static int ItemExtraPriority(ref LocalTargetInfo item, /* Pawn pawn,*/ ref IntVec3 nearTo)
+		/*public static int ItemExtraPriority(ref LocalTargetInfo item, ref IntVec3 nearTo)
 		{
 			var typeScore = 0; // TypeScore(item);
 			var nearTo2 = nearTo;
@@ -130,9 +140,9 @@ namespace AchtungMod
 			//var itemCell = item.Cell;
 			//var otherScore = OthersScore(ref itemCell, pawn);
 			return typeScore + nearScore; // + otherScore;
-		}
+		}*/
 
-		public static float BaseScore(IntVec3 pos, Map map, int totalCount)
+		/*public static float BaseScore(IntVec3 pos, Map map, int totalCount)
 		{
 			var pathGrid = map.pathGrid;
 			var left = pathGrid.Walkable(pos + new IntVec3(-1, 0, 0)) ? 0 : 1;
@@ -167,9 +177,9 @@ namespace AchtungMod
 				return 0.5f + 0.5f * (totalCount + 1 - min) / (totalCount + 1);
 			}
 			return score / 2f;
-		}
+		}*/
 
-		public static int ItemScore(ref IntVec3 pos, Map map, int totalCount)
+		/*public static int ItemScore(ref IntVec3 pos, Map map, int totalCount)
 		{
 			var pathGrid = map.pathGrid;
 			var left = pathGrid.Walkable(pos + new IntVec3(-1, 0, 0)) ? 1 : 0;
@@ -190,12 +200,12 @@ namespace AchtungMod
 				return totalCount; // 1x total
 			}
 			return 0; // 0
-		}
+		}*/
 
-		public static int NearScore(ref LocalTargetInfo item, ref IntVec3 nearTo)
+		/*public static int NearScore(ref LocalTargetInfo item, ref IntVec3 nearTo)
 		{
 			return IntVec3Utility.ManhattanDistanceFlat(item.Cell, nearTo); // nearTo.DistanceToSquared(item.Cell);
-		}
+		}*/
 
 		public static int MaterialScore(LocalTargetInfo item)
 		{
@@ -239,6 +249,8 @@ namespace AchtungMod
 		{
 			return;
 
+			/* -------------------------------------------------------------------------
+
 			targetBaseScoreCache = new Dictionary<LocalTargetInfo, int>();
 			targets
 				.Select(target => target.item)
@@ -249,23 +261,38 @@ namespace AchtungMod
 			targetBaseScoreCache
 				.OrderBy(pair => pair.Value)
 				.Do(pair => { scores += $" {pair.Key.Cell.x}x{pair.Key.Cell.z}={pair.Value}"; });
-			Log.Error($"### {pawn.Name.ToStringShort} [{targets.Count}]{scores}");
+			// Log.Error($"### {pawn.Name.ToStringShort} [{targets.Count}]{scores}");
+			*/
+		}
+
+		private bool FreeTarget(ForcedTarget target)
+		{
+			var allReservations = Tools.Reservations(pawn.Map.reservationManager);
+			return allReservations.Any(res => res.Target.Cell == target.item.Cell && res.Claimant != pawn) == false;
 		}
 
 		public List<LocalTargetInfo> GetSortedTargets()
 		{
 			var result = new List<ForcedTarget>();
 			var temp = targets.ToList();
-			List<ForcedTarget> extract;
+			// List<ForcedTarget> extract;
 
+			return temp
+				.Where(target => target.IsValidTarget() && FreeTarget(target))
+				.OrderByDescending(target => target.materialScore)
+				.Select(target => target.item)
+				.ToList();
+			/* ----------------------------------------------------------------------------------------
+			
+			// ### ENABLE AGAIN FOR SMART BUILDING
 			temp.Do(target =>
 			{
-				var valid = target.item.HasThing == false || (target.item.Thing != null && target.item.Thing.Spawned && target.item.Thing.Destroyed == false);
+				var valid = target.IsValidTarget();
 				target.baseScore = valid ? BaseScore(target.item.Cell, target.item.Thing.Map, temp.Count) : -1;
 				target.typeScore = ((target.item.Thing as Blueprint) != null ? 0.25f : 0f) + ((target.item.Thing as Frame) != null ? 0.5f : 0f);
 				target.materialScore = MaterialScore(target.item) / 1000f;
 			});
-
+			
 			// important pieces
 			extract = temp.Where(target => target.baseScore > 0.5f).OrderByDescending(target => target.baseScore).ToList();
 			result.AddRange(extract);
@@ -286,7 +313,7 @@ namespace AchtungMod
 
 			return extract
 				.Select(target => target.item)
-				.ToList();
+				.ToList();*/
 
 			/*int[] CalcScore(LocalTargetInfo item, ref IntVec3 near)
 			{
@@ -331,13 +358,13 @@ namespace AchtungMod
 					if (isThingJob)
 					{
 						job = item.Thing.GetThingJob(pawn, workgiver);
-						// if (job != null)
+						//if (job != null)
 						//	Log.Warning($"-> job {job} (A={job.targetA}, B={job.targetB}) on thing {item.Thing} at {item.Thing.Position}");
 					}
 					else
 					{
 						job = item.Cell.GetCellJob(pawn, workgiver);
-						// if (job != null)
+						//if (job != null)
 						//	Log.Warning($"-> job {job} (A={job.targetA}, B={job.targetB}) on cell {item.Cell}");
 					}
 
@@ -360,7 +387,8 @@ namespace AchtungMod
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 
 			var forcedJob = forcedWork.GetForcedJob(pawn);
-			if (forcedJob == null) return false;
+			if (forcedJob == null)
+				return false;
 			if (forcedJob.initialized == false)
 			{
 				forcedJob.initialized = true;
@@ -374,7 +402,7 @@ namespace AchtungMod
 				return false;
 			}
 
-			pawn.ClearReservationsForJob(lastJob);
+			// pawn.ClearReservationsForJob(lastJob);
 
 			while (true)
 			{
@@ -460,7 +488,11 @@ namespace AchtungMod
 				}
 				while (count < addedThings.Count());
 				things = things.Where(thing => thing.Spawned).Where(HasJob).Union(addedThings.Except(things));
-				targets = new HashSet<ForcedTarget>(things.Select(thing => new ForcedTarget(new LocalTargetInfo(thing))));
+				targets = new HashSet<ForcedTarget>(things.Select(thing =>
+				{
+					var item = new LocalTargetInfo(thing);
+					return new ForcedTarget(item) { materialScore = MaterialScore(item) };
+				}));
 				PrepareTargets();
 
 				return;
@@ -484,7 +516,11 @@ namespace AchtungMod
 			}
 			while (count < addedCells.Count());
 			cells = cells.Where(cell => HasJob(ref cell)).Union(addedCells.Except(cells));
-			targets = new HashSet<ForcedTarget>(cells.Select(cell => new ForcedTarget(new LocalTargetInfo(cell))));
+			targets = new HashSet<ForcedTarget>(cells.Select(cell =>
+			{
+				var item = new LocalTargetInfo(cell);
+				return new ForcedTarget(item) { materialScore = MaterialScore(item) };
+			}));
 			PrepareTargets();
 		}
 
@@ -499,7 +535,7 @@ namespace AchtungMod
 
 			if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
 			{
-				targets.RemoveWhere(target => target.item.IsValid == false);
+				targets.RemoveWhere(target => target.item.ThingDestroyed);
 				PrepareTargets();
 			}
 		}
@@ -508,9 +544,17 @@ namespace AchtungMod
 	public class ForcedTarget : IExposable, IEquatable<ForcedTarget>
 	{
 		public LocalTargetInfo item = LocalTargetInfo.Invalid;
-		public float baseScore = 0f;
-		public float typeScore = 0f;
+		//public float baseScore = 0f;
+		//public float typeScore = 0f;
 		public float materialScore = 0f;
+
+		public ForcedTarget()
+		{
+			item = LocalTargetInfo.Invalid;
+			//baseScore = 0f;
+			//typeScore = 0f;
+			materialScore = 0f;
+		}
 
 		public ForcedTarget(LocalTargetInfo item)
 		{
@@ -520,8 +564,8 @@ namespace AchtungMod
 		public void ExposeData()
 		{
 			Scribe_TargetInfo.Look(ref item, false, "item", LocalTargetInfo.Invalid);
-			Scribe_Values.Look(ref baseScore, "baseScore", 0f, true);
-			Scribe_Values.Look(ref typeScore, "typeScore", 0f, true);
+			//Scribe_Values.Look(ref baseScore, "baseScore", 0f, true);
+			//Scribe_Values.Look(ref typeScore, "typeScore", 0f, true);
 			Scribe_Values.Look(ref materialScore, "materialScore", 0f, true);
 		}
 
@@ -530,11 +574,20 @@ namespace AchtungMod
 			return item.Equals(other.item);
 		}
 
+		public bool IsValidTarget()
+		{
+			return item.HasThing == false || (item.Thing != null && item.ThingDestroyed == false);
+		}
+
 		public override string ToString()
 		{
 			if (item.HasThing)
-				return $"{item.Thing.def.defName}@{item.Cell.x}x{item.Cell.z}({baseScore})";
-			return $"{item.Cell.x}x{item.Cell.z}({baseScore})";
+				return $"{item.Thing.def.defName}@{item.Cell.x}x{item.Cell.z}({materialScore})";
+			return $"{item.Cell.x}x{item.Cell.z}({materialScore})";
+
+			//if (item.HasThing)
+			//	return $"{item.Thing.def.defName}@{item.Cell.x}x{item.Cell.z}({baseScore})";
+			//return $"{item.Cell.x}x{item.Cell.z}({baseScore})";
 		}
 	}
 
@@ -542,9 +595,10 @@ namespace AchtungMod
 	{
 		public static Job GetThingJob(this Thing thing, Pawn pawn, WorkGiver_Scanner workgiver, bool ignoreReserve = false)
 		{
-			var ignoreRestrictions = ((workgiver as WorkGiver_Haul) != null || (workgiver as WorkGiver_Repair) != null);
-			ignoreRestrictions |= (
-				(workgiver as WorkGiver_ConstructAffectFloor) != null
+			var ignoreRestrictions = (false
+				|| (workgiver as WorkGiver_Haul) != null
+				|| (workgiver as WorkGiver_Repair) != null
+				|| (workgiver as WorkGiver_ConstructAffectFloor) != null
 				|| (workgiver as WorkGiver_ConstructDeliverResources) != null
 				|| (workgiver as WorkGiver_ConstructFinishFrames) != null
 				|| (workgiver as WorkGiver_Flick) != null
@@ -560,11 +614,11 @@ namespace AchtungMod
 				if (workgiver.MissingRequiredCapacity(pawn) == null)
 					if (workgiver.HasJobOnThing(pawn, thing, true))
 					{
-						//Log.Warning($"{pawn.Name.ToStringShort} can {workgiver.def.defName} on {thing.def.defName} at {thing.Position}");
+						// Log.Warning($"{pawn.Name.ToStringShort} can {workgiver.def.defName} on {thing.def.defName} at {thing.Position}");
 						var job = workgiver.JobOnThing(pawn, thing, true);
 						if (job != null)
 						{
-							//Log.Warning($"{pawn.Name.ToStringShort} has {job.def.defName} on {thing.def.defName} at {thing.Position}");
+							// Log.Warning($"{pawn.Name.ToStringShort} has {job.def.defName} on {thing.def.defName} at {thing.Position}");
 							if (ignoreRestrictions || thing.IsForbidden(pawn) == false)
 								if (ignoreRestrictions || thing.Position.InAllowedArea(pawn))
 								{
@@ -572,7 +626,7 @@ namespace AchtungMod
 									var ok2 = (ignoreReserve && pawn.CanReach(thing, workgiver.PathEndMode, Danger.Deadly));
 									if (ok1 || ok2)
 									{
-										//Log.Warning($"{pawn.Name.ToStringShort} got job on {thing.def.defName} at {thing.Position}");
+										// Log.Warning($"{pawn.Name.ToStringShort} got job on {thing.def.defName} at {thing.Position}");
 										return job;
 									}
 								}

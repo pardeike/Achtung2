@@ -1,11 +1,9 @@
-﻿using System;
+﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Harmony;
-using RimWorld;
 using UnityEngine;
 using Verse;
-using Verse.AI;
 
 namespace AchtungMod
 {
@@ -281,7 +279,7 @@ namespace AchtungMod
 			forcedWork.ForcedJobsForMap(Find.CurrentMap)
 				.DoIf(forcedJob => Find.Selector.IsSelected(forcedJob.pawn), forcedJob =>
 				{
-					forcedJob.AllCells().Distinct()
+					forcedJob.AllCells(true).Distinct()
 						.Do(cell => Tools.DrawForceIcon(cell.ToVector3()));
 				});
 		}
@@ -293,7 +291,7 @@ namespace AchtungMod
 				return;
 
 			var selector = Find.Selector;
-			var allReservations = Traverse.Create(reservationManager).Field("reservations").GetValue<List<ReservationManager.Reservation>>();
+			var allReservations = Tools.Reservations(reservationManager);
 			allReservations
 				.DoIf(res => selector.IsSelected(res.Claimant), res => Tools.DebugPosition(res.Target.Cell.ToVector3(), res.Target.HasThing ? new Color(1f, 0f, 0f, 0.2f) : new Color(0f, 1f, 0f, 0.2f)));
 
@@ -302,9 +300,9 @@ namespace AchtungMod
 				.Where(t => t != null)
 				.Do(thing => Tools.DebugPosition(thing.Position.ToVector3(), new Color(1f, 0f, 0f, 0.2f)));*/
 
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
-			forcedWork.GetForbiddenLocations()
-				.Do(cell => Tools.DebugPosition(cell.ToVector3(), new Color(0f, 0f, 1f, 0.2f)));
+			//var forcedWork = Find.World.GetComponent<ForcedWork>();
+			//forcedWork.GetForbiddenLocations()
+			//	.Do(cell => Tools.DebugPosition(cell.ToVector3(), new Color(0f, 0f, 1f, 0.2f)));
 		}
 
 		public void HandleDrawing()
@@ -312,7 +310,7 @@ namespace AchtungMod
 			DrawForcedJobs();
 
 			// for debugging reservations
-			DrawReservations();
+			// DrawReservations();
 
 			if (isDragging)
 			{

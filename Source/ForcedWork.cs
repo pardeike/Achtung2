@@ -44,9 +44,10 @@ namespace AchtungMod
 		public void QueueJob(Pawn pawn, Job job)
 		{
 			// TODO: find out if we still get stackoverflows if we start jobs directly
-			// tracker.StartJob(job, JobCondition.Succeeded, null/*pawn.mindState.lastJobGiver*/, false, false, null, null/*pawn.mindState.lastJobTag*/, true);
+			var tracker = pawn.jobs;
+			tracker.StartJob(job, JobCondition.Succeeded, null/*pawn.mindState.lastJobGiver*/, false, false, null, null/*pawn.mindState.lastJobTag*/, true);
 
-			jobQueue.Enqueue(new KeyValuePair<Pawn, Job>(pawn, job));
+			// jobQueue.Enqueue(new KeyValuePair<Pawn, Job>(pawn, job));
 		}
 
 		public override void WorldComponentTick()

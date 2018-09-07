@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using Harmony;
 using RimWorld;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using UnityEngine;
 using Verse;
 using Verse.AI;
-using System.Reflection;
-using System;
-using Harmony;
-using System.Linq;
-using System.Reflection.Emit;
 
 namespace AchtungMod
 {
@@ -96,6 +96,7 @@ namespace AchtungMod
 			var instr = instructions.ToList();
 
 			var f_NotInHomeAreaTrans = AccessTools.Field(typeof(WorkGiver_FixBrokenDownBuilding), "NotInHomeAreaTrans");
+			if (f_NotInHomeAreaTrans == null) throw new Exception("Cannot find method WorkGiver_FixBrokenDownBuilding.NotInHomeAreaTrans");
 			var i = instr.FirstIndexOf(inst => inst.opcode == OpCodes.Ldsfld && inst.operand == f_NotInHomeAreaTrans);
 			if (i > 0)
 			{
@@ -123,7 +124,9 @@ namespace AchtungMod
 	}
 
 	// allow multiple colonists by reserving the exit path from a build place
-	//
+	/*
+	 * ### ENABLE AGAIN FOR SMART BUILDING
+	 * 
 	[HarmonyPatch(typeof(JobDriver_ConstructFinishFrame))]
 	[HarmonyPatch(nameof(JobDriver_ConstructFinishFrame.TryMakePreToilReservations))]
 	static class JobDriver_ConstructFinishFrame_TryMakePreToilReservations_Patch
@@ -187,43 +190,26 @@ namespace AchtungMod
 
 			forcedWork.RemoveForbiddenLocations(claimant);
 		}
-	}
-
-	// this is onyl called from ReservationManager.Reserve - make it use
-	// InterruptOptional instead of InterruptForced for forced jobs
-	//
-	[HarmonyPatch(typeof(Pawn_JobTracker))]
-	[HarmonyPatch(nameof(Pawn_JobTracker.EndCurrentOrQueuedJob))]
-	static class ReservationUtility_EndCurrentOrQueuedJob_Patch
-	{
-		static void Prefix(Pawn_JobTracker __instance, ref JobCondition condition)
-		{
-			if (condition == JobCondition.InterruptForced)
-			{
-				var forcedWork = Find.World.GetComponent<ForcedWork>();
-				if (forcedWork.HasForcedJob(__instance.curDriver.pawn))
-					condition = JobCondition.InterruptOptional;
-			}
-		}
-	}
-
-	// ignore reservations for forced jobs
-	/*
-	[HarmonyPatch(typeof(ReservationManager))]
-	[HarmonyPatch(nameof(ReservationManager.CanReserve))]
-	static class ReservationUtility_CanReserve_Patch
-	{
-		static bool Prefix(Pawn claimant, LocalTargetInfo target, bool ignoreOtherReservations, ref bool __result)
-		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
-			if (forcedWork.HasForcedJob(claimant))
-			{
-				__result = true;
-				return false;
-			}
-			return true;
-		}
 	}*/
+
+	[HarmonyPatch(typeof(ReservationManager))]
+	[HarmonyPatch(nameof(ReservationManager.Reserve))]
+	static class ReservationManager_Reserve_Patch
+	{
+		public static bool CanReserve(ReservationManager reservationManager, Pawn claimant, LocalTargetInfo target, int maxPawns, int stackCount, ReservationLayerDef layer, bool ignoreOtherReservations)
+		{
+			if (ignoreOtherReservations)
+				return false;
+			return reservationManager.CanReserve(claimant, target, maxPawns, stackCount, layer, ignoreOtherReservations);
+		}
+
+		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			var fromMethod = AccessTools.Method(typeof(ReservationManager), nameof(ReservationManager.CanReserve));
+			var toMethod = AccessTools.Method(typeof(ReservationManager_Reserve_Patch), nameof(ReservationManager_Reserve_Patch.CanReserve));
+			return instructions.MethodReplacer(fromMethod, toMethod);
+		}
+	}
 
 	// ignore forbidden for forced jobs
 	// TODO: make this optional
@@ -272,7 +258,9 @@ namespace AchtungMod
 	}
 
 	// for forced jobs, do not find work "on the way" to the work cell
-	//
+	/*
+	 * ### ENABLE AGAIN FOR SMART BUILDING
+	 * 
 	[HarmonyPatch(typeof(WorkGiver_ConstructDeliverResources))]
 	[HarmonyPatch("FindNearbyNeeders")]
 	static class WorkGiver_ConstructDeliverResources_FindNearbyNeeders_Patch
@@ -304,6 +292,7 @@ namespace AchtungMod
 		{
 			var m_RadialDistinctThingsAround = AccessTools.Method(typeof(GenRadial), nameof(GenRadial.RadialDistinctThingsAround));
 			var m_RadialDistinctThingsAround_Patch = AccessTools.Method(typeof(WorkGiver_ConstructDeliverResources_FindNearbyNeeders_Patch), "RadialDistinctThingsAround_Patch");
+			if (m_RadialDistinctThingsAround_Patch == null) throw new Exception("Cannot find method WorkGiver_ConstructDeliverResources_FindNearbyNeeders_Patch.m_RadialDistinctThingsAround_Patch");
 
 			var found = 0;
 			var list = instructions.ToList();
@@ -330,7 +319,7 @@ namespace AchtungMod
 			foreach (var instruction in list)
 				yield return instruction;
 		}
-	}
+	}*/
 
 	// patch in our menu options
 	//
@@ -401,6 +390,9 @@ namespace AchtungMod
 			var m_CleanupCurrentJob = AccessTools.Method(typeof(Pawn_JobTracker), "CleanupCurrentJob");
 			var m_ContinueJob = AccessTools.Method(typeof(ForcedJob), nameof(ForcedJob.ContinueJob));
 			var f_pawn = AccessTools.Field(typeof(Pawn_JobTracker), "pawn");
+
+			if (m_CleanupCurrentJob == null) throw new Exception("Cannot find method Pawn_JobTracker.CleanupCurrentJob");
+			if (f_pawn == null) throw new Exception("Cannot find field Pawn_JobTracker.pawn");
 
 			var instrList = instructions.ToList();
 			for (var i = 0; i < instrList.Count; i++)
@@ -593,7 +585,7 @@ namespace AchtungMod
 	}
 
 	// turn reservation error into warning inject
-	//
+	/*
 	[HarmonyPatch(typeof(ReservationManager))]
 	[HarmonyPatch("LogCouldNotReserveError")]
 	static class ReservationManager_LogCouldNotReserveError_Patch
@@ -604,7 +596,7 @@ namespace AchtungMod
 			var toMethod = AccessTools.Method(typeof(Log), "Warning", new Type[] { typeof(string), typeof(bool) });
 			return instructions.MethodReplacer(fromMethod, toMethod);
 		}
-	}
+	}*/
 
 	// pawn inspector panel
 	//
