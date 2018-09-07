@@ -48,11 +48,6 @@ Here are the current problems and their workarounds for the current version:
 Achtung! usually does not modify save state for saved games to avoid a dependency on it. However, a side effect of the provided custom jobs is that when save the game and your colonists are actively running an Achtung job this will be saved too thus creating a dependency to Achtung. Workaround: open the saved game with Achtung, cancel all Achtung jobs and save it again. This will "clean" the save and remove the dependency.
 
 
-REQUIREMENTS
-
-Achtung! Mod works with RimWorld B18 and will get updated in-sync with RimWorld. I does not depend on any other mods and is known to work in any mod order you like.
-
-
 FEEDBACK
 
 Please send me feedback and rate and recommend my mod whenever possible. The three main places to do so are
