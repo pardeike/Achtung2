@@ -38,7 +38,7 @@ namespace AchtungMod
 						var jobItem = forcedWork.GetForcedJobs(option.forcePawn).FirstOrDefault();
 						if (jobItem != null)
 						{
-							sharedCells = jobItem.GetSortedTargets().Select(item => item.Cell).ToList();
+							sharedCells = jobItem.GetSortedTargets(new HashSet<int>()).Select(item => item.Cell).ToList();
 							result = true;
 						}
 					}

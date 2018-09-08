@@ -9,7 +9,7 @@ namespace AchtungMod
 {
 	public class ForcedWork : WorldComponent
 	{
-		Queue<KeyValuePair<Pawn, Job>> jobQueue = new Queue<KeyValuePair<Pawn, Job>>();
+		//Queue<KeyValuePair<Pawn, Job>> jobQueue = new Queue<KeyValuePair<Pawn, Job>>();
 
 		Dictionary<Pawn, ForcedJobs> allForcedJobs = new Dictionary<Pawn, ForcedJobs>();
 		private List<Pawn> forcedJobsKeysWorkingList;
@@ -20,7 +20,7 @@ namespace AchtungMod
 
 		public ForcedWork(World world) : base(world)
 		{
-			jobQueue = new Queue<KeyValuePair<Pawn, Job>>();
+			//jobQueue = new Queue<KeyValuePair<Pawn, Job>>();
 		}
 
 		private static List<WorkGiverDef> AllWorkerDefs<T>() where T : class
@@ -50,15 +50,17 @@ namespace AchtungMod
 			// jobQueue.Enqueue(new KeyValuePair<Pawn, Job>(pawn, job));
 		}
 
-		public override void WorldComponentTick()
+		/*public override void WorldComponentTick()
 		{
 			if (jobQueue.Count > 0)
 			{
 				var item = jobQueue.Dequeue();
 				// TODO: setting last lastJobGiver and lastJobTag lead to errors when loading a saved game
-				item.Key.jobs.StartJob(item.Value, JobCondition.Succeeded, null/*pawn.mindState.lastJobGiver*/, false, false, null, null/*pawn.mindState.lastJobTag*/, true);
+				// pawn.mindState.lastJobGiver
+				// pawn.mindState.lastJobTag
+				item.Key.jobs.StartJob(item.Value, JobCondition.Succeeded, null, false, false, null, null, true);
 			}
-		}
+		}*/
 
 		public List<ForcedJob> GetForcedJobs(Pawn pawn)
 		{

@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Harmony;
+using RimWorld;
+using System;
 using System.Collections.Generic;
-using Harmony;
+using UnityEngine;
 using Verse;
 using Verse.AI;
-using UnityEngine;
-using RimWorld;
 
 namespace AchtungMod
 {
@@ -132,7 +132,7 @@ namespace AchtungMod
 		{
 			return
 				currentItem == null ||
-				(currentItem.Thing != null && currentItem.Thing.Destroyed) ||
+				(currentItem.HasThing && currentItem.Thing.Destroyed) ||
 				currentItem.Cell.IsValid == false ||
 				(currentItem.Cell.x == 0 && currentItem.Cell.z == 0);
 		}

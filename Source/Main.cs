@@ -258,9 +258,7 @@ namespace AchtungMod
 	}
 
 	// for forced jobs, do not find work "on the way" to the work cell
-	/*
-	 * ### ENABLE AGAIN FOR SMART BUILDING
-	 * 
+	//
 	[HarmonyPatch(typeof(WorkGiver_ConstructDeliverResources))]
 	[HarmonyPatch("FindNearbyNeeders")]
 	static class WorkGiver_ConstructDeliverResources_FindNearbyNeeders_Patch
@@ -269,23 +267,16 @@ namespace AchtungMod
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 			var forcedJob = forcedWork.GetForcedJob(pawn);
-			if (forcedJob != null)
+			if (forcedJob != null && forcedJob.isThingJob)
 			{
-				var targets = forcedJob.GetSortedTargets()
-					.Where(target => forcedWork.IsForbiddenLocation(target.Cell) == false).ToList();
-				if (targets.Count > 0)
-				{
-					if (targets[0].HasThing)
-					{
-						foreach (var thing in targets.Select(target => target.Thing))
-							yield return thing;
-						yield break;
-					}
-				}
+				foreach (var thing1 in forcedJob.GetUnsortedTargets())
+					yield return thing1;
 			}
-
-			foreach (var thing in GenRadial.RadialDistinctThingsAround(center, map, radius, useCenter))
-				yield return thing;
+			else
+			{
+				foreach (var thing2 in GenRadial.RadialDistinctThingsAround(center, map, radius, useCenter))
+					yield return thing2;
+			}
 		}
 
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -319,7 +310,7 @@ namespace AchtungMod
 			foreach (var instruction in list)
 				yield return instruction;
 		}
-	}*/
+	}
 
 	// patch in our menu options
 	//

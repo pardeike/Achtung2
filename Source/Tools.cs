@@ -173,6 +173,142 @@ namespace AchtungMod
 			});
 		}
 
+		public static bool IsFreeTarget(Pawn pawn, ForcedTarget target)
+		{
+			var allReservations = Tools.Reservations(pawn.Map.reservationManager);
+			return allReservations.Any(res => res.Target.Cell == target.item.Cell && res.Claimant != pawn) == false;
+		}
+
+		public static bool WillBlock(this LocalTargetInfo info)
+		{
+			if (info.HasThing == false) return false;
+			var thing = info.Thing;
+			var thingDef = thing.def;
+			var blueprint = thing as Blueprint;
+			if (blueprint != null)
+			{
+				var def = blueprint.def.entityDefToBuild as ThingDef;
+				if (def != null)
+					thingDef = def;
+			}
+			var frame = thing as Frame;
+			if (frame != null)
+			{
+				var def = frame.def.entityDefToBuild as ThingDef;
+				if (def != null)
+					thingDef = def;
+			}
+			return thingDef.passability == Traversability.Impassable;
+		}
+
+		public static int[] NeighbourCount(IntVec3 pos, PathGrid grid, HashSet<int> planned, int mapWidth)
+		{
+			var idx = CellIndicesUtility.CellToIndex(pos.x, pos.z, mapWidth);
+			if (grid.Walkable(pos) == false || planned.Contains(idx))
+				return new[] { -1, 0, 0 };
+			var counts = new int[4];
+			for (var i = 0; i < 4; i++)
+			{
+				var vec = pos + GenAdj.CardinalDirectionsAround[i];
+				idx = CellIndicesUtility.CellToIndex(vec.x, vec.z, mapWidth);
+				counts[i] = planned.Contains(idx) == false && grid.Walkable(vec) ? 0 : 1;
+			}
+			var count = counts.Sum();
+			var isCorner = count == 2 && counts[0] != counts[2];
+			var isRoomCorner = false;
+			if (isCorner)
+			{
+				for (var i = 0; i < 4; i++)
+				{
+					var j = (i + 1) % 4;
+					if (counts[i] == 0 && counts[j] == 0)
+					{
+						var vec = pos + GenAdj.CardinalDirectionsAround[i] + GenAdj.CardinalDirectionsAround[j];
+						idx = CellIndicesUtility.CellToIndex(vec.x, vec.z, mapWidth);
+						if (planned.Contains(idx) == false && grid.Walkable(vec))
+						{
+							isRoomCorner = true;
+							break;
+						}
+					}
+				}
+			}
+			return new[] { count, isCorner ? 1 : 0, isRoomCorner ? 1 : 0 };
+		}
+
+		private static int NeighbourSubScore(IntVec3 pos, PathGrid pathGrid, int mapWidth, HashSet<int> planned)
+		{
+			var result = 0;
+			for (var i = 0; i < 4; i++)
+			{
+				var vec = pos + GenAdj.CardinalDirectionsAround[i];
+				var subInfo = NeighbourCount(vec, pathGrid, planned, mapWidth);
+				if (subInfo[0] != -1)
+					result += 4 - subInfo[0];
+			}
+			return result;
+		}
+
+		public static int NeighbourScore(IntVec3 pos, PathGrid pathGrid, int mapWidth, HashSet<int> planned)
+		{
+			var neighbourCountInfo = NeighbourCount(pos, pathGrid, planned, mapWidth);
+			var blockedCount = neighbourCountInfo[0];
+			var IsCorner = neighbourCountInfo[1] == 1;
+			var IsRoomCorner = neighbourCountInfo[2] == 1;
+
+			// full enclosed or pos itself unwalkable
+			if (blockedCount == -1 || blockedCount == 4)
+				return -100;
+
+			// end of tunnel
+			if (blockedCount == 3)
+				return 11;
+
+			var neighbourScore = NeighbourSubScore(pos, pathGrid, mapWidth, planned);
+
+			// safe corners (1)
+			if (blockedCount == 2 && IsCorner)
+			{
+				if (neighbourScore == 6)
+					return 10;
+				if (neighbourScore == 7)
+					return 9;
+				if (neighbourScore == 5 && IsRoomCorner)
+					return 8;
+				if (neighbourScore == 4 && IsRoomCorner)
+					return 7;
+			}
+
+			// perimeter
+			if (blockedCount == 1)
+			{
+				if (neighbourScore == 8) // between two corners
+					return 6;
+				if (neighbourScore == 10) // at the wall
+					return 5;
+				if (neighbourScore == 11) // at the wall but close to negative corner
+					return 4;
+				if (neighbourScore == 9) // one corner
+					return 3;
+				if (neighbourScore == 12) // at the end of a free standing block
+					return 2;
+			}
+
+			// safe corners (2)
+			if (blockedCount == 2 && IsCorner)
+			{
+				if (neighbourScore == 5)
+					return 1;
+			}
+
+			// center
+			if (blockedCount == 0)
+				return 0;
+
+			// all the unsafe positions - we should never get here if we re-iterate
+			return -neighbourScore;
+		}
+
 		public static IEnumerable<IntVec3> AllCells(this LocalTargetInfo item)
 		{
 			if (item.HasThing)
