@@ -208,12 +208,10 @@ namespace AchtungMod
 
 			if (condition == JobCondition.InterruptForced)
 			{
-				Find.LetterStack.ReceiveLetter("Forced work interrupted", "Forced work of " + pawn.Name.ToStringShort + " was interrupted.", LetterDefOf.NeutralEvent, pawn);
+				Messages.Message("Forced work of " + pawn.Name.ToStringShort + " was interrupted.", MessageTypeDefOf.RejectInput);
 				forcedWork.Remove(pawn);
 				return false;
 			}
-
-			// pawn.ClearReservationsForJob(lastJob);
 
 			while (true)
 			{
@@ -430,11 +428,11 @@ namespace AchtungMod
 			return null;
 		}
 
-		public static Job GetCellJob(this IntVec3 cell, Pawn pawn, WorkGiver_Scanner workgiver)
+		public static Job GetCellJob(this IntVec3 cell, Pawn pawn, WorkGiver_Scanner workgiver, bool ignoreReserve = false)
 		{
 			if (workgiver.PotentialWorkCellsGlobal(pawn).Contains(cell))
 				if (workgiver.MissingRequiredCapacity(pawn) == null)
-					if (workgiver.HasJobOnCell(pawn, cell))
+					if (workgiver.HasJobOnCell(pawn, cell, ignoreReserve))
 					{
 						var job = workgiver.JobOnCell(pawn, cell);
 						if (pawn.CanReach(cell, workgiver.PathEndMode, Danger.Deadly))

@@ -104,6 +104,8 @@ namespace AchtungMod
 
 		public void RemoveForcedJob(Pawn pawn)
 		{
+			Unprepare(pawn);
+
 			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
 				return;
 			if (forcedJobs.jobs.Count == 0)
@@ -137,12 +139,12 @@ namespace AchtungMod
 			{
 				var cell = pos + radial[i];
 
-				if (cell.GetCellJob(pawn, workgiver) != null)
+				if (cell.GetCellJob(pawn, workgiver, true) != null)
 					return new LocalTargetInfo(cell);
 				var things = pawn.Map.thingGrid.ThingsAt(cell);
 				foreach (var thing in things)
 				{
-					if (thing.GetThingJob(pawn, workgiver) != null)
+					if (thing.GetThingJob(pawn, workgiver, true) != null)
 						return new LocalTargetInfo(thing);
 				}
 			}

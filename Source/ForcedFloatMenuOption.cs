@@ -159,13 +159,14 @@ namespace AchtungMod
 				var item = forcedWork.HasJobItem(forcePawn, workgiver, forceCell);
 				if (item == null) continue;
 
+				Tools.CancelWorkOn(forcePawn, item);
+
 				if (forcedWork.AddForcedJob(forcePawn, workgiverDefs, item))
 				{
 					var job = forcedWork.GetJobItem(forcePawn, workgiver, item);
 					var success = job == null ? false : forcePawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, forceCell);
 					if (success == false)
 					{
-						Log.Error("Cannot execute job with " + forcePawn.Name.ToStringShort + " at " + forceCell + " with " + workgiverDef + " even if HasJobItem returned " + item);
 						forcedWork.Prepare(forcePawn);
 						continue;
 					}
@@ -173,8 +174,8 @@ namespace AchtungMod
 				return true;
 			}
 
-			forcedWork.Unprepare(forcePawn);
-			Log.Warning("Cannot find job for " + forcePawn.Name.ToStringShort + " at " + forceCell + " with " + string.Join(",", workgiverDefs.Select(def => def.ToString()).ToArray()));
+			forcedWork.RemoveForcedJob(forcePawn);
+			Messages.Message(forcePawn.Name.ToStringShort + " could not find more forced work. The remaining work is most likely reserved or not accessible.", MessageTypeDefOf.RejectInput);
 			return false;
 		}
 	}

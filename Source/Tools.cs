@@ -449,6 +449,25 @@ namespace AchtungMod
 			return oldState != drafted;
 		}
 
+		public static void CancelWorkOn(Pawn newWorker, LocalTargetInfo workItem)
+		{
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			newWorker.Map.mapPawns
+				.PawnsInFaction(Faction.OfPlayer)
+				.DoIf(pawn => pawn.jobs.curJob != null && forcedWork.HasForcedJob(pawn) == false, pawn =>
+				 {
+					 var isForced = pawn.jobs.curJob.playerForced;
+					 var hasTarget = pawn.jobs.curJob.AnyTargetIs(workItem);
+					 var destination = pawn.jobs.curJob.GetDestination(pawn);
+					 if (isForced && hasTarget && destination == workItem)
+					 {
+						 pawn.ClearReservationsForJob(pawn.CurJob);
+						 pawn.jobs.EndCurrentJob(Verse.AI.JobCondition.InterruptForced, false);
+						 forcedWork.Remove(pawn);
+					 }
+				 });
+		}
+
 		public static void DrawMarker(Vector3 pos)
 		{
 			pos.y = Altitudes.AltitudeFor(AltitudeLayer.Pawn - 1);

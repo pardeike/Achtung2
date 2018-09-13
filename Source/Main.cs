@@ -199,7 +199,11 @@ namespace AchtungMod
 		public static bool CanReserve(ReservationManager reservationManager, Pawn claimant, LocalTargetInfo target, int maxPawns, int stackCount, ReservationLayerDef layer, bool ignoreOtherReservations)
 		{
 			if (ignoreOtherReservations)
-				return false;
+			{
+				var forcedWork = Find.World.GetComponent<ForcedWork>();
+				if (forcedWork.HasForcedJob(claimant))
+					return false;
+			}
 			return reservationManager.CanReserve(claimant, target, maxPawns, stackCount, layer, ignoreOtherReservations);
 		}
 
