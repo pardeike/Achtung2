@@ -1,5 +1,6 @@
 ﻿using Harmony;
 using RimWorld;
+using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -551,7 +552,8 @@ namespace AchtungMod
 	{
 		static void Prefix()
 		{
-			Controller.GetInstance().HandleEvents();
+			if (WorldRendererUtility.WorldRenderedNow == false)
+				Controller.GetInstance().HandleEvents();
 		}
 	}
 
@@ -563,7 +565,8 @@ namespace AchtungMod
 	{
 		static void Postfix()
 		{
-			Controller.GetInstance().HandleDrawing();
+			if (WorldRendererUtility.WorldRenderedNow == false)
+				Controller.GetInstance().HandleDrawing();
 		}
 	}
 
@@ -575,7 +578,8 @@ namespace AchtungMod
 	{
 		static void Postfix()
 		{
-			Controller.GetInstance().HandleDrawingOnGUI();
+			if (WorldRendererUtility.WorldRenderedNow == false)
+				Controller.GetInstance().HandleDrawingOnGUI();
 		}
 	}
 
@@ -616,7 +620,8 @@ namespace AchtungMod
 		static void Postfix(List<FloatMenuOption> __result, Vector3 clickPos, Pawn pawn)
 		{
 			if (pawn != null && pawn.Drafted == false)
-				__result.AddRange(Controller.GetInstance().AchtungChoicesAtFor(clickPos, pawn));
+				if (WorldRendererUtility.WorldRenderedNow == false)
+					__result.AddRange(Controller.GetInstance().AchtungChoicesAtFor(clickPos, pawn));
 		}
 	}
 }
