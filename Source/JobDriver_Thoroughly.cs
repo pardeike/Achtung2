@@ -62,7 +62,7 @@ namespace AchtungMod
 			Scribe_Values.Look(ref totalWorkCount, "totalWorkCount", -1f, false);
 		}
 
-		public virtual IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, Vector3 clickPos)
+		public virtual IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, LocalTargetInfo clickCell)
 		{
 			pawn = thePawn;
 			return null;
@@ -83,9 +83,9 @@ namespace AchtungMod
 			return jobs;
 		}
 
-		public void StartJob(Pawn targetPawn, LocalTargetInfo target)
+		public void StartJob(Pawn targetPawn, LocalTargetInfo target, LocalTargetInfo extra)
 		{
-			var newJob = new Job(MakeDef(), target) { playerForced = true };
+			var newJob = new Job(MakeDef(), target, extra) { playerForced = true };
 			targetPawn.jobs.TryTakeOrderedJob(newJob);
 		}
 

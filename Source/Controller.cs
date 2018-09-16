@@ -250,14 +250,15 @@ namespace AchtungMod
 		private void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType)
 		{
 			var driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
-			var targets = driver.CanStart(pawn, clickPos);
+			var clickCell = new LocalTargetInfo(IntVec3.FromVector3(clickPos));
+			var targets = driver.CanStart(pawn, clickCell);
 			if (targets != null)
 			{
 				var existingJobs = driver.SameJobTypesOngoing();
 				foreach (var target in targets)
 				{
 					var suffix = existingJobs.Count > 0 ? " " + ("AlreadyDoing".Translate(existingJobs.Count + 1)) : "";
-					options.Add(new FloatMenuOption(driver.GetLabel() + suffix, () => driver.StartJob(pawn, target), MenuOptionPriority.Low));
+					options.Add(new FloatMenuOption(driver.GetLabel() + suffix, () => driver.StartJob(pawn, target, clickCell), MenuOptionPriority.Low));
 				}
 			}
 		}

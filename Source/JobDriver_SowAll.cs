@@ -1,11 +1,11 @@
-﻿using System;
+﻿using RimWorld;
+using System;
 using System.Collections.Generic;
-using RimWorld;
+using System.Linq;
+using System.Reflection;
+using UnityEngine;
 using Verse;
 using Verse.AI;
-using System.Linq;
-using UnityEngine;
-using System.Reflection;
 
 namespace AchtungMod
 {
@@ -39,13 +39,12 @@ namespace AchtungMod
 			return EffecterDefOf.Sow;
 		}
 
-		public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, Vector3 clickPos)
+		public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, LocalTargetInfo clickCell)
 		{
-			base.CanStart(thePawn, clickPos);
-			if (thePawn.workSettings.GetPriority(WorkTypeDefOf.Growing) == 0) return null;
-			LocalTargetInfo cell = IntVec3.FromVector3(clickPos);
-			var cells = AllWorkAt(cell, thePawn, true);
-			IEnumerable<LocalTargetInfo> result = (cells != null && cells.Count() > 0) ? new List<LocalTargetInfo> { cell } : null;
+			base.CanStart(thePawn, clickCell);
+			if (thePawn.workSettings == null || thePawn.workSettings.GetPriority(WorkTypeDefOf.Growing) == 0) return null;
+			var cells = AllWorkAt(clickCell, thePawn, true);
+			IEnumerable<LocalTargetInfo> result = (cells != null && cells.Count() > 0) ? new List<LocalTargetInfo> { clickCell } : null;
 
 			return result;
 		}

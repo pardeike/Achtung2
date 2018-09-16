@@ -1,10 +1,9 @@
-﻿using System;
+﻿using RimWorld;
+using System;
 using System.Collections.Generic;
-using RimWorld;
+using System.Linq;
 using Verse;
 using Verse.AI;
-using System.Linq;
-using UnityEngine;
 
 namespace AchtungMod
 {
@@ -15,15 +14,14 @@ namespace AchtungMod
 			return "FireFight";
 		}
 
-		public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, Vector3 clickPos)
+		public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, LocalTargetInfo clickCell)
 		{
-			base.CanStart(thePawn, clickPos);
-			if (thePawn.workSettings.GetPriority(WorkTypeDefOf.Firefighter) == 0) return null;
-			LocalTargetInfo cell = IntVec3.FromVector3(clickPos);
-			var item = thePawn.Map.thingGrid.ThingAt(cell.Cell, ThingDefOf.Fire);
+			base.CanStart(thePawn, clickCell);
+			if (thePawn.workSettings == null || thePawn.workSettings.GetPriority(WorkTypeDefOf.Firefighter) == 0) return null;
+			var item = thePawn.Map.thingGrid.ThingAt(clickCell.Cell, ThingDefOf.Fire);
 			if (item == null) return null;
 			var canFight = item.Destroyed == false && thePawn.CanReach(item, PathEndMode.Touch, thePawn.NormalMaxDanger()) && thePawn.CanReserve(item, 1);
-			return canFight ? new List<LocalTargetInfo> { cell } : null;
+			return canFight ? new List<LocalTargetInfo> { clickCell } : null;
 		}
 
 		public override void UpdateVerbAndWorkLocations()
