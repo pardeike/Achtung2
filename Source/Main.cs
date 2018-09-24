@@ -28,8 +28,6 @@ namespace AchtungMod
 			const string sameSpotId = "net.pardeike.rimworld.mod.samespot";
 			IsSameSpotInstalled = harmony.GetPatchedMethods()
 				.Any(method => harmony.GetPatchInfo(method).Transpilers.Any(transpiler => transpiler.owner == sameSpotId));
-
-			FireStats.Trigger(true);
 		}
 	}
 
@@ -59,7 +57,7 @@ namespace AchtungMod
 	{
 		static void Postfix()
 		{
-			FireStats.Trigger(false);
+			ModCounter.Trigger();
 		}
 	}
 

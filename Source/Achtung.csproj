@@ -45,9 +45,6 @@
       <HintPath>D:\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Firebaser, Version=0.9.6.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Firebaser.0.9.6\lib\net35\Firebaser.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine">
       <HintPath>D:\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
@@ -57,7 +54,7 @@
   <ItemGroup>
     <Compile Include="Colonist.cs" />
     <Compile Include="Controller.cs" />
-    <Compile Include="FireStats.cs" />
+    <Compile Include="ModCounter.cs" />
     <Compile Include="ForcedFloatMenuOption.cs" />
     <Compile Include="ForcedJob.cs" />
     <Compile Include="ForcedWork.cs" />
@@ -84,7 +81,7 @@
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_ConfigurationName="Any" BuildVersion_IncrementBeforeBuild="False" BuildVersion_StartDate="2000/1/1" BuildVersion_BuildVersioningStyle="None.None.None.None" BuildVersion_UpdateAssemblyVersion="False" BuildVersion_UpdateFileVersion="False" BuildVersion_UseGlobalSettings="False" BuildVersion_UseUniversalClock="False" BuildVersion_ReplaceNonNumerics="False" />
+      <UserProperties BuildVersion_ReplaceNonNumerics="False" BuildVersion_UseUniversalClock="False" BuildVersion_UseGlobalSettings="False" BuildVersion_UpdateFileVersion="False" BuildVersion_UpdateAssemblyVersion="False" BuildVersion_BuildVersioningStyle="None.None.None.None" BuildVersion_StartDate="2000/1/1" BuildVersion_IncrementBeforeBuild="False" BuildVersion_ConfigurationName="Any" BuildVersion_DetectChanges="False" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
