@@ -84,14 +84,23 @@ namespace AchtungMod
 			if (room == null || room.IsHuge)
 				return new List<Filth>();
 
+			var pathGrid = pawn.Map.pathGrid;
+			if (pathGrid == null)
+				return new List<Filth>();
+
 			var filth = room
 				.ContainedAndAdjacentThings.OfType<Filth>()
 				.Where(f =>
-					f.Destroyed == false
-					&& f.GetRoom() == room || f.GetRoom().IsDoorway
-					&& pawn.CanReach(f, PathEndMode.Touch, pawn.NormalMaxDanger())
-					&& pawn.CanReserve(f, 1)
-				);
+				{
+					if (f == null || f.Destroyed) return false;
+					if (pathGrid.Walkable(f.Position) == false) return false;
+					var fRoom = f.GetRoom();
+					if (fRoom == null) return false;
+					if (fRoom != room && fRoom.IsDoorway == false) return false;
+					if (pawn.CanReach(f, PathEndMode.Touch, pawn.NormalMaxDanger()) == false) return false;
+					if (pawn.CanReserve(f, 1) == false) return false;
+					return true;
+				});
 
 			var filthCount = filth.Count();
 			if (filthCount > 0)

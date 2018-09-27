@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using UnityEngine;
 using Verse;
 using Verse.AI;
 
@@ -13,21 +11,6 @@ namespace AchtungMod
 	{
 		public ThingDef currentPlantDef;
 		public float xpPerTick = 0.11f;
-
-		public static MethodInfo _ThrowTextMethod;
-		public static MethodInfo ThrowTextMethod
-		{
-			get
-			{
-				if (_ThrowTextMethod == null)
-				{
-					var type = Type.GetType("RimWorld.MoteThrower", false, false);
-					if (type == null) type = Type.GetType("RimWorld.MoteMaker", false, false);
-					if (type != null) _ThrowTextMethod = type.GetMethod("ThrowText", BindingFlags.Static | BindingFlags.Public);
-				}
-				return _ThrowTextMethod;
-			}
-		}
 
 		public override string GetPrefix()
 		{
@@ -167,12 +150,6 @@ namespace AchtungMod
 			return c;
 		}
 
-		// A14 & A15 compatibility
-		public void ThrowText(Vector3 loc, string txt)
-		{
-			ThrowTextMethod?.Invoke(null, new object[] { loc, txt, 220 });
-		}
-
 		public bool Harvest(Plant plant)
 		{
 			pawn.skills?.Learn(SkillDefOf.Plants, xpPerTick);
@@ -187,7 +164,7 @@ namespace AchtungMod
 					if (pawn.RaceProps.Humanlike && plant.def.plant.harvestFailable && Rand.Value > pawn.GetStatValue(StatDefOf.PlantHarvestYield, true))
 					{
 						var loc = (pawn.DrawPos + plant.DrawPos) / 2f;
-						ThrowText(loc, "HarvestFailed".Translate());
+						MoteMaker.ThrowText(loc, pawn.Map, "HarvestFailed".Translate());
 					}
 					else
 					{

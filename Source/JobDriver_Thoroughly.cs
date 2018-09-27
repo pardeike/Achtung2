@@ -190,7 +190,7 @@ namespace AchtungMod
 			if (pawn.Position.AdjacentTo8WayOrInside(currentItem))
 			{
 				var itemCompleted = DoWorkToItem();
-				// if (itemCompleted) currentItem = null;
+				if (itemCompleted) currentItem = null;
 			}
 			else if (!isMoving)
 			{
