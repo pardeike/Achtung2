@@ -546,8 +546,8 @@ namespace AchtungMod
 		public static Vector2 LabelDrawPosFor(Vector3 drawPos, float worldOffsetZ)
 		{
 			drawPos.z += worldOffsetZ;
-			Vector2 vector2 = Find.Camera.WorldToScreenPoint(drawPos);
-			vector2.y = Screen.height - vector2.y;
+			var vector2 = Find.Camera.WorldToScreenPoint(drawPos) / Prefs.UIScale;
+			vector2.y = UI.screenHeight - vector2.y;
 			return vector2;
 		}
 
