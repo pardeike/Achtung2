@@ -39,13 +39,9 @@ SETTINGS
 Achtung uses the default way to access mod settings. There, you find switches to turn certain features on/off and you can change the default keys to your liking.
 
 
-COMPATIBILITY
+ADDING AND REMOVING:
 
-Achtung! is developed with the user in mind. To stay compatible with other mods, Achtung! was developed to stay out of its way and does not overwrite any essential functions. Instead, it reuses existing functionality and probably works with 99% of other mods out of the box.
-
-Here are the current problems and their workarounds for the current version:
-
-Achtung! usually does not modify save state for saved games to avoid a dependency on it. However, a side effect of the provided custom jobs is that when save the game and your colonists are actively running an Achtung job this will be saved too thus creating a dependency to Achtung. Workaround: open the saved game with Achtung, cancel all Achtung jobs and save it again. This will "clean" the save and remove the dependency.
+Achtung can be added to any existing game. It usually does not modify save state for saved games to avoid a dependency on it. However, a side effect of the provided custom jobs is that when save the game and your colonists are actively running an Achtung job this will be saved too thus creating a dependency to Achtung. Workaround: open the saved game with Achtung, cancel all Achtung jobs and save it again. This will "clean" the save and remove the dependency.
 
 
 FEEDBACK
