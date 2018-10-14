@@ -257,7 +257,7 @@ namespace AchtungMod
 				var existingJobs = driver.SameJobTypesOngoing();
 				foreach (var target in targets)
 				{
-					var suffix = existingJobs.Count > 0 ? " " + ("AlreadyDoing".Translate(existingJobs.Count + 1)) : "";
+					var suffix = existingJobs.Count > 0 ? " " + ("AlreadyDoing".Translate(new object[] { existingJobs.Count + 1 })) : "";
 					options.Add(new FloatMenuOption(driver.GetLabel() + suffix, () => driver.StartJob(pawn, target, clickCell), MenuOptionPriority.Low));
 				}
 			}
@@ -277,8 +277,12 @@ namespace AchtungMod
 		private void DrawForcedJobs()
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
-			forcedWork.ForcedJobsForMap(Find.CurrentMap)
-				.DoIf(forcedJob => Find.Selector.IsSelected(forcedJob.pawn), forcedJob =>
+			var map = Find.CurrentMap;
+			if (map == null || forcedWork == null)
+				return;
+
+			forcedWork.ForcedJobsForMap(map)
+				.DoIf(forcedJob => forcedJob.pawn.Spawned && forcedJob.pawn.Map == map && Find.Selector.IsSelected(forcedJob.pawn), forcedJob =>
 				{
 					forcedJob.AllCells(true).Distinct()
 						.Do(cell => Tools.DrawForceIcon(cell.ToVector3()));

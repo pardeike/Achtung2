@@ -451,24 +451,24 @@ namespace AchtungMod
 			if (breakNote != null)
 			{
 				___pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(___pawn);
-				var jobName = ___pawn.jobs.curJob.GetReport(___pawn).CapitalizeFirst();
-				var label = "JobInterruptedLabel".Translate(jobName);
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(___pawn.Name.ToStringShort, breakNote), LetterDefOf.NegativeEvent, ___pawn));
+				var jobName = ___pawn.jobs?.curJob.GetReport(___pawn).CapitalizeFirst() ?? "-";
+				var label = "JobInterruptedLabel".Translate(new object[] { jobName });
+				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(new object[] { ___pawn.Name.ToStringShort, breakNote }), LetterDefOf.NegativeEvent, ___pawn));
 
 				forcedWork.Remove(___pawn);
-				___pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, true);
+				___pawn.jobs?.EndCurrentJob(JobCondition.InterruptForced, true);
 				return;
 			}
 
 			if (Tools.PawnOverHealthLevel(___pawn))
 			{
 				___pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(___pawn);
-				var jobName = ___pawn.jobs.curJob.GetReport(___pawn).CapitalizeFirst();
-				var label = "JobInterruptedLabel".Translate(jobName);
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBadHealth".Translate(___pawn.Name.ToStringShort), LetterDefOf.NegativeEvent, ___pawn));
+				var jobName = ___pawn.jobs?.curJob.GetReport(___pawn).CapitalizeFirst() ?? "-";
+				var label = "JobInterruptedLabel".Translate(new object[] { jobName });
+				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBadHealth".Translate(new object[] { ___pawn.Name.ToStringShort }), LetterDefOf.NegativeEvent, ___pawn));
 
 				forcedWork.Remove(___pawn);
-				___pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, true);
+				___pawn.jobs?.EndCurrentJob(JobCondition.InterruptForced, true);
 				return;
 			}
 		}
@@ -514,7 +514,7 @@ namespace AchtungMod
 			yield return new Command_Action
 			{
 				defaultLabel = "IncreaseForceRadius".Translate(),
-				defaultDesc = "IncreaseForceRadiusDesc".Translate(radius),
+				defaultDesc = "IncreaseForceRadiusDesc".Translate(new object[] { radius }),
 				icon = ForceRadiusExpand,
 				activateSound = SoundDefOf.Designate_AreaAdd,
 				action = delegate
@@ -527,7 +527,7 @@ namespace AchtungMod
 			yield return new Command_Action
 			{
 				defaultLabel = "DecreaseForceRadius".Translate(),
-				defaultDesc = "DecreaseForceRadiusDesc".Translate(radius),
+				defaultDesc = "DecreaseForceRadiusDesc".Translate(new object[] { radius }),
 				icon = radius > 0 ? ForceRadiusShrink : ForceRadiusShrinkOff,
 				activateSound = radius > 0 ? SoundDefOf.Designate_AreaAdd : SoundDefOf.Designate_Failed,
 				action = delegate

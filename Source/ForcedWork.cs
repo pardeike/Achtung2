@@ -9,8 +9,6 @@ namespace AchtungMod
 {
 	public class ForcedWork : WorldComponent
 	{
-		//Queue<KeyValuePair<Pawn, Job>> jobQueue = new Queue<KeyValuePair<Pawn, Job>>();
-
 		Dictionary<Pawn, ForcedJobs> allForcedJobs = new Dictionary<Pawn, ForcedJobs>();
 		private List<Pawn> forcedJobsKeysWorkingList;
 		private List<ForcedJobs> forcedJobsValuesWorkingList;
@@ -20,7 +18,6 @@ namespace AchtungMod
 
 		public ForcedWork(World world) : base(world)
 		{
-			//jobQueue = new Queue<KeyValuePair<Pawn, Job>>();
 		}
 
 		private static List<WorkGiverDef> AllWorkerDefs<T>() where T : class
@@ -43,24 +40,9 @@ namespace AchtungMod
 
 		public void QueueJob(Pawn pawn, Job job)
 		{
-			// TODO: find out if we still get stackoverflows if we start jobs directly
 			var tracker = pawn.jobs;
-			tracker.StartJob(job, JobCondition.Succeeded, null/*pawn.mindState.lastJobGiver*/, false, false, null, null/*pawn.mindState.lastJobTag*/, true);
-
-			// jobQueue.Enqueue(new KeyValuePair<Pawn, Job>(pawn, job));
+			tracker?.StartJob(job, JobCondition.Succeeded, null, false, false, null, null, true);
 		}
-
-		/*public override void WorldComponentTick()
-		{
-			if (jobQueue.Count > 0)
-			{
-				var item = jobQueue.Dequeue();
-				// TODO: setting last lastJobGiver and lastJobTag lead to errors when loading a saved game
-				// pawn.mindState.lastJobGiver
-				// pawn.mindState.lastJobTag
-				item.Key.jobs.StartJob(item.Value, JobCondition.Succeeded, null, false, false, null, null, true);
-			}
-		}*/
 
 		public List<ForcedJob> GetForcedJobs(Pawn pawn)
 		{

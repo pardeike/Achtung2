@@ -63,7 +63,7 @@ namespace AchtungMod
 		{
 			var room = RoomAt(TargetA);
 			var name = room == null ? "" : " " + room.Role.label;
-			return (GetPrefix() + "Report").Translate(name, room == null ? "-" : Math.Floor(Progress() * 100f) + "%");
+			return (GetPrefix() + "Report").Translate(new object[] { name, room == null ? "-" : Math.Floor(Progress() * 100f) + "%" });
 		}
 
 		public override bool TryMakePreToilReservations(bool errorOnFailed)

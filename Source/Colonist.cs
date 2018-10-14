@@ -61,7 +61,10 @@ namespace AchtungMod
 					collideWithPawns = false,
 					locomotionUrgency = LocomotionUrgency.Sprint
 				};
-				if (pawn.jobs.IsCurrentJobPlayerInterruptible())
+				if (pawn.Map.exitMapGrid.IsExitCell(bestCell))
+					job.exitMapOnArrival = true;
+
+				if (pawn.jobs?.IsCurrentJobPlayerInterruptible() ?? false)
 					pawn.jobs.TryTakeOrderedJob(job);
 			}
 		}

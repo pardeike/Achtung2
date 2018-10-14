@@ -354,7 +354,7 @@ namespace AchtungMod
 					pawn.drafter != null
 					&& pawn.IsColonistPlayerControlled
 					&& pawn.Downed == false
-					&& pawn.jobs.IsCurrentJobPlayerInterruptible())
+					&& (pawn.jobs?.IsCurrentJobPlayerInterruptible() ?? false))
 				.Select(pawn => new Colonist(pawn))
 				.ToList();
 		}
@@ -413,7 +413,7 @@ namespace AchtungMod
 				if (colonist.originalDraftStatus == false && newDraftStatus)
 					gotUndrafted = true;
 				colonist.pawn.mindState.priorityWork.Clear();
-				if (colonist.pawn.jobs.curJob != null && colonist.pawn.jobs.IsCurrentJobPlayerInterruptible())
+				if (colonist.pawn.jobs?.curJob != null && colonist.pawn.jobs.IsCurrentJobPlayerInterruptible())
 				{
 					colonist.pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
 				}
@@ -452,9 +452,12 @@ namespace AchtungMod
 		public static void CancelWorkOn(Pawn newWorker, LocalTargetInfo workItem)
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			if (forcedWork == null || newWorker.Map == null)
+				return;
+
 			newWorker.Map.mapPawns
 				.PawnsInFaction(Faction.OfPlayer)
-				.DoIf(pawn => pawn.jobs.curJob != null && forcedWork.HasForcedJob(pawn) == false, pawn =>
+				.DoIf(pawn => pawn.jobs?.curJob != null && forcedWork.HasForcedJob(pawn) == false, pawn =>
 				 {
 					 var isForced = pawn.jobs.curJob.playerForced;
 					 var hasTarget = pawn.jobs.curJob.AnyTargetIs(workItem);
