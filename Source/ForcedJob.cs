@@ -18,12 +18,17 @@ namespace AchtungMod
 
 		public void ExposeData()
 		{
+			if (Scribe.mode == LoadSaveMode.Saving)
+				jobs.RemoveAll(job => job.IsEmpty());
+
 			Scribe_Collections.Look(ref jobs, "jobs", LookMode.Deep);
 
-			if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
 				if (jobs == null)
 					jobs = new List<ForcedJob>();
+
+				jobs.RemoveAll(job => job.IsEmpty());
 			}
 		}
 	}
@@ -35,10 +40,10 @@ namespace AchtungMod
 
 		public Pawn pawn = null;
 		public List<WorkGiverDef> workgiverDefs = new List<WorkGiverDef>();
+		public Action cellChangeDelegate;
 		public bool isThingJob = false;
 		public bool initialized = false;
 		public int cellRadius = 0;
-
 		static readonly Dictionary<BuildableDef, int> TypeScores = new Dictionary<BuildableDef, int>
 		{
 			{ ThingDefOf.PowerConduit, 1000 },
@@ -83,6 +88,7 @@ namespace AchtungMod
 		public void AddTarget(LocalTargetInfo item)
 		{
 			targets.Add(new ForcedTarget(item, MaterialScore(item)));
+			cellChangeDelegate();
 			UpdateCells();
 		}
 
@@ -126,11 +132,6 @@ namespace AchtungMod
 			}
 
 			return new[] { scoreThing, scoreBlueprint, scoreFrame }.Max();
-		}
-
-		public void PrepareTargets()
-		{
-			return;
 		}
 
 		public IEnumerable<Thing> GetUnsortedTargets()
@@ -300,7 +301,7 @@ namespace AchtungMod
 					var item = new LocalTargetInfo(thing);
 					return new ForcedTarget(item, MaterialScore(item));
 				}));
-				PrepareTargets();
+				cellChangeDelegate();
 
 				return;
 			}
@@ -328,11 +329,19 @@ namespace AchtungMod
 				var item = new LocalTargetInfo(cell);
 				return new ForcedTarget(item, MaterialScore(item));
 			}));
-			PrepareTargets();
+			cellChangeDelegate();
+		}
+
+		public bool IsEmpty()
+		{
+			return targets.Count == 0;
 		}
 
 		public void ExposeData()
 		{
+			if (Scribe.mode == LoadSaveMode.Saving)
+				targets.RemoveWhere(target => target.item == null || target.item.IsValid == false || target.item.ThingDestroyed);
+
 			Scribe_References.Look(ref pawn, "pawn");
 			Scribe_Collections.Look(ref workgiverDefs, "workgivers", LookMode.Def);
 			Scribe_Collections.Look(ref targets, "targets", LookMode.Deep);
@@ -340,11 +349,8 @@ namespace AchtungMod
 			Scribe_Values.Look(ref initialized, "inited", false, true);
 			Scribe_Values.Look(ref cellRadius, "radius", 0, true);
 
-			if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
-			{
-				targets.RemoveWhere(target => target.item.ThingDestroyed);
-				PrepareTargets();
-			}
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+				targets.RemoveWhere(target => target.item == null || target.item.IsValid == false || target.item.ThingDestroyed);
 		}
 	}
 

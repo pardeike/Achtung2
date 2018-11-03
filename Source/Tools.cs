@@ -309,7 +309,7 @@ namespace AchtungMod
 			return -neighbourScore;
 		}
 
-		public static IEnumerable<IntVec3> AllCells(this LocalTargetInfo item)
+		/*public static IEnumerable<IntVec3> AllCells(this LocalTargetInfo item)
 		{
 			if (item.HasThing)
 			{
@@ -323,10 +323,12 @@ namespace AchtungMod
 				yield break;
 			}
 			yield return item.Cell;
-		}
+		}*/
 
 		public static IEnumerable<IntVec3> AllCells(this Thing thing)
 		{
+			if (thing == null)
+				yield break;
 			var size = thing.def.size;
 			if (size.x + size.z == 1)
 				yield return thing.Position;

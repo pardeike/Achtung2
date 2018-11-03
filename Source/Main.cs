@@ -96,6 +96,26 @@ namespace AchtungMod
 		}
 	}
 
+	// allow for jobs outside allowed area
+	//
+	[HarmonyPatch(typeof(ForbidUtility))]
+	[HarmonyPatch(nameof(ForbidUtility.InAllowedArea))]
+	static class ForbidUtility_InAllowedArea_Patch
+	{
+		static void Postfix(IntVec3 c, Pawn forPawn, ref bool __result)
+		{
+			if (__result == false)
+				return;
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			if (forcedWork.HasForcedJob(forPawn))
+				__result = true;
+			else
+				__result = forcedWork
+					.AllForcedCellsForMap(forPawn.Map)
+					.Contains(c) == false;
+		}
+	}
+
 	// forced repair outside of allowed area
 	//
 	[HarmonyPatch(typeof(WorkGiver_Repair))]
