@@ -65,6 +65,9 @@ namespace AchtungMod
 
 		public static string PawnOverBreakLevel(Pawn pawn)
 		{
+			if (pawn.InMentalState)
+				return "";
+
 			var mb = pawn.mindState.mentalBreaker;
 			switch (Achtung.Settings.breakLevel)
 			{
@@ -540,7 +543,7 @@ namespace AchtungMod
 		{
 			if (name.CanTranslate())
 			{
-				Text.Font = GameFont.Tiny;
+				Text.Font = GameFont.Small;
 				listing.ColumnWidth -= 34;
 				GUI.color = Color.white;
 				listing.Label(name.Translate());

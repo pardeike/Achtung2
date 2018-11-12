@@ -46,6 +46,13 @@ The formation can be rotated using Q and E</AchtungModifierExplained>
 	<HealthLevelOptionNeedsMedicalRest>Needs medical rest</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>In pain shock</HealthLevelOptionInPainShock>
 
+	<IgnoreForbiddenTitle>Ignore forbidden things</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Ignores forbidden (red crossed) items when doing forced work</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>Ignore restricted areas</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Ignore zone restrictions when doing forced work</IgnoreRestrictionsExplained>
+	<IgnoreAssignmentsTitle>Ignore work type assignments</IgnoreAssignmentsTitle>
+	<IgnoreAssignmentsExplained>Ignores unset work priorities</IgnoreAssignmentsExplained>
+
 	<JobInterruptedLabel>Cancelled: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} is in bad shape</JobInterruptedBadHealth>

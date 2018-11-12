@@ -45,6 +45,13 @@ Höll i för att flytta kolonister i deras formation. Formationen kan roteras me
 	<HealthLevelOptionNeedsMedicalRest>Sängbunden</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>I shock</HealthLevelOptionInPainShock>
 
+	<IgnoreForbiddenTitle>Ignorera förbjudna saker</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Ignorerar förbjudna (röd kors) föremål vid tvångsarbete</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>Ignorera begränsade områden</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Ignorera zonbegränsningar vid tvångsarbete</IgnoreRestrictionsExplained>
+	<IgnoreAssignmentsTitle>Ignorera arbetstypsuppdrag</IgnoreAssignmentsTitle>
+	<IgnoreAssignmentsExplained>Ignorerar tomma arbetsprioriteringar</IgnoreAssignmentsExplained>
+
 	<JobInterruptedLabel>Avbruten: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} har låg hälsa</JobInterruptedBadHealth>

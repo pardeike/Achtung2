@@ -45,6 +45,13 @@ La formación puede rotar usando las teclas Q y E.</AchtungModifierExplained>
 	<HealthLevelOptionNeedsMedicalRest>Necesita descanso médico</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>En estado de shock</HealthLevelOptionInPainShock>
 
+	<IgnoreForbiddenTitle>Ignorar las cosas prohibidas</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Ignora los artículos prohibidos (cruzados en rojo) al realizar trabajos forzados</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>Ignorar las áreas restringidas</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Ignorar las restricciones de zona al hacer trabajos forzados</IgnoreRestrictionsExplained>
+	<IgnoreAssignmentsTitle>Ignorar asignaciones de tipo de trabajo</IgnoreAssignmentsTitle>
+	<IgnoreAssignmentsExplained>Ignora las prioridades de trabajo que no están establecidas</IgnoreAssignmentsExplained>
+
 	<JobInterruptedLabel>Cancelado: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} se encuentra mal</JobInterruptedBadHealth>

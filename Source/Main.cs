@@ -86,11 +86,14 @@ namespace AchtungMod
 	{
 		static bool Prefix(Pawn p, Thing t, bool forced, ref bool __result)
 		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
-			if (forced || forcedWork.HasForcedJob(p))
+			if (Achtung.Settings.ignoreRestrictions)
 			{
-				__result = true;
-				return false;
+				var forcedWork = Find.World.GetComponent<ForcedWork>();
+				if (forced || forcedWork.HasForcedJob(p))
+				{
+					__result = true;
+					return false;
+				}
 			}
 			return true;
 		}
@@ -104,15 +107,21 @@ namespace AchtungMod
 	{
 		static void Postfix(IntVec3 c, Pawn forPawn, ref bool __result)
 		{
-			if (__result == false)
-				return;
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 			if (forcedWork.HasForcedJob(forPawn))
-				__result = true;
-			else
-				__result = forcedWork
-					.AllForcedCellsForMap(forPawn.Map)
-					.Contains(c) == false;
+			{
+				if (Achtung.Settings.ignoreRestrictions)
+				{
+					__result = true;
+					return;
+				}
+			}
+			else if (__result == true)
+			{
+				// ignore forced work cells if colonist is not forced
+				if (forcedWork.AllForcedCellsForMap(forPawn.Map).Contains(c))
+					__result = false;
+			}
 		}
 	}
 
@@ -247,7 +256,6 @@ namespace AchtungMod
 	}
 
 	// ignore forbidden for forced jobs
-	// TODO: make this optional
 	//
 	[HarmonyPatch(typeof(ForbidUtility))]
 	[HarmonyPatch(nameof(ForbidUtility.IsForbidden))]
@@ -256,11 +264,14 @@ namespace AchtungMod
 	{
 		static bool Prefix(Thing t, Pawn pawn, ref bool __result)
 		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
-			if (forcedWork.HasForcedJob(pawn))
+			if (Achtung.Settings.ignoreForbidden)
 			{
-				__result = false;
-				return false;
+				var forcedWork = Find.World.GetComponent<ForcedWork>();
+				if (forcedWork.HasForcedJob(pawn))
+				{
+					__result = false;
+					return false;
+				}
 			}
 			return true;
 		}
@@ -364,14 +375,37 @@ namespace AchtungMod
 			__state.Unprepare(pawn);
 		}
 
+		static int GetPriority(Pawn pawn, WorkTypeDef w)
+		{
+			if (Achtung.Settings.ignoreAssignments)
+				return pawn.story.WorkTypeIsDisabled(w) ? 0 : 1;
+			return pawn.workSettings.GetPriority(w);
+		}
+
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
+			var m_GetPriority = AccessTools.Method(typeof(Pawn_WorkSettings), nameof(Pawn_WorkSettings.GetPriority));
 			var c_FloatMenuOption = AccessTools.FirstConstructor(typeof(FloatMenuOption), c => c.GetParameters().Count() > 1);
 			var m_ForcedFloatMenuOption = AccessTools.Method(typeof(ForcedFloatMenuOption), nameof(ForcedFloatMenuOption.CreateForcedMenuItem));
 
 			var list = instructions.ToList();
 
 			var foundCount = 0;
+			while (true)
+			{
+				var idx = list.FirstIndexOf(instr => instr.operand == m_GetPriority);
+				if (idx < 2 || idx >= list.Count)
+					break;
+				foundCount++;
+				list[idx - 2].opcode = OpCodes.Nop;
+				list[idx].opcode = OpCodes.Call;
+				list[idx].operand = SymbolExtensions.GetMethodInfo(() => GetPriority(null, WorkTypeDefOf.Doctor));
+			}
+
+			if (foundCount != 2)
+				Log.Error("Cannot find 2x Pawn_WorkSettings.GetPriority in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
+
+			foundCount = 0;
 			Enumerable.Range(0, list.Count)
 				.DoIf(i => list[i].opcode == OpCodes.Isinst && list[i].operand == typeof(WorkGiver_Scanner), i =>
 				{
@@ -470,10 +504,13 @@ namespace AchtungMod
 			var breakNote = Tools.PawnOverBreakLevel(___pawn);
 			if (breakNote != null)
 			{
-				___pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(___pawn);
-				var jobName = ___pawn.jobs?.curJob.GetReport(___pawn).CapitalizeFirst() ?? "-";
-				var label = "JobInterruptedLabel".Translate(new object[] { jobName });
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(new object[] { ___pawn.Name.ToStringShort, breakNote }), LetterDefOf.NegativeEvent, ___pawn));
+				if (breakNote != "")
+				{
+					___pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(___pawn);
+					var jobName = ___pawn.jobs?.curJob.GetReport(___pawn).CapitalizeFirst() ?? "-";
+					var label = "JobInterruptedLabel".Translate(new object[] { jobName });
+					Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(new object[] { ___pawn.Name.ToStringShort, breakNote }), LetterDefOf.NegativeEvent, ___pawn));
+				}
 
 				forcedWork.Remove(___pawn);
 				___pawn.jobs?.EndCurrentJob(JobCondition.InterruptForced, true);

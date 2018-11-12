@@ -421,8 +421,8 @@ namespace AchtungMod
 						var job = workgiver.JobOnThing(pawn, thing, true);
 						if (job != null)
 						{
-							if (ignoreRestrictions || thing.IsForbidden(pawn) == false)
-								if (ignoreRestrictions || thing.Position.InAllowedArea(pawn))
+							if ((Achtung.Settings.ignoreForbidden && ignoreRestrictions) || thing.IsForbidden(pawn) == false)
+								if ((Achtung.Settings.ignoreRestrictions && ignoreRestrictions) || thing.Position.InAllowedArea(pawn))
 								{
 									var ok1 = (ignoreReserve == false && pawn.CanReserveAndReach(thing, workgiver.PathEndMode, Danger.Deadly));
 									var ok2 = (ignoreReserve && pawn.CanReach(thing, workgiver.PathEndMode, Danger.Deadly));

@@ -37,6 +37,9 @@ namespace AchtungMod
 		public AchtungModKey forceCommandMenuKey = AchtungModKey.Ctrl;
 		public BreakLevel breakLevel = BreakLevel.AlmostExtreme;
 		public HealthLevel healthLevel = HealthLevel.InPainShock;
+		public bool ignoreForbidden = false;
+		public bool ignoreRestrictions = false;
+		public bool ignoreAssignments = false;
 
 		public override void ExposeData()
 		{
@@ -46,11 +49,16 @@ namespace AchtungMod
 			Scribe_Values.Look(ref forceCommandMenuKey, "forceCommandMenuKey", AchtungModKey.Ctrl, true);
 			Scribe_Values.Look(ref breakLevel, "BreakLevel", BreakLevel.AlmostExtreme, true);
 			Scribe_Values.Look(ref healthLevel, "HealthLevel", HealthLevel.InPainShock, true);
+			Scribe_Values.Look(ref ignoreForbidden, "ignoreForbidden", false, true);
+			Scribe_Values.Look(ref ignoreRestrictions, "ignoreRestrictions", false, true);
+			Scribe_Values.Look(ref ignoreAssignments, "ignoreAssignments", false, true);
 		}
 
+		static Vector2 scrollPosition = Vector2.zero;
 		public void DoWindowContents(Rect canvas)
 		{
-			var list = new Listing_Standard { ColumnWidth = canvas.width / 2 };
+			var columnWidth = canvas.width * 0.6f;
+			var list = new Listing_Standard { ColumnWidth = columnWidth };
 			list.Begin(canvas);
 			list.Gap();
 
@@ -63,8 +71,15 @@ namespace AchtungMod
 			list.ValueLabeled("BreakLevel", ref Achtung.Settings.breakLevel);
 			list.Gap();
 			list.ValueLabeled("HealthLevel", ref Achtung.Settings.healthLevel);
+			list.Gap();
+			list.CheckboxEnhanced("IgnoreForbidden", ref Achtung.Settings.ignoreForbidden);
+			list.CheckboxEnhanced("IgnoreRestrictions", ref Achtung.Settings.ignoreRestrictions);
+			list.CheckboxEnhanced("IgnoreAssignments", ref Achtung.Settings.ignoreAssignments);
 
-			list.Gap(18f);
+			list.NewColumn();
+			list.ColumnWidth = canvas.width - columnWidth;
+
+			list.Gap();
 			list.Note("Notes");
 			list.Gap(6f);
 			list.Note("Note1");

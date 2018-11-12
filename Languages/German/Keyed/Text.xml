@@ -46,6 +46,13 @@ Die Formation kann während der Bewegung mit Q und E rotiert werden</AchtungModi
 	<HealthLevelOptionNeedsMedicalRest>Notwendige Bettruhe</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>Schockzustand</HealthLevelOptionInPainShock>
 
+	<IgnoreForbiddenTitle>Ignoriere verbotene Dinge</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Ignoriert verbotene (rotes Kreuz) Dinge während erzwungener Arbeit</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>Ignoriere Zonenbegrenzungen</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Ignoriert Zonen während erzwungener Arbeit</IgnoreRestrictionsExplained>
+	<IgnoreAssignmentsTitle>Ignoriere Arbeitseinstellungen</IgnoreAssignmentsTitle>
+	<IgnoreAssignmentsExplained>Ignoriert leere, unzugewiesene Arbeitsprioriteten</IgnoreAssignmentsExplained>
+
 	<JobInterruptedLabel>Abgebrochen: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} ist in schlechter gesundheitlicher Verfassung</JobInterruptedBadHealth>
