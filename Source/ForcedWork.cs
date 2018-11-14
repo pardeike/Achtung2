@@ -12,7 +12,6 @@ namespace AchtungMod
 		Dictionary<Pawn, ForcedJobs> allForcedJobs = new Dictionary<Pawn, ForcedJobs>();
 		private List<Pawn> forcedJobsKeysWorkingList;
 		private List<ForcedJobs> forcedJobsValuesWorkingList;
-		private HashSet<IntVec3> allForcedCells;
 
 		readonly HashSet<Pawn> preparing = new HashSet<Pawn>();
 		readonly Dictionary<Pawn, HashSet<IntVec3>> forbiddenLocations = new Dictionary<Pawn, HashSet<IntVec3>>();
@@ -108,7 +107,6 @@ namespace AchtungMod
 			Unprepare(pawn);
 
 			var forcedJob = new ForcedJob() { pawn = pawn, workgiverDefs = workgiverDefs, isThingJob = item.HasThing };
-			forcedJob.cellChangeDelegate = () => allForcedCells = null;
 			forcedJob.AddTarget(item);
 			if (allForcedJobs.ContainsKey(pawn) == false)
 				allForcedJobs[pawn] = new ForcedJobs();
@@ -149,16 +147,10 @@ namespace AchtungMod
 				.SelectMany(pair => pair.Value.jobs);
 		}
 
-		public HashSet<IntVec3> AllForcedCellsForMap(Map map)
+		public bool IsForbiddenCell(Map map, IntVec3 cell)
 		{
-			if (allForcedCells == null)
-			{
-				allForcedCells = new HashSet<IntVec3>(allForcedJobs
-				.Where(pair => pair.Key.Map == map)
-				.SelectMany(pair => pair.Value.jobs)
-				.SelectMany(forcedJob => forcedJob.AllCells(true)));
-			}
-			return allForcedCells;
+			var jobs = allForcedJobs.Values.SelectMany(forcedJobs => forcedJobs.jobs);
+			return jobs.Any(job => job.IsForbiddenCell(map, cell));
 		}
 
 		public void AddForbiddenLocation(Pawn pawn, IntVec3 cell)
@@ -210,10 +202,6 @@ namespace AchtungMod
 					.Where(pair => pair.Value.jobs.Count == 0)
 					.Select(pair => pair.Key)
 					.Do(pawn => Remove(pawn));
-
-				allForcedJobs.Values
-					.SelectMany(forcedJobs => forcedJobs.jobs)
-					.Do(forcedJob => forcedJob.cellChangeDelegate = () => allForcedCells = null);
 			}
 		}
 	}

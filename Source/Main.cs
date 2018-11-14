@@ -119,7 +119,7 @@ namespace AchtungMod
 			else if (__result == true)
 			{
 				// ignore forced work cells if colonist is not forced
-				if (forcedWork.AllForcedCellsForMap(forPawn.Map).Contains(c))
+				if (forcedWork.IsForbiddenCell(forPawn.Map, c))
 					__result = false;
 			}
 		}

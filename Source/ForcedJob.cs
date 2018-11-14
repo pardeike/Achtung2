@@ -40,7 +40,6 @@ namespace AchtungMod
 
 		public Pawn pawn = null;
 		public List<WorkGiverDef> workgiverDefs = new List<WorkGiverDef>();
-		public Action cellChangeDelegate;
 		public bool isThingJob = false;
 		public bool initialized = false;
 		public int cellRadius = 0;
@@ -88,7 +87,6 @@ namespace AchtungMod
 		public void AddTarget(LocalTargetInfo item)
 		{
 			targets.Add(new ForcedTarget(item, MaterialScore(item)));
-			cellChangeDelegate();
 			UpdateCells();
 		}
 
@@ -162,6 +160,12 @@ namespace AchtungMod
 					return neighbourScore * 10000 + target.materialScore;
 				})
 				.Select(target => target.item);
+		}
+
+		public bool IsForbiddenCell(Map map, IntVec3 cell)
+		{
+			if (pawn.Map != map) return false;
+			return targets.Any(target => target.item.Cell == cell && target.IsBuilding());
 		}
 
 		public bool GetNextJob(out Job job, out LocalTargetInfo atItem)
@@ -301,7 +305,6 @@ namespace AchtungMod
 					var item = new LocalTargetInfo(thing);
 					return new ForcedTarget(item, MaterialScore(item));
 				}));
-				cellChangeDelegate();
 
 				return;
 			}
@@ -329,7 +332,6 @@ namespace AchtungMod
 				var item = new LocalTargetInfo(cell);
 				return new ForcedTarget(item, MaterialScore(item));
 			}));
-			cellChangeDelegate();
 		}
 
 		public bool IsEmpty()
@@ -385,6 +387,19 @@ namespace AchtungMod
 		public bool IsValidTarget()
 		{
 			return item.HasThing == false || item.ThingDestroyed == false;
+		}
+
+		public bool IsBuilding()
+		{
+			if (item.HasThing == false) return false;
+			var thing = item.Thing;
+			var frame = thing as Frame;
+			if (frame != null)
+				return frame.def.entityDefToBuild == ThingDefOf.Wall;
+			var blueprint = thing as Blueprint_Build;
+			if (blueprint != null)
+				return blueprint.def.entityDefToBuild == ThingDefOf.Wall;
+			return false;
 		}
 
 		public override string ToString()
