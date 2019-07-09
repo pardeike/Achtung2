@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using Multiplayer.API;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,6 +55,7 @@ namespace AchtungMod
 			.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
 		}
 
+		[SyncMethod]
 		public void MouseDown(Vector3 pos)
 		{
 			colonists = Tools.GetSelectedColonists();
@@ -123,6 +125,7 @@ namespace AchtungMod
 			Event.current.Use();
 		}
 
+		[SyncMethod]
 		private void StartDragging(Vector3 pos, bool asGroup)
 		{
 			groupMovement = asGroup;
@@ -146,6 +149,7 @@ namespace AchtungMod
 			Event.current.Use();
 		}
 
+		[SyncMethod]
 		private void EndDragging()
 		{
 			groupMovement = false;
@@ -157,6 +161,7 @@ namespace AchtungMod
 			isDragging = false;
 		}
 
+		[SyncMethod]
 		public void MouseDrag(Vector3 pos)
 		{
 			if (Event.current.button != (int)Button.right)
@@ -188,6 +193,7 @@ namespace AchtungMod
 			Event.current.Use();
 		}
 
+		[SyncMethod]
 		public void MouseUp()
 		{
 			if (Event.current.button != (int)Button.right)
@@ -196,6 +202,7 @@ namespace AchtungMod
 			EndDragging();
 		}
 
+		[SyncMethod]
 		public void KeyDown(KeyCode key)
 		{
 			if (isDragging)
@@ -263,6 +270,7 @@ namespace AchtungMod
 			}
 		}
 
+		[SyncMethod]
 		public IEnumerable<FloatMenuOption> AchtungChoicesAtFor(Vector3 clickPos, Pawn pawn)
 		{
 			var options = new List<FloatMenuOption>();
