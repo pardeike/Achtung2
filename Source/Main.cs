@@ -1,4 +1,5 @@
 ﻿using Harmony;
+using Multiplayer.API;
 using RimWorld;
 using RimWorld.Planet;
 using System;
@@ -28,6 +29,9 @@ namespace AchtungMod
 			const string sameSpotId = "net.pardeike.rimworld.mod.samespot";
 			IsSameSpotInstalled = harmony.GetPatchedMethods()
 				.Any(method => harmony.GetPatchInfo(method).Transpilers.Any(transpiler => transpiler.owner == sameSpotId));
+
+			if (MP.enabled)
+				MP.RegisterAll();
 		}
 	}
 
