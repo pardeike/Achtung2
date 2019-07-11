@@ -34,7 +34,6 @@ namespace AchtungMod
 			{
 				MP.RegisterAll();
 				MP.RegisterSyncWorker<Vector3>(Vector3Support);
-				Log.Warning("Achtung Mod: multiplayer enabled");
 			}
 		}
 

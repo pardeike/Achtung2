@@ -448,8 +448,6 @@ namespace AchtungMod
 
 		public static bool SetDraftStatus(Pawn pawn, bool drafted, bool fakeIt)
 		{
-			Log.Warning(pawn.Name.ToStringShort + " drafted=" + drafted + " fakeIt=" + fakeIt);
-
 			var previousStatus = GetDraftingStatus(pawn);
 			if (previousStatus != drafted)
 			{
@@ -465,6 +463,23 @@ namespace AchtungMod
 		{
 			var oldState = SetDraftStatus(pawn, drafted, fakeIt);
 			return oldState != drafted;
+		}
+
+		[SyncMethod]
+		public static void OrderToSynced(Pawn pawn, int x, int z)
+		{
+			var bestCell = new IntVec3(x, 0, z);
+			var job = new Job(JobDefOf.Goto, bestCell)
+			{
+				playerForced = true,
+				collideWithPawns = false,
+				locomotionUrgency = LocomotionUrgency.Sprint
+			};
+			if (pawn.Map.exitMapGrid.IsExitCell(bestCell))
+				job.exitMapOnArrival = true;
+
+			if (pawn.jobs?.IsCurrentJobPlayerInterruptible() ?? false)
+				pawn.jobs.TryTakeOrderedJob(job);
 		}
 
 		[SyncMethod]

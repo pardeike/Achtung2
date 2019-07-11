@@ -1,5 +1,4 @@
-﻿using Multiplayer.API;
-using RimWorld;
+﻿using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -23,24 +22,6 @@ namespace AchtungMod
 			offsetFromCenter = Vector3.zero;
 			designation = Vector3.zero;
 			originalDraftStatus = Tools.GetDraftingStatus(pawn);
-		}
-
-		[SyncWorker]
-		static void SyncColonist(SyncWorker sync, ref Colonist colonist)
-		{
-			if (sync.isWriting)
-				sync.Write(colonist.pawn);
-			else
-			{
-				var pawn = sync.Read<Pawn>();
-				colonist = new Colonist(pawn);
-			}
-
-			sync.Bind(ref colonist.designation);
-			sync.Bind(ref colonist.lastOrder);
-			sync.Bind(ref colonist.startPosition);
-			sync.Bind(ref colonist.offsetFromCenter);
-			sync.Bind(ref colonist.originalDraftStatus);
 		}
 
 		public IntVec3 UpdateOrderPos(Vector3 pos)
@@ -67,25 +48,13 @@ namespace AchtungMod
 			return IntVec3.Invalid;
 		}
 
-		[SyncMethod]
 		public void OrderTo(Vector3 pos)
 		{
 			var bestCell = UpdateOrderPos(pos);
 			if (bestCell.IsValid && lastOrder.IsValid == false || lastOrder != bestCell)
 			{
 				lastOrder = bestCell;
-
-				var job = new Job(JobDefOf.Goto, bestCell)
-				{
-					playerForced = true,
-					collideWithPawns = false,
-					locomotionUrgency = LocomotionUrgency.Sprint
-				};
-				if (pawn.Map.exitMapGrid.IsExitCell(bestCell))
-					job.exitMapOnArrival = true;
-
-				if (pawn.jobs?.IsCurrentJobPlayerInterruptible() ?? false)
-					pawn.jobs.TryTakeOrderedJob(job);
+				Tools.OrderToSynced(pawn, bestCell.x, bestCell.z);
 			}
 		}
 	}
