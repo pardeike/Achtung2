@@ -583,7 +583,7 @@ namespace AchtungMod
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 			var forcedJob = forcedWork.GetForcedJob(pawn);
-			if (forcedJob != null && forcedJob.cellRadius > 0)
+			if (forcedJob != null && forcedJob.cellRadius + delta >= 0)
 				forcedJob.ChangeCellRadius(delta);
 		}
 
