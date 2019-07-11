@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using Multiplayer.API;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -391,7 +392,7 @@ namespace AchtungMod
 			colonists.DoIf(colonist => colonist.pawn.Drafted == false,
 				colonist =>
 				{
-					var oldStatus = SetDraftStatus(colonist.pawn, draftStatus);
+					var oldStatus = SetDraftStatus(colonist.pawn, draftStatus, false);
 					if (oldStatus != draftStatus)
 					{
 						if (draftStatus)
@@ -406,13 +407,14 @@ namespace AchtungMod
 				SoundDefOf.DraftOff.PlayOneShotOnCamera(null);
 		}
 
+		[SyncMethod]
 		public static void CancelDrafting(List<Colonist> colonists)
 		{
 			var gotDrafted = false;
 			var gotUndrafted = false;
 			colonists.Do(colonist =>
 			{
-				var newDraftStatus = SetDraftStatus(colonist.pawn, colonist.originalDraftStatus);
+				var newDraftStatus = SetDraftStatus(colonist.pawn, colonist.originalDraftStatus, false);
 				if (colonist.originalDraftStatus && !newDraftStatus)
 					gotDrafted = true;
 				if (colonist.originalDraftStatus == false && newDraftStatus)
@@ -436,24 +438,36 @@ namespace AchtungMod
 			return pawn.drafter.Drafted;
 		}
 
-		public static bool SetDraftStatus(Pawn pawn, bool drafted)
+		[SyncMethod]
+		private static void SetDraftStatusSynced(Pawn pawn, bool drafted)
 		{
+			// we don't use the indirect method because it has lots of side effects
+			//
+			draftHandlerField?.SetValue(pawn.drafter, drafted);
+		}
+
+		public static bool SetDraftStatus(Pawn pawn, bool drafted, bool fakeIt)
+		{
+			Log.Warning(pawn.Name.ToStringShort + " drafted=" + drafted + " fakeIt=" + fakeIt);
+
 			var previousStatus = GetDraftingStatus(pawn);
 			if (previousStatus != drafted)
 			{
-				// we don't use the indirect method because it has lots of side effects
-				//
-				draftHandlerField?.SetValue(pawn.drafter, drafted);
+				if (fakeIt)
+					draftHandlerField?.SetValue(pawn.drafter, drafted);
+				else
+					SetDraftStatusSynced(pawn, drafted);
 			}
 			return previousStatus;
 		}
 
-		public static bool ForceDraft(Pawn pawn, bool drafted)
+		public static bool ForceDraft(Pawn pawn, bool drafted, bool fakeIt)
 		{
-			var oldState = SetDraftStatus(pawn, drafted);
+			var oldState = SetDraftStatus(pawn, drafted, fakeIt);
 			return oldState != drafted;
 		}
 
+		[SyncMethod]
 		public static void CancelWorkOn(Pawn newWorker, LocalTargetInfo workItem)
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();

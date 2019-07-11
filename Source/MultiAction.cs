@@ -43,7 +43,7 @@ namespace AchtungMod
 				if (option.Disabled == false)
 				{
 					if (IsForced())
-						Tools.SetDraftStatus(colonist.pawn, draftMode);
+						Tools.SetDraftStatus(colonist.pawn, draftMode, false);
 					option.action();
 				}
 			};

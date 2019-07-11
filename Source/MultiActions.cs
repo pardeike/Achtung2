@@ -26,13 +26,13 @@ namespace AchtungMod
 
 		public void AddColonist(Colonist colonist)
 		{
-			var forced = Tools.ForceDraft(colonist.pawn, true);
+			var forced = Tools.ForceDraft(colonist.pawn, true, true);
 			FloatMenuMakerMap.ChoicesAtFor(clickPos, colonist.pawn).Do(option => AddMultiAction(colonist, true, option));
-			if (forced) Tools.SetDraftStatus(colonist.pawn, false);
+			if (forced) Tools.SetDraftStatus(colonist.pawn, false, true);
 
-			forced = Tools.ForceDraft(colonist.pawn, false);
+			forced = Tools.ForceDraft(colonist.pawn, false, true);
 			FloatMenuMakerMap.ChoicesAtFor(clickPos, colonist.pawn).Do(option => AddMultiAction(colonist, false, option));
-			if (forced) Tools.SetDraftStatus(colonist.pawn, true);
+			if (forced) Tools.SetDraftStatus(colonist.pawn, true, true);
 		}
 
 		public void AddMultiAction(Colonist colonist, bool draftMode, FloatMenuOption option)

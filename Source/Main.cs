@@ -33,8 +33,16 @@ namespace AchtungMod
 			if (MP.enabled)
 			{
 				MP.RegisterAll();
+				MP.RegisterSyncWorker<Vector3>(Vector3Support);
 				Log.Warning("Achtung Mod: multiplayer enabled");
 			}
+		}
+
+		static void Vector3Support(SyncWorker sync, ref UnityEngine.Vector3 value)
+		{
+			sync.Bind(ref value.x);
+			sync.Bind(ref value.y);
+			sync.Bind(ref value.z);
 		}
 	}
 

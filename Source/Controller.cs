@@ -1,6 +1,4 @@
-﻿using Harmony;
-using Multiplayer.API;
-using RimWorld;
+﻿using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,17 +43,6 @@ namespace AchtungMod
 			drawColonistPreviews = true;
 		}
 
-		[SyncWorker]
-		static void LocateController(SyncWorker sync, ref Controller instance)
-		{
-			if (sync.isWriting)
-			{
-				// Use sync to deliver more context
-			}
-			else
-				instance = Controller.GetInstance();
-		}
-
 		public void InstallDefs()
 		{
 			new List<JobDef>
@@ -67,7 +54,6 @@ namespace AchtungMod
 			.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
 		}
 
-		[SyncMethod]
 		public void MouseDown(Vector3 pos)
 		{
 			colonists = Tools.GetSelectedColonists();
@@ -130,7 +116,8 @@ namespace AchtungMod
 			if (achtungPressed)
 				Tools.DraftWithSound(colonists, true);
 
-			var allDrafted = colonists.All(colonist => colonist.pawn.Drafted);
+			// in multiplayer, drafting will update pawn.Drafted in the same tick, so we fake it
+			var allDrafted = colonists.All(colonist => colonist.pawn.Drafted || achtungPressed);
 			if (allDrafted)
 			{
 				StartDragging(pos, achtungPressed);
@@ -142,7 +129,6 @@ namespace AchtungMod
 			Event.current.Use();
 		}
 
-		[SyncMethod]
 		private void StartDragging(Vector3 pos, bool asGroup)
 		{
 			groupMovement = asGroup;
@@ -166,7 +152,6 @@ namespace AchtungMod
 			Event.current.Use();
 		}
 
-		[SyncMethod]
 		private void EndDragging()
 		{
 			groupMovement = false;
@@ -178,7 +163,6 @@ namespace AchtungMod
 			isDragging = false;
 		}
 
-		[SyncMethod]
 		public void MouseDrag(Vector3 pos)
 		{
 			if (Event.current.button != (int)Button.right)
@@ -210,7 +194,6 @@ namespace AchtungMod
 			Event.current.Use();
 		}
 
-		[SyncMethod]
 		public void MouseUp()
 		{
 			if (Event.current.button != (int)Button.right)
@@ -219,7 +202,6 @@ namespace AchtungMod
 			EndDragging();
 		}
 
-		[SyncMethod]
 		public void KeyDown(KeyCode key)
 		{
 			if (isDragging)
@@ -271,7 +253,6 @@ namespace AchtungMod
 			}
 		}
 
-		[SyncMethod]
 		private void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType)
 		{
 			var driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
