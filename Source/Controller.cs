@@ -1,4 +1,5 @@
-﻿using Multiplayer.API;
+﻿using Harmony;
+using Multiplayer.API;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -44,6 +45,17 @@ namespace AchtungMod
 			drawColonistPreviews = true;
 		}
 
+		[SyncWorker]
+		static void LocateController(SyncWorker sync, ref Controller instance)
+		{
+			if (sync.isWriting)
+			{
+				// Use sync to deliver more context
+			}
+			else
+				instance = Controller.GetInstance();
+		}
+
 		public void InstallDefs()
 		{
 			new List<JobDef>
@@ -78,10 +90,6 @@ namespace AchtungMod
 			var forceMenu = Tools.IsModKeyPressed(Achtung.Settings.forceCommandMenuKey);
 			var thingsClicked = Find.CurrentMap.thingGrid.ThingsListAt(IntVec3.FromVector3(pos));
 			var pawnClicked = thingsClicked.OfType<Pawn>().Any();
-			var weaponClicked = thingsClicked.Any(thing => thing.def.IsWeapon);
-			var medicineClicked = thingsClicked.Any(thing => thing.def.IsMedicine);
-			var bedClicked = thingsClicked.Any(thing => thing.def.IsBed);
-			var fireClicked = thingsClicked.Any(thing => thing.def == ThingDefOf.Fire);
 
 			if (pawnClicked && colonists.Count > 1 && achtungPressed == false && forceMenu == false)
 			{
@@ -94,7 +102,16 @@ namespace AchtungMod
 					return;
 			}
 
-			if ((weaponClicked || medicineClicked || bedClicked || fireClicked) && achtungPressed == false)
+			var useMenuCases = achtungPressed == false && thingsClicked.Any(thing =>
+			{
+				return false
+					|| thing.def.IsWeapon
+					|| thing.def.IsBed
+					|| thing.def.IsMedicine
+					|| thing.def == ThingDefOf.Fire
+					|| thing.def.category == ThingCategory.Building && thing.def.building.IsMortar;
+			});
+			if (useMenuCases)
 			{
 				if (actions.Count(false) > 0)
 					Find.WindowStack.Add(actions.GetWindow());
@@ -254,6 +271,7 @@ namespace AchtungMod
 			}
 		}
 
+		[SyncMethod]
 		private void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType)
 		{
 			var driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
@@ -270,7 +288,6 @@ namespace AchtungMod
 			}
 		}
 
-		[SyncMethod]
 		public IEnumerable<FloatMenuOption> AchtungChoicesAtFor(Vector3 clickPos, Pawn pawn)
 		{
 			var options = new List<FloatMenuOption>();

@@ -31,7 +31,10 @@ namespace AchtungMod
 				.Any(method => harmony.GetPatchInfo(method).Transpilers.Any(transpiler => transpiler.owner == sameSpotId));
 
 			if (MP.enabled)
+			{
 				MP.RegisterAll();
+				Log.Warning("Achtung Mod: multiplayer enabled");
+			}
 		}
 	}
 

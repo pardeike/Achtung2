@@ -42,9 +42,7 @@
       <HintPath>..\packages\Lib.Harmony.1.2.0.1\lib\net35\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="0MultiplayerAPI, Version=0.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Assemblies\0MultiplayerAPI.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\RimWorld.MultiplayerAPI.0.1.0\lib\net35\0MultiplayerAPI.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>D:\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
@@ -96,7 +94,7 @@ ModBuilder -v XMLPut -file "$(SolutionDir)About\ModSync.xml" -xpath /ModSyncNinj
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_ReplaceNonNumerics="False" BuildVersion_UseUniversalClock="False" BuildVersion_UseGlobalSettings="False" BuildVersion_UpdateFileVersion="False" BuildVersion_UpdateAssemblyVersion="False" BuildVersion_BuildVersioningStyle="None.None.None.None" BuildVersion_StartDate="2000/1/1" BuildVersion_IncrementBeforeBuild="False" BuildVersion_ConfigurationName="Any" BuildVersion_DetectChanges="False" />
+      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_ConfigurationName="Any" BuildVersion_IncrementBeforeBuild="False" BuildVersion_StartDate="2000/1/1" BuildVersion_BuildVersioningStyle="None.None.None.None" BuildVersion_UpdateAssemblyVersion="False" BuildVersion_UpdateFileVersion="False" BuildVersion_UseGlobalSettings="False" BuildVersion_UseUniversalClock="False" BuildVersion_ReplaceNonNumerics="False" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
