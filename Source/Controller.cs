@@ -1,4 +1,6 @@
-﻿using RimWorld;
+﻿using Harmony;
+using Multiplayer.API;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -253,6 +255,13 @@ namespace AchtungMod
 			}
 		}
 
+		[SyncMethod]
+		static void StartWorkSynced(Type driverType, Pawn pawn, LocalTargetInfo target, LocalTargetInfo clickCell)
+		{
+			var driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
+			driver.StartJob(pawn, target, clickCell);
+		}
+
 		private void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType)
 		{
 			var driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
@@ -264,7 +273,7 @@ namespace AchtungMod
 				foreach (var target in targets)
 				{
 					var suffix = existingJobs.Count > 0 ? " " + ("AlreadyDoing".Translate(new object[] { existingJobs.Count + 1 })) : "";
-					options.Add(new FloatMenuOption(driver.GetLabel() + suffix, () => driver.StartJob(pawn, target, clickCell), MenuOptionPriority.Low));
+					options.Add(new FloatMenuOption(driver.GetLabel() + suffix, () => StartWorkSynced(driverType, pawn, target, clickCell), MenuOptionPriority.Low));
 				}
 			}
 		}

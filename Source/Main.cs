@@ -34,14 +34,23 @@ namespace AchtungMod
 			{
 				MP.RegisterAll();
 				MP.RegisterSyncWorker<Vector3>(Vector3Support);
+				MP.RegisterSyncWorker<Type>(TypeSupport);
 			}
 		}
 
-		static void Vector3Support(SyncWorker sync, ref UnityEngine.Vector3 value)
+		static void Vector3Support(SyncWorker sync, ref Vector3 value)
 		{
 			sync.Bind(ref value.x);
 			sync.Bind(ref value.y);
 			sync.Bind(ref value.z);
+		}
+
+		static void TypeSupport(SyncWorker sync, ref Type value)
+		{
+			if (sync.isWriting)
+				sync.Write(value.FullName);
+			else
+				value = AccessTools.TypeByName(sync.Read<string>());
 		}
 	}
 
@@ -569,6 +578,15 @@ namespace AchtungMod
 		public static readonly Texture2D ForceRadiusShrink = ContentFinder<Texture2D>.Get("ForceRadiusShrink", true);
 		public static readonly Texture2D ForceRadiusShrinkOff = ContentFinder<Texture2D>.Get("ForceRadiusShrinkOff", true);
 
+		[SyncMethod]
+		static void ActionSynced(Pawn pawn, int delta)
+		{
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedJob = forcedWork.GetForcedJob(pawn);
+			if (forcedJob != null && forcedJob.cellRadius > 0)
+				forcedJob.ChangeCellRadius(delta);
+		}
+
 		static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> gizmos, Pawn ___pawn)
 		{
 			var gizmoList = gizmos.ToList();
@@ -588,11 +606,7 @@ namespace AchtungMod
 				defaultDesc = "IncreaseForceRadiusDesc".Translate(new object[] { radius }),
 				icon = ForceRadiusExpand,
 				activateSound = SoundDefOf.Designate_AreaAdd,
-				action = delegate
-				{
-					forcedJob = forcedWork.GetForcedJob(___pawn);
-					forcedJob?.ChangeCellRadius(1);
-				}
+				action = delegate { ActionSynced(___pawn, 1); }
 			};
 
 			yield return new Command_Action
@@ -601,12 +615,7 @@ namespace AchtungMod
 				defaultDesc = "DecreaseForceRadiusDesc".Translate(new object[] { radius }),
 				icon = radius > 0 ? ForceRadiusShrink : ForceRadiusShrinkOff,
 				activateSound = radius > 0 ? SoundDefOf.Designate_AreaAdd : SoundDefOf.Designate_Failed,
-				action = delegate
-				{
-					forcedJob = forcedWork.GetForcedJob(___pawn);
-					if (forcedJob != null && forcedJob.cellRadius > 0)
-						forcedJob.ChangeCellRadius(-1);
-				}
+				action = delegate { ActionSynced(___pawn, -1); }
 			};
 		}
 	}
