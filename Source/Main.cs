@@ -703,7 +703,7 @@ namespace AchtungMod
 		{
 			if (pawn != null && pawn.Drafted == false)
 				if (WorldRendererUtility.WorldRenderedNow == false)
-					__result.AddRange(Controller.GetInstance().AchtungChoicesAtFor(clickPos.x, clickPos.y, clickPos.z, pawn));
+					__result.AddRange(Controller.GetInstance().AchtungChoicesAtFor(clickPos, pawn));
 		}
 	}
 }
