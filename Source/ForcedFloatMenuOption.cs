@@ -1,10 +1,12 @@
-﻿using RimWorld;
+﻿using Multiplayer.API;
+using RimWorld;
 using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.AI;
 
 namespace AchtungMod
 {
@@ -145,8 +147,11 @@ namespace AchtungMod
 			return false;
 		}
 
-		public virtual bool ForceAction()
+		[SyncMethod]
+		public static bool ForceActionSynced(Pawn forcePawn, WorkGiver_Scanner forceWorkgiver, int x, int z)
 		{
+			var forceCell = new IntVec3(x, 0, z);
+
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 			forcedWork.Prepare(forcePawn);
 
@@ -177,6 +182,11 @@ namespace AchtungMod
 			forcedWork.RemoveForcedJob(forcePawn);
 			Messages.Message(forcePawn.Name.ToStringShort + " could not find more forced work. The remaining work is most likely reserved or not accessible.", MessageTypeDefOf.RejectInput);
 			return false;
+		}
+
+		public virtual bool ForceAction()
+		{
+			return ForceActionSynced(forcePawn, forceWorkgiver, forceCell.x, forceCell.z);
 		}
 	}
 }

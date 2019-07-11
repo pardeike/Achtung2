@@ -1,4 +1,5 @@
 ﻿using Harmony;
+using Multiplayer.API;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -83,6 +84,7 @@ namespace AchtungMod
 			return jobs;
 		}
 
+		[SyncMethod]
 		public void StartJob(Pawn targetPawn, LocalTargetInfo target, LocalTargetInfo extra)
 		{
 			var newJob = new Job(MakeDef(), target, extra) { playerForced = true };
