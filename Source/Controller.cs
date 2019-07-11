@@ -68,7 +68,7 @@ namespace AchtungMod
 		}
 
 		[SyncMethod]
-		public void MouseDown(Vector3 pos)
+		public void MouseDown(float pos_x, float pos_y, float pos_z)
 		{
 			colonists = Tools.GetSelectedColonists();
 			if (colonists.Count == 0 || Achtung.Settings.positioningEnabled == false)
@@ -88,7 +88,7 @@ namespace AchtungMod
 			achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
 
 			var forceMenu = Tools.IsModKeyPressed(Achtung.Settings.forceCommandMenuKey);
-			var thingsClicked = Find.CurrentMap.thingGrid.ThingsListAt(IntVec3.FromVector3(pos));
+			var thingsClicked = Find.CurrentMap.thingGrid.ThingsListAt(new IntVec3((int)pos_x, (int)pos_y, (int)pos_z));
 			var pawnClicked = thingsClicked.OfType<Pawn>().Any();
 
 			if (pawnClicked && colonists.Count > 1 && achtungPressed == false && forceMenu == false)
@@ -133,7 +133,7 @@ namespace AchtungMod
 			var allDrafted = colonists.All(colonist => colonist.pawn.Drafted);
 			if (allDrafted)
 			{
-				StartDragging(pos, achtungPressed);
+				StartDragging(pos_x, pos_y, pos_z, achtungPressed);
 				return;
 			}
 
@@ -143,7 +143,7 @@ namespace AchtungMod
 		}
 
 		[SyncMethod]
-		private void StartDragging(Vector3 pos, bool asGroup)
+		private void StartDragging(float pos_x, float pos_y, float pos_z, bool asGroup)
 		{
 			groupMovement = asGroup;
 
@@ -155,10 +155,7 @@ namespace AchtungMod
 				groupRotationWas45 = Tools.Has45DegreeOffset(colonists);
 			}
 			else
-			{
-				lineStart = pos;
-				lineStart.y = Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays);
-			}
+				lineStart = new Vector3(pos_x, Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays), pos_z);
 
 			colonists.Do(colonist => colonist.offsetFromCenter = colonist.startPosition - groupCenter);
 
@@ -179,7 +176,7 @@ namespace AchtungMod
 		}
 
 		[SyncMethod]
-		public void MouseDrag(Vector3 pos)
+		public void MouseDrag(float pos_x, float pos_y, float pos_z)
 		{
 			if (Event.current.button != (int)Button.right)
 				return;
@@ -187,6 +184,7 @@ namespace AchtungMod
 			if (isDragging == false)
 				return;
 
+			var pos = new Vector3(pos_x, pos_y, pos_z);
 			if (groupMovement)
 			{
 				colonists.Do(colonist => colonist.OrderTo(pos + Tools.RotateBy(colonist.offsetFromCenter, groupRotation, groupRotationWas45)));
@@ -271,11 +269,10 @@ namespace AchtungMod
 			}
 		}
 
-		[SyncMethod]
-		private void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType)
+		private void AddDoThoroughly(List<FloatMenuOption> options, float pos_x, float pos_y, float pos_z, Pawn pawn, Type driverType)
 		{
 			var driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
-			var clickCell = new LocalTargetInfo(IntVec3.FromVector3(clickPos));
+			var clickCell = new LocalTargetInfo(new IntVec3((int)pos_x, (int)pos_y, (int)pos_z));
 			var targets = driver.CanStart(pawn, clickCell);
 			if (targets != null)
 			{
@@ -288,13 +285,14 @@ namespace AchtungMod
 			}
 		}
 
-		public IEnumerable<FloatMenuOption> AchtungChoicesAtFor(Vector3 clickPos, Pawn pawn)
+		[SyncMethod]
+		public IEnumerable<FloatMenuOption> AchtungChoicesAtFor(float pos_x, float pos_y, float pos_z, Pawn pawn)
 		{
 			var options = new List<FloatMenuOption>();
 
-			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_CleanRoom));
-			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_FightFire));
-			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_SowAll));
+			AddDoThoroughly(options, pos_x, pos_y, pos_z, pawn, typeof(JobDriver_CleanRoom));
+			AddDoThoroughly(options, pos_x, pos_y, pos_z, pawn, typeof(JobDriver_FightFire));
+			AddDoThoroughly(options, pos_x, pos_y, pos_z, pawn, typeof(JobDriver_SowAll));
 
 			return options;
 		}
@@ -378,12 +376,12 @@ namespace AchtungMod
 			switch (Event.current.type)
 			{
 				case EventType.mouseDown:
-					MouseDown(pos);
-					MouseDrag(pos);
+					MouseDown(pos.x, pos.y, pos.z);
+					MouseDrag(pos.x, pos.y, pos.z);
 					break;
 
 				case EventType.MouseDrag:
-					MouseDrag(pos);
+					MouseDrag(pos.x, pos.y, pos.z);
 					break;
 
 				case EventType.mouseUp:
