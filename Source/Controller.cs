@@ -25,7 +25,6 @@ namespace AchtungMod
 		public int groupRotation;
 		public bool groupRotationWas45;
 		public bool isDragging;
-		public bool achtungPressed;
 		public bool drawColonistPreviews;
 
 		public static Controller controller;
@@ -73,11 +72,15 @@ namespace AchtungMod
 				return;
 
 			var actions = new MultiActions(colonists, UI.MouseMapPosition());
-			achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
-
+			var achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
 			var forceMenu = Tools.IsModKeyPressed(Achtung.Settings.forceCommandMenuKey);
-			var thingsClicked = Find.CurrentMap.thingGrid.ThingsListAt(IntVec3.FromVector3(pos));
+
+			var map = Find.CurrentMap;
+			var cell = IntVec3.FromVector3(pos);
+
+			var thingsClicked = map.thingGrid.ThingsListAt(cell);
 			var pawnClicked = thingsClicked.OfType<Pawn>().Any();
+			var standableClicked = cell.Standable(map);
 
 			if (pawnClicked && colonists.Count > 1 && achtungPressed == false && forceMenu == false)
 			{
@@ -90,24 +93,7 @@ namespace AchtungMod
 					return;
 			}
 
-			var useMenuCases = achtungPressed == false && thingsClicked.Any(thing =>
-			{
-				return false
-					|| thing.def.IsWeapon
-					|| thing.def.IsBed
-					|| thing.def.IsMedicine
-					|| thing.def == ThingDefOf.Fire
-					|| thing.def.category == ThingCategory.Building && thing.def.building.IsMortar;
-			});
-			if (useMenuCases)
-			{
-				if (actions.Count(false) > 0)
-					Find.WindowStack.Add(actions.GetWindow());
-				Event.current.Use();
-				return;
-			}
-
-			if (forceMenu || (pawnClicked && achtungPressed == false))
+			if (forceMenu || (pawnClicked && achtungPressed == false) || standableClicked == false)
 			{
 				if (actions.Count(false) > 0)
 					Find.WindowStack.Add(actions.GetWindow());
