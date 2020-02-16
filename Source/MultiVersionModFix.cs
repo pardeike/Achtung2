@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using RimWorld;
 using Steamworks;
 using System.Collections.Generic;
@@ -17,21 +17,21 @@ static class MultiVersionModFix
 
 	static MultiVersionModFix()
 	{
-		var instance = HarmonyInstance.Create(_multiversionmodfix);
+		var instance = new Harmony(_multiversionmodfix);
 		var aBool = false;
 		var m_VersionCompatible = AccessTools.Property(typeof(ModMetaData), nameof(ModMetaData.VersionCompatible)).GetGetMethod();
 		var m_VersionCompatiblePostfix = SymbolExtensions.GetMethodInfo(() => VersionCompatible_Postfix(null, ref aBool));
 		instance.PostfixOnce(m_VersionCompatible, m_VersionCompatiblePostfix);
 		var m_SetWorkshopItemDataFrom = AccessTools.Method(typeof(Workshop), "SetWorkshopItemDataFrom");
-		var m_SetWorkshopItemDataFrom_Postfix = SymbolExtensions.GetMethodInfo(() => SetWorkshopItemDataFrom_Postfix(default(UGCUpdateHandle_t), null));
+		var m_SetWorkshopItemDataFrom_Postfix = SymbolExtensions.GetMethodInfo(() => SetWorkshopItemDataFrom_Postfix(default, null));
 		instance.PostfixOnce(m_SetWorkshopItemDataFrom, m_SetWorkshopItemDataFrom_Postfix);
 	}
 
-	static void PostfixOnce(this HarmonyInstance instance, MethodInfo original, MethodInfo postfix)
+	static void PostfixOnce(this Harmony instance, MethodInfo original, MethodInfo postfix)
 	{
-		var postfixes = instance.GetPatchInfo(original)?.Postfixes;
+		var postfixes = Harmony.GetPatchInfo(original)?.Postfixes;
 		if (postfixes == null || !postfixes.Any(patch => patch != null && patch.owner == _multiversionmodfix))
-			instance.Patch(original, postfix: new HarmonyMethod(postfix));
+			_ = instance.Patch(original, postfix: new HarmonyMethod(postfix));
 	}
 
 	static List<System.Version> GetTaggedVersions(string rootDir)
@@ -49,7 +49,7 @@ static class MultiVersionModFix
 			cachedVersions[rootDir] = result;
 			return result;
 		}
-		catch (System.Exception)
+		catch
 		{
 			cachedVersions[rootDir] = null;
 			return null;
@@ -74,8 +74,8 @@ static class MultiVersionModFix
 		if (!taggedVersions.NullOrEmpty())
 		{
 			var tags = taggedVersions.Select(version => version.Major + "." + version.Minor);
-			tags.Add("Mod");
-			SteamUGC.SetItemTags(updateHandle, tags.Distinct().ToList());
+			_ = tags.AddItem("Mod");
+			_ = SteamUGC.SetItemTags(updateHandle, tags.Distinct().ToList());
 		}
 	}
 }

@@ -240,7 +240,7 @@ namespace AchtungMod
 		public override string GetReport()
 		{
 			var name = currentPlantDef == null ? "" : " " + currentPlantDef.label;
-			return (GetPrefix() + "Report").Translate(new object[] { name, Math.Floor(Progress() * 100f) + "%" });
+			return (GetPrefix() + "Report").Translate(name, Math.Floor(Progress() * 100f) + "%");
 		}
 
 		protected override IEnumerable<Toil> MakeNewToils()

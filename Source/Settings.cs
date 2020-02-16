@@ -54,8 +54,7 @@ namespace AchtungMod
 			Scribe_Values.Look(ref ignoreAssignments, "ignoreAssignments", false, true);
 		}
 
-		static Vector2 scrollPosition = Vector2.zero;
-		public void DoWindowContents(Rect canvas)
+		public static void DoWindowContents(Rect canvas)
 		{
 			var columnWidth = canvas.width * 0.6f;
 			var list = new Listing_Standard { ColumnWidth = columnWidth };

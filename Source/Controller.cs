@@ -1,7 +1,4 @@
-﻿using Harmony;
-using Multiplayer.API;
-using RimWorld;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -44,7 +41,7 @@ namespace AchtungMod
 			drawColonistPreviews = true;
 		}
 
-		public void InstallDefs()
+		public static void InstallDefs()
 		{
 			new List<JobDef>
 			{
@@ -241,14 +238,15 @@ namespace AchtungMod
 			}
 		}
 
-		[SyncMethod]
+		// TODO: multiplayer
+		//[SyncMethod]
 		static void StartWorkSynced(Type driverType, Pawn pawn, LocalTargetInfo target, LocalTargetInfo clickCell)
 		{
 			var driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
 			driver.StartJob(pawn, target, clickCell);
 		}
 
-		private void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType)
+		private static void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType)
 		{
 			var driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
 			var clickCell = new LocalTargetInfo(IntVec3.FromVector3(clickPos));
@@ -258,13 +256,13 @@ namespace AchtungMod
 				var existingJobs = driver.SameJobTypesOngoing();
 				foreach (var target in targets)
 				{
-					var suffix = existingJobs.Count > 0 ? " " + ("AlreadyDoing".Translate(new object[] { existingJobs.Count + 1 })) : "";
+					var suffix = existingJobs.Count > 0 ? " " + "AlreadyDoing".Translate("" + (existingJobs.Count + 1)) : new TaggedString("");
 					options.Add(new FloatMenuOption(driver.GetLabel() + suffix, () => StartWorkSynced(driverType, pawn, target, clickCell), MenuOptionPriority.Low));
 				}
 			}
 		}
 
-		public IEnumerable<FloatMenuOption> AchtungChoicesAtFor(Vector3 clickPos, Pawn pawn)
+		public static IEnumerable<FloatMenuOption> AchtungChoicesAtFor(Vector3 clickPos, Pawn pawn)
 		{
 			var options = new List<FloatMenuOption>();
 
@@ -275,7 +273,7 @@ namespace AchtungMod
 			return options;
 		}
 
-		private void DrawForcedJobs()
+		private static void DrawForcedJobs()
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 			var map = Find.CurrentMap;
@@ -290,7 +288,7 @@ namespace AchtungMod
 				});
 		}
 
-		private void DrawReservations()
+		/*private void DrawReservations()
 		{
 			var reservationManager = Find.CurrentMap?.reservationManager;
 			if (reservationManager == null)
@@ -301,15 +299,15 @@ namespace AchtungMod
 			allReservations
 				.DoIf(res => selector.IsSelected(res.Claimant), res => Tools.DebugPosition(res.Target.Cell.ToVector3(), res.Target.HasThing ? new Color(1f, 0f, 0f, 0.2f) : new Color(0f, 1f, 0f, 0.2f)));
 
-			/*Find.CurrentMap?.reservationManager?
-				.AllReservedThings()?
-				.Where(t => t != null)
-				.Do(thing => Tools.DebugPosition(thing.Position.ToVector3(), new Color(1f, 0f, 0f, 0.2f)));*/
+			//Find.CurrentMap?.reservationManager?
+			//	.AllReservedThings()?
+			//	.Where(t => t != null)
+			//	.Do(thing => Tools.DebugPosition(thing.Position.ToVector3(), new Color(1f, 0f, 0f, 0.2f)));
 
 			//var forcedWork = Find.World.GetComponent<ForcedWork>();
 			//forcedWork.GetForbiddenLocations()
 			//	.Do(cell => Tools.DebugPosition(cell.ToVector3(), new Color(0f, 0f, 1f, 0.2f)));
-		}
+		}*/
 
 		public void HandleDrawing()
 		{
@@ -321,7 +319,7 @@ namespace AchtungMod
 			if (isDragging)
 			{
 				if (colonists.Count > 1 && groupMovement == false)
-					Tools.DrawLineBetween(lineStart, lineEnd, 1.0f);
+					Tools.DrawLineBetween(lineStart, lineEnd);
 
 				colonists.Do(c =>
 				{
@@ -353,7 +351,7 @@ namespace AchtungMod
 			var pos = UI.MouseMapPosition();
 			switch (Event.current.type)
 			{
-				case EventType.mouseDown:
+				case EventType.MouseDown:
 					MouseDown(pos);
 					MouseDrag(pos);
 					break;
@@ -362,7 +360,7 @@ namespace AchtungMod
 					MouseDrag(pos);
 					break;
 
-				case EventType.mouseUp:
+				case EventType.MouseUp:
 					MouseUp();
 					break;
 

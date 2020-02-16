@@ -1,5 +1,4 @@
-﻿using Harmony;
-using Multiplayer.API;
+﻿using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
 using System;
@@ -14,30 +13,32 @@ using Verse.AI;
 namespace AchtungMod
 {
 	[StaticConstructorOnStartup]
-	public class AchtungLoader
+	public static class AchtungLoader
 	{
 		public static bool IsSameSpotInstalled;
 
 		static AchtungLoader()
 		{
-			Controller.GetInstance().InstallDefs();
+			Controller.InstallDefs();
 
-			// HarmonyInstance.DEBUG = true;
-			var harmony = HarmonyInstance.Create("net.pardeike.rimworld.mods.achtung");
+			var harmony = new Harmony("net.pardeike.rimworld.mods.achtung");
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
 
 			const string sameSpotId = "net.pardeike.rimworld.mod.samespot";
 			IsSameSpotInstalled = harmony.GetPatchedMethods()
-				.Any(method => harmony.GetPatchInfo(method).Transpilers.Any(transpiler => transpiler.owner == sameSpotId));
+				.Any(method => Harmony.GetPatchInfo(method).Transpilers.Any(transpiler => transpiler.owner == sameSpotId));
 
-			if (MP.enabled)
+			// TODO: multiplayer
+			/*if (MP.enabled)
 			{
 				MP.RegisterAll();
 				MP.RegisterSyncWorker<Vector3>(Vector3Support);
 				MP.RegisterSyncWorker<Type>(TypeSupport);
-			}
+			}*/
 		}
 
+		// TODO: multiplayer
+		/*
 		static void Vector3Support(SyncWorker sync, ref Vector3 value)
 		{
 			sync.Bind(ref value.x);
@@ -52,6 +53,7 @@ namespace AchtungMod
 			else
 				value = AccessTools.TypeByName(sync.Read<string>());
 		}
+		*/
 	}
 
 	public class Achtung : Mod
@@ -65,7 +67,7 @@ namespace AchtungMod
 
 		public override void DoSettingsWindowContents(Rect inRect)
 		{
-			Settings.DoWindowContents(inRect);
+			AchtungSettings.DoWindowContents(inRect);
 		}
 
 		public override string SettingsCategory()
@@ -78,7 +80,7 @@ namespace AchtungMod
 	[HarmonyPatch("FinalizeInit")]
 	static class Game_FinalizeInit_Patch
 	{
-		static void Postfix()
+		public static void Postfix()
 		{
 			ModCounter.Trigger();
 		}
@@ -90,7 +92,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(GenConstruct.BlocksConstruction))]
 	static class GenConstruct_BlocksConstruction_Patch
 	{
-		static bool Prefix(ref bool __result, Thing constructible, Thing t)
+		static bool Prefix(ref bool __result, Thing t)
 		{
 			if (t is Pawn)
 			{
@@ -107,7 +109,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(HaulAIUtility.PawnCanAutomaticallyHaulFast))]
 	static class HaulAIUtility_PawnCanAutomaticallyHaulFast_Patch
 	{
-		static bool Prefix(Pawn p, Thing t, bool forced, ref bool __result)
+		static bool Prefix(Pawn p, bool forced, ref bool __result)
 		{
 			if (Achtung.Settings.ignoreRestrictions)
 			{
@@ -160,12 +162,12 @@ namespace AchtungMod
 
 			var f_NotInHomeAreaTrans = AccessTools.Field(typeof(WorkGiver_FixBrokenDownBuilding), "NotInHomeAreaTrans");
 			if (f_NotInHomeAreaTrans == null) throw new Exception("Cannot find method WorkGiver_FixBrokenDownBuilding.NotInHomeAreaTrans");
-			var i = instr.FirstIndexOf(inst => inst.opcode == OpCodes.Ldsfld && inst.operand == f_NotInHomeAreaTrans);
+			var i = instr.FirstIndexOf(inst => inst.LoadsField(f_NotInHomeAreaTrans));
 			if (i > 0)
 			{
 				object label = null;
 				for (var j = i - 1; j >= 0; j--)
-					if (instr[j].opcode == OpCodes.Brtrue)
+					if (instr[j].opcode == OpCodes.Brtrue || instr[j].opcode == OpCodes.Brtrue_S)
 					{
 						label = instr[j].operand;
 						break;
@@ -285,7 +287,7 @@ namespace AchtungMod
 	[HarmonyPatch(new Type[] { typeof(Thing), typeof(Pawn) })]
 	static class ForbidUtility_IsForbidden_Patch
 	{
-		static bool Prefix(Thing t, Pawn pawn, ref bool __result)
+		static bool Prefix(Pawn pawn, ref bool __result)
 		{
 			if (Achtung.Settings.ignoreForbidden)
 			{
@@ -310,7 +312,7 @@ namespace AchtungMod
 		{
 			var m_Notify_Teleported = AccessTools.Method(typeof(Pawn), nameof(Pawn.Notify_Teleported));
 			var list = instructions.ToList();
-			var idx = list.FirstIndexOf(code => code.operand == m_Notify_Teleported);
+			var idx = list.FirstIndexOf(code => code.Calls(m_Notify_Teleported));
 			if (idx > 0)
 			{
 				if (list[idx - 2].opcode == OpCodes.Ldc_I4_1)
@@ -360,7 +362,7 @@ namespace AchtungMod
 			var idx = 0;
 			while (idx < count)
 			{
-				if (list[idx].operand == m_RadialDistinctThingsAround)
+				if (list[idx].Calls(m_RadialDistinctThingsAround))
 				{
 					list[idx].opcode = OpCodes.Call;
 					list[idx].operand = m_RadialDistinctThingsAround_Patch;
@@ -401,7 +403,7 @@ namespace AchtungMod
 		static int GetPriority(Pawn pawn, WorkTypeDef w)
 		{
 			if (Achtung.Settings.ignoreAssignments)
-				return pawn.story.WorkTypeIsDisabled(w) ? 0 : 1;
+				return pawn.WorkTypeIsDisabled(w) ? 0 : 1;
 			return pawn.workSettings.GetPriority(w);
 		}
 
@@ -416,7 +418,7 @@ namespace AchtungMod
 			var foundCount = 0;
 			while (true)
 			{
-				var idx = list.FirstIndexOf(instr => instr.operand == m_GetPriority);
+				var idx = list.FirstIndexOf(instr => instr.Calls(m_GetPriority));
 				if (idx < 2 || idx >= list.Count)
 					break;
 				foundCount++;
@@ -430,14 +432,14 @@ namespace AchtungMod
 
 			foundCount = 0;
 			Enumerable.Range(0, list.Count)
-				.DoIf(i => list[i].opcode == OpCodes.Isinst && list[i].operand == typeof(WorkGiver_Scanner), i =>
+				.DoIf(i => list[i].opcode == OpCodes.Isinst && (Type)list[i].operand == typeof(WorkGiver_Scanner), i =>
 				{
 					var index = i + 1;
 					if (list[index].opcode == OpCodes.Stloc_S)
 					{
 						var localVar = list[index].operand;
 
-						index = list.FindIndex(index, code => code.opcode == OpCodes.Newobj && code.operand == c_FloatMenuOption);
+						index = list.FindIndex(index, code => code.opcode == OpCodes.Newobj && (ConstructorInfo)code.operand == c_FloatMenuOption);
 						if (index < 0)
 							Log.Error("Cannot find 'Isinst WorkGiver_Scanner' in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
 						else
@@ -473,6 +475,7 @@ namespace AchtungMod
 			var m_CleanupCurrentJob = AccessTools.Method(typeof(Pawn_JobTracker), "CleanupCurrentJob");
 			var m_ContinueJob = AccessTools.Method(typeof(ForcedJob), nameof(ForcedJob.ContinueJob));
 			var f_pawn = AccessTools.Field(typeof(Pawn_JobTracker), "pawn");
+			var f_curJob = AccessTools.Field(typeof(Pawn_JobTracker), "curJob");
 
 			if (m_CleanupCurrentJob == null) throw new Exception("Cannot find method Pawn_JobTracker.CleanupCurrentJob");
 			if (f_pawn == null) throw new Exception("Cannot find field Pawn_JobTracker.pawn");
@@ -483,10 +486,10 @@ namespace AchtungMod
 				var instruction = instrList[i];
 				yield return instruction;
 
-				if (instruction.operand != m_CleanupCurrentJob)
+				if (instruction.OperandIs(m_CleanupCurrentJob) == false)
 					continue;
 
-				if (instrList[i + 1].opcode != OpCodes.Ldarg_2 || instrList[i + 2].opcode != OpCodes.Brfalse)
+				if (instrList[i + 1].opcode != OpCodes.Ldarg_2 || (instrList[i + 2].opcode != OpCodes.Brfalse && instrList[i + 2].opcode != OpCodes.Brfalse_S))
 				{
 					Log.Error("Unexpected opcodes while transpiling Pawn_JobTracker.EndCurrentJob");
 					continue;
@@ -498,7 +501,8 @@ namespace AchtungMod
 				yield return instrList[++i];
 
 				yield return new CodeInstruction(OpCodes.Ldarg_0);
-				yield return new CodeInstruction(OpCodes.Ldloc_1);
+				yield return new CodeInstruction(OpCodes.Ldarg_0);
+				yield return new CodeInstruction(OpCodes.Ldfld, f_curJob);
 				yield return new CodeInstruction(OpCodes.Ldarg_0);
 				yield return new CodeInstruction(OpCodes.Ldfld, f_pawn);
 				yield return new CodeInstruction(OpCodes.Ldarg_1);
@@ -527,12 +531,12 @@ namespace AchtungMod
 			var breakNote = Tools.PawnOverBreakLevel(___pawn);
 			if (breakNote != null)
 			{
-				if (breakNote != "")
+				if (breakNote.Length > 0)
 				{
 					___pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(___pawn);
 					var jobName = ___pawn.jobs?.curJob.GetReport(___pawn).CapitalizeFirst() ?? "-";
-					var label = "JobInterruptedLabel".Translate(new object[] { jobName });
-					Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(new object[] { ___pawn.Name.ToStringShort, breakNote }), LetterDefOf.NegativeEvent, ___pawn));
+					var label = "JobInterruptedLabel".Translate(jobName);
+					Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(___pawn.Name.ToStringShort, breakNote), LetterDefOf.NegativeEvent, ___pawn));
 				}
 
 				forcedWork.Remove(___pawn);
@@ -544,8 +548,8 @@ namespace AchtungMod
 			{
 				___pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(___pawn);
 				var jobName = ___pawn.jobs?.curJob.GetReport(___pawn).CapitalizeFirst() ?? "-";
-				var label = "JobInterruptedLabel".Translate(new object[] { jobName });
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBadHealth".Translate(new object[] { ___pawn.Name.ToStringShort }), LetterDefOf.NegativeEvent, ___pawn));
+				var label = "JobInterruptedLabel".Translate(jobName);
+				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBadHealth".Translate(___pawn.Name.ToStringShort), LetterDefOf.NegativeEvent, ___pawn));
 
 				forcedWork.Remove(___pawn);
 				___pawn.jobs?.EndCurrentJob(JobCondition.InterruptForced, true);
@@ -578,7 +582,8 @@ namespace AchtungMod
 		public static readonly Texture2D ForceRadiusShrink = ContentFinder<Texture2D>.Get("ForceRadiusShrink", true);
 		public static readonly Texture2D ForceRadiusShrinkOff = ContentFinder<Texture2D>.Get("ForceRadiusShrinkOff", true);
 
-		[SyncMethod]
+		// TODO: multiplayer
+		//[SyncMethod]
 		static void ActionSynced(Pawn pawn, int delta)
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
@@ -603,18 +608,18 @@ namespace AchtungMod
 			yield return new Command_Action
 			{
 				defaultLabel = "IncreaseForceRadius".Translate(),
-				defaultDesc = "IncreaseForceRadiusDesc".Translate(new object[] { radius }),
+				defaultDesc = "IncreaseForceRadiusDesc".Translate(radius),
 				icon = ForceRadiusExpand,
-				activateSound = SoundDefOf.Designate_AreaAdd,
+				activateSound = SoundDefOf.Designate_ZoneAdd,
 				action = delegate { ActionSynced(___pawn, 1); }
 			};
 
 			yield return new Command_Action
 			{
 				defaultLabel = "DecreaseForceRadius".Translate(),
-				defaultDesc = "DecreaseForceRadiusDesc".Translate(new object[] { radius }),
+				defaultDesc = "DecreaseForceRadiusDesc".Translate(radius),
 				icon = radius > 0 ? ForceRadiusShrink : ForceRadiusShrinkOff,
-				activateSound = radius > 0 ? SoundDefOf.Designate_AreaAdd : SoundDefOf.Designate_Failed,
+				activateSound = radius > 0 ? SoundDefOf.Designate_ZoneAdd : SoundDefOf.Designate_Failed,
 				action = delegate { ActionSynced(___pawn, -1); }
 			};
 		}
@@ -626,7 +631,7 @@ namespace AchtungMod
 	[HarmonyPatch("ShouldStartJobFromThinkTree")]
 	static class Pawn_JobTracker_ShouldStartJobFromThinkTree_Patch
 	{
-		static void Postfix(Pawn ___pawn, ref bool __result)
+		public static void Postfix(Pawn ___pawn, ref bool __result)
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 			if (__result && forcedWork.HasForcedJob(___pawn))
@@ -711,7 +716,7 @@ namespace AchtungMod
 		{
 			if (pawn != null && pawn.Drafted == false)
 				if (WorldRendererUtility.WorldRenderedNow == false)
-					__result.AddRange(Controller.GetInstance().AchtungChoicesAtFor(clickPos, pawn));
+					__result.AddRange(Controller.AchtungChoicesAtFor(clickPos, pawn));
 		}
 	}
 }

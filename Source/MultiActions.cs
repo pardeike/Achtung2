@@ -1,7 +1,7 @@
-﻿using System;
+﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -10,7 +10,7 @@ namespace AchtungMod
 	public class MultiActions
 	{
 		public Vector3 clickPos;
-		List<MultiAction> allActions;
+		readonly List<MultiAction> allActions;
 		int totalColonistsInvolved = 0;
 
 		public MultiActions(IEnumerable<Colonist> colonists, Vector3 clickPos)
@@ -28,11 +28,11 @@ namespace AchtungMod
 		{
 			var forced = Tools.ForceDraft(colonist.pawn, true, true);
 			FloatMenuMakerMap.ChoicesAtFor(clickPos, colonist.pawn).Do(option => AddMultiAction(colonist, true, option));
-			if (forced) Tools.SetDraftStatus(colonist.pawn, false, true);
+			if (forced) _ = Tools.SetDraftStatus(colonist.pawn, false, true);
 
 			forced = Tools.ForceDraft(colonist.pawn, false, true);
 			FloatMenuMakerMap.ChoicesAtFor(clickPos, colonist.pawn).Do(option => AddMultiAction(colonist, false, option));
-			if (forced) Tools.SetDraftStatus(colonist.pawn, true, true);
+			if (forced) _ = Tools.SetDraftStatus(colonist.pawn, true, true);
 		}
 
 		public void AddMultiAction(Colonist colonist, bool draftMode, FloatMenuOption option)
@@ -63,7 +63,7 @@ namespace AchtungMod
 			});
 		}
 
-		public IEnumerable<Colonist> ColonistsForActions(IEnumerable<MultiAction> subActions)
+		public static IEnumerable<Colonist> ColonistsForActions(IEnumerable<MultiAction> subActions)
 		{
 			return subActions.Select(action => action.colonist).Distinct();
 		}
@@ -82,7 +82,7 @@ namespace AchtungMod
 			return result;
 		}
 
-		private float AllEqualFloat(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, float> eval, float defaultValue)
+		private static float AllEqualFloat(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, float> eval, float defaultValue)
 		{
 			if (options.Count() == 0) return defaultValue;
 			var result = eval(options.First());

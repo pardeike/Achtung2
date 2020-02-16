@@ -19,7 +19,7 @@ namespace AchtungMod
 		public void ExposeData()
 		{
 			if (Scribe.mode == LoadSaveMode.Saving)
-				jobs.RemoveAll(job => job.IsEmpty());
+				_ = jobs.RemoveAll(job => job.IsEmpty());
 
 			Scribe_Collections.Look(ref jobs, "jobs", LookMode.Deep);
 
@@ -28,7 +28,7 @@ namespace AchtungMod
 				if (jobs == null)
 					jobs = new List<ForcedJob>();
 
-				jobs.RemoveAll(job => job.IsEmpty());
+				_ = jobs.RemoveAll(job => job.IsEmpty());
 			}
 		}
 	}
@@ -36,7 +36,7 @@ namespace AchtungMod
 	public class ForcedJob : IExposable
 	{
 		private HashSet<ForcedTarget> targets = new HashSet<ForcedTarget>();
-		private readonly Dictionary<LocalTargetInfo, int> targetBaseScoreCache = new Dictionary<LocalTargetInfo, int>();
+		//private readonly Dictionary<LocalTargetInfo, int> targetBaseScoreCache = new Dictionary<LocalTargetInfo, int>();
 
 		public Pawn pawn = null;
 		public List<WorkGiverDef> workgiverDefs = new List<WorkGiverDef>();
@@ -78,7 +78,7 @@ namespace AchtungMod
 			pawn = null;
 			workgiverDefs = new List<WorkGiverDef>();
 			targets = new HashSet<ForcedTarget>();
-			targetBaseScoreCache = new Dictionary<LocalTargetInfo, int>();
+			//targetBaseScoreCache = new Dictionary<LocalTargetInfo, int>();
 			isThingJob = false;
 			initialized = false;
 			cellRadius = 0;
@@ -86,7 +86,7 @@ namespace AchtungMod
 
 		public void AddTarget(LocalTargetInfo item)
 		{
-			targets.Add(new ForcedTarget(item, MaterialScore(item)));
+			_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
 			UpdateCells();
 		}
 
@@ -199,7 +199,10 @@ namespace AchtungMod
 
 		public static bool ContinueJob(Pawn_JobTracker tracker, Job lastJob, Pawn pawn, JobCondition condition)
 		{
-			if (pawn.IsColonist == false) return false;
+			_ = tracker;
+			_ = lastJob;
+
+			if (pawn == null || pawn.IsColonist == false) return false;
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 
 			var forcedJob = forcedWork.GetForcedJob(pawn);
@@ -222,13 +225,13 @@ namespace AchtungMod
 			{
 				forcedJob.UpdateCells();
 
-				if (forcedJob.GetNextJob(out var job, out var item))
+				if (forcedJob.GetNextJob(out var job, out var _))
 				{
 					job.expiryInterval = 0;
 					job.ignoreJoyTimeAssignment = true;
 					job.locomotionUrgency = LocomotionUrgency.Sprint;
 					job.playerForced = true;
-					forcedWork.QueueJob(pawn, job);
+					ForcedWork.QueueJob(pawn, job);
 					return true;
 				}
 
@@ -342,7 +345,7 @@ namespace AchtungMod
 		public void ExposeData()
 		{
 			if (Scribe.mode == LoadSaveMode.Saving)
-				targets.RemoveWhere(target => target.item == null || target.item.IsValid == false || target.item.ThingDestroyed);
+				_ = targets.RemoveWhere(target => target.item == null || target.item.IsValid == false || target.item.ThingDestroyed);
 
 			Scribe_References.Look(ref pawn, "pawn");
 			Scribe_Collections.Look(ref workgiverDefs, "workgivers", LookMode.Def);
@@ -352,7 +355,7 @@ namespace AchtungMod
 			Scribe_Values.Look(ref cellRadius, "radius", 0, true);
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-				targets.RemoveWhere(target => target.item == null || target.item.IsValid == false || target.item.ThingDestroyed);
+				_ = targets.RemoveWhere(target => target.item == null || target.item.IsValid == false || target.item.ThingDestroyed);
 		}
 	}
 

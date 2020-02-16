@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using RimWorld;
 using Steamworks;
 using System;
@@ -12,7 +12,7 @@ using UnityEngine;
 using Verse;
 using Verse.Steam;
 
-namespace CameraPlus
+namespace CrossPromotionModule
 {
 	[StaticConstructorOnStartup]
 	static class CrossPromotion
@@ -28,26 +28,27 @@ namespace CameraPlus
 
 		static CrossPromotion()
 		{
-			var instance = HarmonyInstance.Create(_crosspromotion);
-			if (instance.HasAnyPatches(_crosspromotion))
+			if (Harmony.HasAnyPatches(_crosspromotion))
 				return;
 
-			instance.Patch(
+			var instance = new Harmony(_crosspromotion);
+
+			_ = instance.Patch(
 				SymbolExtensions.GetMethodInfo(() => MainMenuDrawer.Init()),
 				postfix: new HarmonyMethod(SymbolExtensions.GetMethodInfo(() => MainMenuDrawer_Init_Postfix()))
 			);
 
-			instance.Patch(
+			_ = instance.Patch(
 				AccessTools.DeclaredMethod(typeof(Page_ModsConfig), nameof(Page_ModsConfig.PostClose)),
 				postfix: new HarmonyMethod(SymbolExtensions.GetMethodInfo(() => Page_ModsConfig_PostClose_Postfix()))
 			);
 
-			instance.Patch(
+			_ = instance.Patch(
 				AccessTools.DeclaredMethod(typeof(WorkshopItems), "Notify_Subscribed"),
 				postfix: new HarmonyMethod(SymbolExtensions.GetMethodInfo(() => WorkshopItems_Notify_Subscribed_Postfix(new PublishedFileId_t(0))))
 			);
 
-			instance.Patch(
+			_ = instance.Patch(
 				AccessTools.DeclaredMethod(typeof(Page_ModsConfig), nameof(Page_ModsConfig.DoWindowContents)),
 				transpiler: new HarmonyMethod(SymbolExtensions.GetMethodInfo(() => Page_ModsConfig_DoWindowContents_Transpiler(null, null)))
 			);
@@ -55,7 +56,7 @@ namespace CameraPlus
 
 		static void MainMenuDrawer_Init_Postfix()
 		{
-			ModPreviewPath(0);
+			_ = ModPreviewPath(0);
 			new Thread(() => { FetchPromotionMods(); }).Start();
 		}
 
@@ -69,7 +70,7 @@ namespace CameraPlus
 			var longID = pfid.m_PublishedFileId;
 			if (subscribingMods.Contains(longID) == false)
 				return;
-			subscribingMods.Remove(longID);
+			_ = subscribingMods.Remove(longID);
 
 			LongEventHandler.ExecuteWhenFinished(() =>
 			{
@@ -92,11 +93,11 @@ namespace CameraPlus
 			var list = instructions.ToList();
 			var beginGroupIndicies = list
 				.Select((instr, idx) => new Pair<int, CodeInstruction>(idx, instr))
-				.Where(pair => pair.Second.operand == m_BeginGroup)
+				.Where(pair => pair.Second.operand is MethodInfo mi && mi == m_BeginGroup)
 				.Select(pair => pair.First).ToArray();
 			var endGroupIndicies = list
 				.Select((instr, idx) => new Pair<int, CodeInstruction>(idx, instr))
-				.Where(pair => pair.Second.operand == m_EndGroup)
+				.Where(pair => pair.Second.operand is MethodInfo mi && mi == m_EndGroup)
 				.Select(pair => pair.First).ToArray();
 			if (beginGroupIndicies.Length != 2 || endGroupIndicies.Length != 2)
 				return instructions;
@@ -121,7 +122,7 @@ namespace CameraPlus
 		{
 			var dir = Path.GetTempPath() + "BrrainzMods" + Path.DirectorySeparatorChar;
 			if (Directory.Exists(dir) == false)
-				Directory.CreateDirectory(dir);
+				_ = Directory.CreateDirectory(dir);
 			return dir + modID + "-preview.jpg";
 		}
 
@@ -151,7 +152,7 @@ namespace CameraPlus
 			var callDelegate = new CallResult<SteamUGCQueryCompleted_t>.APIDispatchDelegate((result, failure) =>
 			{
 				callback(result, failure);
-				SteamUGC.ReleaseQueryUGCRequest(query);
+				_ = SteamUGC.ReleaseQueryUGCRequest(query);
 			});
 			var call = SteamUGC.SendQueryUGCRequest(query);
 			var resultHandle = CallResult<SteamUGCQueryCompleted_t>.Create(callDelegate);
@@ -179,8 +180,8 @@ namespace CameraPlus
 				EUserUGCList.k_EUserUGCList_Published, EUGCMatchingUGCType.k_EUGCMatchingUGCType_UsableInGame,
 				EUserUGCListSortOrder.k_EUserUGCListSortOrder_VoteScoreDesc, rimworldID, rimworldID,
 				1);
-				SteamUGC.SetReturnLongDescription(itemQuery, true);
-				SteamUGC.SetRankedByTrendDays(itemQuery, 7);
+				_ = SteamUGC.SetReturnLongDescription(itemQuery, true);
+				_ = SteamUGC.SetRankedByTrendDays(itemQuery, 7);
 				AsyncUserModsQuery(itemQuery, (result, failure) =>
 				{
 					for (uint i = 0; i < result.m_unNumResultsReturned; i++)
@@ -198,7 +199,7 @@ namespace CameraPlus
 										if (File.Exists(path))
 										{
 											if (previewTextures.ContainsKey(modID))
-												previewTextures.Remove(modID);
+												_ = previewTextures.Remove(modID);
 										}
 									});
 								}
@@ -249,7 +250,7 @@ namespace CameraPlus
 			var mainModID = mod.GetPublishedFileId().m_PublishedFileId;
 			var promoMods = CrossPromotion.promotionMods.ToArray();
 			var thisMod = promoMods.FirstOrDefault(m => m.m_nPublishedFileId.m_PublishedFileId == mainModID);
-			var isLocalFile = ModLister.AllInstalledMods.Any(meta => meta.GetPublishedFileId().m_PublishedFileId == mainModID && meta.Source == ContentSource.LocalFolder);
+			var isLocalFile = ModLister.AllInstalledMods.Any(meta => meta.GetPublishedFileId().m_PublishedFileId == mainModID && meta.Source == ContentSource.ModsFolder);
 			var isSubbed = workshopMods.Contains(mainModID);
 
 			if (CrossPromotion.lastPresentedMod != mainModID)
@@ -274,11 +275,11 @@ namespace CameraPlus
 
 			var outRect = new Rect(0f, 0f, leftColumn, mainRect.height);
 			var width = outRect.width - 20f;
-			var imageRect = new Rect(0f, 0f, width, width * mod.previewImage.height / mod.previewImage.width);
+			var imageRect = new Rect(0f, 0f, width, width * mod.PreviewImage.height / mod.PreviewImage.width);
 			var textRect = new Rect(0f, 24f + 10f + imageRect.height, width, Text.CalcHeight(description, width));
 			var innerRect = new Rect(0f, 0f, width, imageRect.height + 20f + 8f + 10f + textRect.height);
 			Widgets.BeginScrollView(outRect, ref leftScroll, innerRect, true);
-			GUI.DrawTexture(imageRect, mod.previewImage, ScaleMode.ScaleToFit);
+			GUI.DrawTexture(imageRect, mod.PreviewImage, ScaleMode.ScaleToFit);
 			var widgetRow = new WidgetRow(imageRect.xMax, imageRect.yMax + 8f, UIDirection.LeftThenDown, width, 8f);
 			if (isLocalFile == false)
 			{
@@ -289,8 +290,8 @@ namespace CameraPlus
 						mod.enabled = false;
 						new Thread(() =>
 						{
-							AccessTools.Method(typeof(Workshop), "Unsubscribe").Invoke(null, new object[] { mod });
-							AccessTools.Method(typeof(Page_ModsConfig), "Notify_SteamItemUnsubscribed").Invoke(page, new object[] { mainModID });
+							_ = AccessTools.Method(typeof(Workshop), "Unsubscribe").Invoke(null, new object[] { mod });
+							_ = AccessTools.Method(typeof(Page_ModsConfig), "Notify_SteamItemUnsubscribed").Invoke(page, new object[] { mainModID });
 						}).Start();
 					}, true, null));
 				}
@@ -306,7 +307,7 @@ namespace CameraPlus
 				if (widgetRow.ButtonText("Upload", null, true, true))
 					Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmSteamWorkshopUpload".Translate(), delegate
 					{
-						AccessTools.Method(typeof(Workshop), "Upload").Invoke(null, new object[] { mod });
+						_ = AccessTools.Method(typeof(Workshop), "Upload").Invoke(null, new object[] { mod });
 					}, true, null));
 			}
 
@@ -336,9 +337,9 @@ namespace CameraPlus
 			foreach (var promoMod in promoMods)
 			{
 				var myModID = promoMod.m_nPublishedFileId.m_PublishedFileId;
-				var isLocalFile = ModLister.AllInstalledMods.Any(meta => meta.GetPublishedFileId().m_PublishedFileId == myModID && meta.Source == ContentSource.LocalFolder);
+				var isLocalFile = ModLister.AllInstalledMods.Any(meta => meta.GetPublishedFileId().m_PublishedFileId == myModID && meta.Source == ContentSource.ModsFolder);
 				var isSubbed = workshopMods.Contains(myModID);
-				CrossPromotion.allVoteStati.TryGetValue(myModID, out var voteStatus);
+				_ = CrossPromotion.allVoteStati.TryGetValue(myModID, out var voteStatus);
 
 				if (height > 0)
 					height += 10f;
@@ -357,10 +358,10 @@ namespace CameraPlus
 			foreach (var promoMod in promoMods)
 			{
 				var myModID = promoMod.m_nPublishedFileId.m_PublishedFileId;
-				var isLocalFile = ModLister.AllInstalledMods.Any(meta => meta.GetPublishedFileId().m_PublishedFileId == myModID && meta.Source == ContentSource.LocalFolder);
+				var isLocalFile = ModLister.AllInstalledMods.Any(meta => meta.GetPublishedFileId().m_PublishedFileId == myModID && meta.Source == ContentSource.ModsFolder);
 				var isSubbed = workshopMods.Contains(myModID);
 				var isActive = activeMods.Contains(myModID);
-				CrossPromotion.allVoteStati.TryGetValue(myModID, out var voteStatus);
+				_ = CrossPromotion.allVoteStati.TryGetValue(myModID, out var voteStatus);
 
 				if (firstTime == false)
 					modRect.y += 10f;
@@ -400,17 +401,17 @@ namespace CameraPlus
 							{
 								if (isSubbed || isLocalFile)
 								{
-									var orderedMods = (IEnumerable<ModMetaData>)AccessTools.Method(typeof(Page_ModsConfig), "ModsInListOrder").Invoke(page, new object[0]);
+									var orderedMods = (IEnumerable<ModMetaData>)AccessTools.Method(typeof(Page_ModsConfig), "ModsInListOrder").Invoke(page, Array.Empty<object>());
 									page.selectedMod = orderedMods.FirstOrDefault(meta => meta.GetPublishedFileId().m_PublishedFileId == myModID);
 									var modsBefore = orderedMods.FirstIndexOf(m => m == page.selectedMod);
 									if (modsBefore >= 0)
-										Traverse.Create(page).Field("modListScrollPosition").SetValue(new Vector2(0f, modsBefore * 26f + 4f));
+										_ = Traverse.Create(page).Field("modListScrollPosition").SetValue(new Vector2(0f, modsBefore * 26f + 4f));
 								}
 								else
 									new Thread(() =>
 									{
 										CrossPromotion.subscribingMods.Add(myModID);
-										SteamUGC.SubscribeItem(new PublishedFileId_t(myModID));
+										_ = SteamUGC.SubscribeItem(new PublishedFileId_t(myModID));
 									}).Start();
 							}
 							var infoWindow = new Dialog_MessageBox(description, "Close".Translate(), null, actionButton, actionButtonAction, null, false, null, null);
@@ -431,7 +432,7 @@ namespace CameraPlus
 								new Thread(() =>
 								{
 									CrossPromotion.subscribingMods.Add(myModID);
-									SteamUGC.SubscribeItem(new PublishedFileId_t(myModID));
+									_ = SteamUGC.SubscribeItem(new PublishedFileId_t(myModID));
 								}).Start();
 						}
 						else if (voteStatus != null && voteStatus == false)
@@ -442,7 +443,7 @@ namespace CameraPlus
 								new Thread(() =>
 								{
 									CrossPromotion.allVoteStati[myModID] = true;
-									SteamUGC.SetUserItemVote(new PublishedFileId_t(myModID), true);
+									_ = SteamUGC.SetUserItemVote(new PublishedFileId_t(myModID), true);
 								}).Start();
 							}
 						}

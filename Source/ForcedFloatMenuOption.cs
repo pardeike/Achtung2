@@ -1,12 +1,10 @@
-﻿using Multiplayer.API;
-using RimWorld;
+﻿using RimWorld;
 using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
-using Verse.AI;
 
 namespace AchtungMod
 {
@@ -64,7 +62,7 @@ namespace AchtungMod
 		public IntVec3 forceCell;
 		public WorkGiver_Scanner forceWorkgiver;
 
-		public static string ForcedLabelText = Translator.CanTranslate("ForceMenuButtonText") ? "ForceMenuButtonText".Translate() : " ! ";
+		public static TaggedString ForcedLabelText = Translator.CanTranslate("ForceMenuButtonText") ? "ForceMenuButtonText".Translate() : new TaggedString(" ! ");
 		public static float buttonSpace = 10f;
 		public static float _buttonWidth = 0f;
 		public static float ButtonWidth
@@ -147,7 +145,8 @@ namespace AchtungMod
 			return false;
 		}
 
-		[SyncMethod]
+		// TODO: multiplayer
+		//[SyncMethod]
 		public static bool ForceActionSynced(Pawn forcePawn, WorkGiver_Scanner forceWorkgiver, int x, int z)
 		{
 			var forceCell = new IntVec3(x, 0, z);
@@ -155,20 +154,20 @@ namespace AchtungMod
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 			forcedWork.Prepare(forcePawn);
 
-			var workgiverDefs = forcedWork.GetCombinedDefs(forceWorkgiver);
+			var workgiverDefs = ForcedWork.GetCombinedDefs(forceWorkgiver);
 			foreach (var workgiverDef in workgiverDefs)
 			{
 				var workgiver = workgiverDef.Worker as WorkGiver_Scanner;
 				if (workgiver == null) continue;
 
-				var item = forcedWork.HasJobItem(forcePawn, workgiver, forceCell);
+				var item = ForcedWork.HasJobItem(forcePawn, workgiver, forceCell);
 				if (item == null) continue;
 
 				Tools.CancelWorkOn(forcePawn, item);
 
 				if (forcedWork.AddForcedJob(forcePawn, workgiverDefs, item))
 				{
-					var job = forcedWork.GetJobItem(forcePawn, workgiver, item);
+					var job = ForcedWork.GetJobItem(forcePawn, workgiver, item);
 					var success = job == null ? false : forcePawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, forceCell);
 					if (success == false)
 					{

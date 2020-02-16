@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -85,8 +85,9 @@ namespace AchtungMod
 
 		public void StartJob(Pawn targetPawn, LocalTargetInfo target, LocalTargetInfo extra)
 		{
-			var newJob = new Job(MakeDef(), target, extra) { playerForced = true };
-			targetPawn.jobs.TryTakeOrderedJob(newJob);
+			var newJob = JobMaker.MakeJob(MakeDef(), target, extra);
+			newJob.playerForced = true;
+			_ = targetPawn.jobs.TryTakeOrderedJob(newJob);
 		}
 
 		public float Progress()
@@ -152,8 +153,8 @@ namespace AchtungMod
 				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
 				EndJobWith(JobCondition.Incompletable);
 				var jobName = (GetPrefix() + "Label").Translate();
-				var label = "JobInterruptedLabel".Translate(new object[] { jobName });
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(new object[] { pawn.Name.ToStringShort, breakNote }), LetterDefOf.NegativeEvent, pawn));
+				var label = "JobInterruptedLabel".Translate(jobName);
+				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(pawn.Name.ToStringShort, breakNote), LetterDefOf.NegativeEvent, pawn));
 				return;
 			}
 
@@ -162,7 +163,7 @@ namespace AchtungMod
 				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
 				EndJobWith(JobCondition.Incompletable);
 				var jobName = (GetPrefix() + "Label").Translate();
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter("JobInterruptedLabel".Translate(new object[] { jobName }), "JobInterruptedBadHealth".Translate(new object[] { pawn.Name.ToStringShort }), LetterDefOf.NegativeEvent, pawn));
+				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter("JobInterruptedLabel".Translate(jobName), "JobInterruptedBadHealth".Translate(pawn.Name.ToStringShort), LetterDefOf.NegativeEvent, pawn));
 				return;
 			}
 		}
@@ -201,7 +202,7 @@ namespace AchtungMod
 
 		public override string GetReport()
 		{
-			return (GetPrefix() + "Report").Translate(new object[] { Math.Floor(Progress() * 100f) + "%" });
+			return (GetPrefix() + "Report").Translate(Math.Floor(Progress() * 100f) + "%");
 		}
 
 		protected override IEnumerable<Toil> MakeNewToils()

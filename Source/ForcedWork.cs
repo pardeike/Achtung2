@@ -26,8 +26,8 @@ namespace AchtungMod
 					.Where(def => def.IsOfType<T>()).ToList();
 		}
 
-		static List<WorkGiverDef> constructionDefs = AllWorkerDefs<WorkGiver_ConstructDeliverResources>().Concat(AllWorkerDefs<WorkGiver_ConstructFinishFrames>()).ToList();
-		public List<WorkGiverDef> GetCombinedDefs(WorkGiver baseWorkgiver)
+		static readonly List<WorkGiverDef> constructionDefs = AllWorkerDefs<WorkGiver_ConstructDeliverResources>().Concat(AllWorkerDefs<WorkGiver_ConstructFinishFrames>()).ToList();
+		public static List<WorkGiverDef> GetCombinedDefs(WorkGiver baseWorkgiver)
 		{
 			if (constructionDefs.Contains(baseWorkgiver.def))
 				return constructionDefs.ToList();
@@ -38,7 +38,7 @@ namespace AchtungMod
 			return new List<WorkGiverDef> { baseWorkgiver.def };
 		}
 
-		public void QueueJob(Pawn pawn, Job job)
+		public static void QueueJob(Pawn pawn, Job job)
 		{
 			var tracker = pawn.jobs;
 			tracker?.StartJob(job, JobCondition.Succeeded, null, false, false, null, null, true);
@@ -53,12 +53,12 @@ namespace AchtungMod
 
 		public void Prepare(Pawn pawn)
 		{
-			preparing.Add(pawn);
+			_ = preparing.Add(pawn);
 		}
 
 		public void Unprepare(Pawn pawn)
 		{
-			preparing.Remove(pawn);
+			_ = preparing.Remove(pawn);
 		}
 
 		public bool HasForcedJob(Pawn pawn)
@@ -99,7 +99,7 @@ namespace AchtungMod
 
 		public void Remove(Pawn pawn)
 		{
-			allForcedJobs.Remove(pawn);
+			_ = allForcedJobs.Remove(pawn);
 		}
 
 		public bool AddForcedJob(Pawn pawn, List<WorkGiverDef> workgiverDefs, LocalTargetInfo item)
@@ -114,7 +114,7 @@ namespace AchtungMod
 			return allForcedJobs[pawn].jobs.Count == 1;
 		}
 
-		public LocalTargetInfo HasJobItem(Pawn pawn, WorkGiver_Scanner workgiver, IntVec3 pos)
+		public static LocalTargetInfo HasJobItem(Pawn pawn, WorkGiver_Scanner workgiver, IntVec3 pos)
 		{
 			var radial = GenRadial.ManualRadialPattern;
 			for (var i = 0; i < radial.Length; i++)
@@ -133,7 +133,7 @@ namespace AchtungMod
 			return null;
 		}
 
-		public Job GetJobItem(Pawn pawn, WorkGiver_Scanner workgiver, LocalTargetInfo item)
+		public static Job GetJobItem(Pawn pawn, WorkGiver_Scanner workgiver, LocalTargetInfo item)
 		{
 			if (item.HasThing)
 				return item.Thing.GetThingJob(pawn, workgiver);
@@ -160,12 +160,12 @@ namespace AchtungMod
 				cells = new HashSet<IntVec3>();
 				forbiddenLocations.Add(pawn, cells);
 			}
-			cells.Add(cell);
+			_ = cells.Add(cell);
 		}
 
 		public void RemoveForbiddenLocations(Pawn pawn)
 		{
-			forbiddenLocations.Remove(pawn);
+			_ = forbiddenLocations.Remove(pawn);
 		}
 
 		public HashSet<IntVec3> GetForbiddenLocations()

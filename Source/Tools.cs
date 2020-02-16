@@ -1,5 +1,4 @@
-﻿using Multiplayer.API;
-using RimWorld;
+﻿using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +7,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
-using static Harmony.AccessTools;
+using static HarmonyLib.AccessTools;
 
 namespace AchtungMod
 {
@@ -60,8 +59,8 @@ namespace AchtungMod
 				Log.Warning(text);
 		}
 #else
-		public static void Debug(string text) { }
-		public static void Debug(Thing thing, string text) { }
+		public static void Debug(string text) { _ = text; }
+		public static void Debug(Thing thing, string text) { _ = thing; _ = text; }
 #endif
 
 		public static string PawnOverBreakLevel(Pawn pawn)
@@ -407,7 +406,8 @@ namespace AchtungMod
 				SoundDefOf.DraftOff.PlayOneShotOnCamera(null);
 		}
 
-		[SyncMethod]
+		// TODO: multiplayer
+		//[SyncMethod]
 		public static void CancelDrafting(List<Colonist> colonists)
 		{
 			var gotDrafted = false;
@@ -438,7 +438,8 @@ namespace AchtungMod
 			return pawn.drafter.Drafted;
 		}
 
-		[SyncMethod]
+		// TODO: multiplayer
+		//[SyncMethod]
 		private static void SetDraftStatusSynced(Pawn pawn, bool drafted)
 		{
 			// we don't use the indirect method because it has lots of side effects
@@ -465,24 +466,24 @@ namespace AchtungMod
 			return oldState != drafted;
 		}
 
-		[SyncMethod]
+		// TODO: multiplayer
+		//[SyncMethod]
 		public static void OrderToSynced(Pawn pawn, int x, int z)
 		{
 			var bestCell = new IntVec3(x, 0, z);
-			var job = new Job(JobDefOf.Goto, bestCell)
-			{
-				playerForced = true,
-				collideWithPawns = false,
-				locomotionUrgency = LocomotionUrgency.Sprint
-			};
+			var job = JobMaker.MakeJob(JobDefOf.Goto, bestCell);
+			job.playerForced = true;
+			job.collideWithPawns = false;
+			job.locomotionUrgency = LocomotionUrgency.Sprint;
 			if (pawn.Map.exitMapGrid.IsExitCell(bestCell))
 				job.exitMapOnArrival = true;
 
 			if (pawn.jobs?.IsCurrentJobPlayerInterruptible() ?? false)
-				pawn.jobs.TryTakeOrderedJob(job);
+				_ = pawn.jobs.TryTakeOrderedJob(job);
 		}
 
-		[SyncMethod]
+		// TODO: multiplayer
+		//[SyncMethod]
 		public static void CancelWorkOn(Pawn newWorker, LocalTargetInfo workItem)
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
@@ -537,7 +538,7 @@ namespace AchtungMod
 			Graphics.DrawMesh(mesh, matrix, mat, 0);
 		}
 
-		public static void DrawLineBetween(Vector3 A, Vector3 B, float thickness)
+		public static void DrawLineBetween(Vector3 A, Vector3 B)
 		{
 			if (Mathf.Abs(A.x - B.x) >= 0.01f || Mathf.Abs(A.z - B.z) >= 0.01f)
 			{
@@ -575,7 +576,7 @@ namespace AchtungMod
 				Text.Font = GameFont.Small;
 				listing.ColumnWidth -= 34;
 				GUI.color = Color.white;
-				listing.Label(name.Translate());
+				_ = listing.Label(name.Translate());
 				listing.ColumnWidth += 34;
 			}
 		}
@@ -599,7 +600,7 @@ namespace AchtungMod
 			Text.Font = GameFont.Tiny;
 			listing.ColumnWidth -= 34;
 			GUI.color = Color.gray;
-			listing.Label((name + "Explained").Translate());
+			_ = listing.Label((name + "Explained").Translate());
 			listing.ColumnWidth += 34;
 
 			var rect = listing.GetRect(0);
@@ -642,7 +643,7 @@ namespace AchtungMod
 				Text.Font = GameFont.Tiny;
 				listing.ColumnWidth -= 34;
 				GUI.color = Color.gray;
-				listing.Label(key.Translate());
+				_ = listing.Label(key.Translate());
 				listing.ColumnWidth += 34;
 			}
 
