@@ -6,9 +6,6 @@
 		<li>1.0</li>
 		<li>1.1</li>
 	</supportedVersions>
-	<supportedGameVersions>
-		<li>1.1</li>
-	</supportedGameVersions>
 	<packageId>brrainz.achtung</packageId>
 	<description>Command your colonists like a boss!
 
