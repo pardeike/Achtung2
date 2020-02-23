@@ -229,7 +229,6 @@ namespace AchtungMod
 				{
 					job.expiryInterval = 0;
 					job.ignoreJoyTimeAssignment = true;
-					job.locomotionUrgency = LocomotionUrgency.Sprint;
 					job.playerForced = true;
 					ForcedWork.QueueJob(pawn, job);
 					return true;

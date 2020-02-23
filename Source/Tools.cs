@@ -474,7 +474,6 @@ namespace AchtungMod
 			var job = JobMaker.MakeJob(JobDefOf.Goto, bestCell);
 			job.playerForced = true;
 			job.collideWithPawns = false;
-			job.locomotionUrgency = LocomotionUrgency.Sprint;
 			if (pawn.Map.exitMapGrid.IsExitCell(bestCell))
 				job.exitMapOnArrival = true;
 
