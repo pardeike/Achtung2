@@ -22,7 +22,7 @@ namespace AchtungMod
 			Controller.InstallDefs();
 
 			var harmony = new Harmony("net.pardeike.rimworld.mods.achtung");
-			harmony.PatchAll(Assembly.GetExecutingAssembly());
+			harmony.PatchAll();
 
 			const string sameSpotId = "net.pardeike.rimworld.mod.samespot";
 			IsSameSpotInstalled = harmony.GetPatchedMethods()
