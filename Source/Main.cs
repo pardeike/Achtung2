@@ -625,7 +625,7 @@ namespace AchtungMod
 		}
 	}
 
-	// ignore think treee when building uninterrupted
+	// ignore think tree when building uninterrupted
 	//
 	[HarmonyPatch(typeof(Pawn_JobTracker))]
 	[HarmonyPatch("ShouldStartJobFromThinkTree")]
@@ -633,9 +633,22 @@ namespace AchtungMod
 	{
 		public static void Postfix(Pawn ___pawn, ref bool __result)
 		{
+			if (__result == false)
+				return;
+
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
-			if (__result && forcedWork.HasForcedJob(___pawn))
-				__result = false;
+			if (forcedWork.HasForcedJob(___pawn) == false)
+				return;
+
+			var forcedJob = forcedWork.GetForcedJob(___pawn);
+			if (forcedJob == null)
+				return;
+
+			var workGiver = ___pawn.CurJob?.workGiverDef;
+			if (workGiver == null)
+				return;
+
+			__result = forcedJob.workgiverDefs.Contains(workGiver) == false;
 		}
 	}
 
