@@ -162,7 +162,7 @@ namespace AchtungMod
 
 			var f_NotInHomeAreaTrans = AccessTools.Field(typeof(WorkGiver_FixBrokenDownBuilding), "NotInHomeAreaTrans");
 			if (f_NotInHomeAreaTrans == null) throw new Exception("Cannot find method WorkGiver_FixBrokenDownBuilding.NotInHomeAreaTrans");
-			var i = instr.FirstIndexOf(inst => inst.LoadsField(f_NotInHomeAreaTrans));
+			var i = instr.FindIndex(inst => inst.LoadsField(f_NotInHomeAreaTrans));
 			if (i > 0)
 			{
 				object label = null;
@@ -312,7 +312,7 @@ namespace AchtungMod
 		{
 			var m_Notify_Teleported = AccessTools.Method(typeof(Pawn), nameof(Pawn.Notify_Teleported));
 			var list = instructions.ToList();
-			var idx = list.FirstIndexOf(code => code.Calls(m_Notify_Teleported));
+			var idx = list.FindIndex(code => code.Calls(m_Notify_Teleported));
 			if (idx > 0)
 			{
 				if (list[idx - 2].opcode == OpCodes.Ldc_I4_1)
@@ -418,7 +418,7 @@ namespace AchtungMod
 			var foundCount = 0;
 			while (true)
 			{
-				var idx = list.FirstIndexOf(instr => instr.Calls(m_GetPriority));
+				var idx = list.FindIndex(instr => instr.Calls(m_GetPriority));
 				if (idx < 2 || idx >= list.Count)
 					break;
 				foundCount++;
