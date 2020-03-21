@@ -26,13 +26,21 @@ namespace AchtungMod
 
 		public void AddColonist(Colonist colonist)
 		{
-			var forced = Tools.ForceDraft(colonist.pawn, true, true);
-			FloatMenuMakerMap.ChoicesAtFor(clickPos, colonist.pawn).Do(option => AddMultiAction(colonist, true, option));
-			if (forced) _ = Tools.SetDraftStatus(colonist.pawn, false, true);
+			var existingLabels = new HashSet<string>();
+			FloatMenuMakerMap.ChoicesAtFor(clickPos, colonist.pawn).Do(option =>
+			{
+				AddMultiAction(colonist, colonist.pawn.Drafted, option);
+				_ = existingLabels.Add(option.Label);
+			});
 
-			forced = Tools.ForceDraft(colonist.pawn, false, true);
-			FloatMenuMakerMap.ChoicesAtFor(clickPos, colonist.pawn).Do(option => AddMultiAction(colonist, false, option));
-			if (forced) _ = Tools.SetDraftStatus(colonist.pawn, true, true);
+			var draftState = colonist.pawn.Drafted;
+			_ = Tools.SetDraftStatus(colonist.pawn, !draftState, true);
+			FloatMenuMakerMap.ChoicesAtFor(clickPos, colonist.pawn).Do(option =>
+			{
+				if (existingLabels.Contains(option.Label) == false)
+					AddMultiAction(colonist, !draftState, option);
+			});
+			_ = Tools.SetDraftStatus(colonist.pawn, draftState, true);
 		}
 
 		public void AddMultiAction(Colonist colonist, bool draftMode, FloatMenuOption option)
@@ -146,7 +154,6 @@ namespace AchtungMod
 		public Window GetWindow()
 		{
 			var options = new List<FloatMenuOption>();
-
 			GetKeys().Do(key =>
 			{
 				var subActions = ActionsForKey(key).ToList();
@@ -156,7 +163,7 @@ namespace AchtungMod
 				options.Add(option);
 			});
 
-			return new FloatMenu(options);
+			return new FloatMenu(options) { givesColonistOrders = true };
 		}
 	}
 }

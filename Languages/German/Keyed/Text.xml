@@ -9,8 +9,10 @@
 Während des Rechtsklicks gedrückt halten um die Formation beim Bewegen an die Mausposition beizubehalten
 Die Formation kann während der Bewegung mit Q und E rotiert werden</AchtungModifierExplained>
 
-	<ForceCommandMenuTitle>Kontextmenü erzwingen</ForceCommandMenuTitle>
-	<ForceCommandMenuExplained>Zeigt das Kontextmenü anstatt Kolonisten zu positionieren</ForceCommandMenuExplained>
+	<ForceCommandMenuModeTitle>Kontextmenümodus</ForceCommandMenuModeTitle>
+	<ForceCommandMenuModeExplained>Auto = Normales Verhalten (Kampfmodus entscheidet)\nZeige Menü = Für das Kontextmenu, Taste gedrückt halten\nSetze Position = Für das Positionieren, Taste gedrückt halten</ForceCommandMenuModeExplained>
+	<ForceCommandMenuKeyTitle>Kontextmenütaste</ForceCommandMenuKeyTitle>
+
 	<ForcedCommandState>Angewiesen bis zum Ende zu arbeiten.</ForcedCommandState>
 
 	<ForceMenuButtonText>Erzwinge</ForceMenuButtonText>
@@ -23,6 +25,10 @@ Die Formation kann während der Bewegung mit Q und E rotiert werden</AchtungModi
 	<Notes>Notizen</Notes>
 	<Note1>Mit Achtung enthält das Kontextmenu sowohl normale als auch Kampfkommandos</Note1>
 	<Note2>Während Kolonisten entlang einer Linie positioniert werden, versetzt ein Rechtsklick sie in die Kampfposition</Note2>
+
+	<CommandMenuModeOptionAuto>Auto</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionPressForMenu>Zeige Menü</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForPosition>Setze Position</CommandMenuModeOptionPressForPosition>
 
 	<AchtungModKeyOptionNone>Keine</AchtungModKeyOptionNone>
 	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>

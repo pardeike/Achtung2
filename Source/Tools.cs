@@ -460,12 +460,6 @@ namespace AchtungMod
 			return previousStatus;
 		}
 
-		public static bool ForceDraft(Pawn pawn, bool drafted, bool fakeIt)
-		{
-			var oldState = SetDraftStatus(pawn, drafted, fakeIt);
-			return oldState != drafted;
-		}
-
 		// TODO: multiplayer
 		//[SyncMethod]
 		public static void OrderToSynced(Pawn pawn, int x, int z)
@@ -611,7 +605,7 @@ namespace AchtungMod
 				if (!tooltip.NullOrEmpty()) TooltipHandler.TipRegion(rect, tooltip);
 			}
 
-			listing.Gap();
+			listing.Gap(6);
 		}
 
 		public static void ValueLabeled<T>(this Listing_Standard listing, string name, ref T value, string tooltip = null)
@@ -670,7 +664,7 @@ namespace AchtungMod
 				}
 			}
 
-			listing.Gap();
+			listing.Gap(6);
 		}
 
 	}

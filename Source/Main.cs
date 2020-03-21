@@ -76,6 +76,26 @@ namespace AchtungMod
 		}
 	}
 
+	/* DEBUG
+	[HarmonyPatch]
+	static class DEBUG
+	{
+		public static IEnumerable<MethodBase> TargetMethods()
+		{
+			yield break;
+		}
+
+		static MethodBase GetOutsideCaller(int n)
+		{
+			var frames = new StackTrace(fNeedFileInfo: true).GetFrames();
+			return frames[n].GetMethod();
+		}
+
+		public static void Postfix()
+		{
+		}
+	}*/
+
 	[HarmonyPatch(typeof(Game))]
 	[HarmonyPatch("FinalizeInit")]
 	static class Game_FinalizeInit_Patch
@@ -92,7 +112,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(GenConstruct.BlocksConstruction))]
 	static class GenConstruct_BlocksConstruction_Patch
 	{
-		static bool Prefix(ref bool __result, Thing t)
+		public static bool Prefix(ref bool __result, Thing t)
 		{
 			if (t is Pawn)
 			{
@@ -109,7 +129,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(HaulAIUtility.PawnCanAutomaticallyHaulFast))]
 	static class HaulAIUtility_PawnCanAutomaticallyHaulFast_Patch
 	{
-		static bool Prefix(Pawn p, bool forced, ref bool __result)
+		public static bool Prefix(Pawn p, bool forced, ref bool __result)
 		{
 			if (Achtung.Settings.ignoreRestrictions)
 			{
@@ -130,7 +150,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(ForbidUtility.InAllowedArea))]
 	static class ForbidUtility_InAllowedArea_Patch
 	{
-		static void Postfix(IntVec3 c, Pawn forPawn, ref bool __result)
+		public static void Postfix(IntVec3 c, Pawn forPawn, ref bool __result)
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 			if (forcedWork.HasForcedJob(forPawn))
@@ -156,7 +176,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(WorkGiver_Repair.HasJobOnThing))]
 	static class WorkGiver_Repair_HasJobOnThing_Patch
 	{
-		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var instr = instructions.ToList();
 
@@ -272,7 +292,7 @@ namespace AchtungMod
 			return reservationManager.CanReserve(claimant, target, maxPawns, stackCount, layer, ignoreOtherReservations);
 		}
 
-		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var fromMethod = AccessTools.Method(typeof(ReservationManager), nameof(ReservationManager.CanReserve));
 			var toMethod = AccessTools.Method(typeof(ReservationManager_Reserve_Patch), nameof(ReservationManager_Reserve_Patch.CanReserve));
@@ -287,7 +307,7 @@ namespace AchtungMod
 	[HarmonyPatch(new Type[] { typeof(Thing), typeof(Pawn) })]
 	static class ForbidUtility_IsForbidden_Patch
 	{
-		static bool Prefix(Pawn pawn, ref bool __result)
+		public static bool Prefix(Pawn pawn, ref bool __result)
 		{
 			if (Achtung.Settings.ignoreForbidden)
 			{
@@ -308,7 +328,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(Pawn_PathFollower.TryRecoverFromUnwalkablePosition))]
 	static class Pawn_PathFollower_TryRecoverFromUnwalkablePosition_Patch
 	{
-		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var m_Notify_Teleported = AccessTools.Method(typeof(Pawn), nameof(Pawn.Notify_Teleported));
 			var list = instructions.ToList();
@@ -350,7 +370,7 @@ namespace AchtungMod
 			}
 		}
 
-		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var m_RadialDistinctThingsAround = AccessTools.Method(typeof(GenRadial), nameof(GenRadial.RadialDistinctThingsAround));
 			var m_RadialDistinctThingsAround_Patch = AccessTools.Method(typeof(WorkGiver_ConstructDeliverResources_FindNearbyNeeders_Patch), "RadialDistinctThingsAround_Patch");
@@ -389,25 +409,25 @@ namespace AchtungMod
 	[HarmonyPatch("AddJobGiverWorkOrders")]
 	static class FloatMenuMakerMap_AddJobGiverWorkOrders_Patch
 	{
-		static void Prefix(Pawn pawn, out ForcedWork __state)
+		public static void Prefix(Pawn pawn, out ForcedWork __state)
 		{
 			__state = Find.World.GetComponent<ForcedWork>();
 			__state.Prepare(pawn);
 		}
 
-		static void Postfix(Pawn pawn, ForcedWork __state)
+		public static void Postfix(Pawn pawn, ForcedWork __state)
 		{
 			__state.Unprepare(pawn);
 		}
 
-		static int GetPriority(Pawn pawn, WorkTypeDef w)
+		public static int GetPriority(Pawn pawn, WorkTypeDef w)
 		{
 			if (Achtung.Settings.ignoreAssignments)
 				return pawn.WorkTypeIsDisabled(w) ? 0 : 1;
 			return pawn.workSettings.GetPriority(w);
 		}
 
-		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var m_GetPriority = AccessTools.Method(typeof(Pawn_WorkSettings), nameof(Pawn_WorkSettings.GetPriority));
 			var c_FloatMenuOption = AccessTools.FirstConstructor(typeof(FloatMenuOption), c => c.GetParameters().Count() > 1);
@@ -470,7 +490,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(Pawn_JobTracker.EndCurrentJob))]
 	static class Pawn_JobTracker_EndCurrentJob_Patch
 	{
-		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var m_CleanupCurrentJob = AccessTools.Method(typeof(Pawn_JobTracker), "CleanupCurrentJob");
 			var m_ContinueJob = AccessTools.Method(typeof(ForcedJob), nameof(ForcedJob.ContinueJob));
@@ -519,7 +539,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(MentalBreaker.MentalBreakerTick))]
 	static class MentalBreaker_MentalBreakerTick_Patch
 	{
-		static void Postfix(Pawn ___pawn)
+		public static void Postfix(Pawn ___pawn)
 		{
 			if (___pawn.IsColonist == false || ___pawn.IsHashIntervalTick(120) == false)
 				return;
@@ -564,7 +584,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(Pawn.DeSpawn))]
 	static class Pawn_DeSpawn_Patch
 	{
-		static void Postfix(Pawn __instance)
+		public static void Postfix(Pawn __instance)
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 			forcedWork.Remove(__instance);
@@ -584,7 +604,7 @@ namespace AchtungMod
 
 		// TODO: multiplayer
 		//[SyncMethod]
-		static void ActionSynced(Pawn pawn, int delta)
+		public static void ActionSynced(Pawn pawn, int delta)
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 			var forcedJob = forcedWork.GetForcedJob(pawn);
@@ -592,7 +612,7 @@ namespace AchtungMod
 				forcedJob.ChangeCellRadius(delta);
 		}
 
-		static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> gizmos, Pawn ___pawn)
+		public static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> gizmos, Pawn ___pawn)
 		{
 			var gizmoList = gizmos.ToList();
 			foreach (var gizmo in gizmos)
@@ -654,14 +674,13 @@ namespace AchtungMod
 
 	// handle events early
 	//
-	[HarmonyPatch(typeof(MainTabsRoot))]
-	[HarmonyPatch(nameof(MainTabsRoot.HandleLowPriorityShortcuts))]
-	static class MainTabsRoot_HandleLowPriorityShortcuts_Patch
+	[HarmonyPatch(typeof(Selector))]
+	[HarmonyPatch("HandleMapClicks")]
+	static class Selector_HandleMapClicks_Patch
 	{
-		static void Prefix()
+		public static bool Prefix()
 		{
-			if (WorldRendererUtility.WorldRenderedNow == false)
-				Controller.GetInstance().HandleEvents();
+			return Controller.GetInstance().HandleEvents();
 		}
 	}
 
@@ -671,7 +690,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(SelectionDrawer.DrawSelectionOverlays))]
 	static class SelectionDrawer_DrawSelectionOverlays_Patch
 	{
-		static void Postfix()
+		public static void Postfix()
 		{
 			if (WorldRendererUtility.WorldRenderedNow == false)
 				Controller.GetInstance().HandleDrawing();
@@ -684,26 +703,31 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(ThingOverlays.ThingOverlaysOnGUI))]
 	static class ThingOverlays_ThingOverlaysOnGUI_Patch
 	{
-		static void Postfix()
+		public static void Postfix()
 		{
 			if (WorldRendererUtility.WorldRenderedNow == false)
 				Controller.GetInstance().HandleDrawingOnGUI();
 		}
 	}
 
-	// turn reservation error into warning inject
-	/*
-	[HarmonyPatch(typeof(ReservationManager))]
-	[HarmonyPatch("LogCouldNotReserveError")]
-	static class ReservationManager_LogCouldNotReserveError_Patch
+	// turn some errors into warnings
+	//
+	[HarmonyPatch]
+	static class Errors_To_Warnings_Patch
 	{
-		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		public static IEnumerable<MethodBase> TargetMethods()
 		{
-			var fromMethod = AccessTools.Method(typeof(Log), "Error", new Type[] { typeof(string), typeof(bool) });
-			var toMethod = AccessTools.Method(typeof(Log), "Warning", new Type[] { typeof(string), typeof(bool) });
+			yield return AccessTools.Method(typeof(ReservationManager), "LogCouldNotReserveError");
+			yield return AccessTools.Method(typeof(JobUtility), "TryStartErrorRecoverJob");
+		}
+
+		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			var fromMethod = SymbolExtensions.GetMethodInfo(() => Log.Error("", false));
+			var toMethod = SymbolExtensions.GetMethodInfo(() => Log.Warning("", false));
 			return instructions.MethodReplacer(fromMethod, toMethod);
 		}
-	}*/
+	}
 
 	// pawn inspector panel
 	//
@@ -711,7 +735,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(Pawn.GetInspectString))]
 	static class Pawn_GetInspectString_Patch
 	{
-		static void Postfix(Pawn __instance, ref string __result)
+		public static void Postfix(Pawn __instance, ref string __result)
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 			if (forcedWork.HasForcedJob(__instance))
@@ -725,7 +749,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(FloatMenuMakerMap.ChoicesAtFor))]
 	static class FloatMenuMakerMap_ChoicesAtFor_Patch
 	{
-		static void Postfix(List<FloatMenuOption> __result, Vector3 clickPos, Pawn pawn)
+		public static void Postfix(List<FloatMenuOption> __result, Vector3 clickPos, Pawn pawn)
 		{
 			if (pawn != null && pawn.Drafted == false)
 				if (WorldRendererUtility.WorldRenderedNow == false)

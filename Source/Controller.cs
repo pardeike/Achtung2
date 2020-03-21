@@ -52,25 +52,39 @@ namespace AchtungMod
 			.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
 		}
 
-		public void MouseDown(Vector3 pos)
+		public bool MouseDown(Vector3 pos)
 		{
 			colonists = Tools.GetSelectedColonists();
+
 			if (colonists.Count == 0 || Achtung.Settings.positioningEnabled == false)
-				return;
+				return true;
 
 			if (isDragging && Event.current.button == (int)Button.left && groupMovement == false)
 			{
 				Tools.DraftWithSound(colonists, true);
 				EndDragging();
-				return;
+				return true;
 			}
 
 			if (Event.current.button != (int)Button.right)
-				return;
+				return true;
 
 			var actions = new MultiActions(colonists, UI.MouseMapPosition());
 			var achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
-			var forceMenu = Tools.IsModKeyPressed(Achtung.Settings.forceCommandMenuKey);
+			var allDrafted = colonists.All(colonist => colonist.pawn.Drafted || achtungPressed);
+			var mixedDrafted = !allDrafted && colonists.Any(colonist => colonist.pawn.Drafted);
+
+			var forceMenu = false;
+			if (Achtung.Settings.forceCommandMenuMode == CommandMenuMode.Auto && !mixedDrafted)
+			{
+				forceMenu = allDrafted == false;
+			}
+			else
+			{
+				forceMenu = Tools.IsModKeyPressed(Achtung.Settings.forceCommandMenuKey);
+				if (Achtung.Settings.forceCommandMenuMode == CommandMenuMode.PressForPosition)
+					forceMenu = !forceMenu;
+			}
 
 			var map = Find.CurrentMap;
 			var cell = IntVec3.FromVector3(pos);
@@ -87,7 +101,7 @@ namespace AchtungMod
 					return rangedVerb != null && rangedVerb.verbProps.range > 0;
 				});
 				if (allHaveWeapons)
-					return;
+					return true;
 			}
 
 			if (forceMenu || (pawnClicked && achtungPressed == false) || standableClicked == false)
@@ -95,23 +109,23 @@ namespace AchtungMod
 				if (actions.Count(false) > 0)
 					Find.WindowStack.Add(actions.GetWindow());
 				Event.current.Use();
-				return;
+				return false;
 			}
 
 			if (achtungPressed)
 				Tools.DraftWithSound(colonists, true);
 
 			// in multiplayer, drafting will update pawn.Drafted in the same tick, so we fake it
-			var allDrafted = colonists.All(colonist => colonist.pawn.Drafted || achtungPressed);
 			if (allDrafted)
 			{
 				StartDragging(pos, achtungPressed);
-				return;
+				return true;
 			}
 
 			if (actions.Count(false) > 0)
 				Find.WindowStack.Add(actions.GetWindow());
 			Event.current.Use();
+			return false;
 		}
 
 		private void StartDragging(Vector3 pos, bool asGroup)
@@ -346,13 +360,14 @@ namespace AchtungMod
 			});
 		}
 
-		public void HandleEvents()
+		public bool HandleEvents()
 		{
 			var pos = UI.MouseMapPosition();
+			var runOriginal = true;
 			switch (Event.current.type)
 			{
 				case EventType.MouseDown:
-					MouseDown(pos);
+					runOriginal = MouseDown(pos);
 					MouseDrag(pos);
 					break;
 
@@ -368,6 +383,7 @@ namespace AchtungMod
 					KeyDown(Event.current.keyCode);
 					break;
 			}
+			return runOriginal;
 		}
 	}
 }
