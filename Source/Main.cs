@@ -322,7 +322,7 @@ namespace AchtungMod
 		}
 	}
 
-	// teleporting does not end current job with error condition
+	/* teleporting does not end current job with error condition
 	//
 	[HarmonyPatch(typeof(Pawn_PathFollower))]
 	[HarmonyPatch(nameof(Pawn_PathFollower.TryRecoverFromUnwalkablePosition))]
@@ -346,7 +346,7 @@ namespace AchtungMod
 			foreach (var instruction in list)
 				yield return instruction;
 		}
-	}
+	}*/
 
 	// for forced jobs, do not find work "on the way" to the work cell
 	//
