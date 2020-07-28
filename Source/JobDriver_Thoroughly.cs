@@ -178,8 +178,8 @@ namespace AchtungMod
 				currentItem = FindNextWorkItem();
 				if (CurrentItemInvalid() == false)
 				{
-					pawn.Map.reservationManager.Reserve(pawn, job, currentItem);
-					pawn.CurJob?.SetTarget(TargetIndex.A, currentItem);
+					if (pawn.Map.reservationManager.Reserve(pawn, job, currentItem))
+						pawn.CurJob?.SetTarget(TargetIndex.A, currentItem);
 				}
 			}
 			if (CurrentItemInvalid())

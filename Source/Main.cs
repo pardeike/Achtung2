@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Multiplayer.API;
 using RimWorld;
 using RimWorld.Planet;
 using System;
@@ -28,32 +29,11 @@ namespace AchtungMod
 			IsSameSpotInstalled = harmony.GetPatchedMethods()
 				.Any(method => Harmony.GetPatchInfo(method).Transpilers.Any(transpiler => transpiler.owner == sameSpotId));
 
-			// TODO: multiplayer
-			/*if (MP.enabled)
-			{
+			// multiplayer
+			//
+			if (MP.enabled)
 				MP.RegisterAll();
-				MP.RegisterSyncWorker<Vector3>(Vector3Support);
-				MP.RegisterSyncWorker<Type>(TypeSupport);
-			}*/
 		}
-
-		// TODO: multiplayer
-		/*
-		static void Vector3Support(SyncWorker sync, ref Vector3 value)
-		{
-			sync.Bind(ref value.x);
-			sync.Bind(ref value.y);
-			sync.Bind(ref value.z);
-		}
-
-		static void TypeSupport(SyncWorker sync, ref Type value)
-		{
-			if (sync.isWriting)
-				sync.Write(value.FullName);
-			else
-				value = AccessTools.TypeByName(sync.Read<string>());
-		}
-		*/
 	}
 
 	public class Achtung : Mod
@@ -131,7 +111,7 @@ namespace AchtungMod
 	{
 		public static bool Prefix(Pawn p, bool forced, ref bool __result)
 		{
-			if (Achtung.Settings.ignoreRestrictions)
+			if (p?.Map != null && Achtung.Settings.ignoreRestrictions)
 			{
 				var forcedWork = Find.World.GetComponent<ForcedWork>();
 				if (forced || forcedWork.HasForcedJob(p))
@@ -152,6 +132,9 @@ namespace AchtungMod
 	{
 		public static void Postfix(IntVec3 c, Pawn forPawn, ref bool __result)
 		{
+			if (forPawn?.Map == null)
+				return;
+
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 			if (forcedWork.HasForcedJob(forPawn))
 			{
@@ -309,7 +292,7 @@ namespace AchtungMod
 	{
 		public static bool Prefix(Pawn pawn, ref bool __result)
 		{
-			if (Achtung.Settings.ignoreForbidden)
+			if (pawn?.Map != null && Achtung.Settings.ignoreForbidden)
 			{
 				var forcedWork = Find.World.GetComponent<ForcedWork>();
 				if (forcedWork.HasForcedJob(pawn))
@@ -412,12 +395,14 @@ namespace AchtungMod
 		public static void Prefix(Pawn pawn, out ForcedWork __state)
 		{
 			__state = Find.World.GetComponent<ForcedWork>();
-			__state.Prepare(pawn);
+			if (pawn?.Map != null)
+				__state.Prepare(pawn);
 		}
 
 		public static void Postfix(Pawn pawn, ForcedWork __state)
 		{
-			__state.Unprepare(pawn);
+			if (pawn?.Map != null)
+				__state.Unprepare(pawn);
 		}
 
 		public static int GetPriority(Pawn pawn, WorkTypeDef w)
@@ -427,18 +412,43 @@ namespace AchtungMod
 			return pawn.workSettings.GetPriority(w);
 		}
 
+		static bool IgnoreForbiddenHauling(WorkGiver_Scanner workgiver)
+		{
+			if (Achtung.Settings.ignoreForbidden == false) return false;
+			return workgiver.Ignorable();
+		}
+
 		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var m_GetPriority = AccessTools.Method(typeof(Pawn_WorkSettings), nameof(Pawn_WorkSettings.GetPriority));
 			var c_FloatMenuOption = AccessTools.FirstConstructor(typeof(FloatMenuOption), c => c.GetParameters().Count() > 1);
 			var m_ForcedFloatMenuOption = AccessTools.Method(typeof(ForcedFloatMenuOption), nameof(ForcedFloatMenuOption.CreateForcedMenuItem));
+			var m_Accepts = SymbolExtensions.GetMethodInfo(() => new ThingRequest().Accepts(default));
+			var m_IgnoreForbiddenHauling = SymbolExtensions.GetMethodInfo(() => IgnoreForbiddenHauling(default));
 
 			var list = instructions.ToList();
+
+			var idx = list.FindIndex(instr => instr.Calls(m_Accepts));
+			if (idx < 0 || idx >= list.Count)
+				Log.Error("Cannot find ThingRequest.Accepts in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
+			else
+			{
+				var jump = list[idx + 1];
+				if (jump.Branches(out var label) == false)
+					Log.Error("Cannot find branch after ThingRequest.Accepts in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
+				else
+					list.InsertRange(idx + 2, new[]
+					{
+						list[idx + 2], // local variable 'WorkGiver_Scanner'
+						new CodeInstruction(OpCodes.Call, m_IgnoreForbiddenHauling),
+						new CodeInstruction(OpCodes.Brtrue, label)
+					});
+			}
 
 			var foundCount = 0;
 			while (true)
 			{
-				var idx = list.FindIndex(instr => instr.Calls(m_GetPriority));
+				idx = list.FindIndex(instr => instr.Calls(m_GetPriority));
 				if (idx < 2 || idx >= list.Count)
 					break;
 				foundCount++;
@@ -446,7 +456,6 @@ namespace AchtungMod
 				list[idx].opcode = OpCodes.Call;
 				list[idx].operand = SymbolExtensions.GetMethodInfo(() => GetPriority(null, WorkTypeDefOf.Doctor));
 			}
-
 			if (foundCount != 2)
 				Log.Error("Cannot find 2x Pawn_WorkSettings.GetPriority in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
 
@@ -454,19 +463,19 @@ namespace AchtungMod
 			Enumerable.Range(0, list.Count)
 				.DoIf(i => list[i].opcode == OpCodes.Isinst && (Type)list[i].operand == typeof(WorkGiver_Scanner), i =>
 				{
-					var index = i + 1;
-					if (list[index].opcode == OpCodes.Stloc_S)
+					idx = i + 1;
+					if (list[idx].opcode == OpCodes.Stloc_S)
 					{
-						var localVar = list[index].operand;
+						var localVar = list[idx].operand;
 
-						index = list.FindIndex(index, code => code.opcode == OpCodes.Newobj && (ConstructorInfo)code.operand == c_FloatMenuOption);
-						if (index < 0)
+						idx = list.FindIndex(idx, code => code.opcode == OpCodes.Newobj && (ConstructorInfo)code.operand == c_FloatMenuOption);
+						if (idx < 0)
 							Log.Error("Cannot find 'Isinst WorkGiver_Scanner' in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
 						else
 						{
-							list[index].opcode = OpCodes.Call;
-							list[index].operand = m_ForcedFloatMenuOption;
-							list.InsertRange(index, new CodeInstruction[]
+							list[idx].opcode = OpCodes.Call;
+							list[idx].operand = m_ForcedFloatMenuOption;
+							list.InsertRange(idx, new CodeInstruction[]
 							{
 								new CodeInstruction(OpCodes.Ldarg_1),
 								new CodeInstruction(OpCodes.Ldarg_0),
@@ -477,7 +486,6 @@ namespace AchtungMod
 						}
 					}
 				});
-
 			if (foundCount != 2)
 				Log.Error("Cannot find 2x 'Isinst WorkGiver_Scanner', 'Stloc_S n' -> 'Newobj FloatMenuOption()' in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
 
@@ -541,6 +549,9 @@ namespace AchtungMod
 	{
 		public static void Postfix(Pawn ___pawn)
 		{
+			if (___pawn?.Map == null)
+				return;
+
 			if (___pawn.IsColonist == false || ___pawn.IsHashIntervalTick(120) == false)
 				return;
 
@@ -602,8 +613,7 @@ namespace AchtungMod
 		public static readonly Texture2D ForceRadiusShrink = ContentFinder<Texture2D>.Get("ForceRadiusShrink", true);
 		public static readonly Texture2D ForceRadiusShrinkOff = ContentFinder<Texture2D>.Get("ForceRadiusShrinkOff", true);
 
-		// TODO: multiplayer
-		//[SyncMethod]
+		[SyncMethod] // multiplayer
 		public static void ActionSynced(Pawn pawn, int delta)
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
@@ -653,7 +663,7 @@ namespace AchtungMod
 	{
 		public static void Postfix(Pawn ___pawn, ref bool __result)
 		{
-			if (__result == false)
+			if (__result == false || ___pawn?.Map == null)
 				return;
 
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
@@ -751,7 +761,7 @@ namespace AchtungMod
 	{
 		public static void Postfix(List<FloatMenuOption> __result, Vector3 clickPos, Pawn pawn)
 		{
-			if (pawn != null && pawn.Drafted == false)
+			if (pawn?.Map != null && pawn.Drafted == false)
 				if (WorldRendererUtility.WorldRenderedNow == false)
 					__result.AddRange(Controller.AchtungChoicesAtFor(clickPos, pawn));
 		}

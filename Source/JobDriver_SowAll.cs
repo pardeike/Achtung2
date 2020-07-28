@@ -24,7 +24,7 @@ namespace AchtungMod
 
 		public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, LocalTargetInfo clickCell)
 		{
-			base.CanStart(thePawn, clickCell);
+			_ = base.CanStart(thePawn, clickCell);
 			if (thePawn.workSettings == null || thePawn.workSettings.GetPriority(WorkTypeDefOf.Growing) == 0) return null;
 			var cells = AllWorkAt(clickCell, thePawn, true);
 			IEnumerable<LocalTargetInfo> result = (cells != null && cells.Count() > 0) ? new List<LocalTargetInfo> { clickCell } : null;
@@ -44,8 +44,8 @@ namespace AchtungMod
 			{
 				if (t.def == def) return true;
 				if (((t is Blueprint) || (t is Frame)) && (t.Faction == pawn.Faction)) return true;
-				if (t.def.BlockPlanting && !(t is Plant)) return true;
-				if (t.def.BlockPlanting && t is Plant && t.def.plant.harvestWork >= maxHarvestWork) return true;
+				if (t.def.BlocksPlanting() && !(t is Plant)) return true;
+				if (t.def.BlocksPlanting() && t is Plant && t.def.plant.harvestWork >= maxHarvestWork) return true;
 				return false;
 			});
 			return failureCondition == false;
@@ -105,7 +105,7 @@ namespace AchtungMod
 						}
 						zone.cells.DoIf(c => (c != cell), c => roomCells.Remove(c));
 					}
-					roomCells.Remove(cell);
+					_ = roomCells.Remove(cell);
 				}
 
 				return zoneCells.Union(growerCells).Distinct()
@@ -177,7 +177,7 @@ namespace AchtungMod
 							{
 								t.SetForbidden(true, true);
 							}
-							GenPlace.TryPlaceThing(t, pawn.Position, pawn.Map, ThingPlaceMode.Near, null);
+							_ = GenPlace.TryPlaceThing(t, pawn.Position, pawn.Map, ThingPlaceMode.Near, null);
 							pawn.records.Increment(RecordDefOf.PlantsHarvested);
 						}
 					}
@@ -190,7 +190,7 @@ namespace AchtungMod
 
 		public IEnumerable<Plant> PlantsToCutFirstAt(IntVec3 cell)
 		{
-			return cell.GetThingList(pawn.Map).Where(p => p is Plant && p.def != currentPlantDef && p.def.BlockPlanting && p.Destroyed == false).Cast<Plant>();
+			return cell.GetThingList(pawn.Map).Where(p => p is Plant && p.def != currentPlantDef && p.def.BlocksPlanting() && p.Destroyed == false).Cast<Plant>();
 		}
 
 		public override bool DoWorkToItem()
@@ -246,7 +246,7 @@ namespace AchtungMod
 		protected override IEnumerable<Toil> MakeNewToils()
 		{
 			var toil = base.MakeNewToils().First();
-			toil.PlaySustainerOrSound(() => SoundDefOf.Interact_Sow);
+			_ = toil.PlaySustainerOrSound(() => SoundDefOf.Interact_Sow);
 			yield return toil;
 		}
 

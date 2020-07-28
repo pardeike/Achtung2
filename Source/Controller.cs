@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Multiplayer.API;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -252,8 +253,7 @@ namespace AchtungMod
 			}
 		}
 
-		// TODO: multiplayer
-		//[SyncMethod]
+		[SyncMethod] // multiplayer
 		static void StartWorkSynced(Type driverType, Pawn pawn, LocalTargetInfo target, LocalTargetInfo clickCell)
 		{
 			var driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);

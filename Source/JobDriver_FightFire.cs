@@ -16,7 +16,7 @@ namespace AchtungMod
 
 		public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, LocalTargetInfo clickCell)
 		{
-			base.CanStart(thePawn, clickCell);
+			_ = base.CanStart(thePawn, clickCell);
 			if (thePawn.workSettings == null || thePawn.workSettings.GetPriority(WorkTypeDefOf.Firefighter) == 0) return null;
 			var item = thePawn.Map.thingGrid.ThingAt(clickCell.Cell, ThingDefOf.Fire);
 			if (item == null) return null;
@@ -28,7 +28,7 @@ namespace AchtungMod
 		{
 			workLocations.ToList().Do(pos =>
 			{
-				if (pawn.Map.thingGrid.CellContains(pos, ThingDefOf.Fire) == false) workLocations.Remove(pos);
+				if (pawn.Map.thingGrid.CellContains(pos, ThingDefOf.Fire) == false) _ = workLocations.Remove(pos);
 				GenAdj.CellsAdjacent8Way(new LocalTargetInfo(pos).ToTargetInfo(pawn.Map))
 					.Where(loc => workLocations.Contains(loc) == false)
 					.Where(loc => pawn.Map.thingGrid.CellContains(loc, ThingDefOf.Fire))
@@ -48,12 +48,12 @@ namespace AchtungMod
 
 		public override bool DoWorkToItem()
 		{
-			pawn.natives.TryBeatFire(currentItem.Thing as Fire);
-			if (currentItem.Thing.Destroyed)
-			{
-				pawn.records.Increment(RecordDefOf.FiresExtinguished);
-				return true;
-			}
+			if (pawn.natives.TryBeatFire(currentItem.Thing as Fire))
+				if (currentItem.Thing.Destroyed)
+				{
+					pawn.records.Increment(RecordDefOf.FiresExtinguished);
+					return true;
+				}
 			return false;
 		}
 

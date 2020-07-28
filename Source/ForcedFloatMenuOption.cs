@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using Multiplayer.API;
+using RimWorld;
 using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
@@ -145,8 +146,7 @@ namespace AchtungMod
 			return false;
 		}
 
-		// TODO: multiplayer
-		//[SyncMethod]
+		[SyncMethod] // multiplayer
 		public static bool ForceActionSynced(Pawn forcePawn, WorkGiver_Scanner forceWorkgiver, int x, int z)
 		{
 			var forceCell = new IntVec3(x, 0, z);
@@ -168,7 +168,7 @@ namespace AchtungMod
 				if (forcedWork.AddForcedJob(forcePawn, workgiverDefs, item))
 				{
 					var job = ForcedWork.GetJobItem(forcePawn, workgiver, item);
-					var success = job == null ? false : forcePawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, forceCell);
+					var success = job != null && forcePawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, forceCell);
 					if (success == false)
 					{
 						forcedWork.Prepare(forcePawn);

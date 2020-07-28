@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using Multiplayer.API;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -406,8 +407,7 @@ namespace AchtungMod
 				SoundDefOf.DraftOff.PlayOneShotOnCamera(null);
 		}
 
-		// TODO: multiplayer
-		//[SyncMethod]
+		[SyncMethod] // multiplayer
 		public static void CancelDrafting(List<Colonist> colonists)
 		{
 			var gotDrafted = false;
@@ -438,8 +438,7 @@ namespace AchtungMod
 			return pawn.drafter.Drafted;
 		}
 
-		// TODO: multiplayer
-		//[SyncMethod]
+		[SyncMethod] // multiplayer
 		private static void SetDraftStatusSynced(Pawn pawn, bool drafted)
 		{
 			// we don't use the indirect method because it has lots of side effects
@@ -460,8 +459,7 @@ namespace AchtungMod
 			return previousStatus;
 		}
 
-		// TODO: multiplayer
-		//[SyncMethod]
+		[SyncMethod] // multiplayer
 		public static void OrderToSynced(Pawn pawn, int x, int z)
 		{
 			var bestCell = new IntVec3(x, 0, z);
@@ -475,8 +473,7 @@ namespace AchtungMod
 				_ = pawn.jobs.TryTakeOrderedJob(job);
 		}
 
-		// TODO: multiplayer
-		//[SyncMethod]
+		[SyncMethod] // multiplayer
 		public static void CancelWorkOn(Pawn newWorker, LocalTargetInfo workItem)
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();

@@ -414,9 +414,9 @@ namespace AchtungMod
 
 	public static class ForcedExtensions
 	{
-		public static Job GetThingJob(this Thing thing, Pawn pawn, WorkGiver_Scanner workgiver, bool ignoreReserve = false)
+		public static bool Ignorable(this WorkGiver_Scanner workgiver)
 		{
-			var ignoreRestrictions = (false
+			return (false
 				|| (workgiver as WorkGiver_Haul) != null
 				|| (workgiver as WorkGiver_Repair) != null
 				|| (workgiver as WorkGiver_ConstructAffectFloor) != null
@@ -430,7 +430,10 @@ namespace AchtungMod
 				|| (workgiver as WorkGiver_TakeToBed) != null
 				|| (workgiver as WorkGiver_RemoveBuilding) != null
 			);
+		}
 
+		public static Job GetThingJob(this Thing thing, Pawn pawn, WorkGiver_Scanner workgiver, bool ignoreReserve = false)
+		{
 			if (workgiver.PotentialWorkThingRequest.Accepts(thing) || (workgiver.PotentialWorkThingsGlobal(pawn) != null && workgiver.PotentialWorkThingsGlobal(pawn).Contains(thing)))
 				if (workgiver.MissingRequiredCapacity(pawn) == null)
 					if (workgiver.HasJobOnThing(pawn, thing, true))
@@ -438,8 +441,9 @@ namespace AchtungMod
 						var job = workgiver.JobOnThing(pawn, thing, true);
 						if (job != null)
 						{
-							if ((Achtung.Settings.ignoreForbidden && ignoreRestrictions) || thing.IsForbidden(pawn) == false)
-								if ((Achtung.Settings.ignoreRestrictions && ignoreRestrictions) || thing.Position.InAllowedArea(pawn))
+							var ignorable = workgiver.Ignorable();
+							if ((Achtung.Settings.ignoreForbidden && ignorable) || thing.IsForbidden(pawn) == false)
+								if ((Achtung.Settings.ignoreRestrictions && ignorable) || thing.Position.InAllowedArea(pawn))
 								{
 									var ok1 = (ignoreReserve == false && pawn.CanReserveAndReach(thing, workgiver.PathEndMode, Danger.Deadly));
 									var ok2 = (ignoreReserve && pawn.CanReach(thing, workgiver.PathEndMode, Danger.Deadly));

@@ -26,7 +26,7 @@ namespace AchtungMod
 
 		public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, LocalTargetInfo clickCell)
 		{
-			base.CanStart(thePawn, clickCell);
+			_ = base.CanStart(thePawn, clickCell);
 			var cleanDef = DefDatabase<WorkTypeDef>.GetNamed("Cleaning");
 			if (thePawn.workSettings == null || thePawn.workSettings.GetPriority(cleanDef) == 0)
 				return null;
