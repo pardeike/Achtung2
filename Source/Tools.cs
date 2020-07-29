@@ -1,4 +1,5 @@
-﻿using Multiplayer.API;
+﻿using HarmonyLib;
+using Multiplayer.API;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -664,5 +665,17 @@ namespace AchtungMod
 			listing.Gap(6);
 		}
 
+		public static IEnumerable<MethodBase> GetLatestMethod(Type type, params string[] names)
+		{
+			foreach (var name in names)
+			{
+				var method = Method(type, name);
+				if (method != null)
+				{
+					yield return method;
+					yield break;
+				}
+			}
+		}
 	}
 }

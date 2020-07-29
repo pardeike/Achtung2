@@ -388,10 +388,18 @@ namespace AchtungMod
 
 	// patch in our menu options
 	//
-	[HarmonyPatch(typeof(FloatMenuMakerMap))]
-	[HarmonyPatch("AddJobGiverWorkOrders")]
+	[HarmonyPatch]
 	static class FloatMenuMakerMap_AddJobGiverWorkOrders_Patch
 	{
+		public static IEnumerable<MethodBase> TargetMethods()
+		{
+			return Tools.GetLatestMethod(
+				typeof(FloatMenuMakerMap),
+				"AddJobGiverWorkOrders_NewTmp",
+				"AddJobGiverWorkOrders"
+			);
+		}
+
 		public static void Prefix(Pawn pawn, out ForcedWork __state)
 		{
 			__state = Find.World.GetComponent<ForcedWork>();
@@ -757,6 +765,7 @@ namespace AchtungMod
 	//
 	[HarmonyPatch(typeof(FloatMenuMakerMap))]
 	[HarmonyPatch(nameof(FloatMenuMakerMap.ChoicesAtFor))]
+	[HarmonyPatch(new[] { typeof(Vector3), typeof(Pawn) })]
 	static class FloatMenuMakerMap_ChoicesAtFor_Patch
 	{
 		public static void Postfix(List<FloatMenuOption> __result, Vector3 clickPos, Pawn pawn)
@@ -766,4 +775,24 @@ namespace AchtungMod
 					__result.AddRange(Controller.AchtungChoicesAtFor(clickPos, pawn));
 		}
 	}
+
+	// custom context menu
+	/*
+	[HarmonyPatch]
+	static class FloatMenuMakerMap_ChoicesAtFor_List_Patch
+	{
+		public static IEnumerable<MethodBase> TargetMethods()
+		{
+			var args = new[] { typeof(Vector3), typeof(List<Pawn>) };
+			var method = AccessTools.Method(typeof(FloatMenuMakerMap), nameof(FloatMenuMakerMap.ChoicesAtFor), args);
+			if (method != null)
+				yield return method;
+		}
+
+		public static void Postfix(List<FloatMenuOption> __result, Vector3 clickPos, List<Pawn> pawns)
+		{
+			if (WorldRendererUtility.WorldRenderedNow == false)
+				pawns.DoIf(pawn => pawn?.Map != null, pawn => __result.AddRange(Controller.AchtungChoicesAtFor(clickPos, pawn)));
+		}
+	}*/
 }
