@@ -305,7 +305,7 @@ namespace AchtungMod
 		}
 	}
 
-	/* teleporting does not end current job with error condition
+	// teleporting does not end current job with error condition
 	//
 	[HarmonyPatch(typeof(Pawn_PathFollower))]
 	[HarmonyPatch(nameof(Pawn_PathFollower.TryRecoverFromUnwalkablePosition))]
@@ -329,7 +329,7 @@ namespace AchtungMod
 			foreach (var instruction in list)
 				yield return instruction;
 		}
-	}*/
+	}
 
 	// for forced jobs, do not find work "on the way" to the work cell
 	//
@@ -426,11 +426,15 @@ namespace AchtungMod
 			return workgiver.Ignorable();
 		}
 
-		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase original)
 		{
+			var createForcedMenuItemName = original.GetParameters().Types()[0] == typeof(Vector3) ?
+				nameof(ForcedFloatMenuOption.CreateForcedMenuItemNew) :
+				nameof(ForcedFloatMenuOption.CreateForcedMenuItem);
+
 			var m_GetPriority = AccessTools.Method(typeof(Pawn_WorkSettings), nameof(Pawn_WorkSettings.GetPriority));
 			var c_FloatMenuOption = AccessTools.FirstConstructor(typeof(FloatMenuOption), c => c.GetParameters().Count() > 1);
-			var m_ForcedFloatMenuOption = AccessTools.Method(typeof(ForcedFloatMenuOption), nameof(ForcedFloatMenuOption.CreateForcedMenuItem));
+			var m_ForcedFloatMenuOption = AccessTools.Method(typeof(ForcedFloatMenuOption), createForcedMenuItemName);
 			var m_Accepts = SymbolExtensions.GetMethodInfo(() => new ThingRequest().Accepts(default));
 			var m_IgnoreForbiddenHauling = SymbolExtensions.GetMethodInfo(() => IgnoreForbiddenHauling(default));
 

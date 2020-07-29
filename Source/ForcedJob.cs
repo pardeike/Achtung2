@@ -216,6 +216,7 @@ namespace AchtungMod
 
 			if (condition == JobCondition.InterruptForced)
 			{
+				Log.Warning($"Forced job {lastJob} for {pawn} ended unexpected with {condition}");
 				Messages.Message("Forced work of " + pawn.Name.ToStringShort + " was interrupted.", MessageTypeDefOf.RejectInput);
 				forcedWork.Remove(pawn);
 				return false;

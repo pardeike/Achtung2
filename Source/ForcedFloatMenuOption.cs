@@ -95,6 +95,12 @@ namespace AchtungMod
 			return option;
 		}
 
+		public static FloatMenuOption CreateForcedMenuItemNew(string label, Action action, MenuOptionPriority priority, Action mouseoverGuiAction, Thing revalidateClickTarget, float extraPartWidth, Func<Rect, bool> extraPartOnGUI, WorldObject revalidateWorldClickTarget, Pawn pawn, Vector3 clickPos, WorkGiver_Scanner workgiver)
+		{
+			var clickCell = IntVec3.FromVector3(clickPos);
+			return CreateForcedMenuItem(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget, pawn, clickCell, workgiver);
+		}
+
 		public ForcedFloatMenuOption(string label, Action action, MenuOptionPriority priority, Action mouseoverGuiAction, Thing revalidateClickTarget, float extraPartWidth, Func<Rect, bool> extraPartOnGUI, WorldObject revalidateWorldClickTarget)
 			: base(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget)
 		{
@@ -149,7 +155,7 @@ namespace AchtungMod
 		[SyncMethod] // multiplayer
 		public static bool ForceActionSynced(Pawn forcePawn, WorkGiver_Scanner forceWorkgiver, int x, int z)
 		{
-			var forceCell = new IntVec3(x, 0, z);
+			var cell = new IntVec3(x, 0, z);
 
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 			forcedWork.Prepare(forcePawn);
@@ -160,7 +166,7 @@ namespace AchtungMod
 				var workgiver = workgiverDef.Worker as WorkGiver_Scanner;
 				if (workgiver == null) continue;
 
-				var item = ForcedWork.HasJobItem(forcePawn, workgiver, forceCell);
+				var item = ForcedWork.HasJobItem(forcePawn, workgiver, cell);
 				if (item == null) continue;
 
 				Tools.CancelWorkOn(forcePawn, item);
@@ -168,10 +174,10 @@ namespace AchtungMod
 				if (forcedWork.AddForcedJob(forcePawn, workgiverDefs, item))
 				{
 					var job = ForcedWork.GetJobItem(forcePawn, workgiver, item);
-					var success = job != null && forcePawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, forceCell);
+					var success = job != null && forcePawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, cell);
 					if (success == false)
 					{
-						forcedWork.Prepare(forcePawn);
+						forcedWork.Prepare(forcePawn); // TODO: should this be Unprepare() ?
 						continue;
 					}
 				}
