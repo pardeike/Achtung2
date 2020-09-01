@@ -12,6 +12,7 @@ namespace AchtungMod
 		Dictionary<Pawn, ForcedJobs> allForcedJobs = new Dictionary<Pawn, ForcedJobs>();
 		private List<Pawn> forcedJobsKeysWorkingList;
 		private List<ForcedJobs> forcedJobsValuesWorkingList;
+		private int counter;
 
 		readonly HashSet<Pawn> preparing = new HashSet<Pawn>();
 		readonly Dictionary<Pawn, HashSet<IntVec3>> forbiddenLocations = new Dictionary<Pawn, HashSet<IntVec3>>();
@@ -179,6 +180,43 @@ namespace AchtungMod
 		{
 			return forbiddenLocations
 				.Any(pair => pair.Value.Contains(cell));
+		}
+
+		public override void WorldComponentTick()
+		{
+			if (Find.TickManager.TicksGame % 139 != 0) return;
+			var pawns = allForcedJobs.Keys.ToArray();
+			var n = pawns.Length;
+			if (n == 0) return;
+			var pawn = pawns[++counter % n];
+			var map = pawn.Map;
+			if (map == null) return;
+
+			void ShowNote(string txt)
+			{
+				map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
+				var jobName = pawn.jobs?.curJob.GetReport(pawn).CapitalizeFirst() ?? "-";
+				var label = "JobInterruptedLabel".Translate(jobName);
+				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, txt, LetterDefOf.NegativeEvent, pawn));
+			}
+
+			var breakNote = Tools.PawnOverBreakLevel(pawn);
+			if (breakNote != null)
+			{
+				if (breakNote.Length > 0)
+					ShowNote("JobInterruptedBreakdown".Translate(pawn.Name.ToStringShort, breakNote));
+				Remove(pawn);
+				pawn.jobs?.EndCurrentJob(JobCondition.InterruptForced, true);
+				return;
+			}
+
+			if (Tools.PawnOverHealthLevel(pawn))
+			{
+				ShowNote("JobInterruptedBadHealth".Translate(pawn.Name.ToStringShort));
+				Remove(pawn);
+				pawn.jobs?.EndCurrentJob(JobCondition.InterruptForced, true);
+				return;
+			}
 		}
 
 		public override void ExposeData()

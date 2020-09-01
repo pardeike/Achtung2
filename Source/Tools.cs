@@ -503,12 +503,17 @@ namespace AchtungMod
 			DrawScaledMesh(MeshPool.plane10, markerMaterial, pos, Quaternion.identity, 1.25f, 1.25f);
 		}
 
-		public static void DrawForceIcon(Vector3 pos)
+		public static void DrawForceIcon(int x, int z)
 		{
 			// for strong visual debugging
 			// DebugPosition(pos, new Color(1f, 1f, 0f, 0.3f));
 
-			pos += new Vector3(0.75f, Altitudes.AltitudeFor(AltitudeLayer.MoteOverhead), 0.75f);
+			var pos = new Vector3(x + 0.75f, Altitudes.AltitudeFor(AltitudeLayer.MoteOverhead), z + 0.75f);
+			if (Achtung.Settings.workMarkers == WorkMarkers.Static)
+			{
+				DrawScaledMesh(MeshPool.plane10, forceIconMaterial, pos, Quaternion.identity, 0.5f, 0.5f);
+				return;
+			}
 			var a = 0.08f * (GenTicks.TicksAbs + 13 * pos.x + 7 * pos.z);
 			var rot = Quaternion.Euler(0f, Mathf.Sin(a) * 10f, 0f);
 			DrawScaledMesh(MeshPool.plane10, forceIconMaterial, pos, rot, 0.5f, 0.5f);
@@ -560,15 +565,16 @@ namespace AchtungMod
 			});
 		}
 
-		public static void Note(this Listing_Standard listing, string name)
+		public static void Note(this Listing_Standard listing, string name, GameFont font = GameFont.Small)
 		{
 			if (name.CanTranslate())
 			{
-				Text.Font = GameFont.Small;
+				Text.Font = font;
 				listing.ColumnWidth -= 34;
 				GUI.color = Color.white;
 				_ = listing.Label(name.Translate());
 				listing.ColumnWidth += 34;
+				Text.Font = GameFont.Small;
 			}
 		}
 
@@ -593,6 +599,7 @@ namespace AchtungMod
 			GUI.color = Color.gray;
 			_ = listing.Label((name + "Explained").Translate());
 			listing.ColumnWidth += 34;
+			Text.Font = GameFont.Small;
 
 			var rect = listing.GetRect(0);
 			rect.height = listing.CurHeight - startHeight;
@@ -636,6 +643,7 @@ namespace AchtungMod
 				GUI.color = Color.gray;
 				_ = listing.Label(key.Translate());
 				listing.ColumnWidth += 34;
+				Text.Font = GameFont.Small;
 			}
 
 			rect = listing.GetRect(0);

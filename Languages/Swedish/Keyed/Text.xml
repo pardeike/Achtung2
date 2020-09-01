@@ -58,6 +58,12 @@ Höll i för att flytta kolonister i deras formation. Formationen kan roteras me
 	<IgnoreAssignmentsTitle>Ignorera arbetstypsuppdrag</IgnoreAssignmentsTitle>
 	<IgnoreAssignmentsExplained>Ignorerar tomma arbetsprioriteringar</IgnoreAssignmentsExplained>
 
+	<WorkMarkersTitle>Tvingade arbetspositioner</WorkMarkersTitle>
+	<WorkMarkersExplained>Platser med tvångsarbete visas med små markörer</WorkMarkersExplained>
+	<WorkMarkersOptionAnimated>Animaterat</WorkMarkersOptionAnimated>
+	<WorkMarkersOptionStatic>Statiskt</WorkMarkersOptionStatic>
+	<WorkMarkersOptionOff>Av</WorkMarkersOptionOff>
+
 	<JobInterruptedLabel>Avbruten: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} har låg hälsa</JobInterruptedBadHealth>

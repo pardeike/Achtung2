@@ -553,54 +553,6 @@ namespace AchtungMod
 		}
 	}
 
-	// check mental levels
-	//
-	[HarmonyPatch(typeof(MentalBreaker))]
-	[HarmonyPatch(nameof(MentalBreaker.MentalBreakerTick))]
-	static class MentalBreaker_MentalBreakerTick_Patch
-	{
-		public static void Postfix(Pawn ___pawn)
-		{
-			if (___pawn?.Map == null)
-				return;
-
-			if (___pawn.IsColonist == false || ___pawn.IsHashIntervalTick(120) == false)
-				return;
-
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
-			if (forcedWork.HasForcedJob(___pawn) == false)
-				return;
-
-			var breakNote = Tools.PawnOverBreakLevel(___pawn);
-			if (breakNote != null)
-			{
-				if (breakNote.Length > 0)
-				{
-					___pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(___pawn);
-					var jobName = ___pawn.jobs?.curJob.GetReport(___pawn).CapitalizeFirst() ?? "-";
-					var label = "JobInterruptedLabel".Translate(jobName);
-					Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBreakdown".Translate(___pawn.Name.ToStringShort, breakNote), LetterDefOf.NegativeEvent, ___pawn));
-				}
-
-				forcedWork.Remove(___pawn);
-				___pawn.jobs?.EndCurrentJob(JobCondition.InterruptForced, true);
-				return;
-			}
-
-			if (Tools.PawnOverHealthLevel(___pawn))
-			{
-				___pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(___pawn);
-				var jobName = ___pawn.jobs?.curJob.GetReport(___pawn).CapitalizeFirst() ?? "-";
-				var label = "JobInterruptedLabel".Translate(jobName);
-				Find.LetterStack.ReceiveLetter(LetterMaker.MakeLetter(label, "JobInterruptedBadHealth".Translate(___pawn.Name.ToStringShort), LetterDefOf.NegativeEvent, ___pawn));
-
-				forcedWork.Remove(___pawn);
-				___pawn.jobs?.EndCurrentJob(JobCondition.InterruptForced, true);
-				return;
-			}
-		}
-	}
-
 	// release forced work when pawn disappears
 	//
 	[HarmonyPatch(typeof(Pawn))]

@@ -52,6 +52,12 @@ La formación puede rotar usando las teclas Q y E.</AchtungModifierExplained>
 	<IgnoreAssignmentsTitle>Ignorar asignaciones de tipo de trabajo</IgnoreAssignmentsTitle>
 	<IgnoreAssignmentsExplained>Ignora las prioridades de trabajo que no están establecidas</IgnoreAssignmentsExplained>
 
+	<WorkMarkersTitle>Posiciones de trabajo forzoso</WorkMarkersTitle>
+	<WorkMarkersExplained>Los puestos de trabajo forzoso se indican con marcadores.</WorkMarkersExplained>
+	<WorkMarkersOptionAnimated>Con animación</WorkMarkersOptionAnimated>
+	<WorkMarkersOptionStatic>Estático</WorkMarkersOptionStatic>
+	<WorkMarkersOptionOff>Apagado</WorkMarkersOptionOff>
+
 	<JobInterruptedLabel>Cancelado: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} se encuentra mal</JobInterruptedBadHealth>

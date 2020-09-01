@@ -59,6 +59,12 @@ The formation can be rotated using Q and E</AchtungModifierExplained>
 	<IgnoreAssignmentsTitle>Ignore work type assignments</IgnoreAssignmentsTitle>
 	<IgnoreAssignmentsExplained>Ignores unset work priorities</IgnoreAssignmentsExplained>
 
+	<WorkMarkersTitle>Force work markers</WorkMarkersTitle>
+	<WorkMarkersExplained>Forced work is displayed with small markers</WorkMarkersExplained>
+	<WorkMarkersOptionAnimated>Animated</WorkMarkersOptionAnimated>
+	<WorkMarkersOptionStatic>Static</WorkMarkersOptionStatic>
+	<WorkMarkersOptionOff>Off</WorkMarkersOptionOff>
+
 	<JobInterruptedLabel>Cancelled: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} is in bad shape</JobInterruptedBadHealth>

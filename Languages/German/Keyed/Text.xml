@@ -59,6 +59,12 @@ Die Formation kann während der Bewegung mit Q und E rotiert werden</AchtungModi
 	<IgnoreAssignmentsTitle>Ignoriere Arbeitseinstellungen</IgnoreAssignmentsTitle>
 	<IgnoreAssignmentsExplained>Ignoriert leere, unzugewiesene Arbeitsprioriteten</IgnoreAssignmentsExplained>
 
+	<WorkMarkersTitle>Erzwungene Arbeitspositionen</WorkMarkersTitle>
+	<WorkMarkersExplained>Stellen mit erzwungener Arbeit werden mit Markierungen angezeigt</WorkMarkersExplained>
+	<WorkMarkersOptionAnimated>Animieren</WorkMarkersOptionAnimated>
+	<WorkMarkersOptionStatic>Statisch</WorkMarkersOptionStatic>
+	<WorkMarkersOptionOff>Aus</WorkMarkersOptionOff>
+
 	<JobInterruptedLabel>Abgebrochen: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} ist in schlechter gesundheitlicher Verfassung</JobInterruptedBadHealth>

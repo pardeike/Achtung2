@@ -294,11 +294,12 @@ namespace AchtungMod
 			if (map == null || forcedWork == null)
 				return;
 
+			var currentViewRect = Find.CameraDriver.CurrentViewRect;
 			forcedWork.ForcedJobsForMap(map)
 				.DoIf(forcedJob => forcedJob.pawn.Spawned && forcedJob.pawn.Map == map && Find.Selector.IsSelected(forcedJob.pawn), forcedJob =>
 				{
 					forcedJob.AllCells(true).Distinct()
-						.Do(cell => Tools.DrawForceIcon(cell.ToVector3()));
+						.DoIf(cell => currentViewRect.Contains(cell), cell => Tools.DrawForceIcon(cell.x, cell.z));
 				});
 		}
 
@@ -325,7 +326,8 @@ namespace AchtungMod
 
 		public void HandleDrawing()
 		{
-			DrawForcedJobs();
+			if (Achtung.Settings.workMarkers != WorkMarkers.Off)
+				DrawForcedJobs();
 
 			// for debugging reservations
 			// DrawReservations();
