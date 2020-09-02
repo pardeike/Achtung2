@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using HarmonyLib;
+using UnityEngine;
 using Verse;
 
 namespace AchtungMod
@@ -71,6 +72,7 @@ namespace AchtungMod
 			Scribe_Values.Look(ref ignoreAssignments, "ignoreAssignments", false, true);
 		}
 
+		static readonly AccessTools.FieldRef<Listing, float> curX = AccessTools.FieldRefAccess<Listing, float>("curX");
 		public static void DoWindowContents(Rect canvas)
 		{
 			var columnWidth = (canvas.width - 30) / 2 - 2;
@@ -90,7 +92,7 @@ namespace AchtungMod
 			}
 
 			list.NewColumn();
-			list.Indent(30 - Listing.ColumnSpacing);
+			curX(list) += 30 - Listing.ColumnSpacing;
 
 			list.Gap(4);
 			list.ValueLabeled("BreakLevel", ref Achtung.Settings.breakLevel);

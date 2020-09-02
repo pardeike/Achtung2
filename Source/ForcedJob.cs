@@ -302,12 +302,14 @@ namespace AchtungMod
 					addedThings.AddRange(newThings.Where(HasJob).ToList()); // keep termination with 'ToList()' here
 				}
 				while (count < addedThings.Count());
-				things = things.Where(thing => thing.Spawned).Where(HasJob).Union(addedThings.Except(things));
-				targets = new HashSet<ForcedTarget>(things.Select(thing =>
-				{
-					var item = new LocalTargetInfo(thing);
-					return new ForcedTarget(item, MaterialScore(item));
-				}));
+				targets = things
+					.Where(thing => thing.Spawned && HasJob(thing))
+					.Union(addedThings.Except(things))
+					.Select(thing =>
+					{
+						var item = new LocalTargetInfo(thing);
+						return new ForcedTarget(item, MaterialScore(item));
+					}).ToHashSet();
 
 				return;
 			}
@@ -384,7 +386,12 @@ namespace AchtungMod
 
 		public bool Equals(ForcedTarget other)
 		{
-			return item.Equals(other.item);
+			return item == other.item;
+		}
+
+		public override int GetHashCode()
+		{
+			return item.GetHashCode();
 		}
 
 		public bool IsValidTarget()
