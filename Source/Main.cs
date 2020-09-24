@@ -420,8 +420,9 @@ namespace AchtungMod
 			return pawn.workSettings.GetPriority(w);
 		}
 
-		static bool IgnoreForbiddenHauling(WorkGiver_Scanner workgiver)
+		static bool IgnoreForbiddenHauling(WorkGiver_Scanner workgiver, Thing thing)
 		{
+			if (workgiver is WorkGiver_Haul && thing.def.alwaysHaulable == false && thing.def.EverHaulable == false) return false;
 			if (Achtung.Settings.ignoreForbidden == false) return false;
 			return workgiver.Ignorable();
 		}
@@ -436,7 +437,7 @@ namespace AchtungMod
 			var c_FloatMenuOption = AccessTools.FirstConstructor(typeof(FloatMenuOption), c => c.GetParameters().Count() > 1);
 			var m_ForcedFloatMenuOption = AccessTools.Method(typeof(ForcedFloatMenuOption), createForcedMenuItemName);
 			var m_Accepts = SymbolExtensions.GetMethodInfo(() => new ThingRequest().Accepts(default));
-			var m_IgnoreForbiddenHauling = SymbolExtensions.GetMethodInfo(() => IgnoreForbiddenHauling(default));
+			var m_IgnoreForbiddenHauling = SymbolExtensions.GetMethodInfo(() => IgnoreForbiddenHauling(default, default));
 
 			var list = instructions.ToList();
 
@@ -445,6 +446,7 @@ namespace AchtungMod
 				Log.Error("Cannot find ThingRequest.Accepts in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
 			else
 			{
+				var loadThingVar = list[idx - 1];
 				var jump = list[idx + 1];
 				if (jump.Branches(out var label) == false)
 					Log.Error("Cannot find branch after ThingRequest.Accepts in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
@@ -452,6 +454,7 @@ namespace AchtungMod
 					list.InsertRange(idx + 2, new[]
 					{
 						list[idx + 2], // local variable 'WorkGiver_Scanner'
+						loadThingVar.Clone(), // clicked thing
 						new CodeInstruction(OpCodes.Call, m_IgnoreForbiddenHauling),
 						new CodeInstruction(OpCodes.Brtrue, label)
 					});
