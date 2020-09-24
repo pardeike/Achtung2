@@ -48,7 +48,6 @@ namespace AchtungMod
 			{
 				new JobDriver_CleanRoom().MakeDef(),
 				new JobDriver_FightFire().MakeDef(),
-				new JobDriver_SowAll().MakeDef()
 			}
 			.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
 		}
@@ -282,7 +281,6 @@ namespace AchtungMod
 
 			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_CleanRoom));
 			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_FightFire));
-			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_SowAll));
 
 			return options;
 		}

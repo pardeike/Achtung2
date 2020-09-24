@@ -9,6 +9,8 @@ namespace AchtungMod
 {
 	public class JobDriver_CleanRoom : JobDriver_Thoroughly
 	{
+		Room room;
+
 		public override string GetPrefix()
 		{
 			return "CleanRoom";
@@ -19,30 +21,26 @@ namespace AchtungMod
 			return EffecterDefOf.Clean;
 		}
 
-		public override void ExposeData()
-		{
-			base.ExposeData();
-		}
-
 		public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, LocalTargetInfo clickCell)
 		{
 			_ = base.CanStart(thePawn, clickCell);
 			var cleanDef = DefDatabase<WorkTypeDef>.GetNamed("Cleaning");
-			if (thePawn.workSettings == null || thePawn.workSettings.GetPriority(cleanDef) == 0)
-				return null;
+			if (Achtung.Settings.ignoreAssignments == false)
+				if (thePawn.workSettings == null || thePawn.workSettings.GetPriority(cleanDef) == 0)
+					return null;
 
-			var filthToClean = AllFilth(clickCell);
-			if (filthToClean.Any())
+			if (AllFilth(clickCell.Cell).Any())
 				return new List<LocalTargetInfo> { clickCell };
 			return null;
 		}
 
 		public override LocalTargetInfo FindNextWorkItem()
 		{
-			var filth = AllFilth(TargetB);
+			var filth = AllFilth();
 			currentWorkCount = filth.Count();
 			if (totalWorkCount < currentWorkCount) totalWorkCount = currentWorkCount;
-			return filth.FirstOrDefault();
+			var pos = pawn.Position;
+			return filth.OrderBy(f => (pos - f.Position).LengthHorizontalSquared).FirstOrDefault();
 		}
 
 		public override bool DoWorkToItem()
@@ -61,7 +59,6 @@ namespace AchtungMod
 
 		public override string GetReport()
 		{
-			var room = RoomAt(TargetA);
 			var name = room == null ? "" : " " + room.Role.label;
 			return (GetPrefix() + "Report").Translate(name, room == null ? "-" : Math.Floor(Progress() * 100f) + "%");
 		}
@@ -73,17 +70,17 @@ namespace AchtungMod
 
 		//
 
-		private IEnumerable<Filth> AllFilth(LocalTargetInfo roomLocation)
+		private IEnumerable<Filth> AllFilth(IntVec3? useCell = null)
 		{
-			var room = RoomAt(roomLocation);
-			if (room == null || room.IsHuge)
-				return new List<Filth>();
+			room = ValidateRoom(room ?? RoomAt(useCell ?? TargetLocA));
+			room = room ?? ValidateRoom(RoomAt(useCell ?? TargetLocA));
+			if (room == null) return new List<Filth>();
 
 			var pathGrid = pawn.Map.pathGrid;
 			if (pathGrid == null)
 				return new List<Filth>();
 
-			var filth = room
+			return room
 				.ContainedAndAdjacentThings.OfType<Filth>()
 				.Where(f =>
 				{
@@ -96,27 +93,22 @@ namespace AchtungMod
 					if (pawn.CanReserve(f, 1) == false) return false;
 					return true;
 				});
-
-			var filthCount = filth.Count();
-			if (filthCount > 0)
-			{
-				var center = filth.Aggregate(IntVec3.Zero, (prev, f) => prev + f.Position);
-				center = new IntVec3(center.x / filthCount, 0, center.z / filthCount);
-				filth = filth.OrderBy(f => (currentItem.Cell - f.Position).LengthHorizontalSquared - 2 * (center - f.Position).LengthHorizontalSquared);
-			}
-
-			return filth;
 		}
 
-		private Room RoomAt(LocalTargetInfo target)
+		private Room ValidateRoom(Room room)
 		{
-			var cell = target.Cell;
-			if (cell.IsValid == false)
-				return null;
-			var theRoom = RegionAndRoomQuery.RoomAt(cell, pawn.Map);
-			if (theRoom == null || theRoom.IsHuge || theRoom.Group.AnyRoomTouchesMapEdge)
-				return null;
-			return theRoom;
+			if (room == null) return null;
+			if (room.Dereferenced) return null;
+			if (room.IsHuge) return null;
+			if (room.RegionCount == 0) return null;
+			if (room.Group.AnyRoomTouchesMapEdge) return null;
+			return room;
+		}
+
+		private Room RoomAt(IntVec3 cell)
+		{
+			if (cell.IsValid == false) return null;
+			return RegionAndRoomQuery.RoomAt(cell, pawn.Map);
 		}
 	}
 }

@@ -10,10 +10,10 @@ namespace AchtungMod
 {
 	public abstract class JobDriver_Thoroughly : JobDriver
 	{
-		public HashSet<IntVec3> workLocations = null;
-		public LocalTargetInfo currentItem = null;
-		public bool isMoving = false;
-		public float subCounter = 0;
+		public HashSet<IntVec3> workLocations;
+		public LocalTargetInfo currentItem;
+		public bool isMoving;
+		public float subCounter;
 		public float currentWorkCount = -1f;
 		public float totalWorkCount = -1f;
 
@@ -60,6 +60,23 @@ namespace AchtungMod
 			Scribe_Values.Look(ref subCounter, "subCounter", 0, false);
 			Scribe_Values.Look(ref currentWorkCount, "currentWorkCount", -1f, false);
 			Scribe_Values.Look(ref totalWorkCount, "totalWorkCount", -1f, false);
+
+			var dummyCell = IntVec3.Invalid;
+			Thing dummyThing = null;
+			if (Scribe.mode == LoadSaveMode.Saving && currentItem != null)
+			{
+				dummyCell = currentItem.Cell;
+				dummyThing = currentItem.Thing;
+			}
+			Scribe_Values.Look(ref dummyCell, "current-cell", IntVec3.Invalid, false);
+			Scribe_Values.Look(ref dummyThing, "current-thing", null, false);
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				if (dummyThing != null)
+					currentItem = new LocalTargetInfo(dummyThing);
+				else
+					currentItem = new LocalTargetInfo(dummyCell);
+			}
 		}
 
 		public virtual IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, LocalTargetInfo clickCell)
@@ -140,6 +157,8 @@ namespace AchtungMod
 
 		public void CheckJobCancelling()
 		{
+			if (Find.TickManager.TicksGame % 149 != 0) return;
+
 			if (pawn.Dead || pawn.Downed || pawn.HasAttachment(ThingDefOf.Fire))
 			{
 				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
