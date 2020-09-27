@@ -422,7 +422,7 @@ namespace AchtungMod
 
 		static bool IgnoreForbiddenHauling(WorkGiver_Scanner workgiver, Thing thing)
 		{
-			if (workgiver is WorkGiver_Haul && thing.def.alwaysHaulable == false && thing.def.EverHaulable == false) return false;
+			if (workgiver is WorkGiver_Haul && thing?.def != null && thing.def.alwaysHaulable == false && thing.def.EverHaulable == false) return false;
 			if (Achtung.Settings.ignoreForbidden == false) return false;
 			return workgiver.Ignorable();
 		}

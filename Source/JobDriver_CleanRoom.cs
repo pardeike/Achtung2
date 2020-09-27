@@ -25,9 +25,10 @@ namespace AchtungMod
 		{
 			_ = base.CanStart(thePawn, clickCell);
 			var cleanDef = DefDatabase<WorkTypeDef>.GetNamed("Cleaning");
-			if (Achtung.Settings.ignoreAssignments == false)
-				if (thePawn.workSettings == null || thePawn.workSettings.GetPriority(cleanDef) == 0)
-					return null;
+			if (thePawn.workSettings == null)
+				return null;
+			if (Achtung.Settings.ignoreAssignments == false && thePawn.workSettings.GetPriority(cleanDef) == 0)
+				return null;
 
 			if (AllFilth(clickCell.Cell).Any())
 				return new List<LocalTargetInfo> { clickCell };
