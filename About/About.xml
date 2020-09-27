@@ -16,6 +16,8 @@
 		</li>
 	</modDependencies>
 	<packageId>brrainz.achtung</packageId>
+	<steamAppId>730936602</steamAppId>
+	<url>https://github.com/pardeike/Achtung2</url>
 	<description>Command your colonists like a boss!
 
 The Achtung! mod enhances how you control RimWorld. You will get more control on how to position your colonists and how they take job orders.
