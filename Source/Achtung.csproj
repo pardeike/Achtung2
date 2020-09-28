@@ -24,7 +24,6 @@
     <Compile Include="Colonist.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="CrossPromotion.cs" />
-    <Compile Include="ExceptionHandler.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ModCounter.cs" />
     <Compile Include="ForcedFloatMenuOption.cs" />
