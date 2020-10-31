@@ -305,29 +305,25 @@ namespace AchtungMod
 		}
 	}
 
-	// teleporting does not end current job with error condition
+	// teleporting does not end current job with error condition or causes the pawn
+	// to loose the active job and stand still without new assignments
+	//
+	// Side effect: instant teleportation (which looks arguable better than vanilla)
 	//
 	[HarmonyPatch(typeof(Pawn_PathFollower))]
 	[HarmonyPatch(nameof(Pawn_PathFollower.TryRecoverFromUnwalkablePosition))]
 	static class Pawn_PathFollower_TryRecoverFromUnwalkablePosition_Patch
 	{
+		public static void My_Notify_Teleported(Pawn pawn, bool _1, bool _2)
+		{
+			pawn.Drawer.tweener.ResetTweenedPosToRoot();
+		}
+
 		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
-			var m_Notify_Teleported = AccessTools.Method(typeof(Pawn), nameof(Pawn.Notify_Teleported));
-			var list = instructions.ToList();
-			var idx = list.FindIndex(code => code.Calls(m_Notify_Teleported));
-			if (idx > 0)
-			{
-				if (list[idx - 2].opcode == OpCodes.Ldc_I4_1)
-					list[idx - 2].opcode = OpCodes.Ldarg_1;
-				else
-					Log.Error("Cannot find Ldc_I4_1 before Pawn.Notify_Teleported in Pawn_PathFollower.TryRecoverFromUnwalkablePosition");
-			}
-			else
-				Log.Error("Cannot find Pawn.Notify_Teleported in Pawn_PathFollower.TryRecoverFromUnwalkablePosition");
-
-			foreach (var instruction in list)
-				yield return instruction;
+			var from = AccessTools.Method(typeof(Pawn), nameof(Pawn.Notify_Teleported));
+			var to = SymbolExtensions.GetMethodInfo(() => My_Notify_Teleported(default, default, default));
+			return Transpilers.MethodReplacer(instructions, from, to);
 		}
 	}
 
