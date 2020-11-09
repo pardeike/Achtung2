@@ -23,6 +23,9 @@ namespace AchtungMod
 
 		public static FieldInfo draftHandlerField = typeof(Pawn_DraftController).GetField("draftedInt", BindingFlags.NonPublic | BindingFlags.Instance);
 		public static readonly FieldRef<ReservationManager, List<ReservationManager.Reservation>> Reservations = FieldRefAccess<ReservationManager, List<ReservationManager.Reservation>>("reservations");
+		public static readonly FieldRef<FloatMenuOption, Texture2D> ItemIcon = FieldRefAccess<FloatMenuOption, Texture2D>("itemIcon");
+		public static readonly FieldRef<FloatMenuOption, Color> ItemColor = FieldRefAccess<FloatMenuOption, Color>("iconColor");
+		public static readonly FieldRef<FloatMenuOption, FloatMenuSizeMode> SizeMode = FieldRefAccess<FloatMenuOption, FloatMenuSizeMode>("sizeMode");
 
 		private static string _version;
 		public static string Version

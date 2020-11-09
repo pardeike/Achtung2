@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using HarmonyLib;
 using UnityEngine;
 using Verse;
 
@@ -85,7 +84,7 @@ namespace AchtungMod
 			if (options.All(option =>
 			{
 				var val = compareFunc(option);
-				return val == null || (val as S) == valueToCompare;
+				return val == null || val == valueToCompare;
 			}) == false)
 				result = defaultValue;
 			return result;
@@ -100,15 +99,26 @@ namespace AchtungMod
 			return result;
 		}
 
-        private static Color AllEqualColor(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, Color> eval, Color defaultValue)
-        {
-            if (options.Count() == 0) return defaultValue;
-            var result = eval(options.First());
-            if (!options.All(option => eval(option) == result))
-                result = defaultValue;
-            return result;
-        }
+		static readonly FloatMenuSizeMode noSizeMode = (FloatMenuSizeMode)999;
+		private static FloatMenuSizeMode AllEqualFloatMenuSizeMode(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, FloatMenuSizeMode> eval)
+		{
+			if (options.Count() == 0) return noSizeMode;
+			var result = eval(options.First());
+			if (options.All(option => eval(option) == result) == false)
+				result = noSizeMode;
+			return result;
+		}
 
+		private static Color AllEqualColor(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, Color> eval, Color defaultValue)
+		{
+			if (options.Count() == 0) return defaultValue;
+			var result = eval(options.First());
+			if (!options.All(option => eval(option) == result))
+				result = defaultValue;
+			return result;
+		}
+
+		static readonly Color noColor = new Color();
 		public FloatMenuOption GetOption(string title, IEnumerable<MultiAction> multiActions)
 		{
 			var actions = multiActions.ToList();
@@ -159,15 +169,16 @@ namespace AchtungMod
 				option.extraPartOnGUI = extraPartOnGUI;
 			option.revalidateWorldClickTarget = revalidateWorldClickTarget;
 
-			// fix faction icons in CommsConsole
-            var itemIcon = AllEqual(options, o => Traverse.Create(o).Field("itemIcon").GetValue<Texture2D>(), o => Traverse.Create(o).Field("itemIcon").GetValue<Texture2D>(), null);
-            if (itemIcon != null)
-            {
-                var opt = Traverse.Create(option);
-                opt.Field("itemIcon").SetValue(itemIcon);
-				var iconColor = AllEqualColor(options, o => Traverse.Create(o).Field("iconColor").GetValue<Color>(), new Color());
-                opt.Field("iconColor").SetValue(iconColor);
-            }
+			var itemIcon = AllEqual(options, o => Tools.ItemIcon(o), o => Tools.ItemIcon(o), null);
+			if (itemIcon != null)
+			{
+				Tools.ItemIcon(option) = itemIcon;
+				Tools.ItemColor(option) = AllEqualColor(options, o => Tools.ItemColor(o), noColor);
+			}
+
+			var sizeMode = AllEqualFloatMenuSizeMode(options, o => Tools.SizeMode(o));
+			if (sizeMode != noSizeMode)
+				Tools.SizeMode(option) = sizeMode;
 
 			return option;
 		}
