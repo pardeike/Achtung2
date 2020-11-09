@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
 using UnityEngine;
 using Verse;
 
@@ -99,6 +100,15 @@ namespace AchtungMod
 			return result;
 		}
 
+        private static Color AllEqualColor(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, Color> eval, Color defaultValue)
+        {
+            if (options.Count() == 0) return defaultValue;
+            var result = eval(options.First());
+            if (!options.All(option => eval(option) == result))
+                result = defaultValue;
+            return result;
+        }
+
 		public FloatMenuOption GetOption(string title, IEnumerable<MultiAction> multiActions)
 		{
 			var actions = multiActions.ToList();
@@ -148,6 +158,17 @@ namespace AchtungMod
 			if (option.extraPartOnGUI == null)
 				option.extraPartOnGUI = extraPartOnGUI;
 			option.revalidateWorldClickTarget = revalidateWorldClickTarget;
+
+			// fix faction icons in CommsConsole
+            var itemIcon = AllEqual(options, o => Traverse.Create(o).Field("itemIcon").GetValue<Texture2D>(), o => Traverse.Create(o).Field("itemIcon").GetValue<Texture2D>(), null);
+            if (itemIcon != null)
+            {
+                var opt = Traverse.Create(option);
+                opt.Field("itemIcon").SetValue(itemIcon);
+				var iconColor = AllEqualColor(options, o => Traverse.Create(o).Field("iconColor").GetValue<Color>(), new Color());
+                opt.Field("iconColor").SetValue(iconColor);
+            }
+
 			return option;
 		}
 
