@@ -1,5 +1,6 @@
 ﻿using RimWorld;
 using RimWorld.Planet;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
@@ -23,8 +24,16 @@ namespace AchtungMod
 
 		private static List<WorkGiverDef> AllWorkerDefs<T>() where T : class
 		{
-			return DefDatabase<WorkGiverDef>.AllDefsListForReading
+			try
+			{
+				return DefDatabase<WorkGiverDef>.AllDefsListForReading
 					.Where(def => def.IsOfType<T>()).ToList();
+			}
+			catch (Exception ex)
+			{
+				Log.Error($"Achtung cannot fetch a list of WorkGiverDefs for {typeof(T).FullName}: {ex}");
+				return new List<WorkGiverDef>();
+			}
 		}
 
 		static readonly List<WorkGiverDef> constructionDefs = AllWorkerDefs<WorkGiver_ConstructDeliverResources>().Concat(AllWorkerDefs<WorkGiver_ConstructFinishFrames>()).ToList();

@@ -166,7 +166,8 @@ namespace AchtungMod
 
 		public static bool IsOfType<T>(this WorkGiverDef def) where T : class
 		{
-			return ((def.Worker as T) != null);
+			if (def.giverClass == null) return false;
+			return (def.Worker as T) != null;
 		}
 
 		public static bool Has45DegreeOffset(List<Colonist> colonists)
