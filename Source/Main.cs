@@ -721,13 +721,31 @@ namespace AchtungMod
 	[HarmonyPatch(typeof(FloatMenuMakerMap))]
 	[HarmonyPatch(nameof(FloatMenuMakerMap.ChoicesAtFor))]
 	[HarmonyPatch(new[] { typeof(Vector3), typeof(Pawn) })]
+	[StaticConstructorOnStartup]
 	static class FloatMenuMakerMap_ChoicesAtFor_Patch
 	{
+		static readonly Texture2D AttentionIcon = ContentFinder<Texture2D>.Get("AttentionIcon", true);
+
 		public static void Postfix(List<FloatMenuOption> __result, Vector3 clickPos, Pawn pawn)
 		{
 			if (pawn?.Map != null && pawn.Drafted == false)
 				if (WorldRendererUtility.WorldRenderedNow == false)
 					__result.AddRange(Controller.AchtungChoicesAtFor(clickPos, pawn));
+		}
+
+		public static Exception Finalizer(Exception __exception, List<FloatMenuOption> __result)
+		{
+			if (__exception != null)
+			{
+				var exceptionString = __exception.ToString();
+				__result.Add(new FloatMenuOption("Achtung caught and prevented some mod exception. Select this to copy the stacktrace to your clipboard", () =>
+				{
+					var te = new TextEditor { text = exceptionString };
+					te.SelectAll();
+					te.Copy();
+				}, AttentionIcon, Color.yellow, MenuOptionPriority.VeryLow));
+			}
+			return null;
 		}
 	}
 
