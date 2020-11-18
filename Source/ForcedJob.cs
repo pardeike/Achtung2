@@ -100,7 +100,7 @@ namespace AchtungMod
 				return validTargets.Select(target => target.item.Cell);
 		}
 
-		public IEnumerable<WorkGiver_Scanner> WorkGivers => workgiverDefs.Select(wgd => (WorkGiver_Scanner)wgd.Worker);
+		public IEnumerable<WorkGiver_Scanner> WorkGivers => workgiverDefs.Where(wgd => wgd.giverClass != null).Select(wgd => (WorkGiver_Scanner)wgd.Worker);
 
 		public static int MaterialScore(LocalTargetInfo item)
 		{

@@ -163,7 +163,7 @@ namespace AchtungMod
 			var workgiverDefs = ForcedWork.GetCombinedDefs(forceWorkgiver);
 			foreach (var workgiverDef in workgiverDefs)
 			{
-				var workgiver = workgiverDef.Worker as WorkGiver_Scanner;
+				var workgiver = workgiverDef.giverClass == null ? null : workgiverDef.Worker as WorkGiver_Scanner;
 				if (workgiver == null) continue;
 
 				var item = ForcedWork.HasJobItem(forcePawn, workgiver, cell);
