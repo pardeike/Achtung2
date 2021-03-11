@@ -261,6 +261,22 @@ namespace AchtungMod
 	}*/
 
 	[HarmonyPatch(typeof(ReservationManager))]
+	[HarmonyPatch("RespectsReservationsOf")]
+	static class ReservationManager_RespectsReservationsOf_Patch
+	{
+		public static bool Prefix(Pawn newClaimant, Pawn oldClaimant, ref bool __result)
+		{
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			if (forcedWork.HasForcedJob(newClaimant) && forcedWork.HasForcedJob(oldClaimant))
+			{
+				__result = false;
+				return false;
+			}
+			return true;
+		}
+	}
+
+	[HarmonyPatch(typeof(ReservationManager))]
 	[HarmonyPatch(nameof(ReservationManager.Reserve))]
 	static class ReservationManager_Reserve_Patch
 	{
@@ -352,8 +368,7 @@ namespace AchtungMod
 		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var m_RadialDistinctThingsAround = AccessTools.Method(typeof(GenRadial), nameof(GenRadial.RadialDistinctThingsAround));
-			var m_RadialDistinctThingsAround_Patch = AccessTools.Method(typeof(WorkGiver_ConstructDeliverResources_FindNearbyNeeders_Patch), "RadialDistinctThingsAround_Patch");
-			if (m_RadialDistinctThingsAround_Patch == null) throw new Exception("Cannot find method WorkGiver_ConstructDeliverResources_FindNearbyNeeders_Patch.m_RadialDistinctThingsAround_Patch");
+			var m_RadialDistinctThingsAround_Patch = SymbolExtensions.GetMethodInfo(() => RadialDistinctThingsAround_Patch(default, default, default, default, default));
 
 			var found = 0;
 			var list = instructions.ToList();
