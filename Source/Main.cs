@@ -763,24 +763,4 @@ namespace AchtungMod
 			return null;
 		}
 	}
-
-	// custom context menu
-	/*
-	[HarmonyPatch]
-	static class FloatMenuMakerMap_ChoicesAtFor_List_Patch
-	{
-		public static IEnumerable<MethodBase> TargetMethods()
-		{
-			var args = new[] { typeof(Vector3), typeof(List<Pawn>) };
-			var method = AccessTools.Method(typeof(FloatMenuMakerMap), nameof(FloatMenuMakerMap.ChoicesAtFor), args);
-			if (method != null)
-				yield return method;
-		}
-
-		public static void Postfix(List<FloatMenuOption> __result, Vector3 clickPos, List<Pawn> pawns)
-		{
-			if (WorldRendererUtility.WorldRenderedNow == false)
-				pawns.DoIf(pawn => pawn?.Map != null, pawn => __result.AddRange(Controller.AchtungChoicesAtFor(clickPos, pawn)));
-		}
-	}*/
 }

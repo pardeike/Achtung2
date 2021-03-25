@@ -17,7 +17,7 @@ namespace AchtungMod
 		public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, LocalTargetInfo clickCell)
 		{
 			_ = base.CanStart(thePawn, clickCell);
-			if (thePawn.workSettings == null)
+			if (thePawn.workSettings == null || thePawn.WorkTypeIsDisabled(WorkTypeDefOf.Firefighter))
 				return null;
 			if (Achtung.Settings.ignoreAssignments == false && thePawn.workSettings.GetPriority(WorkTypeDefOf.Firefighter) == 0)
 				return null;

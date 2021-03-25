@@ -69,7 +69,7 @@ namespace AchtungMod
 				dummyThing = currentItem.Thing;
 			}
 			Scribe_Values.Look(ref dummyCell, "current-cell", IntVec3.Invalid, false);
-			Scribe_Values.Look(ref dummyThing, "current-thing", null, false);
+			Scribe_References.Look(ref dummyThing, "current-thing-ref");
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
 				if (dummyThing != null)
