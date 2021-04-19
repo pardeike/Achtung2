@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+	<PositioningEnabledTitle>Aangepaste muispositionering</PositioningEnabledTitle>
+	<PositioningEnabledExplained>Maakt gevechtspositionering mogelijk voor je muisklikken/slepen (zie onderstaande instellingen)</PositioningEnabledExplained>
+
+	<AchtungModifierTitle>Achtung! toets</AchtungModifierTitle>
+	<AchtungModifierExplained>Als je deze toets ingedrukt houdt, worden kolonisten geforceerd als ze de opdrachten Verplaatsen of Verplaatsen-in-formatie krijgen.\nAls je hem vasthoudt, kunnen de geselecteerde kolonisten in hun huidige formatie naar je cursor worden verplaatst door de rechtermuisknop ingedrukt te houden en te slepen. Zodra de rechtermuisknop wordt ingedrukt, kan de Achtung! toets worden losgelaten.\nDe formatie kan worden gedraaid met Q en E</AchtungModifierExplained>
+
+	<ForceCommandMenuModeTitle>Contextmenu Modus</ForceCommandMenuModeTitle>
+	<ForceCommandMenuModeExplained>Auto = normaal gedrag (wapenstatus beslist)\nToon Menu = Toets ingedrukt houden voor contextmenu\nZet Positie = Toets ingedrukt houden om naar positie te bevelen</ForceCommandMenuModeExplained>
+	<ForceCommandMenuKeyTitle>Context Menu Toets</ForceCommandMenuKeyTitle>
+
+	<ForcedCommandState>Bevolen te werken tot het klaar is.</ForcedCommandState>
+
+	<ForceMenuButtonText>Dwingen</ForceMenuButtonText>
+
+	<IncreaseForceRadius>Straal vergroten</IncreaseForceRadius>
+	<IncreaseForceRadiusDesc>Vergroot de zoekafstand voor gedwongen werk (huidige straal is {0})</IncreaseForceRadiusDesc>
+	<DecreaseForceRadius>Straal verkleinen</DecreaseForceRadius>
+	<DecreaseForceRadiusDesc>Verklein de zoekafstand voor gedwongen werk (huidige straal is {0})</DecreaseForceRadiusDesc>
+
+	<Notes>Opmerkingen</Notes>
+	<Note1>Bij gebruik van Achtung bevat het contextmenu commando's voor zowel de gevechtsmodus als de normale modus.</Note1>
+	<Note2>Bij het positioneren van kolonisten die hun wapen niet hebben getrokken langs een lijn, zal een linkerklik de kolonisten hun wapens laten trekken.</Note2>
+
+	<CommandMenuModeOptionAuto>Auto</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionPressForMenu>Toon Menu</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForPosition>Zet Positie</CommandMenuModeOptionPressForPosition>
+
+	<AchtungModKeyOptionNone>Uitgeschakeld</AchtungModKeyOptionNone>
+	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
+	<AchtungModKeyOptionCtrl>Ctrl</AchtungModKeyOptionCtrl>
+	<AchtungModKeyOptionShift>Shift</AchtungModKeyOptionShift>
+	<AchtungModKeyOptionMeta>Win/Cmd</AchtungModKeyOptionMeta>
+
+	<BreakLevelTitle>Zenuwinzinkingsniveau voor taken</BreakLevelTitle>
+	<BreakLevelExplained>Stel het zenuwinzinkingsniveau in waarop een kolonist een Achtung-taak stopt</BreakLevelExplained>
+	<BreakLevelOptionNone>Negeer</BreakLevelOptionNone>
+	<BreakLevelOptionMinor>Klein</BreakLevelOptionMinor>
+	<BreakLevelOptionMajor>Groot</BreakLevelOptionMajor>
+	<BreakLevelOptionAlmostExtreme>Bijna extreem</BreakLevelOptionAlmostExtreme>
+	<BreakLevelOptionExtreme>Extreem</BreakLevelOptionExtreme>
+
+	<HealthLevelTitle>Gezondheidstoestand voor taken</HealthLevelTitle>
+	<HealthLevelExplained>Stel de gezondheidstoestand in waarop een kolonist een Achtung-taak stopt</HealthLevelExplained>
+	<HealthLevelOptionNone>Negeer</HealthLevelOptionNone>
+	<HealthLevelOptionShouldBeTendedNow>Moet nu behandeld worden</HealthLevelOptionShouldBeTendedNow>
+	<HealthLevelOptionPrefersMedicalRest>Medische zorg</HealthLevelOptionPrefersMedicalRest>
+	<HealthLevelOptionNeedsMedicalRest>Medische rust nodig</HealthLevelOptionNeedsMedicalRest>
+	<HealthLevelOptionInPainShock>In pijnshock</HealthLevelOptionInPainShock>
+
+	<IgnoreForbiddenTitle>Negeer verboden voorwerpen</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Negeert verboden (rood gekruiste) items bij gedwongen werk</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>Negeer toegestane zones</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Negeert zonebeperkingen bij gedwongen werk</IgnoreRestrictionsExplained>
+	<IgnoreAssignmentsTitle>Negeer toewijzingen van werktypes</IgnoreAssignmentsTitle>
+	<IgnoreAssignmentsExplained>Negeert niet-ingestelde werkprioriteiten</IgnoreAssignmentsExplained>
+
+	<WorkMarkersTitle>Markeringen op gedwongen werk</WorkMarkersTitle>
+	<WorkMarkersExplained>Gedwongen werk wordt weergegeven met kleine markeringen</WorkMarkersExplained>
+	<WorkMarkersOptionAnimated>Animatie</WorkMarkersOptionAnimated>
+	<WorkMarkersOptionStatic>Stilstaand</WorkMarkersOptionStatic>
+	<WorkMarkersOptionOff>Uit</WorkMarkersOptionOff>
+
+	<JobInterruptedLabel>Geannuleerd: {0}</JobInterruptedLabel>
+	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
+	<JobInterruptedBadHealth>{0} verkeert in slechte staat</JobInterruptedBadHealth>
+
+	<CleanRoomLabel>Deze ruimte schoonmaken</CleanRoomLabel>
+	<CleanRoomInfoText>De ruimte grondig aan het schoonmaken</CleanRoomInfoText>
+	<CleanRoomDescription>Maak een ruimte volledig schoon</CleanRoomDescription>
+	<CleanRoomReport>{0} aan het schoonmaken: {1}</CleanRoomReport>
+
+	<FireFightLabel>Brand blussen</FireFightLabel>
+	<FireFightInfoText>Brand aan het blussen</FireFightInfoText>
+	<FireFightDescription>Blus een brand (zelfs buiten de thuiszone)</FireFightDescription>
+	<FireFightReport>Brand aan het blussen: {0}</FireFightReport>
+
+	<SowZoneLabel>Zaaien in deze zone/ruimte</SowZoneLabel>
+	<SowZoneInfoText>Zone/ruimte aan het inzaaien</SowZoneInfoText>
+	<SowZoneDescription>Zaai in een kweekzone of kamer tot deze volledig is ingezaaid</SowZoneDescription>
+	<SowZoneReport>{0} aan het inzaaien: {1}</SowZoneReport>
+
+	<AlreadyDoing>(Taak #{0})</AlreadyDoing>
+
+</LanguageData>
