@@ -15,6 +15,6 @@
   </loadBefore>
   <loadAfter>
   </loadAfter>
-  <manifestUri>https://raw.githubusercontent.com/pardeike/Achtung2/master/About/Manifest.xml</manifestUri>
+  <manifestUri>https://raw.githubusercontent.com/pardeike/Achtung2/latest/About/Manifest.xml</manifestUri>
   <downloadUri>https://github.com/pardeike/Achtung2/releases/latest</downloadUri>
 </Manifest>
