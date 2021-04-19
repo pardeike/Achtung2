@@ -21,6 +21,8 @@ The formation can be rotated using Q and E</AchtungModifierExplained>
 	<IncreaseForceRadiusDesc>Increase the search distance for forced work (current radius is {0})</IncreaseForceRadiusDesc>
 	<DecreaseForceRadius>Decrease Radius</DecreaseForceRadius>
 	<DecreaseForceRadiusDesc>Decrease the search distance for forced work (current radius is {0})</DecreaseForceRadiusDesc>
+	<BuildingSmart>Building Smart</BuildingSmart>
+	<BuildingSmartDesc>Building smart prevents holes or getting stuck but is slower and always builds around your start location</BuildingSmartDesc>
 
 	<Notes>Notes</Notes>
 	<Note1>When using Achtung the context menu contains both: drafted and undrafted commands</Note1>
@@ -58,6 +60,9 @@ The formation can be rotated using Q and E</AchtungModifierExplained>
 	<IgnoreRestrictionsExplained>Ignore zone restrictions when doing forced work</IgnoreRestrictionsExplained>
 	<IgnoreAssignmentsTitle>Ignore work type assignments</IgnoreAssignmentsTitle>
 	<IgnoreAssignmentsExplained>Ignores unset work priorities</IgnoreAssignmentsExplained>
+
+	<BuildingSmartDefaultTitle>Smart building is on for new Achtung! jobs</BuildingSmartDefaultTitle>
+	<BuildingSmartDefaultExplained>Sets the default for how new jobs choose their build order</BuildingSmartDefaultExplained>
 
 	<WorkMarkersTitle>Force work markers</WorkMarkersTitle>
 	<WorkMarkersExplained>Forced work is displayed with small markers</WorkMarkersExplained>

@@ -57,6 +57,7 @@ namespace AchtungMod
 		public bool ignoreRestrictions = false;
 		public bool ignoreAssignments = false;
 		public WorkMarkers workMarkers = WorkMarkers.Animated;
+		public bool buildingSmartDefault = true;
 
 		public override void ExposeData()
 		{
@@ -70,6 +71,8 @@ namespace AchtungMod
 			Scribe_Values.Look(ref ignoreForbidden, "ignoreForbidden", false, true);
 			Scribe_Values.Look(ref ignoreRestrictions, "ignoreRestrictions", false, true);
 			Scribe_Values.Look(ref ignoreAssignments, "ignoreAssignments", false, true);
+			Scribe_Values.Look(ref workMarkers, "workMarkers", WorkMarkers.Animated, true);
+			Scribe_Values.Look(ref buildingSmartDefault, "buildingSmartDefault", true, true);
 		}
 
 		static readonly AccessTools.FieldRef<Listing, float> curX = AccessTools.FieldRefAccess<Listing, float>("curX");
@@ -102,6 +105,8 @@ namespace AchtungMod
 			list.CheckboxEnhanced("IgnoreForbidden", ref Achtung.Settings.ignoreForbidden);
 			list.CheckboxEnhanced("IgnoreRestrictions", ref Achtung.Settings.ignoreRestrictions);
 			list.CheckboxEnhanced("IgnoreAssignments", ref Achtung.Settings.ignoreAssignments);
+			list.Gap(10);
+			list.CheckboxEnhanced("BuildingSmartDefault", ref Achtung.Settings.buildingSmartDefault);
 			list.Gap(10);
 			list.ValueLabeled("WorkMarkers", ref Achtung.Settings.workMarkers);
 

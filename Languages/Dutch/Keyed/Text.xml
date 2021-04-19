@@ -19,6 +19,8 @@
 	<IncreaseForceRadiusDesc>Vergroot de zoekafstand voor gedwongen werk (huidige straal is {0})</IncreaseForceRadiusDesc>
 	<DecreaseForceRadius>Straal verkleinen</DecreaseForceRadius>
 	<DecreaseForceRadiusDesc>Verklein de zoekafstand voor gedwongen werk (huidige straal is {0})</DecreaseForceRadiusDesc>
+	<BuildingSmart>Slim bouwen</BuildingSmart>
+	<BuildingSmartDesc>Slim bouwen voorkomt gaten of vast komen te zitten, maar is langzamer en bouwt altijd rond je startlocatie</BuildingSmartDesc>
 
 	<Notes>Opmerkingen</Notes>
 	<Note1>Bij gebruik van Achtung bevat het contextmenu commando's voor zowel de gevechtsmodus als de normale modus.</Note1>
@@ -56,6 +58,9 @@
 	<IgnoreRestrictionsExplained>Negeert zonebeperkingen bij gedwongen werk</IgnoreRestrictionsExplained>
 	<IgnoreAssignmentsTitle>Negeer toewijzingen van werktypes</IgnoreAssignmentsTitle>
 	<IgnoreAssignmentsExplained>Negeert niet-ingestelde werkprioriteiten</IgnoreAssignmentsExplained>
+
+	<BuildingSmartDefaultTitle>Slim bouwen is standaard voor nieuwe Achtung! banen</BuildingSmartDefaultTitle>
+	<BuildingSmartDefaultExplained>Stelt de standaard in voor hoe nieuwe jobs hun bouwvolgorde kiezen</BuildingSmartDefaultExplained>
 
 	<WorkMarkersTitle>Markeringen op gedwongen werk</WorkMarkersTitle>
 	<WorkMarkersExplained>Gedwongen werk wordt weergegeven met kleine markeringen</WorkMarkersExplained>

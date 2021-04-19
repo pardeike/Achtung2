@@ -590,14 +590,24 @@ namespace AchtungMod
 		public static readonly Texture2D ForceRadiusExpand = ContentFinder<Texture2D>.Get("ForceRadiusExpand", true);
 		public static readonly Texture2D ForceRadiusShrink = ContentFinder<Texture2D>.Get("ForceRadiusShrink", true);
 		public static readonly Texture2D ForceRadiusShrinkOff = ContentFinder<Texture2D>.Get("ForceRadiusShrinkOff", true);
+		public static readonly Texture2D BuildingSmart = ContentFinder<Texture2D>.Get("BuildingSmart", true);
+		public static readonly Texture2D BuildingSmartOff = ContentFinder<Texture2D>.Get("BuildingSmartOff", true);
 
 		[SyncMethod] // multiplayer
-		public static void ActionSynced(Pawn pawn, int delta)
+		public static void ChangeCellRadiusSynced(Pawn pawn, int delta)
 		{
 			var forcedWork = Find.World.GetComponent<ForcedWork>();
 			var forcedJob = forcedWork.GetForcedJob(pawn);
 			if (forcedJob != null && forcedJob.cellRadius + delta >= 0)
 				forcedJob.ChangeCellRadius(delta);
+		}
+
+		[SyncMethod] // multiplayer
+		public static void ToggleSmartBuildingSynced(Pawn pawn)
+		{
+			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedJob = forcedWork.GetForcedJob(pawn);
+			forcedJob.ToggleSmartBuilding();
 		}
 
 		public static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> gizmos, Pawn ___pawn)
@@ -612,6 +622,7 @@ namespace AchtungMod
 				yield break;
 
 			var radius = forcedJob.cellRadius;
+			var smart = forcedJob.buildSmart;
 
 			yield return new Command_Action
 			{
@@ -619,7 +630,7 @@ namespace AchtungMod
 				defaultDesc = "IncreaseForceRadiusDesc".Translate(radius),
 				icon = ForceRadiusExpand,
 				activateSound = SoundDefOf.Designate_ZoneAdd,
-				action = delegate { ActionSynced(___pawn, 1); }
+				action = delegate { ChangeCellRadiusSynced(___pawn, 1); }
 			};
 
 			yield return new Command_Action
@@ -628,7 +639,16 @@ namespace AchtungMod
 				defaultDesc = "DecreaseForceRadiusDesc".Translate(radius),
 				icon = radius > 0 ? ForceRadiusShrink : ForceRadiusShrinkOff,
 				activateSound = radius > 0 ? SoundDefOf.Designate_ZoneAdd : SoundDefOf.Designate_Failed,
-				action = delegate { ActionSynced(___pawn, -1); }
+				action = delegate { ChangeCellRadiusSynced(___pawn, -1); }
+			};
+
+			yield return new Command_Action
+			{
+				defaultLabel = "BuildingSmart".Translate(),
+				defaultDesc = "BuildingSmartDesc".Translate(),
+				icon = smart ? BuildingSmart : BuildingSmartOff,
+				activateSound = smart ? SoundDefOf.Designate_PlanRemove : SoundDefOf.Designate_PlanAdd,
+				action = delegate { ToggleSmartBuildingSynced(___pawn); }
 			};
 		}
 	}

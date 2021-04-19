@@ -36,13 +36,13 @@ namespace AchtungMod
 	public class ForcedJob : IExposable
 	{
 		private HashSet<ForcedTarget> targets = new HashSet<ForcedTarget>();
-		//private readonly Dictionary<LocalTargetInfo, int> targetBaseScoreCache = new Dictionary<LocalTargetInfo, int>();
 
 		public Pawn pawn = null;
 		public List<WorkGiverDef> workgiverDefs = new List<WorkGiverDef>();
 		public bool isThingJob = false;
 		public bool initialized = false;
 		public int cellRadius = 0;
+		public bool buildSmart = true;
 		static readonly Dictionary<BuildableDef, int> TypeScores = new Dictionary<BuildableDef, int>
 		{
 			{ ThingDefOf.PowerConduit, 1000 },
@@ -78,10 +78,10 @@ namespace AchtungMod
 			pawn = null;
 			workgiverDefs = new List<WorkGiverDef>();
 			targets = new HashSet<ForcedTarget>();
-			//targetBaseScoreCache = new Dictionary<LocalTargetInfo, int>();
 			isThingJob = false;
 			initialized = false;
 			cellRadius = 0;
+			buildSmart = Achtung.Settings.buildingSmartDefault;
 		}
 
 		public void AddTarget(LocalTargetInfo item)
@@ -143,6 +143,8 @@ namespace AchtungMod
 
 		public IEnumerable<LocalTargetInfo> GetSortedTargets(HashSet<int> planned)
 		{
+			const int maxSquaredDistance = 200 * 200;
+
 			var map = pawn.Map;
 			var pathGrid = map.pathGrid;
 			var mapWidth = map.Size.x;
@@ -155,9 +157,15 @@ namespace AchtungMod
 				})
 				.OrderByDescending(target =>
 				{
-					var willBlock = target.item.WillBlock();
-					var neighbourScore = willBlock ? Tools.NeighbourScore(target.item.Cell, pathGrid, mapWidth, planned) : 100;
-					return neighbourScore * 10000 + target.materialScore;
+					if (buildSmart)
+					{
+						var willBlock = target.item.WillBlock();
+						var neighbourScore = willBlock ? Tools.NeighbourScore(target.item.Cell, pathGrid, mapWidth, planned) : 100;
+						return target.materialScore + neighbourScore * 10000;
+					}
+					var reverseDistance = maxSquaredDistance - pawn.Position.DistanceToSquared(target.item.Cell);
+					if (reverseDistance < 0) reverseDistance = 0;
+					return target.materialScore + reverseDistance * 10000;
 				})
 				.Select(target => target.item);
 		}
@@ -249,6 +257,12 @@ namespace AchtungMod
 		public void ChangeCellRadius(int delta)
 		{
 			cellRadius += delta;
+			UpdateCells();
+		}
+
+		public void ToggleSmartBuilding()
+		{
+			buildSmart = !buildSmart;
 			UpdateCells();
 		}
 
@@ -355,6 +369,7 @@ namespace AchtungMod
 			Scribe_Values.Look(ref isThingJob, "thingJob", false, true);
 			Scribe_Values.Look(ref initialized, "inited", false, true);
 			Scribe_Values.Look(ref cellRadius, "radius", 0, true);
+			Scribe_Values.Look(ref buildSmart, "buildSmart", true, true);
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 				_ = targets.RemoveWhere(target => target.item == null || target.item.IsValid == false || target.item.ThingDestroyed);

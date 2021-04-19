@@ -21,6 +21,8 @@ Die Formation kann während der Bewegung mit Q und E rotiert werden</AchtungModi
 	<IncreaseForceRadiusDesc>Erhöht die Suchentfernung für erzwungene Arbeit (momentan {0})</IncreaseForceRadiusDesc>
 	<DecreaseForceRadius>Radius kleiner</DecreaseForceRadius>
 	<DecreaseForceRadiusDesc>Verringert die Suchentfernung für erzwungene Arbeit (momentan {0})</DecreaseForceRadiusDesc>
+	<BuildingSmart>Cleveres Bauen</BuildingSmart>
+	<BuildingSmartDesc>Cleveres Bauen verhindert Löcher oder Feststecken aber ist langsamer und wird immer in Kreisen um den Startpunkt ausführt</BuildingSmartDesc>
 
 	<Notes>Notizen</Notes>
 	<Note1>Mit Achtung enthält das Kontextmenu sowohl normale als auch Kampfkommandos</Note1>
@@ -58,6 +60,9 @@ Die Formation kann während der Bewegung mit Q und E rotiert werden</AchtungModi
 	<IgnoreRestrictionsExplained>Ignoriert Zonen während erzwungener Arbeit</IgnoreRestrictionsExplained>
 	<IgnoreAssignmentsTitle>Ignoriere Arbeitseinstellungen</IgnoreAssignmentsTitle>
 	<IgnoreAssignmentsExplained>Ignoriert leere, unzugewiesene Arbeitsprioriteten</IgnoreAssignmentsExplained>
+
+	<BuildingSmartDefaultTitle>Cleveres Bauen als Vorwahl für neue Achtung! Jobs</BuildingSmartDefaultTitle>
+	<BuildingSmartDefaultExplained>Schaltet den schlaueren Baumodus für neue Jobs an</BuildingSmartDefaultExplained>
 
 	<WorkMarkersTitle>Erzwungene Arbeitspositionen</WorkMarkersTitle>
 	<WorkMarkersExplained>Stellen mit erzwungener Arbeit werden mit Markierungen angezeigt</WorkMarkersExplained>

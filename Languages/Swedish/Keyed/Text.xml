@@ -20,6 +20,8 @@ Höll i för att flytta kolonister i deras formation. Formationen kan roteras me
 	<IncreaseForceRadiusDesc>Öka sökavståndet för tvångsarbete (just nu {0})</IncreaseForceRadiusDesc>
 	<DecreaseForceRadius>Minska avstånd</DecreaseForceRadius>
 	<DecreaseForceRadiusDesc>Minska sökavståndet för tvångsarbete (just nu {0})</DecreaseForceRadiusDesc>
+	<BuildingSmart>Smart byggande</BuildingSmart>
+	<BuildingSmartDesc>Smart byggande förhindrar hål eller att kolonister fastna men tar mer tid och utförs alltid i circlar rund startpunkten</BuildingSmartDesc>
 
 	<Notes>Anmärkningar</Notes>
 	<Note1>Med Achtung innehåller kontextmenyn såväl normala som kampkommandos</Note1>
@@ -57,6 +59,9 @@ Höll i för att flytta kolonister i deras formation. Formationen kan roteras me
 	<IgnoreRestrictionsExplained>Ignorera zonbegränsningar vid tvångsarbete</IgnoreRestrictionsExplained>
 	<IgnoreAssignmentsTitle>Ignorera arbetstypsuppdrag</IgnoreAssignmentsTitle>
 	<IgnoreAssignmentsExplained>Ignorerar tomma arbetsprioriteringar</IgnoreAssignmentsExplained>
+
+	<BuildingSmartDefaultTitle>Smart byggande är på för nya jobs</BuildingSmartDefaultTitle>
+	<BuildingSmartDefaultExplained>Förvalet för nya Achtung! jobs är att de byggs på ett smart sätt</BuildingSmartDefaultExplained>
 
 	<WorkMarkersTitle>Tvingade arbetspositioner</WorkMarkersTitle>
 	<WorkMarkersExplained>Platser med tvångsarbete visas med små markörer</WorkMarkersExplained>
