@@ -768,11 +768,12 @@ namespace AchtungMod
 					__result.AddRange(Controller.AchtungChoicesAtFor(clickPos, pawn));
 		}
 
-		public static Exception Finalizer(Exception __exception, List<FloatMenuOption> __result)
+		public static Exception Finalizer(Exception __exception, ref List<FloatMenuOption> __result)
 		{
 			if (__exception != null)
 			{
 				var exceptionString = __exception.ToString();
+				__result = __result ?? new List<FloatMenuOption>();
 				__result.Add(new FloatMenuOption("Achtung caught and prevented some mod exception. Select this to copy the stacktrace to your clipboard", () =>
 				{
 					var te = new TextEditor { text = exceptionString };

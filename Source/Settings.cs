@@ -57,7 +57,7 @@ namespace AchtungMod
 		public bool ignoreRestrictions = false;
 		public bool ignoreAssignments = false;
 		public WorkMarkers workMarkers = WorkMarkers.Animated;
-		public bool buildingSmartDefault = true;
+		public bool buildingSmartDefault = false;
 
 		public override void ExposeData()
 		{
@@ -72,7 +72,7 @@ namespace AchtungMod
 			Scribe_Values.Look(ref ignoreRestrictions, "ignoreRestrictions", false, true);
 			Scribe_Values.Look(ref ignoreAssignments, "ignoreAssignments", false, true);
 			Scribe_Values.Look(ref workMarkers, "workMarkers", WorkMarkers.Animated, true);
-			Scribe_Values.Look(ref buildingSmartDefault, "buildingSmartDefault", true, true);
+			Scribe_Values.Look(ref buildingSmartDefault, "buildingSmartDefault", false, true);
 		}
 
 		static readonly AccessTools.FieldRef<Listing, float> curX = AccessTools.FieldRefAccess<Listing, float>("curX");
