@@ -21,12 +21,6 @@ namespace AchtungMod
 		public static Material lineMaterial;
 		public static string goHereLabel;
 
-		public static FieldInfo draftHandlerField = typeof(Pawn_DraftController).GetField("draftedInt", BindingFlags.NonPublic | BindingFlags.Instance);
-		public static readonly FieldRef<ReservationManager, List<ReservationManager.Reservation>> Reservations = FieldRefAccess<ReservationManager, List<ReservationManager.Reservation>>("reservations");
-		public static readonly FieldRef<FloatMenuOption, Texture2D> ItemIcon = FieldRefAccess<FloatMenuOption, Texture2D>("itemIcon");
-		public static readonly FieldRef<FloatMenuOption, Color> ItemColor = FieldRefAccess<FloatMenuOption, Color>("iconColor");
-		public static readonly FieldRef<FloatMenuOption, FloatMenuSizeMode> SizeMode = FieldRefAccess<FloatMenuOption, FloatMenuSizeMode>("sizeMode");
-
 		private static string _version;
 		public static string Version
 		{
@@ -74,34 +68,26 @@ namespace AchtungMod
 				return "";
 
 			var mb = pawn.mindState.mentalBreaker;
-			switch (Achtung.Settings.breakLevel)
+			return Achtung.Settings.breakLevel switch
 			{
-				case BreakLevel.Minor:
-					return mb.BreakMinorIsImminent ? "BreakRiskMinor".Translate() : null;
-				case BreakLevel.Major:
-					return mb.BreakMajorIsImminent ? "BreakRiskMajor".Translate() : null;
-				case BreakLevel.AlmostExtreme:
-					return mb.BreakExtremeIsApproaching ? "BreakRiskExtreme".Translate() : null;
-				case BreakLevel.Extreme:
-					return mb.BreakExtremeIsImminent ? "BreakRiskExtreme".Translate() : null;
-			}
-			return null;
+				BreakLevel.Minor => mb.BreakMinorIsImminent ? "BreakRiskMinor".Translate() : null,
+				BreakLevel.Major => mb.BreakMajorIsImminent ? "BreakRiskMajor".Translate() : null,
+				BreakLevel.AlmostExtreme => mb.BreakExtremeIsApproaching ? "BreakRiskExtreme".Translate() : null,
+				BreakLevel.Extreme => mb.BreakExtremeIsImminent ? "BreakRiskExtreme".Translate() : null,
+				_ => null,
+			};
 		}
 
 		public static bool PawnOverHealthLevel(Pawn pawn)
 		{
-			switch (Achtung.Settings.healthLevel)
+			return Achtung.Settings.healthLevel switch
 			{
-				case HealthLevel.ShouldBeTendedNow:
-					return HealthAIUtility.ShouldBeTendedNowByPlayer(pawn) || HealthAIUtility.ShouldHaveSurgeryDoneNow(pawn);
-				case HealthLevel.PrefersMedicalRest:
-					return HealthAIUtility.ShouldSeekMedicalRest(pawn);
-				case HealthLevel.NeedsMedicalRest:
-					return HealthAIUtility.ShouldSeekMedicalRestUrgent(pawn);
-				case HealthLevel.InPainShock:
-					return pawn.health.InPainShock;
-			}
-			return false;
+				HealthLevel.ShouldBeTendedNow => HealthAIUtility.ShouldBeTendedNowByPlayer(pawn) || HealthAIUtility.ShouldHaveSurgeryDoneNow(pawn),
+				HealthLevel.PrefersMedicalRest => HealthAIUtility.ShouldSeekMedicalRest(pawn),
+				HealthLevel.NeedsMedicalRest => HealthAIUtility.ShouldSeekMedicalRestUrgent(pawn),
+				HealthLevel.InPainShock => pawn.health.InPainShock,
+				_ => false,
+			};
 		}
 
 		public static Vector3 RotateBy(Vector3 offsetFromCenter, int rotation, bool was45)
@@ -120,38 +106,30 @@ namespace AchtungMod
 
 		public static bool IsModKey(KeyCode code, AchtungModKey key)
 		{
-			switch (key)
+			return key switch
 			{
-				case AchtungModKey.Alt:
-					return code == KeyCode.LeftAlt || code == KeyCode.RightAlt;
-				case AchtungModKey.Ctrl:
-					return code == KeyCode.LeftControl || code == KeyCode.RightControl;
-				case AchtungModKey.Shift:
-					return code == KeyCode.LeftShift || code == KeyCode.RightShift;
-				case AchtungModKey.Meta:
-					return code == KeyCode.LeftWindows || code == KeyCode.RightWindows
-						|| code == KeyCode.LeftCommand || code == KeyCode.RightCommand
-						|| code == KeyCode.LeftApple || code == KeyCode.RightApple;
-			}
-			return false;
+				AchtungModKey.Alt => code == KeyCode.LeftAlt || code == KeyCode.RightAlt,
+				AchtungModKey.Ctrl => code == KeyCode.LeftControl || code == KeyCode.RightControl,
+				AchtungModKey.Shift => code == KeyCode.LeftShift || code == KeyCode.RightShift,
+				AchtungModKey.Meta => code == KeyCode.LeftWindows || code == KeyCode.RightWindows
+|| code == KeyCode.LeftCommand || code == KeyCode.RightCommand
+|| code == KeyCode.LeftApple || code == KeyCode.RightApple,
+				_ => false,
+			};
 		}
 
 		public static bool IsModKeyPressed(AchtungModKey key)
 		{
-			switch (key)
+			return key switch
 			{
-				case AchtungModKey.Alt:
-					return Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
-				case AchtungModKey.Ctrl:
-					return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-				case AchtungModKey.Shift:
-					return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-				case AchtungModKey.Meta:
-					return Input.GetKey(KeyCode.LeftWindows) || Input.GetKey(KeyCode.RightWindows)
-						|| Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand)
-						|| Input.GetKey(KeyCode.LeftApple) || Input.GetKey(KeyCode.RightApple);
-			}
-			return false;
+				AchtungModKey.Alt => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt),
+				AchtungModKey.Ctrl => Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl),
+				AchtungModKey.Shift => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift),
+				AchtungModKey.Meta => Input.GetKey(KeyCode.LeftWindows) || Input.GetKey(KeyCode.RightWindows)
+|| Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand)
+|| Input.GetKey(KeyCode.LeftApple) || Input.GetKey(KeyCode.RightApple),
+				_ => false,
+			};
 		}
 
 		public static bool IsForcedJob()
@@ -184,8 +162,8 @@ namespace AchtungMod
 
 		public static bool IsFreeTarget(Pawn pawn, ForcedTarget target)
 		{
-			var allReservations = Tools.Reservations(pawn.Map.reservationManager);
-			return allReservations.Any(res => res.Target.Cell == target.item.Cell && res.Claimant != pawn) == false;
+			return pawn.Map.reservationManager.reservations
+				.Any(res => res.Target.Cell == target.item.Cell && res.Claimant != pawn) == false;
 		}
 
 		public static bool WillBlock(this LocalTargetInfo info)
@@ -193,15 +171,13 @@ namespace AchtungMod
 			if (info.HasThing == false) return false;
 			var thing = info.Thing;
 			var thingDef = thing.def;
-			var blueprint = thing as Blueprint;
-			if (blueprint != null)
+			if (thing is Blueprint blueprint)
 			{
 				var def = blueprint.def.entityDefToBuild as ThingDef;
 				if (def != null)
 					thingDef = def;
 			}
-			var frame = thing as Frame;
-			if (frame != null)
+			if (thing is Frame frame)
 			{
 				var def = frame.def.entityDefToBuild as ThingDef;
 				if (def != null)
@@ -448,7 +424,7 @@ namespace AchtungMod
 		{
 			// we don't use the indirect method because it has lots of side effects
 			//
-			draftHandlerField?.SetValue(pawn.drafter, drafted);
+			pawn.drafter.draftedInt = drafted;
 		}
 
 		public static bool SetDraftStatus(Pawn pawn, bool drafted, bool fakeIt)
@@ -457,7 +433,7 @@ namespace AchtungMod
 			if (previousStatus != drafted)
 			{
 				if (fakeIt)
-					draftHandlerField?.SetValue(pawn.drafter, drafted);
+					pawn.drafter.draftedInt = drafted;
 				else
 					SetDraftStatusSynced(pawn, drafted);
 			}
@@ -481,7 +457,7 @@ namespace AchtungMod
 		[SyncMethod] // multiplayer
 		public static void CancelWorkOn(Pawn newWorker, LocalTargetInfo workItem)
 		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 			if (forcedWork == null || newWorker.Map == null)
 				return;
 

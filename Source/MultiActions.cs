@@ -169,16 +169,16 @@ namespace AchtungMod
 				option.extraPartOnGUI = extraPartOnGUI;
 			option.revalidateWorldClickTarget = revalidateWorldClickTarget;
 
-			var itemIcon = AllEqual(options, o => Tools.ItemIcon(o), o => Tools.ItemIcon(o), null);
+			var itemIcon = AllEqual(options, o => o.itemIcon, o => o.itemIcon, null);
 			if (itemIcon != null)
 			{
-				Tools.ItemIcon(option) = itemIcon;
-				Tools.ItemColor(option) = AllEqualColor(options, o => Tools.ItemColor(o), noColor);
+				option.itemIcon = itemIcon;
+				option.iconColor = AllEqualColor(options, o => o.iconColor, noColor);
 			}
 
-			var sizeMode = AllEqualFloatMenuSizeMode(options, o => Tools.SizeMode(o));
+			var sizeMode = AllEqualFloatMenuSizeMode(options, o => o.sizeMode);
 			if (sizeMode != noSizeMode)
-				Tools.SizeMode(option) = sizeMode;
+				option.sizeMode = sizeMode;
 
 			return option;
 		}

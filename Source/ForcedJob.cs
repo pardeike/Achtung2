@@ -114,15 +114,13 @@ namespace AchtungMod
 				if (TypeScores.TryGetValue(thing.def, out var n))
 					scoreThing = n;
 
-				var blueprint = thing as Blueprint_Build;
-				if (blueprint != null)
+				if (thing is Blueprint_Build blueprint)
 				{
 					if (TypeScores.TryGetValue(blueprint.def.entityDefToBuild, out n))
 						scoreBlueprint = n;
 				}
 
-				var frame = thing as Frame;
-				if (frame != null)
+				if (thing is Frame frame)
 				{
 					if (TypeScores.TryGetValue(frame.def.entityDefToBuild, out n))
 						scoreFrame = n;
@@ -170,9 +168,8 @@ namespace AchtungMod
 				.Select(target => target.item);
 		}
 
-		public bool IsForbiddenCell(Map map, IntVec3 cell)
+		public bool IsForbiddenCell(IntVec3 cell)
 		{
-			if (pawn.Map != map) return false;
 			return targets.Any(target => target.item.Cell == cell && target.IsBuilding());
 		}
 
@@ -211,7 +208,7 @@ namespace AchtungMod
 			_ = lastJob;
 
 			if (pawn == null || pawn.IsColonist == false) return false;
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 
 			var forcedJob = forcedWork.GetForcedJob(pawn);
 			if (forcedJob == null)
@@ -418,11 +415,9 @@ namespace AchtungMod
 		{
 			if (item.HasThing == false) return false;
 			var thing = item.Thing;
-			var frame = thing as Frame;
-			if (frame != null)
+			if (thing is Frame frame)
 				return frame.def.entityDefToBuild == ThingDefOf.Wall;
-			var blueprint = thing as Blueprint_Build;
-			if (blueprint != null)
+			if (thing is Blueprint_Build blueprint)
 				return blueprint.def.entityDefToBuild == ThingDefOf.Wall;
 			return false;
 		}

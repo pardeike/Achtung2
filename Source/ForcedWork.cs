@@ -16,10 +16,23 @@ namespace AchtungMod
 		private int counter;
 
 		readonly HashSet<Pawn> preparing = new HashSet<Pawn>();
-		readonly Dictionary<Pawn, HashSet<IntVec3>> forbiddenLocations = new Dictionary<Pawn, HashSet<IntVec3>>();
+		//readonly Dictionary<Pawn, HashSet<IntVec3>> forbiddenLocations = new Dictionary<Pawn, HashSet<IntVec3>>();
 
-		public ForcedWork(World world) : base(world)
+		public ForcedWork(World world) : base(world) { }
+
+		static ForcedWork instance = null;
+		public static ForcedWork Instance
 		{
+			get
+			{
+				if (instance == null)
+					instance = Find.World.GetComponent<ForcedWork>();
+				return instance;
+			}
+			set
+			{
+				instance = value;
+			}
 		}
 
 		private static List<WorkGiverDef> AllWorkerDefs<T>() where T : class
@@ -159,11 +172,11 @@ namespace AchtungMod
 
 		public bool IsForbiddenCell(Map map, IntVec3 cell)
 		{
-			var jobs = allForcedJobs.Values.SelectMany(forcedJobs => forcedJobs.jobs);
-			return jobs.Any(job => job.IsForbiddenCell(map, cell));
+			return ForcedJobsForMap(map)
+				.Any(job => job.IsForbiddenCell(cell));
 		}
 
-		public void AddForbiddenLocation(Pawn pawn, IntVec3 cell)
+		/*public void AddForbiddenLocation(Pawn pawn, IntVec3 cell)
 		{
 			if (forbiddenLocations.TryGetValue(pawn, out var cells) == false)
 			{
@@ -171,25 +184,25 @@ namespace AchtungMod
 				forbiddenLocations.Add(pawn, cells);
 			}
 			_ = cells.Add(cell);
-		}
+		}*/
 
-		public void RemoveForbiddenLocations(Pawn pawn)
+		/*public void RemoveForbiddenLocations(Pawn pawn)
 		{
 			_ = forbiddenLocations.Remove(pawn);
-		}
+		}*/
 
-		public HashSet<IntVec3> GetForbiddenLocations()
+		/*public HashSet<IntVec3> GetForbiddenLocations()
 		{
 			var result = new HashSet<IntVec3>();
 			forbiddenLocations.Do(pair => result.UnionWith(pair.Value));
 			return result;
-		}
+		}*/
 
-		public bool IsForbiddenLocation(IntVec3 cell)
+		/*public bool IsForbiddenLocation(IntVec3 cell)
 		{
 			return forbiddenLocations
 				.Any(pair => pair.Value.Contains(cell));
-		}
+		}*/
 
 		public override void WorldComponentTick()
 		{

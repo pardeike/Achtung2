@@ -287,7 +287,7 @@ namespace AchtungMod
 
 		private static void DrawForcedJobs()
 		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 			var map = Find.CurrentMap;
 			if (map == null || forcedWork == null)
 				return;
@@ -317,7 +317,7 @@ namespace AchtungMod
 			//	.Where(t => t != null)
 			//	.Do(thing => Tools.DebugPosition(thing.Position.ToVector3(), new Color(1f, 0f, 0f, 0.2f)));
 
-			//var forcedWork = Find.World.GetComponent<ForcedWork>();
+			//var forcedWork = ForcedWork.Instance;
 			//forcedWork.GetForbiddenLocations()
 			//	.Do(cell => Tools.DebugPosition(cell.ToVector3(), new Color(0f, 0f, 1f, 0.2f)));
 		}*/

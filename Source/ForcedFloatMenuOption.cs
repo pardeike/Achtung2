@@ -17,7 +17,7 @@ namespace AchtungMod
 
 		public override bool ForceAction()
 		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 			var sharedCells = new List<IntVec3>();
 
 			var result = false;
@@ -157,7 +157,7 @@ namespace AchtungMod
 		{
 			var cell = new IntVec3(x, 0, z);
 
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 			forcedWork.Prepare(forcePawn);
 
 			var workgiverDefs = ForcedWork.GetCombinedDefs(forceWorkgiver);

@@ -76,6 +76,16 @@ namespace AchtungMod
 		}
 	}*/
 
+	[HarmonyPatch(typeof(World))]
+	[HarmonyPatch("FinalizeInit")]
+	static class World_FinalizeInit_Patch
+	{
+		public static void Prefix()
+		{
+			ForcedWork.Instance = null;
+		}
+	}
+
 	[HarmonyPatch(typeof(Game))]
 	[HarmonyPatch("FinalizeInit")]
 	static class Game_FinalizeInit_Patch
@@ -113,7 +123,7 @@ namespace AchtungMod
 		{
 			if (p?.Map != null && Achtung.Settings.ignoreRestrictions)
 			{
-				var forcedWork = Find.World.GetComponent<ForcedWork>();
+				var forcedWork = ForcedWork.Instance;
 				if (forced || forcedWork.HasForcedJob(p))
 				{
 					__result = true;
@@ -132,10 +142,11 @@ namespace AchtungMod
 	{
 		public static void Postfix(IntVec3 c, Pawn forPawn, ref bool __result)
 		{
-			if (forPawn?.Map == null)
+			var map = forPawn?.Map;
+			if (map == null)
 				return;
 
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 			if (forcedWork.HasForcedJob(forPawn))
 			{
 				if (Achtung.Settings.ignoreRestrictions)
@@ -143,11 +154,14 @@ namespace AchtungMod
 					__result = true;
 					return;
 				}
+
+				return;
 			}
-			else if (__result == true)
+
+			if (__result == true)
 			{
 				// ignore forced work cells if colonist is not forced
-				if (forcedWork.IsForbiddenCell(forPawn.Map, c))
+				if (forcedWork.IsForbiddenCell(map, c))
 					__result = false;
 			}
 		}
@@ -205,7 +219,7 @@ namespace AchtungMod
 				return;
 
 			var pawn = __instance.pawn;
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 			if (forcedWork.HasForcedJob(pawn) == false)
 				return;
 
@@ -238,7 +252,7 @@ namespace AchtungMod
 	{
 		static void Postfix(Pawn claimant)
 		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 			if (forcedWork.HasForcedJob(claimant) == false)
 				return;
 
@@ -252,7 +266,7 @@ namespace AchtungMod
 	{
 		static void Postfix(Pawn claimant)
 		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 			if (forcedWork.HasForcedJob(claimant) == false)
 				return;
 
@@ -266,7 +280,7 @@ namespace AchtungMod
 	{
 		public static bool Prefix(Pawn newClaimant, Pawn oldClaimant, ref bool __result)
 		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 			if (forcedWork.HasForcedJob(newClaimant) && forcedWork.HasForcedJob(oldClaimant))
 			{
 				__result = false;
@@ -284,7 +298,7 @@ namespace AchtungMod
 		{
 			if (ignoreOtherReservations)
 			{
-				var forcedWork = Find.World.GetComponent<ForcedWork>();
+				var forcedWork = ForcedWork.Instance;
 				if (forcedWork.HasForcedJob(claimant))
 					return false;
 			}
@@ -310,7 +324,7 @@ namespace AchtungMod
 		{
 			if (pawn?.Map != null && Achtung.Settings.ignoreForbidden)
 			{
-				var forcedWork = Find.World.GetComponent<ForcedWork>();
+				var forcedWork = ForcedWork.Instance;
 				if (forcedWork.HasForcedJob(pawn))
 				{
 					__result = false;
@@ -351,7 +365,7 @@ namespace AchtungMod
 	{
 		public static IEnumerable<Thing> RadialDistinctThingsAround_Patch(IntVec3 center, Map map, float radius, bool useCenter, Pawn pawn)
 		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 			var forcedJob = forcedWork.GetForcedJob(pawn);
 			if (forcedJob != null && forcedJob.isThingJob)
 			{
@@ -413,7 +427,7 @@ namespace AchtungMod
 
 		public static void Prefix(Pawn pawn, out ForcedWork __state)
 		{
-			__state = Find.World.GetComponent<ForcedWork>();
+			__state = ForcedWork.Instance;
 			if (pawn?.Map != null)
 				__state.Prepare(pawn);
 		}
@@ -575,7 +589,7 @@ namespace AchtungMod
 	{
 		public static void Postfix(Pawn __instance)
 		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 			forcedWork.Remove(__instance);
 		}
 	}
@@ -596,7 +610,7 @@ namespace AchtungMod
 		[SyncMethod] // multiplayer
 		public static void ChangeCellRadiusSynced(Pawn pawn, int delta)
 		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 			var forcedJob = forcedWork.GetForcedJob(pawn);
 			if (forcedJob != null && forcedJob.cellRadius + delta >= 0)
 				forcedJob.ChangeCellRadius(delta);
@@ -605,7 +619,7 @@ namespace AchtungMod
 		[SyncMethod] // multiplayer
 		public static void ToggleSmartBuildingSynced(Pawn pawn)
 		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 			var forcedJob = forcedWork.GetForcedJob(pawn);
 			forcedJob.ToggleSmartBuilding();
 		}
@@ -616,7 +630,7 @@ namespace AchtungMod
 			foreach (var gizmo in gizmos)
 				yield return gizmo;
 
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 			var forcedJob = forcedWork.GetForcedJob(___pawn);
 			if (forcedJob == null)
 				yield break;
@@ -664,7 +678,7 @@ namespace AchtungMod
 			if (__result == false || ___pawn?.Map == null)
 				return;
 
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 			if (forcedWork.HasForcedJob(___pawn) == false)
 				return;
 
@@ -745,7 +759,7 @@ namespace AchtungMod
 	{
 		public static void Postfix(Pawn __instance, ref string __result)
 		{
-			var forcedWork = Find.World.GetComponent<ForcedWork>();
+			var forcedWork = ForcedWork.Instance;
 			if (forcedWork.HasForcedJob(__instance))
 				__result = __result + "\n" + "ForcedCommandState".Translate();
 		}
@@ -773,7 +787,7 @@ namespace AchtungMod
 			if (__exception != null)
 			{
 				var exceptionString = __exception.ToString();
-				__result = __result ?? new List<FloatMenuOption>();
+				__result ??= new List<FloatMenuOption>();
 				__result.Add(new FloatMenuOption("Achtung caught and prevented some mod exception. Select this to copy the stacktrace to your clipboard", () =>
 				{
 					var te = new TextEditor { text = exceptionString };

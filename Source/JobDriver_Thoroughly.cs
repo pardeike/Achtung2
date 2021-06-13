@@ -1,5 +1,4 @@
-﻿using HarmonyLib;
-using RimWorld;
+﻿using RimWorld;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -224,7 +223,7 @@ namespace AchtungMod
 			return (GetPrefix() + "Report").Translate(Math.Floor(Progress() * 100f) + "%");
 		}
 
-		protected override IEnumerable<Toil> MakeNewToils()
+		public override IEnumerable<Toil> MakeNewToils()
 		{
 			var effecterProgresBar = EffecterDefOf.ProgressBar.Spawn();
 			var effecterWorkIcon = GetWorkIcon()?.Spawn();
@@ -250,7 +249,7 @@ namespace AchtungMod
 				{
 					effecterWorkIcon.EffectTick(toil.actor, TargetInfo.Invalid);
 					var interactSymbol = (SubEffecter_InteractSymbol)effecterWorkIcon.children[0];
-					var dualMode = Traverse.Create(interactSymbol).Field("interactMote").GetValue<MoteDualAttached>();
+					var dualMode = (MoteDualAttached)interactSymbol.interactMote;
 					dualMode.Attach(toil.actor, currentItem.ToTargetInfo(toil.actor.Map));
 				}
 			});
