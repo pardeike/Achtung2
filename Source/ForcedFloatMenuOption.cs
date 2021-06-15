@@ -13,7 +13,7 @@ namespace AchtungMod
 	{
 		public List<ForcedFloatMenuOption> options;
 
-		public ForcedMultiFloatMenuOption(string label) : base(label, null, MenuOptionPriority.Default, null, null, 0f, null, null) { }
+		public ForcedMultiFloatMenuOption(string label) : base(label, null, MenuOptionPriority.Default, null, null, 0f, null, null, false, 0) { }
 
 		public override bool ForceAction()
 		{
@@ -81,28 +81,22 @@ namespace AchtungMod
 			}
 		}
 
-		public static FloatMenuOption CreateForcedMenuItem(string label, Action action, MenuOptionPriority priority, Action mouseoverGuiAction, Thing revalidateClickTarget, float extraPartWidth, Func<Rect, bool> extraPartOnGUI, WorldObject revalidateWorldClickTarget, Pawn pawn, IntVec3 clickCell, WorkGiver_Scanner workgiver)
+		public static FloatMenuOption CreateForcedMenuItem(string label, Action action, MenuOptionPriority priority, Action<Rect> mouseoverGuiAction, Thing revalidateClickTarget, float extraPartWidth, Func<Rect, bool> extraPartOnGUI, WorldObject revalidateWorldClickTarget, bool playSelectionSound, int orderInPriority, Pawn pawn, Vector3 clickPos, WorkGiver_Scanner workgiver)
 		{
 			if (action == null)
-				return new FloatMenuOption(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget);
+				return new FloatMenuOption(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget, playSelectionSound, orderInPriority);
 
-			var option = new ForcedFloatMenuOption(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget) { };
+			var option = new ForcedFloatMenuOption(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget, playSelectionSound, orderInPriority) { };
 			option.forcePawn = pawn;
-			option.forceCell = clickCell;
+			option.forceCell = IntVec3.FromVector3(clickPos);
 			option.forceWorkgiver = workgiver;
 			option.extraPartOnGUI = extraPartRect => option.RenderExtraPartOnGui(extraPartRect);
 
 			return option;
 		}
 
-		public static FloatMenuOption CreateForcedMenuItemNew(string label, Action action, MenuOptionPriority priority, Action mouseoverGuiAction, Thing revalidateClickTarget, float extraPartWidth, Func<Rect, bool> extraPartOnGUI, WorldObject revalidateWorldClickTarget, Pawn pawn, Vector3 clickPos, WorkGiver_Scanner workgiver)
-		{
-			var clickCell = IntVec3.FromVector3(clickPos);
-			return CreateForcedMenuItem(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget, pawn, clickCell, workgiver);
-		}
-
-		public ForcedFloatMenuOption(string label, Action action, MenuOptionPriority priority, Action mouseoverGuiAction, Thing revalidateClickTarget, float extraPartWidth, Func<Rect, bool> extraPartOnGUI, WorldObject revalidateWorldClickTarget)
-			: base(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget)
+		public ForcedFloatMenuOption(string label, Action action, MenuOptionPriority priority, Action<Rect> mouseoverGuiAction, Thing revalidateClickTarget, float extraPartWidth, Func<Rect, bool> extraPartOnGUI, WorldObject revalidateWorldClickTarget, bool playSelectionSound, int orderInPriority)
+			: base(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget, playSelectionSound, orderInPriority)
 		{
 			// somehow necessary or else 'extraPartWidth' will be 0
 			base.extraPartWidth = buttonSpace + ButtonWidth;

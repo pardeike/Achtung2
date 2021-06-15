@@ -77,7 +77,7 @@ namespace AchtungMod
 	}*/
 
 	[HarmonyPatch(typeof(World))]
-	[HarmonyPatch("FinalizeInit")]
+	[HarmonyPatch(nameof(World.FinalizeInit))]
 	static class World_FinalizeInit_Patch
 	{
 		public static void Prefix()
@@ -87,7 +87,7 @@ namespace AchtungMod
 	}
 
 	[HarmonyPatch(typeof(Game))]
-	[HarmonyPatch("FinalizeInit")]
+	[HarmonyPatch(nameof(Game.FinalizeInit))]
 	static class Game_FinalizeInit_Patch
 	{
 		public static void Postfix()
@@ -177,14 +177,14 @@ namespace AchtungMod
 		{
 			var instr = instructions.ToList();
 
-			var f_NotInHomeAreaTrans = AccessTools.Field(typeof(WorkGiver_FixBrokenDownBuilding), "NotInHomeAreaTrans");
+			var f_NotInHomeAreaTrans = AccessTools.Field(typeof(WorkGiver_FixBrokenDownBuilding), nameof(WorkGiver_FixBrokenDownBuilding.NotInHomeAreaTrans));
 			if (f_NotInHomeAreaTrans == null) throw new Exception("Cannot find method WorkGiver_FixBrokenDownBuilding.NotInHomeAreaTrans");
 			var i = instr.FindIndex(inst => inst.LoadsField(f_NotInHomeAreaTrans));
 			if (i > 0)
 			{
 				object label = null;
 				for (var j = i - 1; j >= 0; j--)
-					if (instr[j].opcode == OpCodes.Brtrue || instr[j].opcode == OpCodes.Brtrue_S)
+					if (instr[j].opcode == OpCodes.Brfalse || instr[j].opcode == OpCodes.Brfalse_S)
 					{
 						label = instr[j].operand;
 						break;
@@ -195,7 +195,7 @@ namespace AchtungMod
 					instr.Insert(i++, new CodeInstruction(OpCodes.Brtrue, label));
 				}
 				else
-					Log.Error("Cannot find Brtrue before NotInHomeAreaTrans");
+					Log.Error("Cannot find Brfalse before NotInHomeAreaTrans");
 			}
 			else
 				Log.Error("Cannot find ldsfld RimWorld.WorkGiver_FixBrokenDownBuilding::NotInHomeAreaTrans");
@@ -275,7 +275,7 @@ namespace AchtungMod
 	}*/
 
 	[HarmonyPatch(typeof(ReservationManager))]
-	[HarmonyPatch("RespectsReservationsOf")]
+	[HarmonyPatch(nameof(ReservationManager.RespectsReservationsOf))]
 	static class ReservationManager_RespectsReservationsOf_Patch
 	{
 		public static bool Prefix(Pawn newClaimant, Pawn oldClaimant, ref bool __result)
@@ -360,7 +360,7 @@ namespace AchtungMod
 	// for forced jobs, do not find work "on the way" to the work cell
 	//
 	[HarmonyPatch(typeof(WorkGiver_ConstructDeliverResources))]
-	[HarmonyPatch("FindNearbyNeeders")]
+	[HarmonyPatch(nameof(WorkGiver_ConstructDeliverResources.FindNearbyNeeders))]
 	static class WorkGiver_ConstructDeliverResources_FindNearbyNeeders_Patch
 	{
 		public static IEnumerable<Thing> RadialDistinctThingsAround_Patch(IntVec3 center, Map map, float radius, bool useCenter, Pawn pawn)
@@ -413,18 +413,10 @@ namespace AchtungMod
 
 	// patch in our menu options
 	//
-	[HarmonyPatch]
+	[HarmonyPatch(typeof(FloatMenuMakerMap))]
+	[HarmonyPatch(nameof(FloatMenuMakerMap.AddJobGiverWorkOrders))]
 	static class FloatMenuMakerMap_AddJobGiverWorkOrders_Patch
 	{
-		public static IEnumerable<MethodBase> TargetMethods()
-		{
-			return Tools.GetLatestMethod(
-				typeof(FloatMenuMakerMap),
-				"AddJobGiverWorkOrders_NewTmp",
-				"AddJobGiverWorkOrders"
-			);
-		}
-
 		public static void Prefix(Pawn pawn, out ForcedWork __state)
 		{
 			__state = ForcedWork.Instance;
@@ -454,15 +446,14 @@ namespace AchtungMod
 
 		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase original)
 		{
-			var createForcedMenuItemName = original.GetParameters().Types()[0] == typeof(Vector3) ?
-				nameof(ForcedFloatMenuOption.CreateForcedMenuItemNew) :
-				nameof(ForcedFloatMenuOption.CreateForcedMenuItem);
-
 			var m_GetPriority = AccessTools.Method(typeof(Pawn_WorkSettings), nameof(Pawn_WorkSettings.GetPriority));
-			var c_FloatMenuOption = AccessTools.FirstConstructor(typeof(FloatMenuOption), c => c.GetParameters().Count() > 1);
-			var m_ForcedFloatMenuOption = AccessTools.Method(typeof(ForcedFloatMenuOption), createForcedMenuItemName);
+			var floatMenuOptionConstructorArgs = new[] { typeof(string), typeof(Action), typeof(MenuOptionPriority), typeof(Action<Rect>), typeof(Thing), typeof(float), typeof(Func<Rect, bool>), typeof(WorldObject), typeof(bool), typeof(int) };
+			var c_FloatMenuOption = AccessTools.Constructor(typeof(FloatMenuOption), floatMenuOptionConstructorArgs);
+			var m_CreateForcedMenuItem = SymbolExtensions.GetMethodInfo(() => ForcedFloatMenuOption.CreateForcedMenuItem(default, default, default, default, default, default, default, default, default, default, default, default, default));
 			var m_Accepts = SymbolExtensions.GetMethodInfo(() => new ThingRequest().Accepts(default));
 			var m_IgnoreForbiddenHauling = SymbolExtensions.GetMethodInfo(() => IgnoreForbiddenHauling(default, default));
+			if (c_FloatMenuOption == null)
+				Log.Error($"Cannot find constructor for FloatMenuOption() with argument types {floatMenuOptionConstructorArgs.Join(t => t.Name)}");
 
 			var list = instructions.ToList();
 
@@ -514,7 +505,7 @@ namespace AchtungMod
 						else
 						{
 							list[idx].opcode = OpCodes.Call;
-							list[idx].operand = m_ForcedFloatMenuOption;
+							list[idx].operand = m_CreateForcedMenuItem;
 							list.InsertRange(idx, new CodeInstruction[]
 							{
 								new CodeInstruction(OpCodes.Ldarg_1),
@@ -540,10 +531,10 @@ namespace AchtungMod
 	{
 		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
-			var m_CleanupCurrentJob = AccessTools.Method(typeof(Pawn_JobTracker), "CleanupCurrentJob");
+			var m_CleanupCurrentJob = AccessTools.Method(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.CleanupCurrentJob));
 			var m_ContinueJob = AccessTools.Method(typeof(ForcedJob), nameof(ForcedJob.ContinueJob));
-			var f_pawn = AccessTools.Field(typeof(Pawn_JobTracker), "pawn");
-			var f_curJob = AccessTools.Field(typeof(Pawn_JobTracker), "curJob");
+			var f_pawn = AccessTools.Field(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.pawn));
+			var f_curJob = AccessTools.Field(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.curJob));
 
 			if (m_CleanupCurrentJob == null) throw new Exception("Cannot find method Pawn_JobTracker.CleanupCurrentJob");
 			if (f_pawn == null) throw new Exception("Cannot find field Pawn_JobTracker.pawn");
@@ -557,16 +548,35 @@ namespace AchtungMod
 				if (instruction.OperandIs(m_CleanupCurrentJob) == false)
 					continue;
 
-				if (instrList[i + 1].opcode != OpCodes.Ldarg_2 || (instrList[i + 2].opcode != OpCodes.Brfalse && instrList[i + 2].opcode != OpCodes.Brfalse_S))
+				var jump = -1;
+				var unexpected = false;
+				var expected = new[] { OpCodes.Nop, OpCodes.Ldarg_2, OpCodes.Ldloc_S, OpCodes.Stloc_S };
+				for (var j = i + 1; j < i + 6; j++)
 				{
-					Log.Error("Unexpected opcodes while transpiling Pawn_JobTracker.EndCurrentJob");
+					var opcode = instrList[j].opcode;
+					if (opcode == OpCodes.Brfalse || opcode == OpCodes.Brfalse_S)
+					{
+						jump = j;
+						break;
+					}
+					else if (expected.Contains(opcode) == false)
+					{
+						unexpected = true;
+						Log.Error($"Unexpected opcode {opcode} while transpiling Pawn_JobTracker.EndCurrentJob");
+						break;
+					}
+				}
+				if (unexpected)
+					continue;
+				if (jump == -1)
+				{
+					Log.Error("Could not find Brfalse after CleanupCurrentJob while transpiling Pawn_JobTracker.EndCurrentJob");
 					continue;
 				}
+				var endLabel = instrList[jump].operand;
 
-				var endLabel = instrList[i + 2].operand;
-
-				yield return instrList[++i];
-				yield return instrList[++i];
+				for (var j = i; j < jump; j++)
+					yield return instrList[++i];
 
 				yield return new CodeInstruction(OpCodes.Ldarg_0);
 				yield return new CodeInstruction(OpCodes.Ldarg_0);
@@ -670,7 +680,7 @@ namespace AchtungMod
 	// ignore think tree when building uninterrupted
 	//
 	[HarmonyPatch(typeof(Pawn_JobTracker))]
-	[HarmonyPatch("ShouldStartJobFromThinkTree")]
+	[HarmonyPatch(nameof(Pawn_JobTracker.ShouldStartJobFromThinkTree))]
 	static class Pawn_JobTracker_ShouldStartJobFromThinkTree_Patch
 	{
 		public static void Postfix(Pawn ___pawn, ref bool __result)
@@ -697,7 +707,7 @@ namespace AchtungMod
 	// handle events early
 	//
 	[HarmonyPatch(typeof(Selector))]
-	[HarmonyPatch("HandleMapClicks")]
+	[HarmonyPatch(nameof(Selector.HandleMapClicks))]
 	static class Selector_HandleMapClicks_Patch
 	{
 		public static bool Prefix()
@@ -739,14 +749,14 @@ namespace AchtungMod
 	{
 		public static IEnumerable<MethodBase> TargetMethods()
 		{
-			yield return AccessTools.Method(typeof(ReservationManager), "LogCouldNotReserveError");
-			yield return AccessTools.Method(typeof(JobUtility), "TryStartErrorRecoverJob");
+			yield return AccessTools.Method(typeof(ReservationManager), nameof(ReservationManager.LogCouldNotReserveError));
+			yield return AccessTools.Method(typeof(JobUtility), nameof(JobUtility.TryStartErrorRecoverJob));
 		}
 
 		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
-			var fromMethod = SymbolExtensions.GetMethodInfo(() => Log.Error("", false));
-			var toMethod = SymbolExtensions.GetMethodInfo(() => Log.Warning("", false));
+			var fromMethod = SymbolExtensions.GetMethodInfo(() => Log.Error(""));
+			var toMethod = SymbolExtensions.GetMethodInfo(() => Log.Warning(""));
 			return instructions.MethodReplacer(fromMethod, toMethod);
 		}
 	}
@@ -769,7 +779,6 @@ namespace AchtungMod
 	//
 	[HarmonyPatch(typeof(FloatMenuMakerMap))]
 	[HarmonyPatch(nameof(FloatMenuMakerMap.ChoicesAtFor))]
-	[HarmonyPatch(new[] { typeof(Vector3), typeof(Pawn) })]
 	[StaticConstructorOnStartup]
 	static class FloatMenuMakerMap_ChoicesAtFor_Patch
 	{

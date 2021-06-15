@@ -351,9 +351,10 @@ namespace AchtungMod
 			return option.Label == goHereLabel;
 		}
 
-		public static int IsEnclosed(Map map, int maxCount, IntVec3 pos, IntVec3 direction)
+		public static int IsEnclosed(Pawn pawn, int maxCount, IntVec3 pos, IntVec3 direction)
 		{
-			var pathGrid = map.pathGrid;
+			var map = pawn.Map;
+			var pathGrid = map.pathing.For(pawn).pathGrid;
 			var count = 0;
 			(new FloodFiller(map)).FloodFill(pos + direction, cell =>
 			{

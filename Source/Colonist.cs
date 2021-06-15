@@ -30,7 +30,7 @@ namespace AchtungMod
 
 			if (AchtungLoader.IsSameSpotInstalled)
 			{
-				if (cell.Standable(pawn.Map) && pawn.CanReach(cell, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+				if (cell.Standable(pawn.Map) && ReachabilityUtility.CanReach(pawn, cell, PathEndMode.OnCell, Danger.Deadly))
 				{
 					designation = cell.ToVector3Shifted();
 					designation.y = Altitudes.AltitudeFor(AltitudeLayer.Pawn);
