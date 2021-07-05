@@ -74,10 +74,10 @@ namespace AchtungMod
 		private IEnumerable<Filth> AllFilth(IntVec3? useCell = null)
 		{
 			room = ValidateRoom(room ?? RoomAt(useCell ?? TargetLocA));
-			room = room ?? ValidateRoom(RoomAt(useCell ?? TargetLocA));
+			room ??= ValidateRoom(RoomAt(useCell ?? TargetLocA));
 			if (room == null) return new List<Filth>();
 
-			var pathGrid = pawn.Map.pathGrid;
+			var pathGrid = pawn.Map.pathing.For(pawn).pathGrid;
 			if (pathGrid == null)
 				return new List<Filth>();
 
@@ -102,7 +102,7 @@ namespace AchtungMod
 			if (room.Dereferenced) return null;
 			if (room.IsHuge) return null;
 			if (room.RegionCount == 0) return null;
-			if (room.Group.AnyRoomTouchesMapEdge) return null;
+			if (room.TouchesMapEdge) return null;
 			return room;
 		}
 

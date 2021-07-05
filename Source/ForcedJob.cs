@@ -144,7 +144,7 @@ namespace AchtungMod
 			const int maxSquaredDistance = 200 * 200;
 
 			var map = pawn.Map;
-			var pathGrid = map.pathGrid;
+			var pathGrid = map.pathing.For(pawn).pathGrid;
 			var mapWidth = map.Size.x;
 			return targets
 				.Where(target =>
