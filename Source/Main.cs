@@ -184,7 +184,7 @@ namespace AchtungMod
 			{
 				object label = null;
 				for (var j = i - 1; j >= 0; j--)
-					if (instr[j].opcode == OpCodes.Brfalse || instr[j].opcode == OpCodes.Brfalse_S)
+					if (instr[j].opcode == OpCodes.Brtrue || instr[j].opcode == OpCodes.Brtrue_S)
 					{
 						label = instr[j].operand;
 						break;
