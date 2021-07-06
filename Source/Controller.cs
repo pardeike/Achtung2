@@ -1,4 +1,5 @@
 ﻿using Multiplayer.API;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,25 +91,27 @@ namespace AchtungMod
 			var cell = IntVec3.FromVector3(pos);
 
 			var thingsClicked = map.thingGrid.ThingsListAt(cell);
-			var pawnClicked = thingsClicked.OfType<Pawn>().Any();
+			var subjectClicked = thingsClicked.OfType<Pawn>().Where(pawn => pawn.IsColonist == false || pawn.Drafted == false).Any();
 			var standableClicked = cell.Standable(map);
 
-			if (pawnClicked && colonists.Count > 1 && achtungPressed == false && forceMenu == false)
+			// Log.Warning($"### {colonists.Count} achtungPressed={achtungPressed} forceMenu={forceMenu} subjectClicked={subjectClicked} standableClicked={standableClicked} thingsClicked={thingsClicked.Select(t => t.def.defName).Join()}");
+
+			if (subjectClicked && colonists.Count > 1 && achtungPressed == false && forceMenu == false)
 			{
-				var allHaveWeapons = colonists.All(colonist =>
-				{
-					var rangedVerb = colonist.pawn.TryGetAttackVerb(null, false);
-					return rangedVerb != null && rangedVerb.verbProps.range > 0;
-				});
+				var allHaveWeapons = colonists.All(colonist => FloatMenuUtility.GetRangedAttackAction(colonist.pawn, cell, out _) != null);
 				if (allHaveWeapons)
+				{
+					// Log.Warning("ALL WEAPONS -> true");
 					return true;
+				}
 			}
 
-			if (forceMenu || (pawnClicked && achtungPressed == false) || standableClicked == false)
+			if (forceMenu || (subjectClicked && achtungPressed == false) || standableClicked == false)
 			{
 				if (actions.Count(false) > 0)
 					Find.WindowStack.Add(actions.GetWindow());
 				Event.current.Use();
+				// Log.Warning("SHOW MENU -> false");
 				return false;
 			}
 
@@ -119,12 +122,14 @@ namespace AchtungMod
 			if (allDrafted)
 			{
 				StartDragging(pos, achtungPressed);
+				// Log.Warning("ALL DRAFTED -> true");
 				return true;
 			}
 
 			if (actions.Count(false) > 0)
 				Find.WindowStack.Add(actions.GetWindow());
 			Event.current.Use();
+			// Log.Warning("DEFAULT -> false");
 			return false;
 		}
 

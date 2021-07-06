@@ -10,7 +10,7 @@
 		<OutputPath>..\1.3\Assemblies\</OutputPath>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<Version>3.2.0.0</Version>
+		<Version>3.2.1.0</Version>
 		<Copyright>© July, 2016</Copyright>
 	</PropertyGroup>
 
@@ -68,15 +68,16 @@
 	</Target>
 
 	<PropertyGroup>
-		<PostBuildEvent>echo Postprocessing
-where ModBuilder 2&gt; nul | find /i "ModBuilder.exe"
-if not errorlevel 1 (
-	ModBuilder AssemblyVersion -file "$(MSBuildProjectDirectory)\$(OutputPath)$(AssemblyName).dll" -save "$(MSBuildProjectName)-version"
-	ModBuilder XMLPut -file "$(SolutionDir)About\Manifest.xml" -xpath /Manifest/version -value "{{$(MSBuildProjectName)-version}}"
-)
-if defined INSTALL_MOD (
-	"%INSTALL_MOD%" "$(Configuration)" "$(SolutionDir)" "$(MSBuildProjectName)" "1.1 1.2 1.3 About Assemblies Languages Textures" "LoadFolders.xml"
-)
+		<PostBuildEvent>
+			echo Postprocessing
+			where ModBuilder 2&gt; nul | find /i "ModBuilder.exe"
+			if not errorlevel 1 (
+			ModBuilder AssemblyVersion -file "$(MSBuildProjectDirectory)\$(OutputPath)$(AssemblyName).dll" -save "$(MSBuildProjectName)-version"
+			ModBuilder XMLPut -file "$(SolutionDir)About\Manifest.xml" -xpath /Manifest/version -value "{{$(MSBuildProjectName)-version}}"
+			)
+			if defined INSTALL_MOD (
+			"%INSTALL_MOD%" "$(Configuration)" "$(SolutionDir)" "$(MSBuildProjectName)" "1.1 1.2 1.3 About Assemblies Languages Textures" "LoadFolders.xml"
+			)
 		</PostBuildEvent>
 		<Company>Brrainz</Company>
 		<Authors>Andreas Pardeike</Authors>
