@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BrrainzTools;
+using HarmonyLib;
 using Multiplayer.API;
 using RimWorld;
 using RimWorld.Planet;
@@ -55,26 +56,6 @@ namespace AchtungMod
 			return "Achtung!";
 		}
 	}
-
-	/* DEBUG
-	[HarmonyPatch]
-	static class DEBUG
-	{
-		public static IEnumerable<MethodBase> TargetMethods()
-		{
-			yield break;
-		}
-
-		static MethodBase GetOutsideCaller(int n)
-		{
-			var frames = new StackTrace(fNeedFileInfo: true).GetFrames();
-			return frames[n].GetMethod();
-		}
-
-		public static void Postfix()
-		{
-		}
-	}*/
 
 	[HarmonyPatch(typeof(World))]
 	[HarmonyPatch(nameof(World.FinalizeInit))]
@@ -780,26 +761,40 @@ namespace AchtungMod
 	[HarmonyPatch(typeof(FloatMenuMakerMap))]
 	[HarmonyPatch(nameof(FloatMenuMakerMap.ChoicesAtFor))]
 	[StaticConstructorOnStartup]
-	static class FloatMenuMakerMap_ChoicesAtFor_Patch
+	static class FloatMenuMakerMap_ChoicesAtFor_Postfix
 	{
-		static readonly Texture2D AttentionIcon = ContentFinder<Texture2D>.Get("AttentionIcon", true);
-
 		public static void Postfix(List<FloatMenuOption> __result, Vector3 clickPos, Pawn pawn)
 		{
 			if (pawn?.Map != null && pawn.Drafted == false)
 				if (WorldRendererUtility.WorldRenderedNow == false)
 					__result.AddRange(Controller.AchtungChoicesAtFor(clickPos, pawn));
 		}
+	}
+	//
+	[HarmonyPatch(typeof(FloatMenuMakerMap))]
+	[HarmonyPatch(nameof(FloatMenuMakerMap.ChoicesAtFor))]
+	[StaticConstructorOnStartup]
+	static class FloatMenuMakerMap_ChoicesAtFor_Finalizer
+	{
+		static readonly Texture2D AttentionIcon = ContentFinder<Texture2D>.Get("AttentionIcon", true);
+
+		public static bool Prepare(MethodBase _)
+		{
+			return AccessTools.TypeByName("VisualExceptions.HarmonyMain") == null;
+		}
 
 		public static Exception Finalizer(Exception __exception, ref List<FloatMenuOption> __result)
 		{
 			if (__exception != null)
 			{
-				var exceptionString = __exception.ToString();
+				var handler = new ExceptionAnalyser(__exception);
+
+				var mods = handler.GetInvolvedMods(new[] { "brrainz.achtung" }).Select(info => info.metaData.GetWorkshopName() ?? info.metaData.Name).Distinct();
+				var possibleMods = mods.Any() ? $". Possible mods in order of likeliness: {mods.Join()}" : "";
 				__result ??= new List<FloatMenuOption>();
-				__result.Add(new FloatMenuOption("Achtung caught and prevented some mod exception. Select this to copy the stacktrace to your clipboard", () =>
+				__result.Add(new FloatMenuOption($"Some mod caused a {__exception.GetType().Name}{possibleMods}. Select to copy annotated stacktrace to clipboard", () =>
 				{
-					var te = new TextEditor { text = exceptionString };
+					var te = new TextEditor { text = handler.GetStacktrace() };
 					te.SelectAll();
 					te.Copy();
 				}, AttentionIcon, Color.yellow, MenuOptionPriority.VeryLow));
