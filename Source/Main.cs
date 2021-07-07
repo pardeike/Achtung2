@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BrrainzTools;
+using HarmonyLib;
 using Multiplayer.API;
 using RimWorld;
 using RimWorld.Planet;
@@ -772,11 +773,14 @@ namespace AchtungMod
 		{
 			if (__exception != null)
 			{
-				var exceptionString = __exception.ToString();
+				var handler = new ExceptionAnalyser(__exception);
+
+				var mods = handler.GetInvolvedMods(new[] { "brrainz.achtung" }).Select(info => info.metaData.GetWorkshopName() ?? info.metaData.Name).Distinct();
+				var possibleMods = mods.Any() ? $". Possible mods in order of likeliness: {mods.Join()}" : "";
 				__result = __result ?? new List<FloatMenuOption>();
-				__result.Add(new FloatMenuOption("Achtung caught and prevented some mod exception. Select this to copy the stacktrace to your clipboard", () =>
+				__result.Add(new FloatMenuOption($"Some mod caused a {__exception.GetType().Name}{possibleMods}. Select to copy annotated stacktrace to clipboard", () =>
 				{
-					var te = new TextEditor { text = exceptionString };
+					var te = new TextEditor { text = handler.GetStacktrace() };
 					te.SelectAll();
 					te.Copy();
 				}, AttentionIcon, Color.yellow, MenuOptionPriority.VeryLow));

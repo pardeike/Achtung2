@@ -224,7 +224,7 @@ namespace AchtungMod
 			return (GetPrefix() + "Report").Translate(Math.Floor(Progress() * 100f) + "%");
 		}
 
-		protected override IEnumerable<Toil> MakeNewToils()
+		public override IEnumerable<Toil> MakeNewToils()
 		{
 			var effecterProgresBar = EffecterDefOf.ProgressBar.Spawn();
 			var effecterWorkIcon = GetWorkIcon()?.Spawn();
