@@ -757,16 +757,27 @@ namespace AchtungMod
 	[HarmonyPatch(typeof(FloatMenuMakerMap))]
 	[HarmonyPatch(nameof(FloatMenuMakerMap.ChoicesAtFor))]
 	[HarmonyPatch(new[] { typeof(Vector3), typeof(Pawn) })]
-	[StaticConstructorOnStartup]
-	static class FloatMenuMakerMap_ChoicesAtFor_Patch
+	static class FloatMenuMakerMap_ChoicesAtFor_Postfix
 	{
-		static readonly Texture2D AttentionIcon = ContentFinder<Texture2D>.Get("AttentionIcon", true);
-
 		public static void Postfix(List<FloatMenuOption> __result, Vector3 clickPos, Pawn pawn)
 		{
 			if (pawn?.Map != null && pawn.Drafted == false)
 				if (WorldRendererUtility.WorldRenderedNow == false)
 					__result.AddRange(Controller.AchtungChoicesAtFor(clickPos, pawn));
+		}
+	}
+	//
+	[HarmonyPatch(typeof(FloatMenuMakerMap))]
+	[HarmonyPatch(nameof(FloatMenuMakerMap.ChoicesAtFor))]
+	[HarmonyPatch(new[] { typeof(Vector3), typeof(Pawn) })]
+	[StaticConstructorOnStartup]
+	static class FloatMenuMakerMap_ChoicesAtFor_Patch
+	{
+		static readonly Texture2D AttentionIcon = ContentFinder<Texture2D>.Get("AttentionIcon", true);
+
+		public static bool Prepare(MethodBase _)
+		{
+			return AccessTools.TypeByName("VisualExceptions.HarmonyMain") == null;
 		}
 
 		public static Exception Finalizer(Exception __exception, ref List<FloatMenuOption> __result)
