@@ -67,16 +67,6 @@ namespace AchtungMod
 		}
 	}
 
-	[HarmonyPatch(typeof(Game))]
-	[HarmonyPatch(nameof(Game.FinalizeInit))]
-	static class Game_FinalizeInit_Patch
-	{
-		public static void Postfix()
-		{
-			ModCounter.Trigger();
-		}
-	}
-
 	// build-in "Ignore Me Passing" functionality
 	//
 	[HarmonyPatch(typeof(GenConstruct))]
