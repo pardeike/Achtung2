@@ -782,7 +782,7 @@ namespace AchtungMod
 				var mods = handler.GetInvolvedMods(new[] { "brrainz.achtung" }).Select(info => info.metaData.GetWorkshopName() ?? info.metaData.Name).Distinct();
 				var possibleMods = mods.Any() ? $". Possible mods in order of likeliness: {mods.Join()}" : "";
 				__result ??= new List<FloatMenuOption>();
-				__result.Add(new FloatMenuOption($"Some mod caused a {__exception.GetType().Name}{possibleMods}. Select to copy annotated stacktrace to clipboard", () =>
+				__result.Add(new FloatMenuOption($"Achtung found that some other mod(s) caused the following error: {__exception.GetType().Name}{possibleMods}. Select to copy annotated stacktrace to clipboard", () =>
 				{
 					var te = new TextEditor { text = handler.GetStacktrace() };
 					te.SelectAll();

@@ -101,7 +101,7 @@ namespace BrrainzTools
 			{
 				var method = Harmony.GetMethodFromStackframe(frame);
 				var patches = FindPatches(method);
-				modInfos.AddRange(GetFinalizers(patches));
+				//modInfos.AddRange(GetFinalizers(patches));
 				modInfos.AddRange(GetPostfixes(patches));
 				modInfos.AddRange(GetPrefixes(patches));
 				modInfos.AddRange(GetTranspilers(patches));
