@@ -115,6 +115,7 @@ namespace AchtungMod
 				return;
 			if (forcedJobs.jobs.Count == 0)
 				return;
+			forcedJobs.jobs[0].cancelled = true;
 			forcedJobs.jobs.RemoveAt(0);
 			if (forcedJobs.jobs.Count == 0)
 				Remove(pawn);
