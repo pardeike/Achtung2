@@ -15,7 +15,7 @@ namespace AchtungMod
 		private List<ForcedJobs> forcedJobsValuesWorkingList;
 		private int counter;
 
-		readonly HashSet<Pawn> preparing = new HashSet<Pawn>();
+		public readonly HashSet<Pawn> preparing = new HashSet<Pawn>();
 		//readonly Dictionary<Pawn, HashSet<IntVec3>> forbiddenLocations = new Dictionary<Pawn, HashSet<IntVec3>>();
 
 		public ForcedWork(World world) : base(world) { }
@@ -69,9 +69,9 @@ namespace AchtungMod
 
 		public List<ForcedJob> GetForcedJobs(Pawn pawn)
 		{
-			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
+			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forced) == false)
 				return new List<ForcedJob>();
-			return forcedJobs.jobs;
+			return forced.jobs;
 		}
 
 		public void Prepare(Pawn pawn)
@@ -84,12 +84,12 @@ namespace AchtungMod
 			_ = preparing.Remove(pawn);
 		}
 
-		public bool HasForcedJob(Pawn pawn)
+		public bool HasForcedJob(Pawn pawn, bool ignorePreparing = false)
 		{
 			if (pawn == null)
 				return false;
 
-			if (preparing.Contains(pawn))
+			if (ignorePreparing == false && preparing.Contains(pawn))
 				return true;
 
 			if (allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
@@ -100,29 +100,33 @@ namespace AchtungMod
 
 		public ForcedJob GetForcedJob(Pawn pawn)
 		{
-			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
+			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forced) == false)
 				return null;
-			if (forcedJobs.jobs.Count == 0)
+			if (forced.jobs.Count == 0)
 				return null;
-			return forcedJobs.jobs.First();
+			return forced.jobs.First();
 		}
 
 		public void RemoveForcedJob(Pawn pawn)
 		{
 			Unprepare(pawn);
 
-			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
+			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forced) == false)
 				return;
-			if (forcedJobs.jobs.Count == 0)
+			if (forced.jobs.Count == 0)
 				return;
-			forcedJobs.jobs[0].cancelled = true;
-			forcedJobs.jobs.RemoveAt(0);
-			if (forcedJobs.jobs.Count == 0)
+			forced.jobs[0].cancelled = true;
+			forced.jobs.RemoveAt(0);
+			if (forced.jobs.Count == 0)
 				Remove(pawn);
+			else
+				forced.jobs.Do(job => job.Cleanup());
 		}
 
 		public void Remove(Pawn pawn)
 		{
+			if (allForcedJobs.TryGetValue(pawn, out var forced))
+				forced.jobs.Do(job => job.Cleanup());
 			_ = allForcedJobs.Remove(pawn);
 		}
 
@@ -130,8 +134,7 @@ namespace AchtungMod
 		{
 			Unprepare(pawn);
 
-			var forcedJob = new ForcedJob() { pawn = pawn, workgiverDefs = workgiverDefs, isThingJob = item.HasThing };
-			forcedJob.AddTarget(item);
+			var forcedJob = new ForcedJob(pawn, item, workgiverDefs);
 			if (allForcedJobs.ContainsKey(pawn) == false)
 				allForcedJobs[pawn] = new ForcedJobs();
 			allForcedJobs[pawn].jobs.Add(forcedJob);
@@ -264,6 +267,14 @@ namespace AchtungMod
 					.Select(pair => pair.Key)
 					.Do(pawn => Remove(pawn));
 			}
+		}
+
+		public void Cleanup(Map map)
+		{
+			allForcedJobs
+				.Where(pair => pair.Key?.Map == map)
+				.SelectMany(pair => pair.Value.jobs)
+				.Do(job => job.Cleanup());
 		}
 	}
 }

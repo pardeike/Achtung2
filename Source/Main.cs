@@ -67,6 +67,16 @@ namespace AchtungMod
 		}
 	}
 
+	[HarmonyPatch(typeof(Game))]
+	[HarmonyPatch(nameof(Game.DeinitAndRemoveMap))]
+	static class Game_DeinitAndRemoveMap_Patch
+	{
+		public static void Prefix(Map map)
+		{
+			ForcedWork.Instance?.Cleanup(map);
+		}
+	}
+
 	// build-in "Ignore Me Passing" functionality
 	//
 	[HarmonyPatch(typeof(GenConstruct))]
@@ -81,6 +91,21 @@ namespace AchtungMod
 				return false;
 			}
 			return true;
+		}
+	}
+
+	// allow for disabled work types when option is on and we have a forced job
+	//
+	[HarmonyPatch(typeof(Pawn_WorkSettings))]
+	[HarmonyPatch(nameof(Pawn_WorkSettings.WorkIsActive))]
+	static class GenConstruct_CanConstruct_Patch
+	{
+		public static void Postfix(Pawn ___pawn, WorkTypeDef w, ref bool __result)
+		{
+			if (__result == true) return;
+			if (Achtung.Settings.ignoreAssignments == false) return;
+			if (ForcedWork.Instance.HasForcedJob(___pawn) == false) return;
+			__result = ___pawn.workSettings.GetPriority(w) == 0;
 		}
 	}
 
@@ -558,6 +583,22 @@ namespace AchtungMod
 				yield return new CodeInstruction(OpCodes.Call, m_ContinueJob);
 
 				yield return new CodeInstruction(OpCodes.Brtrue, endLabel);
+			}
+		}
+	}
+
+	// make sure fake drafting is off when undrafted
+	//
+	[HarmonyPatch(typeof(Pawn_DraftController))]
+	[HarmonyPatch(nameof(Pawn_DraftController.Drafted), MethodType.Setter)]
+	static class Pawn_DraftController_Drafted_Patch
+	{
+		public static void Postfix(Pawn_DraftController __instance)
+		{
+			if (__instance.draftedInt == false && __instance.pawn != null)
+			{
+				var forcedWork = ForcedWork.Instance;
+				forcedWork.Unprepare(__instance.pawn);
 			}
 		}
 	}

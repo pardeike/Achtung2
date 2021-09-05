@@ -94,16 +94,11 @@ namespace AchtungMod
 			var subjectClicked = thingsClicked.OfType<Pawn>().Where(pawn => pawn.IsColonist == false || pawn.Drafted == false).Any();
 			var standableClicked = cell.Standable(map);
 
-			// Log.Warning($"### {colonists.Count} achtungPressed={achtungPressed} forceMenu={forceMenu} subjectClicked={subjectClicked} standableClicked={standableClicked} thingsClicked={thingsClicked.Select(t => t.def.defName).Join()}");
-
 			if (subjectClicked && colonists.Count > 1 && achtungPressed == false && forceMenu == false)
 			{
 				var allHaveWeapons = colonists.All(colonist => FloatMenuUtility.GetRangedAttackAction(colonist.pawn, cell, out _) != null);
 				if (allHaveWeapons)
-				{
-					// Log.Warning("ALL WEAPONS -> true");
 					return true;
-				}
 			}
 
 			if (forceMenu || (subjectClicked && achtungPressed == false) || standableClicked == false)
@@ -111,7 +106,6 @@ namespace AchtungMod
 				if (actions.Count(false) > 0)
 					Find.WindowStack.Add(actions.GetWindow());
 				Event.current.Use();
-				// Log.Warning("SHOW MENU -> false");
 				return false;
 			}
 
@@ -122,14 +116,12 @@ namespace AchtungMod
 			if (allDrafted)
 			{
 				StartDragging(pos, achtungPressed);
-				// Log.Warning("ALL DRAFTED -> true");
 				return true;
 			}
 
 			if (actions.Count(false) > 0)
 				Find.WindowStack.Add(actions.GetWindow());
 			Event.current.Use();
-			// Log.Warning("DEFAULT -> false");
 			return false;
 		}
 

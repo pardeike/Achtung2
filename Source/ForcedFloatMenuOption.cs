@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.AI;
 
 namespace AchtungMod
 {
@@ -13,7 +14,7 @@ namespace AchtungMod
 	{
 		public List<ForcedFloatMenuOption> options;
 
-		public ForcedMultiFloatMenuOption(string label) : base(label, null, MenuOptionPriority.Default, null, null, 0f, null, null, false, 0) { }
+		public ForcedMultiFloatMenuOption(List<Pawn> pawns, string label) : base(pawns, label, null, MenuOptionPriority.Default, null, null, 0f, null, null, false, 0) { }
 
 		public override bool ForceAction()
 		{
@@ -86,17 +87,38 @@ namespace AchtungMod
 			if (action == null)
 				return new FloatMenuOption(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget, playSelectionSound, orderInPriority);
 
-			var option = new ForcedFloatMenuOption(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget, playSelectionSound, orderInPriority) { };
+			var option = new ForcedFloatMenuOption(new List<Pawn> { pawn }, label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget, playSelectionSound, orderInPriority) { };
 			option.forcePawn = pawn;
 			option.forceCell = IntVec3.FromVector3(clickPos);
 			option.forceWorkgiver = workgiver;
 			option.extraPartOnGUI = extraPartRect => option.RenderExtraPartOnGui(extraPartRect);
-
 			return option;
 		}
 
-		public ForcedFloatMenuOption(string label, Action action, MenuOptionPriority priority, Action<Rect> mouseoverGuiAction, Thing revalidateClickTarget, float extraPartWidth, Func<Rect, bool> extraPartOnGUI, WorldObject revalidateWorldClickTarget, bool playSelectionSound, int orderInPriority)
-			: base(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget, playSelectionSound, orderInPriority)
+		static Action ActionRunner(List<Pawn> pawns, Action action)
+		{
+			return () =>
+			{
+				foreach (var pawn in pawns)
+					ForcedWork.Instance.Unprepare(pawn);
+
+				action(); // run original command
+
+				if (Achtung.Settings.ignoreForbidden)
+				{
+					var reservations = pawns.Where(pawn => ForcedWork.Instance.HasForcedJob(pawn) == false)
+						.SelectMany(pawn => new List<Thing> { pawn.CurJob.targetA.Thing, pawn.CurJob.targetB.Thing, pawn.CurJob.targetC.Thing }.OfType<Thing>())
+						.Where(thing => thing.IsForbidden(Faction.OfPlayer))
+						.SelectMany(thing => thing.Map.reservationManager.reservations.Select(reservation => (thing, reservation))
+						.Where(item => item.reservation.Target == item.thing))
+						.ToList();
+					reservations.Do(item => item.reservation.Claimant.jobs.EndCurrentOrQueuedJob(item.reservation.job, JobCondition.InterruptForced, true));
+				}
+			};
+		}
+
+		public ForcedFloatMenuOption(List<Pawn> pawns, string label, Action action, MenuOptionPriority priority, Action<Rect> mouseoverGuiAction, Thing revalidateClickTarget, float extraPartWidth, Func<Rect, bool> extraPartOnGUI, WorldObject revalidateWorldClickTarget, bool playSelectionSound, int orderInPriority)
+			: base(label, ActionRunner(pawns, action), priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget, playSelectionSound, orderInPriority)
 		{
 			// somehow necessary or else 'extraPartWidth' will be 0
 			base.extraPartWidth = buttonSpace + ButtonWidth;
@@ -171,7 +193,7 @@ namespace AchtungMod
 					var success = job != null && forcePawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, cell);
 					if (success == false)
 					{
-						forcedWork.Prepare(forcePawn); // TODO: should this be Unprepare() ?
+						forcedWork.Prepare(forcePawn); // AddForcedJob unprepares, so re-enable it
 						continue;
 					}
 				}

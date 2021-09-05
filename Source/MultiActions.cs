@@ -121,6 +121,7 @@ namespace AchtungMod
 		static readonly Color noColor = new Color();
 		public FloatMenuOption GetOption(string title, IEnumerable<MultiAction> multiActions)
 		{
+			var pawns = multiActions.Select(ma => ma.colonist.pawn).ToList();
 			var actions = multiActions.ToList();
 			var priority = actions.Max(a => a.option.Priority);
 
@@ -146,7 +147,7 @@ namespace AchtungMod
 			var forcedOptions = options.OfType<ForcedFloatMenuOption>().ToList();
 			if (extraPartOnGUI != null && forcedOptions.Count > 0)
 			{
-				option = new ForcedMultiFloatMenuOption(title)
+				option = new ForcedMultiFloatMenuOption(pawns, title)
 				{
 					options = options.OfType<ForcedFloatMenuOption>().ToList(),
 				};

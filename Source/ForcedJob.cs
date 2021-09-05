@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Verse;
 using Verse.AI;
 
@@ -47,6 +48,7 @@ namespace AchtungMod
 		public int cellRadius = 0;
 		public bool buildSmart = true;
 		public bool cancelled = false;
+		public Coroutine expander, contractor;
 		static readonly Dictionary<BuildableDef, int> TypeScores = new Dictionary<BuildableDef, int>
 		{
 			{ ThingDefOf.PowerConduit, 1000 },
@@ -77,37 +79,37 @@ namespace AchtungMod
 			{ ThingDefOf.Grave, 1 },
 		};
 
-		public ForcedJob()
+		public ForcedJob(Pawn pawn, LocalTargetInfo item, List<WorkGiverDef> workgiverDefs)
 		{
-			pawn = null;
-			workgiverDefs = new List<WorkGiverDef>();
-			targets = new HashSet<ForcedTarget>();
+			this.pawn = pawn;
+			this.workgiverDefs = workgiverDefs;
+			targets = new HashSet<ForcedTarget>() { new ForcedTarget(item, MaterialScore(item)) };
 			isThingJob = false;
 			initialized = false;
 			cellRadius = 0;
 			cancelled = false;
 			buildSmart = Achtung.Settings.buildingSmartDefault;
-		}
 
-		public void AddTarget(LocalTargetInfo item)
-		{
-			_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
 			lastThing = item.Thing;
 			lastLocation = item.Cell;
-			// Log.Warning($"lastThing={lastThing}");
-			// Log.Warning($"lastLocation={lastLocation}");
 
+			isThingJob = item.HasThing;
 			if (isThingJob)
 			{
-				_ = Find.CameraDriver.StartCoroutine(ExpandThingTargets());
-				_ = Find.CameraDriver.StartCoroutine(ContractThingTargets());
-				//_ = Find.CameraDriver.StartCoroutine(UpdateThings());
+				expander = Find.CameraDriver.StartCoroutine(ExpandThingTargets());
+				contractor = Find.CameraDriver.StartCoroutine(ContractThingTargets());
 			}
 			else
 			{
-				_ = Find.CameraDriver.StartCoroutine(ExpandCellTargets());
-				_ = Find.CameraDriver.StartCoroutine(ContractCellTargets());
+				expander = Find.CameraDriver.StartCoroutine(ExpandCellTargets());
+				contractor = Find.CameraDriver.StartCoroutine(ContractCellTargets());
 			}
+		}
+
+		public void Cleanup()
+		{
+			Find.CameraDriver.StopCoroutine(expander);
+			Find.CameraDriver.StopCoroutine(contractor);
 		}
 
 		public IEnumerable<IntVec3> AllCells(bool onlyValid = false)
@@ -175,7 +177,7 @@ namespace AchtungMod
 				})
 				.OrderByDescending(target =>
 				{
-					if (buildSmart)
+					if (buildSmart && isThingJob)
 					{
 						var willBlock = target.item.WillBlock();
 						var neighbourScore = willBlock ? Tools.NeighbourScore(target.item.Cell, pathGrid, mapWidth, planned) : 100;
@@ -214,8 +216,6 @@ namespace AchtungMod
 						{
 							lastThing = item.Thing;
 							lastLocation = item.Thing.Position;
-							// Log.Warning($"lastThing={lastThing}");
-							// Log.Warning($"lastLocation={lastLocation}");
 						}
 						else
 							lastLocation = item.Cell;
@@ -250,7 +250,6 @@ namespace AchtungMod
 
 			if (condition == JobCondition.InterruptForced)
 			{
-				// Log.Warning($"Forced job {lastJob} for {pawn} ended unexpected with {condition}");
 				Messages.Message("Forced work of " + pawn.Name.ToStringShort + " was interrupted.", MessageTypeDefOf.RejectInput);
 				forcedWork.Remove(pawn);
 				return false;
@@ -310,7 +309,6 @@ namespace AchtungMod
 
 		public void UpdateSingleTarget()
 		{
-			// Log.Warning($"UpdateSingleTarget {lastLocation} {lastThing} [is-thing={isThingJob}]");
 			if (isThingJob)
 			{
 				if (lastThing.Spawned == false || HasJob(lastThing) == false)
@@ -324,7 +322,6 @@ namespace AchtungMod
 					.SelectMany(cell => thingGrid.ThingsAt(cell))
 					.Distinct()
 					.ToList();
-				// Log.Warning($"nearbys {nearbys.Join(t => $"[{t.def.defName}@{t.Position}]")}]");
 				var visitedNeighbours = new HashSet<Thing>();
 				for (var j = 0; j < nearbys.Count; j++)
 				{
@@ -332,7 +329,6 @@ namespace AchtungMod
 					if (visitedNeighbours.Contains(nearbyThing) == false)
 					{
 						var ok = HasJob(nearbyThing);
-						// Log.Warning($"job on {nearbyThing} => {ok}");
 						if (ok)
 						{
 							var item = new LocalTargetInfo(nearbyThing);
@@ -348,7 +344,6 @@ namespace AchtungMod
 					_ = targets.RemoveWhere(target => target.item.Cell == lastLocation);
 
 				var nearbys = Nearby(ref lastLocation).ToList();
-				// Log.Warning($"nearbys {nearbys.Join(c => $"[{c}]")}]");
 				var visitedNeighbours = new HashSet<IntVec3>();
 				for (var j = 0; j < nearbys.Count; j++)
 				{
@@ -356,7 +351,6 @@ namespace AchtungMod
 					if (visitedNeighbours.Contains(nearbyCell) == false)
 					{
 						var ok = HasJob(ref nearbyCell);
-						// Log.Warning($"job on {nearbyCell} => {ok}");
 						if (ok)
 						{
 							var item = new LocalTargetInfo(nearbyCell);
@@ -591,9 +585,40 @@ namespace AchtungMod
 			);
 		}
 
+		// fix for forbidden state in cached handlers
+		//
+		public static bool ShouldBeHaulable(Thing t)
+		{
+			// vanilla code but added 'Achtung.Settings.ignoreForbidden == false &&'
+			if (Achtung.Settings.ignoreForbidden == false && t.IsForbidden(Faction.OfPlayer))
+				return false;
+
+			if (!t.def.alwaysHaulable)
+			{
+				if (!t.def.EverHaulable)
+					return false;
+				// vanilla code but added 'Achtung.Settings.ignoreForbidden == false &&'
+				if (Achtung.Settings.ignoreForbidden == false && t.Map.designationManager.DesignationOn(t, DesignationDefOf.Haul) == null && !t.IsInAnyStorage())
+					return false;
+			}
+			return !t.IsInValidBestStorage();
+		}
+		//
+		public static bool ShouldBeMergeable(Thing t)
+		{
+			// vanilla code but added 'Achtung.Settings.ignoreForbidden ||'
+			return (Achtung.Settings.ignoreForbidden || !t.IsForbidden(Faction.OfPlayer)) && t.GetSlotGroup() != null && t.stackCount != t.def.stackLimit;
+		}
+
 		public static Job GetThingJob(this Thing thing, Pawn pawn, WorkGiver_Scanner workgiver, bool ignoreReserve = false)
 		{
-			if (workgiver.PotentialWorkThingRequest.Accepts(thing) || (workgiver.PotentialWorkThingsGlobal(pawn) != null && workgiver.PotentialWorkThingsGlobal(pawn).Contains(thing)))
+			var potentialWork = workgiver.PotentialWorkThingRequest.Accepts(thing) || workgiver.PotentialWorkThingsGlobal(pawn) != null && workgiver.PotentialWorkThingsGlobal(pawn).Contains(thing);
+			if ((workgiver as WorkGiver_Haul) != null && potentialWork == false)
+				potentialWork = ShouldBeHaulable(thing);
+			else if ((workgiver as WorkGiver_Merge) != null && potentialWork == false)
+				potentialWork = ShouldBeMergeable(thing);
+
+			if (potentialWork)
 				if (workgiver.MissingRequiredCapacity(pawn) == null)
 					if (workgiver.HasJobOnThing(pawn, thing, true))
 					{
@@ -601,13 +626,14 @@ namespace AchtungMod
 						if (job != null)
 						{
 							var ignorable = workgiver.Ignorable();
-							if ((Achtung.Settings.ignoreForbidden && ignorable) || thing.IsForbidden(pawn) == false)
-								if ((Achtung.Settings.ignoreRestrictions && ignorable) || thing.Position.InAllowedArea(pawn))
+							if (Achtung.Settings.ignoreForbidden && ignorable || thing.IsForbidden(pawn) == false)
+								if (Achtung.Settings.ignoreRestrictions && ignorable || thing.Position.InAllowedArea(pawn))
 								{
-									var ok1 = (ignoreReserve == false && pawn.CanReserveAndReach(thing, workgiver.PathEndMode, Danger.Deadly));
-									var ok2 = (ignoreReserve && pawn.CanReach(thing, workgiver.PathEndMode, Danger.Deadly));
-									if (ok1 || ok2)
-										return job;
+									if (
+										(ignoreReserve == false && pawn.CanReserveAndReach(thing, workgiver.PathEndMode, Danger.Deadly))
+										||
+										(ignoreReserve && pawn.CanReach(thing, workgiver.PathEndMode, Danger.Deadly))
+									) return job;
 								}
 						}
 					}
