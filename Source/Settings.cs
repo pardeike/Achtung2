@@ -57,6 +57,9 @@ namespace AchtungMod
 		public bool ignoreAssignments = false;
 		public WorkMarkers workMarkers = WorkMarkers.Animated;
 		public bool buildingSmartDefault = false;
+		public int maxForcedItems = 64;
+
+		public static readonly int UnlimitedForcedItems = 2000;
 
 		public override void ExposeData()
 		{
@@ -72,6 +75,7 @@ namespace AchtungMod
 			Scribe_Values.Look(ref ignoreAssignments, "ignoreAssignments", false, true);
 			Scribe_Values.Look(ref workMarkers, "workMarkers", WorkMarkers.Animated, true);
 			Scribe_Values.Look(ref buildingSmartDefault, "buildingSmartDefault", false, true);
+			Scribe_Values.Look(ref maxForcedItems, "maxForcedItems", 64, true);
 		}
 
 		public static void DoWindowContents(Rect canvas)
@@ -107,6 +111,8 @@ namespace AchtungMod
 			list.CheckboxEnhanced("BuildingSmartDefault", ref Achtung.Settings.buildingSmartDefault);
 			list.Gap(10);
 			list.ValueLabeled("WorkMarkers", ref Achtung.Settings.workMarkers);
+			list.Gap(10);
+			list.SliderLabeled("MaxForcedItems", ref Achtung.Settings.maxForcedItems, 0, UnlimitedForcedItems, (n) => n >= UnlimitedForcedItems ? "MaxForcedItemsUnlimited".Translate().ToString() : $"{n}");
 
 			list.End();
 

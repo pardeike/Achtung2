@@ -63,6 +63,10 @@ La formación puede rotar usando las teclas Q y E.</AchtungModifierExplained>
 	<WorkMarkersOptionStatic>Estático</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Apagado</WorkMarkersOptionOff>
 
+	<MaxForcedItemsTitle>Elementos forzados máximos</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Restringe la cantidad de elementos forzados para computadoras más lentas.</MaxForcedItemsExplained>
+	<MaxForcedItemsUnlimited>Ilimitado</MaxForcedItemsUnlimited>
+
 	<JobInterruptedLabel>Cancelado: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} se encuentra mal</JobInterruptedBadHealth>

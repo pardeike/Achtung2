@@ -594,6 +594,49 @@ namespace AchtungMod
 			listing.Gap(6);
 		}
 
+		public static void SliderLabeled(this Listing_Standard listing, string name, ref int value, int min, int max, Func<int, string> converter, string tooltip = null)
+		{
+			var startHeight = listing.CurHeight;
+
+			var rect = listing.GetRect(Text.LineHeight + listing.verticalSpacing);
+
+			Text.Font = GameFont.Small;
+			GUI.color = Color.white;
+
+			var savedAnchor = Text.Anchor;
+
+			Text.Anchor = TextAnchor.MiddleLeft;
+			Widgets.Label(rect, (name + "Title").Translate());
+
+			Text.Anchor = TextAnchor.MiddleRight;
+			Widgets.Label(rect, converter(value));
+
+			Text.Anchor = savedAnchor;
+
+			var key = name + "Explained";
+			if (key.CanTranslate())
+			{
+				Text.Font = GameFont.Tiny;
+				listing.ColumnWidth -= 34;
+				GUI.color = Color.gray;
+				_ = listing.Label(key.Translate());
+				listing.ColumnWidth += 34;
+				Text.Font = GameFont.Small;
+			}
+
+			value = (int)listing.Slider(value, min, max);
+			rect = listing.GetRect(0);
+			rect.height = listing.CurHeight - startHeight;
+			rect.y -= rect.height;
+			if (Mouse.IsOver(rect))
+			{
+				Widgets.DrawHighlight(rect);
+				if (!tooltip.NullOrEmpty()) TooltipHandler.TipRegion(rect, tooltip);
+			}
+
+			listing.Gap(6);
+		}
+
 		public static void ValueLabeled<T>(this Listing_Standard listing, string name, ref T value, string tooltip = null)
 		{
 			var startHeight = listing.CurHeight;

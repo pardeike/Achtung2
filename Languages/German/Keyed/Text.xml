@@ -70,6 +70,10 @@ Die Formation kann während der Bewegung mit Q und E rotiert werden</AchtungModi
 	<WorkMarkersOptionStatic>Statisch</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Aus</WorkMarkersOptionOff>
 
+	<MaxForcedItemsTitle>Maximale Anzahl erzwungener Sachen</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Begrenzt die Menge erzwungener Arbeit für langsame Computer</MaxForcedItemsExplained>
+	<MaxForcedItemsUnlimited>Unbegrenzt</MaxForcedItemsUnlimited>
+
 	<JobInterruptedLabel>Abgebrochen: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} ist in schlechter gesundheitlicher Verfassung</JobInterruptedBadHealth>

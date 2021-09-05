@@ -366,13 +366,16 @@ namespace AchtungMod
 		{
 			while (targets.Count > 0)
 			{
-				var thingGrid = pawn.Map.thingGrid;
+				yield return null;
+				if (Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems && targets.Count > Achtung.Settings.maxForcedItems)
+					continue;
 
 				var visitedNeighbours = new HashSet<Thing>();
 				var neighbours = targets.Select(target => target.item.Thing).ToList();
-				while (neighbours.Count > 0)
+				while (neighbours.Count > 0 && (Achtung.Settings.maxForcedItems >= AchtungSettings.UnlimitedForcedItems || neighbours.Count < Achtung.Settings.maxForcedItems))
 				{
 					var newNeighbours = new List<Thing>();
+					var thingGrid = pawn.Map.thingGrid;
 					for (var i = 0; i < neighbours.Count; i++)
 					{
 						var neighbour = neighbours[i];
@@ -410,9 +413,13 @@ namespace AchtungMod
 		{
 			while (targets.Count > 0)
 			{
+				yield return null;
+				if (Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems && targets.Count > Achtung.Settings.maxForcedItems)
+					continue;
+
 				var visitedNeighbours = new HashSet<IntVec3>();
 				var neighbours = targets.Select(target => target.item.Cell).ToList();
-				while (neighbours.Count > 0)
+				while (neighbours.Count > 0 && (Achtung.Settings.maxForcedItems >= AchtungSettings.UnlimitedForcedItems || neighbours.Count < Achtung.Settings.maxForcedItems))
 				{
 					var newNeighbours = new List<IntVec3>();
 					for (var i = 0; i < neighbours.Count; i++)
@@ -447,8 +454,7 @@ namespace AchtungMod
 		{
 			while (targets.Count > 0)
 			{
-				var allThings = targets.Select(target => target.item.Thing).ToHashSet();
-				var enumerator = allThings.GetEnumerator();
+				var enumerator = targets.Select(target => target.item.Thing).GetEnumerator();
 				yield return null;
 				var counter = 0;
 				while (enumerator.MoveNext())
@@ -468,8 +474,7 @@ namespace AchtungMod
 		{
 			while (targets.Count > 0)
 			{
-				var allCells = targets.Select(target => target.item.Cell).ToHashSet();
-				var enumerator = allCells.GetEnumerator();
+				var enumerator = targets.Select(target => target.item.Cell).GetEnumerator();
 				yield return null;
 				var counter = 0;
 				while (enumerator.MoveNext())

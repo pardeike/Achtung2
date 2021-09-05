@@ -68,6 +68,10 @@
 	<WorkMarkersOptionStatic>Stilstaand</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Uit</WorkMarkersOptionOff>
 
+	<MaxForcedItemsTitle>Maximum gedwongen werk</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Beperkt het aantal gedwongen werk voor langzamere computers</MaxForcedItemsExplained>
+	<MaxForcedItemsUnlimited>Onbeperkt</MaxForcedItemsUnlimited>
+
 	<JobInterruptedLabel>Geannuleerd: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} verkeert in slechte staat</JobInterruptedBadHealth>

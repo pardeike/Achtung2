@@ -70,6 +70,10 @@ The formation can be rotated using Q and E</AchtungModifierExplained>
 	<WorkMarkersOptionStatic>Static</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Off</WorkMarkersOptionOff>
 
+	<MaxForcedItemsTitle>Maximum forced items</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Restricts the number of forced items for slower computers</MaxForcedItemsExplained>
+	<MaxForcedItemsUnlimited>Unlimited</MaxForcedItemsUnlimited>
+
 	<JobInterruptedLabel>Cancelled: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} is in bad shape</JobInterruptedBadHealth>

@@ -69,6 +69,10 @@ Höll i för att flytta kolonister i deras formation. Formationen kan roteras me
 	<WorkMarkersOptionStatic>Statiskt</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Av</WorkMarkersOptionOff>
 
+	<MaxForcedItemsTitle>Maximalt antal påtvingade saker</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Begränsar antalet påtvingade saker för långsammare datorer</MaxForcedItemsExplained>
+	<MaxForcedItemsUnlimited>Obegränsat</MaxForcedItemsUnlimited>
+
 	<JobInterruptedLabel>Avbruten: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} har låg hälsa</JobInterruptedBadHealth>
