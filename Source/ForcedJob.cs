@@ -41,7 +41,8 @@ namespace AchtungMod
 		public Pawn pawn = null;
 		public List<WorkGiverDef> workgiverDefs = new List<WorkGiverDef>();
 		public bool isThingJob = false;
-		public LocalTargetInfo lastItem = LocalTargetInfo.Invalid;
+		public IntVec3 lastLocation = IntVec3.Invalid;
+		public Thing lastThing = null;
 		public bool initialized = false;
 		public int cellRadius = 0;
 		public bool buildSmart = true;
@@ -91,6 +92,11 @@ namespace AchtungMod
 		public void AddTarget(LocalTargetInfo item)
 		{
 			_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
+			lastThing = item.Thing;
+			lastLocation = item.Cell;
+			// Log.Warning($"lastThing={lastThing}");
+			// Log.Warning($"lastLocation={lastLocation}");
+
 			if (isThingJob)
 			{
 				_ = Find.CameraDriver.StartCoroutine(ExpandThingTargets());
@@ -187,10 +193,9 @@ namespace AchtungMod
 			return targets.Any(target => target.item.Cell == cell && target.IsBuilding());
 		}
 
-		public bool GetNextJob(out Job job, out LocalTargetInfo atItem)
+		public bool GetNextJob(out Job job)
 		{
 			job = null;
-			atItem = LocalTargetInfo.Invalid;
 
 			var exist = false;
 			foreach (var item in GetSortedTargets(new HashSet<int>()))
@@ -205,7 +210,15 @@ namespace AchtungMod
 
 					if (job != null)
 					{
-						atItem = item;
+						if (isThingJob)
+						{
+							lastThing = item.Thing;
+							lastLocation = item.Thing.Position;
+							// Log.Warning($"lastThing={lastThing}");
+							// Log.Warning($"lastLocation={lastLocation}");
+						}
+						else
+							lastLocation = item.Cell;
 						return true;
 					}
 				}
@@ -233,15 +246,11 @@ namespace AchtungMod
 				return false;
 			}
 
-			if (condition == JobCondition.Succeeded || forcedJob.lastItem.IsValid)
-			{
-				forcedWork.ForcedJobsForMap(pawn.Map).Do(fjob => _ = fjob.targets.RemoveWhere(target => target.item == forcedJob.lastItem));
-				forcedJob.lastItem = LocalTargetInfo.Invalid;
-			}
+			forcedJob.UpdateSingleTarget();
 
 			if (condition == JobCondition.InterruptForced)
 			{
-				Log.Warning($"Forced job {lastJob} for {pawn} ended unexpected with {condition}");
+				// Log.Warning($"Forced job {lastJob} for {pawn} ended unexpected with {condition}");
 				Messages.Message("Forced work of " + pawn.Name.ToStringShort + " was interrupted.", MessageTypeDefOf.RejectInput);
 				forcedWork.Remove(pawn);
 				return false;
@@ -249,7 +258,7 @@ namespace AchtungMod
 
 			while (true)
 			{
-				if (forcedJob.GetNextJob(out var job, out forcedJob.lastItem))
+				if (forcedJob.GetNextJob(out var job))
 				{
 					job.expiryInterval = 0;
 					job.ignoreJoyTimeAssignment = true;
@@ -299,54 +308,65 @@ namespace AchtungMod
 			return GenAdj.AdjacentCells.Select(vec => cell2 + vec);
 		}
 
-		/*public IEnumerator UpdateThings()
+		public void UpdateSingleTarget()
 		{
-			while (targets.Count > 0)
+			// Log.Warning($"UpdateSingleTarget {lastLocation} {lastThing} [is-thing={isThingJob}]");
+			if (isThingJob)
 			{
-				var count = 0;
+				if (lastThing.Spawned == false || HasJob(lastThing) == false)
+					_ = targets.RemoveWhere(target => target.item.Thing == lastThing);
+
 				var thingGrid = pawn.Map.thingGrid;
-
-				var things = targets.Select(target => target.item.Thing);
-				var addedThings = things.ToList();
-				do
+				var cells = lastThing.Spawned ? lastThing.AllCells() : new List<IntVec3> { lastLocation };
+				var nearbys = cells
+					.SelectMany(cell => Nearby(ref cell, true))
+					.Distinct()
+					.SelectMany(cell => thingGrid.ThingsAt(cell))
+					.Distinct()
+					.ToList();
+				// Log.Warning($"nearbys {nearbys.Join(t => $"[{t.def.defName}@{t.Position}]")}]");
+				var visitedNeighbours = new HashSet<Thing>();
+				for (var j = 0; j < nearbys.Count; j++)
 				{
-					count = addedThings.Count();
-
-					var currentThingCells = addedThings
-						.SelectMany(thing => thing.AllCells())
-						.Distinct();
-
-					var surroundingCells = currentThingCells
-						.SelectMany(cell => Nearby(ref cell))
-						.Distinct();
-					// reinclude current cells so non-complete items are completed
-					//.Except(currentThingCells);
-
-					var newThings = surroundingCells
-						.SelectMany(cell => thingGrid.ThingsAt(cell))
-						.Distinct()
-						.Except(addedThings);
-
-					addedThings.AddRange(newThings.Where(HasJob).ToList()); // keep termination with 'ToList()' here
-
-					yield return null;
-				}
-				while (count < addedThings.Count());
-				targets = things
-					.Where(thing => thing.Spawned && HasJob(thing))
-					.Union(addedThings.Except(things))
-					.Select(thing =>
+					var nearbyThing = nearbys[j];
+					if (visitedNeighbours.Contains(nearbyThing) == false)
 					{
-						var item = new LocalTargetInfo(thing);
-						return new ForcedTarget(item, MaterialScore(item));
-					}).ToHashSet();
-
-				if (cancelled)
-					yield break;
-				else
-					yield return null;
+						var ok = HasJob(nearbyThing);
+						// Log.Warning($"job on {nearbyThing} => {ok}");
+						if (ok)
+						{
+							var item = new LocalTargetInfo(nearbyThing);
+							_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
+						}
+						_ = visitedNeighbours.Add(nearbyThing);
+					}
+				}
 			}
-		}*/
+			else
+			{
+				if (HasJob(ref lastLocation) == false)
+					_ = targets.RemoveWhere(target => target.item.Cell == lastLocation);
+
+				var nearbys = Nearby(ref lastLocation).ToList();
+				// Log.Warning($"nearbys {nearbys.Join(c => $"[{c}]")}]");
+				var visitedNeighbours = new HashSet<IntVec3>();
+				for (var j = 0; j < nearbys.Count; j++)
+				{
+					var nearbyCell = nearbys[j];
+					if (visitedNeighbours.Contains(nearbyCell) == false)
+					{
+						var ok = HasJob(ref nearbyCell);
+						// Log.Warning($"job on {nearbyCell} => {ok}");
+						if (ok)
+						{
+							var item = new LocalTargetInfo(nearbyCell);
+							_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
+						}
+						_ = visitedNeighbours.Add(nearbyCell);
+					}
+				}
+			}
+		}
 
 		public IEnumerator ExpandThingTargets()
 		{
