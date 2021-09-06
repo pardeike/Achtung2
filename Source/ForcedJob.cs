@@ -18,20 +18,21 @@ namespace AchtungMod
 			jobs = new List<ForcedJob>();
 		}
 
+		public bool Any() => jobs != null && jobs.OfType<ForcedJob>().Count() > 0;
+
 		public void ExposeData()
 		{
+			jobs ??= new List<ForcedJob>();
+
 			if (Scribe.mode == LoadSaveMode.Saving)
-				_ = jobs.RemoveAll(job => job.IsEmpty());
+				_ = jobs.RemoveAll(job => job == null || job.IsEmpty());
 
 			Scribe_Collections.Look(ref jobs, "jobs", LookMode.Deep);
 
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				if (jobs == null)
-					jobs = new List<ForcedJob>();
+			jobs ??= new List<ForcedJob>();
 
-				_ = jobs.RemoveAll(job => job.IsEmpty());
-			}
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+				_ = jobs.RemoveAll(job => job == null || job.IsEmpty());
 		}
 	}
 
@@ -79,6 +80,24 @@ namespace AchtungMod
 			{ ThingDefOf.Grave, 1 },
 		};
 
+		public ForcedJob()
+		{
+			pawn = null;
+			workgiverDefs = new List<WorkGiverDef>();
+			targets = new HashSet<ForcedTarget>();
+			isThingJob = false;
+			initialized = false;
+			cellRadius = 0;
+			cancelled = false;
+			buildSmart = Achtung.Settings.buildingSmartDefault;
+
+			lastThing = null;
+			lastLocation = IntVec3.Invalid;
+
+			expander = null;
+			contractor = null;
+		}
+
 		public ForcedJob(Pawn pawn, LocalTargetInfo item, List<WorkGiverDef> workgiverDefs)
 		{
 			this.pawn = pawn;
@@ -106,10 +125,27 @@ namespace AchtungMod
 			}
 		}
 
+		public void Prepare()
+		{
+			if (isThingJob)
+			{
+				expander ??= Find.CameraDriver.StartCoroutine(ExpandThingTargets());
+				contractor ??= Find.CameraDriver.StartCoroutine(ContractThingTargets());
+			}
+			else
+			{
+				expander ??= Find.CameraDriver.StartCoroutine(ExpandCellTargets());
+				contractor ??= Find.CameraDriver.StartCoroutine(ContractCellTargets());
+			}
+		}
+
 		public void Cleanup()
 		{
 			Find.CameraDriver.StopCoroutine(expander);
+			expander = null;
+
 			Find.CameraDriver.StopCoroutine(contractor);
+			contractor = null;
 		}
 
 		public IEnumerable<IntVec3> AllCells(bool onlyValid = false)
@@ -309,7 +345,7 @@ namespace AchtungMod
 
 		public void UpdateSingleTarget()
 		{
-			if (isThingJob)
+			if (isThingJob && lastThing != null && lastLocation.IsValid)
 			{
 				if (lastThing.Spawned == false || HasJob(lastThing) == false)
 					_ = targets.RemoveWhere(target => target.item.Thing == lastThing);
@@ -338,7 +374,7 @@ namespace AchtungMod
 					}
 				}
 			}
-			else
+			if (isThingJob == false && lastLocation.IsValid)
 			{
 				if (HasJob(ref lastLocation) == false)
 					_ = targets.RemoveWhere(target => target.item.Cell == lastLocation);
@@ -498,7 +534,7 @@ namespace AchtungMod
 		public void ExposeData()
 		{
 			if (Scribe.mode == LoadSaveMode.Saving)
-				_ = targets.RemoveWhere(target => target.item == null || target.item.IsValid == false || target.item.ThingDestroyed);
+				_ = targets.RemoveWhere(target => target == null || target.item == null || target.item.IsValid == false || target.item.ThingDestroyed);
 
 			Scribe_References.Look(ref pawn, "pawn");
 			Scribe_Collections.Look(ref workgiverDefs, "workgivers", LookMode.Def);
@@ -506,10 +542,13 @@ namespace AchtungMod
 			Scribe_Values.Look(ref isThingJob, "thingJob", false, true);
 			Scribe_Values.Look(ref initialized, "inited", false, true);
 			Scribe_Values.Look(ref cellRadius, "radius", 0, true);
+			Scribe_Values.Look(ref cancelled, "cancelled", false, true);
 			Scribe_Values.Look(ref buildSmart, "buildSmart", true, true);
+			Scribe_References.Look(ref lastThing, "lastThing");
+			Scribe_Values.Look(ref lastLocation, "lastLocation", IntVec3.Invalid, true);
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-				_ = targets.RemoveWhere(target => target.item == null || target.item.IsValid == false || target.item.ThingDestroyed);
+				_ = targets.RemoveWhere(target => target == null || target.item == null || target.item.IsValid == false || target.item.ThingDestroyed);
 		}
 	}
 

@@ -67,6 +67,16 @@ namespace AchtungMod
 		}
 	}
 
+	[HarmonyPatch(typeof(Map))]
+	[HarmonyPatch(nameof(Map.FinalizeInit))]
+	static class Map_FinalizeInit_Patch
+	{
+		public static void Postfix(Map __instance)
+		{
+			ForcedWork.Instance?.Prepare(__instance);
+		}
+	}
+
 	[HarmonyPatch(typeof(Game))]
 	[HarmonyPatch(nameof(Game.DeinitAndRemoveMap))]
 	static class Game_DeinitAndRemoveMap_Patch
@@ -616,7 +626,7 @@ namespace AchtungMod
 		}
 	}
 
-	// add force radius buttons
+	// add colonist widget buttons
 	//
 	[HarmonyPatch(typeof(PriorityWork))]
 	[HarmonyPatch(nameof(PriorityWork.GetGizmos))]
@@ -779,11 +789,20 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(Pawn.GetInspectString))]
 	static class Pawn_GetInspectString_Patch
 	{
+		static readonly Dictionary<Pawn, string> cache = new Dictionary<Pawn, string>();
+
 		public static void Postfix(Pawn __instance, ref string __result)
 		{
+			if (cache.TryGetValue(__instance, out var text) && DateTime.Now.Ticks % 8 != 0)
+			{
+				__result = text;
+				return;
+			}
+
 			var forcedWork = ForcedWork.Instance;
 			if (forcedWork.HasForcedJob(__instance))
 				__result = __result + "\n" + "ForcedCommandState".Translate();
+			cache[__instance] = __result;
 		}
 	}
 

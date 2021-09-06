@@ -71,7 +71,7 @@ namespace AchtungMod
 		{
 			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forced) == false)
 				return new List<ForcedJob>();
-			return forced.jobs;
+			return forced.jobs ?? new List<ForcedJob>();
 		}
 
 		public void Prepare(Pawn pawn)
@@ -95,14 +95,14 @@ namespace AchtungMod
 			if (allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
 				return false;
 
-			return (forcedJobs.jobs.Count > 0);
+			return forcedJobs.Any();
 		}
 
 		public ForcedJob GetForcedJob(Pawn pawn)
 		{
 			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forced) == false)
 				return null;
-			if (forced.jobs.Count == 0)
+			if (forced.Any() == false)
 				return null;
 			return forced.jobs.First();
 		}
@@ -113,20 +113,20 @@ namespace AchtungMod
 
 			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forced) == false)
 				return;
-			if (forced.jobs.Count == 0)
+			if (forced.Any() == false)
 				return;
 			forced.jobs[0].cancelled = true;
 			forced.jobs.RemoveAt(0);
-			if (forced.jobs.Count == 0)
+			if (forced.Any() == false)
 				Remove(pawn);
 			else
-				forced.jobs.Do(job => job.Cleanup());
+				forced.jobs.Do(job => job?.Cleanup());
 		}
 
 		public void Remove(Pawn pawn)
 		{
 			if (allForcedJobs.TryGetValue(pawn, out var forced))
-				forced.jobs.Do(job => job.Cleanup());
+				forced.jobs.Do(job => job?.Cleanup());
 			_ = allForcedJobs.Remove(pawn);
 		}
 
@@ -171,13 +171,13 @@ namespace AchtungMod
 		{
 			return allForcedJobs
 				.Where(pair => pair.Key.Map == map)
-				.SelectMany(pair => pair.Value.jobs);
+				.SelectMany(pair => pair.Value.jobs ?? new List<ForcedJob>());
 		}
 
 		public bool IsForbiddenCell(Map map, IntVec3 cell)
 		{
 			return ForcedJobsForMap(map)
-				.Any(job => job.IsForbiddenCell(cell));
+				.Any(job => job?.IsForbiddenCell(cell) ?? false);
 		}
 
 		/*public void AddForbiddenLocation(Pawn pawn, IntVec3 cell)
@@ -249,10 +249,10 @@ namespace AchtungMod
 		{
 			if (Scribe.mode == LoadSaveMode.Saving)
 			{
-				allForcedJobs
-					.Where(pair => pair.Value.jobs.Count == 0)
-					.Select(pair => pair.Key)
-					.Do(pawn => Remove(pawn));
+				foreach (var forced in allForcedJobs.Values)
+					forced.jobs = forced.jobs?.OfType<ForcedJob>().ToList() ?? new List<ForcedJob>();
+
+				_ = allForcedJobs.RemoveAll(pair => pair.Value.Any() == false);
 			}
 
 			Scribe_Collections.Look(ref allForcedJobs, "joblist", LookMode.Reference, LookMode.Deep, ref forcedJobsKeysWorkingList, ref forcedJobsValuesWorkingList);
@@ -262,11 +262,19 @@ namespace AchtungMod
 				if (allForcedJobs == null)
 					allForcedJobs = new Dictionary<Pawn, ForcedJobs>();
 
-				allForcedJobs
-					.Where(pair => pair.Value.jobs.Count == 0)
-					.Select(pair => pair.Key)
-					.Do(pawn => Remove(pawn));
+				foreach (var forced in allForcedJobs.Values)
+					forced.jobs = forced.jobs?.OfType<ForcedJob>().ToList() ?? new List<ForcedJob>();
+
+				_ = allForcedJobs.RemoveAll(pair => pair.Value.Any() == false);
 			}
+		}
+
+		public void Prepare(Map map)
+		{
+			allForcedJobs
+				.Where(pair => pair.Key?.Map == map)
+				.SelectMany(pair => pair.Value.jobs)
+				.Do(job => job?.Prepare());
 		}
 
 		public void Cleanup(Map map)
@@ -274,7 +282,7 @@ namespace AchtungMod
 			allForcedJobs
 				.Where(pair => pair.Key?.Map == map)
 				.SelectMany(pair => pair.Value.jobs)
-				.Do(job => job.Cleanup());
+				.Do(job => job?.Cleanup());
 		}
 	}
 }
