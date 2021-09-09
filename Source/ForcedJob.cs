@@ -47,7 +47,7 @@ namespace AchtungMod
 		public Thing lastThing = null;
 		public bool initialized = false;
 		public int cellRadius = 0;
-		public bool buildSmart = true;
+		public bool buildSmart = Achtung.Settings.buildingSmartDefault;
 		public bool cancelled = false;
 		public Coroutine expander, contractor;
 		static readonly Dictionary<BuildableDef, int> TypeScores = new Dictionary<BuildableDef, int>
@@ -82,20 +82,10 @@ namespace AchtungMod
 
 		public ForcedJob()
 		{
-			pawn = null;
 			workgiverDefs = new List<WorkGiverDef>();
 			targets = new HashSet<ForcedTarget>();
-			isThingJob = false;
-			initialized = false;
-			cellRadius = 0;
-			cancelled = false;
 			buildSmart = Achtung.Settings.buildingSmartDefault;
-
-			lastThing = null;
 			lastLocation = IntVec3.Invalid;
-
-			expander = null;
-			contractor = null;
 		}
 
 		public ForcedJob(Pawn pawn, LocalTargetInfo item, List<WorkGiverDef> workgiverDefs)
@@ -103,29 +93,21 @@ namespace AchtungMod
 			this.pawn = pawn;
 			this.workgiverDefs = workgiverDefs;
 			targets = new HashSet<ForcedTarget>() { new ForcedTarget(item, MaterialScore(item)) };
-			isThingJob = false;
-			initialized = false;
-			cellRadius = 0;
-			cancelled = false;
 			buildSmart = Achtung.Settings.buildingSmartDefault;
 
 			lastThing = item.Thing;
 			lastLocation = item.Cell;
 
 			isThingJob = item.HasThing;
-			if (isThingJob)
-			{
-				expander = Find.CameraDriver.StartCoroutine(ExpandThingTargets());
-				contractor = Find.CameraDriver.StartCoroutine(ContractThingTargets());
-			}
-			else
-			{
-				expander = Find.CameraDriver.StartCoroutine(ExpandCellTargets());
-				contractor = Find.CameraDriver.StartCoroutine(ContractCellTargets());
-			}
+			CreateCoroutines();
 		}
 
 		public void Prepare()
+		{
+			CreateCoroutines();
+		}
+
+		void CreateCoroutines()
 		{
 			if (isThingJob)
 			{
@@ -141,10 +123,14 @@ namespace AchtungMod
 
 		public void Cleanup()
 		{
-			Find.CameraDriver.StopCoroutine(expander);
+			cancelled = true;
+
+			if (expander != null)
+				Find.CameraDriver.StopCoroutine(expander);
 			expander = null;
 
-			Find.CameraDriver.StopCoroutine(contractor);
+			if (contractor != null)
+				Find.CameraDriver.StopCoroutine(contractor);
 			contractor = null;
 		}
 
@@ -282,14 +268,14 @@ namespace AchtungMod
 				return false;
 			}
 
-			forcedJob.UpdateSingleTarget();
-
 			if (condition == JobCondition.InterruptForced)
 			{
 				Messages.Message("Forced work of " + pawn.Name.ToStringShort + " was interrupted.", MessageTypeDefOf.RejectInput);
 				forcedWork.Remove(pawn);
 				return false;
 			}
+
+			forcedJob.UpdateSingleTarget();
 
 			while (true)
 			{
@@ -345,6 +331,8 @@ namespace AchtungMod
 
 		public void UpdateSingleTarget()
 		{
+			if (cancelled) return;
+
 			if (isThingJob && lastThing != null && lastLocation.IsValid)
 			{
 				if (lastThing.Spawned == false || HasJob(lastThing) == false)
@@ -400,7 +388,7 @@ namespace AchtungMod
 
 		public IEnumerator ExpandThingTargets()
 		{
-			while (targets.Count > 0)
+			while (cancelled == false && targets.Count > 0)
 			{
 				yield return null;
 				if (Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems && targets.Count > Achtung.Settings.maxForcedItems)
@@ -408,11 +396,11 @@ namespace AchtungMod
 
 				var visitedNeighbours = new HashSet<Thing>();
 				var neighbours = targets.Select(target => target.item.Thing).ToList();
-				while (neighbours.Count > 0 && (Achtung.Settings.maxForcedItems >= AchtungSettings.UnlimitedForcedItems || neighbours.Count < Achtung.Settings.maxForcedItems))
+				while (cancelled == false && neighbours.Count > 0 && (Achtung.Settings.maxForcedItems >= AchtungSettings.UnlimitedForcedItems || neighbours.Count < Achtung.Settings.maxForcedItems))
 				{
 					var newNeighbours = new List<Thing>();
 					var thingGrid = pawn.Map.thingGrid;
-					for (var i = 0; i < neighbours.Count; i++)
+					for (var i = 0; cancelled == false && i < neighbours.Count; i++)
 					{
 						var neighbour = neighbours[i];
 						var nearbys = neighbour.AllCells()
@@ -421,7 +409,7 @@ namespace AchtungMod
 							.SelectMany(cell => thingGrid.ThingsAt(cell))
 							.Distinct()
 							.ToList();
-						for (var j = 0; j < nearbys.Count; j++)
+						for (var j = 0; cancelled == false && j < nearbys.Count; j++)
 						{
 							var thing = nearbys[j];
 							if (visitedNeighbours.Contains(thing) == false)
@@ -433,9 +421,6 @@ namespace AchtungMod
 									newNeighbours.Add(thing);
 								}
 								_ = visitedNeighbours.Add(thing);
-
-								if (cancelled)
-									yield break;
 							}
 						}
 						yield return null;
@@ -447,7 +432,7 @@ namespace AchtungMod
 
 		public IEnumerator ExpandCellTargets()
 		{
-			while (targets.Count > 0)
+			while (cancelled == false && targets.Count > 0)
 			{
 				yield return null;
 				if (Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems && targets.Count > Achtung.Settings.maxForcedItems)
@@ -455,14 +440,14 @@ namespace AchtungMod
 
 				var visitedNeighbours = new HashSet<IntVec3>();
 				var neighbours = targets.Select(target => target.item.Cell).ToList();
-				while (neighbours.Count > 0 && (Achtung.Settings.maxForcedItems >= AchtungSettings.UnlimitedForcedItems || neighbours.Count < Achtung.Settings.maxForcedItems))
+				while (cancelled == false && neighbours.Count > 0 && (Achtung.Settings.maxForcedItems >= AchtungSettings.UnlimitedForcedItems || neighbours.Count < Achtung.Settings.maxForcedItems))
 				{
 					var newNeighbours = new List<IntVec3>();
-					for (var i = 0; i < neighbours.Count; i++)
+					for (var i = 0; cancelled == false && i < neighbours.Count; i++)
 					{
 						var neighbour = neighbours[i];
 						var nearbys = Nearby(ref neighbour).ToList();
-						for (var j = 0; j < nearbys.Count; j++)
+						for (var j = 0; cancelled == false && j < nearbys.Count; j++)
 						{
 							var cell = nearbys[j];
 							if (visitedNeighbours.Contains(cell) == false)
@@ -474,9 +459,6 @@ namespace AchtungMod
 									newNeighbours.Add(cell);
 								}
 								_ = visitedNeighbours.Add(cell);
-
-								if (cancelled)
-									yield break;
 							}
 						}
 						yield return null;
@@ -488,12 +470,12 @@ namespace AchtungMod
 
 		public IEnumerator ContractThingTargets()
 		{
-			while (targets.Count > 0)
+			while (cancelled == false && targets.Count > 0)
 			{
 				var enumerator = targets.Select(target => target.item.Thing).GetEnumerator();
 				yield return null;
 				var counter = 0;
-				while (enumerator.MoveNext())
+				while (cancelled == false && enumerator.MoveNext())
 				{
 					var thing = enumerator.Current;
 					if (thing.Spawned == false || HasJob(thing) == false)
@@ -508,12 +490,12 @@ namespace AchtungMod
 
 		public IEnumerator ContractCellTargets()
 		{
-			while (targets.Count > 0)
+			while (cancelled == false && targets.Count > 0)
 			{
 				var enumerator = targets.Select(target => target.item.Cell).GetEnumerator();
 				yield return null;
 				var counter = 0;
-				while (enumerator.MoveNext())
+				while (cancelled == false && enumerator.MoveNext())
 				{
 					var cell = enumerator.Current;
 					if (HasJob(ref cell) == false)

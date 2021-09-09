@@ -115,12 +115,10 @@ namespace AchtungMod
 				return;
 			if (forced.Any() == false)
 				return;
-			forced.jobs[0].cancelled = true;
+			forced.jobs[0].Cleanup();
 			forced.jobs.RemoveAt(0);
 			if (forced.Any() == false)
 				Remove(pawn);
-			else
-				forced.jobs.Do(job => job?.Cleanup());
 		}
 
 		public void Remove(Pawn pawn)
