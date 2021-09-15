@@ -40,7 +40,7 @@ namespace AchtungMod
 			try
 			{
 				return DefDatabase<WorkGiverDef>.AllDefsListForReading
-					.Where(def => def.IsOfType<T>()).ToList();
+					.Where(def => typeof(T).IsAssignableFrom(def.giverClass)).ToList();
 			}
 			catch (Exception ex)
 			{

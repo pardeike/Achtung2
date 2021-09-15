@@ -186,17 +186,17 @@ namespace AchtungMod
 			return thingDef.passability == Traversability.Impassable;
 		}
 
-		public static int[] NeighbourCount(IntVec3 pos, PathGrid grid, HashSet<int> planned, int mapWidth)
+		public static int[] NeighbourCount(IntVec3 pos, PathGrid grid, List<ReservationManager.Reservation> reservations, HashSet<int> planned, int mapWidth)
 		{
 			var idx = CellIndicesUtility.CellToIndex(pos.x, pos.z, mapWidth);
-			if (grid.Walkable(pos) == false || planned.Contains(idx))
+			if (planned.Contains(idx) || grid.Walkable(pos) == false || reservations.Any(rsv => rsv.target.Cell == pos))
 				return new[] { -1, 0, 0 };
 			var counts = new int[4];
 			for (var i = 0; i < 4; i++)
 			{
 				var vec = pos + GenAdj.CardinalDirectionsAround[i];
 				idx = CellIndicesUtility.CellToIndex(vec.x, vec.z, mapWidth);
-				counts[i] = planned.Contains(idx) == false && grid.Walkable(vec) ? 0 : 1;
+				counts[i] = planned.Contains(idx) || grid.Walkable(vec) == false || reservations.Any(rsv => rsv.target.Cell == vec) ? 1 : 0;
 			}
 			var count = counts.Sum();
 			var isCorner = count == 2 && counts[0] != counts[2];
@@ -210,7 +210,7 @@ namespace AchtungMod
 					{
 						var vec = pos + GenAdj.CardinalDirectionsAround[i] + GenAdj.CardinalDirectionsAround[j];
 						idx = CellIndicesUtility.CellToIndex(vec.x, vec.z, mapWidth);
-						if (planned.Contains(idx) == false && grid.Walkable(vec))
+						if (planned.Contains(idx) == false && grid.Walkable(vec) && reservations.Any(rsv => rsv.target.Cell == vec) == false)
 						{
 							isRoomCorner = true;
 							break;
@@ -221,22 +221,22 @@ namespace AchtungMod
 			return new[] { count, isCorner ? 1 : 0, isRoomCorner ? 1 : 0 };
 		}
 
-		private static int NeighbourSubScore(IntVec3 pos, PathGrid pathGrid, int mapWidth, HashSet<int> planned)
+		private static int NeighbourSubScore(IntVec3 pos, PathGrid pathGrid, List<ReservationManager.Reservation> reservations, int mapWidth, HashSet<int> planned)
 		{
 			var result = 0;
 			for (var i = 0; i < 4; i++)
 			{
 				var vec = pos + GenAdj.CardinalDirectionsAround[i];
-				var subInfo = NeighbourCount(vec, pathGrid, planned, mapWidth);
+				var subInfo = NeighbourCount(vec, pathGrid, reservations, planned, mapWidth);
 				if (subInfo[0] != -1)
 					result += 4 - subInfo[0];
 			}
 			return result;
 		}
 
-		public static int NeighbourScore(IntVec3 pos, PathGrid pathGrid, int mapWidth, HashSet<int> planned)
+		public static int NeighbourScore(IntVec3 pos, PathGrid pathGrid, List<ReservationManager.Reservation> reservations, int mapWidth, HashSet<int> planned)
 		{
-			var neighbourCountInfo = NeighbourCount(pos, pathGrid, planned, mapWidth);
+			var neighbourCountInfo = NeighbourCount(pos, pathGrid, reservations, planned, mapWidth);
 			var blockedCount = neighbourCountInfo[0];
 			var IsCorner = neighbourCountInfo[1] == 1;
 			var IsRoomCorner = neighbourCountInfo[2] == 1;
@@ -249,7 +249,7 @@ namespace AchtungMod
 			if (blockedCount == 3)
 				return 11;
 
-			var neighbourScore = NeighbourSubScore(pos, pathGrid, mapWidth, planned);
+			var neighbourScore = NeighbourSubScore(pos, pathGrid, reservations, mapWidth, planned);
 
 			// safe corners (1)
 			if (blockedCount == 2 && IsCorner)
