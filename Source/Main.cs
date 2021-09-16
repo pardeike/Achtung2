@@ -64,6 +64,7 @@ namespace AchtungMod
 		public static void Prefix()
 		{
 			ForcedWork.Instance = null;
+			Log.Message($"Achtung v{Performance.GetModVersionString()} Info: To make Achtung log some performance info, create an empty 'AchtungPerformance.txt' file in same directory as Player.log");
 		}
 	}
 
@@ -535,6 +536,18 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(Pawn_JobTracker.EndCurrentJob))]
 	static class Pawn_JobTracker_EndCurrentJob_Patch
 	{
+		[HarmonyPriority(int.MaxValue)]
+		static void Prefix()
+		{
+			Performance.EndCurrentJob_Start();
+		}
+
+		[HarmonyPriority(int.MinValue)]
+		static void Postfix()
+		{
+			Performance.EndCurrentJob_Stop();
+		}
+
 		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var m_CleanupCurrentJob = AccessTools.Method(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.CleanupCurrentJob));

@@ -92,7 +92,7 @@ namespace AchtungMod
 		public ForcedJob(Pawn pawn, LocalTargetInfo item, List<WorkGiverDef> workgiverDefs)
 		{
 			this.pawn = pawn;
-			this.workgiverDefs = workgiverDefs;
+			this.workgiverDefs = workgiverDefs.Where(wgd => wgd?.giverClass != null).ToList();
 			targets = new HashSet<ForcedTarget>() { new ForcedTarget(item, MaterialScore(item)) };
 			buildSmart = Achtung.Settings.buildingSmartDefault;
 
@@ -145,8 +145,7 @@ namespace AchtungMod
 		}
 
 		public IEnumerable<WorkGiver_Scanner> WorkGivers => workgiverDefs
-			.Where(wgd => wgd.giverClass != null)
-			.Select(wgd => (WorkGiver_Scanner)wgd.Worker);
+			.Select(wgd => wgd.Worker).OfType<WorkGiver_Scanner>();
 
 		public static int MaterialScore(LocalTargetInfo item)
 		{
@@ -278,6 +277,8 @@ namespace AchtungMod
 
 		public static bool ContinueJob(Pawn_JobTracker tracker, Job lastJob, Pawn pawn, JobCondition condition)
 		{
+			Performance.ContinueJob_Start();
+
 			_ = tracker;
 			_ = lastJob;
 
@@ -285,32 +286,36 @@ namespace AchtungMod
 			var forcedWork = ForcedWork.Instance;
 
 			var forcedJob = forcedWork.GetForcedJob(pawn);
+			Performance.Report(forcedJob, pawn);
 			if (forcedJob == null)
-				return false;
+				return Performance.ContinueJob_Stop(false);
 			if (forcedJob.initialized == false)
 			{
 				forcedJob.initialized = true;
-				return false;
+				return Performance.ContinueJob_Stop(false);
 			}
 
 			if (condition == JobCondition.InterruptForced)
 			{
 				Messages.Message("Forced work of " + pawn.Name.ToStringShort + " was interrupted.", MessageTypeDefOf.RejectInput);
 				forcedWork.Remove(pawn);
-				return false;
+				return Performance.ContinueJob_Stop(false);
 			}
 
 			forcedJob.ExpandTargets();
 
+			Performance.GetNextJob_Start();
 			while (true)
 			{
+				Performance.GetNextJob_Count();
 				if (forcedJob.GetNextJob(out var job))
 				{
 					job.expiryInterval = 0;
 					job.ignoreJoyTimeAssignment = true;
 					job.playerForced = true;
 					ForcedWork.QueueJob(pawn, job);
-					return true;
+					Performance.GetNextJob_Stop();
+					return Performance.ContinueJob_Stop(true);
 				}
 
 				forcedWork.RemoveForcedJob(pawn);
@@ -319,9 +324,10 @@ namespace AchtungMod
 					break;
 				forcedJob.initialized = true;
 			}
+			Performance.GetNextJob_Stop();
 
 			forcedWork.Remove(pawn);
-			return false;
+			return Performance.ContinueJob_Stop(false);
 		}
 
 		public void ChangeCellRadius(int delta)
