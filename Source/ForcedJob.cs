@@ -49,8 +49,7 @@ namespace AchtungMod
 		public int cellRadius = 0;
 		public bool buildSmart = Achtung.Settings.buildingSmartDefault;
 		public bool cancelled = false;
-		public Coroutine expanderThing, contractorThing;
-		public Coroutine expanderCell, contractorCell;
+		public Coroutine expanderThing, expanderCell, contractor;
 		static readonly Dictionary<BuildableDef, int> TypeScores = new Dictionary<BuildableDef, int>
 		{
 			{ ThingDefOf.PowerConduit, 1000 },
@@ -81,6 +80,7 @@ namespace AchtungMod
 			{ ThingDefOf.Grave, 1 },
 		};
 
+		// default constructor for deserialization
 		public ForcedJob()
 		{
 			workgiverDefs = new List<WorkGiverDef>();
@@ -89,6 +89,7 @@ namespace AchtungMod
 			lastLocation = IntVec3.Invalid;
 		}
 
+		// called from AddForcedJob during gameplay
 		public ForcedJob(Pawn pawn, LocalTargetInfo item, List<WorkGiverDef> workgiverDefs)
 		{
 			this.pawn = pawn;
@@ -103,6 +104,7 @@ namespace AchtungMod
 			CreateCoroutines();
 		}
 
+		// called from ForcedWork.Prepare which is called from Map.FinalizeInit
 		public void Prepare()
 		{
 			CreateCoroutines();
@@ -110,10 +112,10 @@ namespace AchtungMod
 
 		void CreateCoroutines()
 		{
+			cancelled = false;
 			expanderThing ??= Find.CameraDriver.StartCoroutine(ExpandThingTargets());
-			contractorThing ??= Find.CameraDriver.StartCoroutine(ContractThingTargets());
 			expanderCell ??= Find.CameraDriver.StartCoroutine(ExpandCellTargets());
-			contractorCell ??= Find.CameraDriver.StartCoroutine(ContractCellTargets());
+			contractor ??= Find.CameraDriver.StartCoroutine(ContractTargets());
 		}
 
 		public void Cleanup()
@@ -123,14 +125,11 @@ namespace AchtungMod
 			if (expanderThing != null) Find.CameraDriver.StopCoroutine(expanderThing);
 			expanderThing = null;
 
-			if (contractorThing != null) Find.CameraDriver.StopCoroutine(contractorThing);
-			contractorThing = null;
-
 			if (expanderCell != null) Find.CameraDriver.StopCoroutine(expanderCell);
 			expanderCell = null;
 
-			if (contractorCell != null) Find.CameraDriver.StopCoroutine(contractorCell);
-			contractorCell = null;
+			if (contractor != null) Find.CameraDriver.StopCoroutine(contractor);
+			contractor = null;
 		}
 
 		public IEnumerable<IntVec3> AllCells(bool onlyValid = false)
@@ -192,6 +191,11 @@ namespace AchtungMod
 			var pos = pawn.Position;
 			var pathGrid = map.pathing.For(pawn).pathGrid;
 			var mapWidth = map.Size.x;
+
+			var forbiddenCells = buildSmart ? map.reservationManager.reservations.Select(reservation => reservation.target.Cell)
+				.SelectMany(cell => GenRadial.RadialCellsAround(cell, 1, true))
+				.Distinct().ToHashSet() : new HashSet<IntVec3>();
+
 			return targets
 				.Where(target =>
 				{
@@ -201,13 +205,17 @@ namespace AchtungMod
 				})
 				.OrderByDescending(target =>
 				{
-					var reverseDistance = maxSquaredDistance - pos.DistanceToSquared(target.item.Cell);
+					var cell = target.item.Cell;
+					if (forbiddenCells.Contains(cell))
+						return -1;
+
+					var reverseDistance = maxSquaredDistance - pos.DistanceToSquared(cell);
 					if (reverseDistance < 0) reverseDistance = 0;
 					if (buildSmart && isThingJob)
 					{
 						var willBlock = target.item.WillBlock();
-						var neighbourScore = willBlock ? Tools.NeighbourScore(target.item.Cell, pathGrid, map.reservationManager.ReservationsReadOnly, mapWidth, planned) : 100;
-						return target.materialScore * 10000 + neighbourScore * 100000000 + reverseDistance;
+						var neighbourScore = willBlock ? Tools.NeighbourScore(cell, pathGrid, map.reservationManager.ReservationsReadOnly, mapWidth, planned) : 100;
+						return target.materialScore + reverseDistance * 10000 + neighbourScore * 100000000;
 					}
 					return target.materialScore + reverseDistance * 10000;
 				})
@@ -342,13 +350,33 @@ namespace AchtungMod
 
 		public bool HasJob(Thing thing)
 		{
-			return WorkGivers.Any(workgiver => thing.GetThingJob(pawn, workgiver, true) != null);
+			try
+			{
+				lock (pawn.Map)
+				{
+					return WorkGivers.Any(workgiver => thing.GetThingJob(pawn, workgiver, true) != null);
+				}
+			}
+			catch
+			{
+				return false;
+			}
 		}
 
 		public bool HasJob(ref IntVec3 cell)
 		{
-			var cell2 = cell;
-			return WorkGivers.Any(workgiver => cell2.GetCellJob(pawn, workgiver) != null);
+			try
+			{
+				lock (pawn.Map)
+				{
+					var cell2 = cell;
+					return WorkGivers.Any(workgiver => cell2.GetCellJob(pawn, workgiver) != null);
+				}
+			}
+			catch
+			{
+				return false;
+			}
 		}
 
 		private IEnumerable<IntVec3> Nearby(ref IntVec3 cell, bool useCenter = false)
@@ -367,9 +395,6 @@ namespace AchtungMod
 
 			if (isThingJob && lastThing != null)
 			{
-				//if ((lastThing.Spawned == false || HasJob(lastThing) == false) && HasJob(ref lastLocation) == false)
-				//	_ = targets.RemoveWhere(target => target.item.Thing == lastThing);
-
 				var cells = lastThing.Spawned ? lastThing.AllCells() : new List<IntVec3> { lastLocation };
 				var nearbys = cells
 					.SelectMany(cell => Nearby(ref cell, true))
@@ -382,12 +407,6 @@ namespace AchtungMod
 					.Distinct()
 					.SelectMany(cell => thingGrid.ThingsAt(cell))
 					.Distinct()
-					//.SelectMany(thing => thing.AllCells())
-					//.Distinct()
-					//.SelectMany(cell => Nearby(ref cell, true))
-					//.Distinct()
-					//.SelectMany(cell => thingGrid.ThingsAt(cell))
-					//.Distinct()
 					.ToList();
 				var visitedNeighbours = new HashSet<Thing>();
 				for (var j = 0; j < nearbys.Count; j++)
@@ -407,12 +426,8 @@ namespace AchtungMod
 			}
 			if (isThingJob == false || (lastThing == null && lastLocation.IsValid))
 			{
-				//if (HasJob(ref lastLocation) == false && thingGrid.ThingsAt(lastLocation).All(thing => HasJob(thing) == false))
-				//	_ = targets.RemoveWhere(target => target.item.Cell == lastLocation);
-
 				var nearbys = Nearby(ref lastLocation)
 					.SelectMany(cell => Nearby(ref cell, true)).Distinct()
-					//.SelectMany(cell => Nearby(ref cell, true)).Distinct()
 					.ToList();
 				var visitedNeighbours = new HashSet<IntVec3>();
 				for (var j = 0; j < nearbys.Count; j++)
@@ -437,11 +452,15 @@ namespace AchtungMod
 			while (cancelled == false && targets.Count > 0)
 			{
 				yield return null;
+
+				if (Find.Maps.Count == 0 || pawn.Spawned == false)
+					continue;
+
 				if (Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems && targets.Count > Achtung.Settings.maxForcedItems)
 					continue;
 
 				var visitedNeighbours = new HashSet<Thing>();
-				var neighbours = targets.Select(target => target.item.Thing).ToList();
+				var neighbours = targets.Select(target => target.item.Thing).Where(thing => thing.Spawned).ToList();
 				while (cancelled == false && neighbours.Count > 0 && (Achtung.Settings.maxForcedItems >= AchtungSettings.UnlimitedForcedItems || neighbours.Count < Achtung.Settings.maxForcedItems))
 				{
 					var newNeighbours = new List<Thing>();
@@ -472,6 +491,7 @@ namespace AchtungMod
 						yield return null;
 					}
 					neighbours = newNeighbours.ToList();
+					yield return null;
 				}
 			}
 		}
@@ -481,6 +501,10 @@ namespace AchtungMod
 			while (cancelled == false && targets.Count > 0)
 			{
 				yield return null;
+
+				if (Find.Maps.Count == 0 || pawn.Spawned == false)
+					continue;
+
 				if (Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems && targets.Count > Achtung.Settings.maxForcedItems)
 					continue;
 
@@ -489,10 +513,11 @@ namespace AchtungMod
 				while (cancelled == false && neighbours.Count > 0 && (Achtung.Settings.maxForcedItems >= AchtungSettings.UnlimitedForcedItems || neighbours.Count < Achtung.Settings.maxForcedItems))
 				{
 					var newNeighbours = new List<IntVec3>();
+					var tm = Find.TickManager;
 					for (var i = 0; cancelled == false && i < neighbours.Count; i++)
 					{
 						var neighbour = neighbours[i];
-						var nearbys = Nearby(ref neighbour).ToList();
+						var nearbys = Nearby(ref neighbour).Where(cell => cell.InBounds(pawn.Map)).ToList();
 						for (var j = 0; cancelled == false && j < nearbys.Count; j++)
 						{
 							var cell = nearbys[j];
@@ -507,50 +532,48 @@ namespace AchtungMod
 								_ = visitedNeighbours.Add(cell);
 							}
 						}
-						yield return null;
+						if (tm.Paused == false)
+							yield return null;
 					}
 					neighbours = newNeighbours.ToList();
+					yield return null;
 				}
 			}
 		}
 
-		public IEnumerator ContractThingTargets()
+		public IEnumerator ContractTargets()
 		{
 			while (cancelled == false && targets.Count > 0)
 			{
-				var enumerator = targets.Select(target => target.item.Thing).GetEnumerator();
-				yield return null;
-				var counter = 0;
-				while (cancelled == false && enumerator.MoveNext())
+				if (Find.Maps.Count == 0 || pawn.Spawned == false)
 				{
-					var thing = enumerator.Current;
-					if (thing.Spawned == false || HasJob(thing) == false)
-						_ = targets.RemoveWhere(target => target.item.Thing == thing);
-					if (++counter % 8 == 0)
-						yield return null;
-					if (cancelled)
-						yield break;
+					yield return null;
+					continue;
 				}
-			}
-		}
 
-		public IEnumerator ContractCellTargets()
-		{
-			while (cancelled == false && targets.Count > 0)
-			{
-				var enumerator = targets.Select(target => target.item.Cell).GetEnumerator();
-				yield return null;
-				var counter = 0;
-				while (cancelled == false && enumerator.MoveNext())
+				var cells = targets.Select(target => target.item.Thing)
+					.SelectMany(thing => thing.AllCells())
+					.Union(targets.Select(target => target.item.Cell))
+					.Distinct()
+					.ToList();
+
+				var yielded = false;
+				var tm = Find.TickManager;
+				for (var i = 0; cancelled == false && i < cells.Count; i++)
 				{
-					var cell = enumerator.Current;
+					var cell = cells[i];
 					if (HasJob(ref cell) == false)
-						_ = targets.RemoveWhere(target => target.item.Cell == cell);
-					if (++counter % 8 == 0)
+						if (pawn.Map.thingGrid.ThingsListAtFast(cell).All(thing => thing.Spawned == false || HasJob(thing) == false))
+							_ = targets.RemoveWhere(target => target.item.Cell == cell || target.item.Thing.AllCells().Contains(cell));
+					if (i % (tm.Paused ? 64 : 4) == 0)
+					{
+						yielded = true;
 						yield return null;
+					}
 					if (cancelled)
 						yield break;
 				}
+				if (yielded == false) yield return null;
 			}
 		}
 
@@ -570,7 +593,6 @@ namespace AchtungMod
 			Scribe_Values.Look(ref isThingJob, "thingJob", false, true);
 			Scribe_Values.Look(ref initialized, "inited", false, true);
 			Scribe_Values.Look(ref cellRadius, "radius", 0, true);
-			Scribe_Values.Look(ref cancelled, "cancelled", false, true);
 			Scribe_Values.Look(ref buildSmart, "buildSmart", true, true);
 			Scribe_References.Look(ref lastThing, "lastThing");
 			Scribe_Values.Look(ref lastLocation, "lastLocation", IntVec3.Invalid, true);

@@ -305,14 +305,13 @@ namespace AchtungMod
 				return;
 
 			var selector = Find.Selector;
-			var allReservations = Tools.Reservations(reservationManager);
-			allReservations
+			reservationManager.ReservationsReadOnly
 				.DoIf(res => selector.IsSelected(res.Claimant), res => Tools.DebugPosition(res.Target.Cell.ToVector3(), res.Target.HasThing ? new Color(1f, 0f, 0f, 0.2f) : new Color(0f, 1f, 0f, 0.2f)));
 
-			//Find.CurrentMap?.reservationManager?
-			//	.AllReservedThings()?
-			//	.Where(t => t != null)
-			//	.Do(thing => Tools.DebugPosition(thing.Position.ToVector3(), new Color(1f, 0f, 0f, 0.2f)));
+			reservationManager?
+				.AllReservedThings()?
+				.Where(t => t != null)
+				.Do(thing => Tools.DebugPosition(thing.Position.ToVector3(), new Color(1f, 0f, 0f, 0.2f)));
 
 			//var forcedWork = ForcedWork.Instance;
 			//forcedWork.GetForbiddenLocations()

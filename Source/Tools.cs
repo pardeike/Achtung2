@@ -111,9 +111,7 @@ namespace AchtungMod
 				AchtungModKey.Alt => code == KeyCode.LeftAlt || code == KeyCode.RightAlt,
 				AchtungModKey.Ctrl => code == KeyCode.LeftControl || code == KeyCode.RightControl,
 				AchtungModKey.Shift => code == KeyCode.LeftShift || code == KeyCode.RightShift,
-				AchtungModKey.Meta => code == KeyCode.LeftWindows || code == KeyCode.RightWindows
-|| code == KeyCode.LeftCommand || code == KeyCode.RightCommand
-|| code == KeyCode.LeftApple || code == KeyCode.RightApple,
+				AchtungModKey.Meta => code == KeyCode.LeftWindows || code == KeyCode.RightWindows || code == KeyCode.LeftCommand || code == KeyCode.RightCommand || code == KeyCode.LeftApple || code == KeyCode.RightApple,
 				_ => false,
 			};
 		}
@@ -125,9 +123,7 @@ namespace AchtungMod
 				AchtungModKey.Alt => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt),
 				AchtungModKey.Ctrl => Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl),
 				AchtungModKey.Shift => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift),
-				AchtungModKey.Meta => Input.GetKey(KeyCode.LeftWindows) || Input.GetKey(KeyCode.RightWindows)
-|| Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand)
-|| Input.GetKey(KeyCode.LeftApple) || Input.GetKey(KeyCode.RightApple),
+				AchtungModKey.Meta => Input.GetKey(KeyCode.LeftWindows) || Input.GetKey(KeyCode.RightWindows) || Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand) || Input.GetKey(KeyCode.LeftApple) || Input.GetKey(KeyCode.RightApple),
 				_ => false,
 			};
 		}
@@ -186,11 +182,16 @@ namespace AchtungMod
 			return thingDef.passability == Traversability.Impassable;
 		}
 
-		public static int[] NeighbourCount(IntVec3 pos, PathGrid grid, List<ReservationManager.Reservation> reservations, HashSet<int> planned, int mapWidth)
+		public static void NeighbourCount(IntVec3 pos, PathGrid grid, List<ReservationManager.Reservation> reservations, HashSet<int> planned, int mapWidth, out int count, out bool isCorner, out bool isRoomCorner)
 		{
 			var idx = CellIndicesUtility.CellToIndex(pos.x, pos.z, mapWidth);
 			if (planned.Contains(idx) || grid.Walkable(pos) == false || reservations.Any(rsv => rsv.target.Cell == pos))
-				return new[] { -1, 0, 0 };
+			{
+				count = -1;
+				isCorner = false;
+				isRoomCorner = false;
+				return;
+			}
 			var counts = new int[4];
 			for (var i = 0; i < 4; i++)
 			{
@@ -198,9 +199,9 @@ namespace AchtungMod
 				idx = CellIndicesUtility.CellToIndex(vec.x, vec.z, mapWidth);
 				counts[i] = planned.Contains(idx) || grid.Walkable(vec) == false || reservations.Any(rsv => rsv.target.Cell == vec) ? 1 : 0;
 			}
-			var count = counts.Sum();
-			var isCorner = count == 2 && counts[0] != counts[2];
-			var isRoomCorner = false;
+			count = counts.Sum();
+			isCorner = count == 2 && counts[0] != counts[2];
+			isRoomCorner = false;
 			if (isCorner)
 			{
 				for (var i = 0; i < 4; i++)
@@ -218,7 +219,6 @@ namespace AchtungMod
 					}
 				}
 			}
-			return new[] { count, isCorner ? 1 : 0, isRoomCorner ? 1 : 0 };
 		}
 
 		private static int NeighbourSubScore(IntVec3 pos, PathGrid pathGrid, List<ReservationManager.Reservation> reservations, int mapWidth, HashSet<int> planned)
@@ -227,19 +227,16 @@ namespace AchtungMod
 			for (var i = 0; i < 4; i++)
 			{
 				var vec = pos + GenAdj.CardinalDirectionsAround[i];
-				var subInfo = NeighbourCount(vec, pathGrid, reservations, planned, mapWidth);
-				if (subInfo[0] != -1)
-					result += 4 - subInfo[0];
+				NeighbourCount(vec, pathGrid, reservations, planned, mapWidth, out var count, out var _1, out var _2);
+				if (count != -1)
+					result += 4 - count;
 			}
 			return result;
 		}
 
 		public static int NeighbourScore(IntVec3 pos, PathGrid pathGrid, List<ReservationManager.Reservation> reservations, int mapWidth, HashSet<int> planned)
 		{
-			var neighbourCountInfo = NeighbourCount(pos, pathGrid, reservations, planned, mapWidth);
-			var blockedCount = neighbourCountInfo[0];
-			var IsCorner = neighbourCountInfo[1] == 1;
-			var IsRoomCorner = neighbourCountInfo[2] == 1;
+			NeighbourCount(pos, pathGrid, reservations, planned, mapWidth, out var blockedCount, out var isCorner, out var isRoomCorner);
 
 			// full enclosed or pos itself unwalkable
 			if (blockedCount == -1 || blockedCount == 4)
@@ -251,16 +248,20 @@ namespace AchtungMod
 
 			var neighbourScore = NeighbourSubScore(pos, pathGrid, reservations, mapWidth, planned);
 
+			// special case: end of free standing block
+			if (blockedCount == 1 && neighbourScore == 12)
+				return 12;
+
 			// safe corners (1)
-			if (blockedCount == 2 && IsCorner)
+			if (blockedCount == 2 && isCorner)
 			{
 				if (neighbourScore == 6)
 					return 10;
 				if (neighbourScore == 7)
 					return 9;
-				if (neighbourScore == 5 && IsRoomCorner)
+				if (neighbourScore == 5 && isRoomCorner)
 					return 8;
-				if (neighbourScore == 4 && IsRoomCorner)
+				if (neighbourScore == 4 && isRoomCorner)
 					return 7;
 			}
 
@@ -280,7 +281,7 @@ namespace AchtungMod
 			}
 
 			// safe corners (2)
-			if (blockedCount == 2 && IsCorner)
+			if (blockedCount == 2 && isCorner)
 			{
 				if (neighbourScore == 5)
 					return 1;
@@ -349,22 +350,6 @@ namespace AchtungMod
 		public static bool IsGoHereOption(FloatMenuOption option)
 		{
 			return option.Label == goHereLabel;
-		}
-
-		public static int IsEnclosed(Pawn pawn, int maxCount, IntVec3 pos, IntVec3 direction)
-		{
-			var map = pawn.Map;
-			var pathGrid = map.pathing.For(pawn).pathGrid;
-			var count = 0;
-			(new FloodFiller(map)).FloodFill(pos + direction, cell =>
-			{
-				return cell != pos && pathGrid.Walkable(cell);
-			}, (cell, len) =>
-			{
-				count++;
-				return count >= maxCount;
-			});
-			return count;
 		}
 
 		public static void DraftWithSound(List<Colonist> colonists, bool draftStatus)
