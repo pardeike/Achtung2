@@ -48,7 +48,7 @@ namespace AchtungMod
 		public bool initialized = false;
 		public int cellRadius = 0;
 		public bool buildSmart = Achtung.Settings.buildingSmartDefault;
-		public bool cancelled = false;
+		public bool cancelled = false, active = false;
 		public Coroutine expanderThing, contractorThing;
 		public Coroutine expanderCell, contractorCell;
 		static readonly Dictionary<BuildableDef, int> TypeScores = new Dictionary<BuildableDef, int>
@@ -106,6 +106,7 @@ namespace AchtungMod
 		public void Prepare()
 		{
 			CreateCoroutines();
+			active = true;
 		}
 
 		void CreateCoroutines()
@@ -437,6 +438,8 @@ namespace AchtungMod
 			while (cancelled == false && targets.Count > 0)
 			{
 				yield return null;
+				if (active == false) continue;
+
 				if (Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems && targets.Count > Achtung.Settings.maxForcedItems)
 					continue;
 
@@ -481,6 +484,8 @@ namespace AchtungMod
 			while (cancelled == false && targets.Count > 0)
 			{
 				yield return null;
+				if (active == false) continue;
+
 				if (Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems && targets.Count > Achtung.Settings.maxForcedItems)
 					continue;
 
@@ -518,15 +523,20 @@ namespace AchtungMod
 		{
 			while (cancelled == false && targets.Count > 0)
 			{
-				var enumerator = targets.Select(target => target.item.Thing).GetEnumerator();
-				yield return null;
-				var counter = 0;
-				while (cancelled == false && enumerator.MoveNext())
+				if (active == false)
 				{
-					var thing = enumerator.Current;
+					yield return null;
+					continue;
+				}
+
+				var things = targets.Select(target => target.item.Thing).ToList();
+				yield return null;
+				for (var i = 0; cancelled == false && i < things.Count; i++)
+				{
+					var thing = things[i];
 					if (thing.Spawned == false || HasJob(thing) == false)
 						_ = targets.RemoveWhere(target => target.item.Thing == thing);
-					if (++counter % 8 == 0)
+					if (++i % 8 == 0)
 						yield return null;
 					if (cancelled)
 						yield break;
@@ -538,18 +548,21 @@ namespace AchtungMod
 		{
 			while (cancelled == false && targets.Count > 0)
 			{
-				var enumerator = targets.Select(target => target.item.Cell).GetEnumerator();
-				yield return null;
-				var counter = 0;
-				while (cancelled == false && enumerator.MoveNext())
+				if (active == false)
 				{
-					var cell = enumerator.Current;
+					yield return null;
+					continue;
+				}
+
+				var cells = targets.Select(target => target.item.Cell).ToList();
+				yield return null;
+				for (var i = 0; cancelled == false && i < cells.Count; i++)
+				{
+					var cell = cells[i];
 					if (HasJob(ref cell) == false)
 						_ = targets.RemoveWhere(target => target.item.Cell == cell);
-					if (++counter % 8 == 0)
+					if (i % 8 == 0)
 						yield return null;
-					if (cancelled)
-						yield break;
 				}
 			}
 		}

@@ -11,6 +11,7 @@ using System.Reflection.Emit;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using Verse.Profile;
 
 namespace AchtungMod
 {
@@ -75,6 +76,37 @@ namespace AchtungMod
 		public static void Postfix(Map __instance)
 		{
 			ForcedWork.Instance?.Prepare(__instance);
+		}
+	}
+
+	[HarmonyPatch]
+	static class HugsLib_Quickstart_InitateSaveLoading_Patch
+	{
+		const string name = "HugsLib.Quickstart.QuickstartController:InitateSaveLoading";
+
+		public static bool Prepare(MethodBase _)
+		{
+			return TargetMethod() != null;
+		}
+
+		public static MethodBase TargetMethod()
+		{
+			return AccessTools.Method(name);
+		}
+
+		public static void Prefix()
+		{
+			Find.Maps?.ForEach(map => ForcedWork.Instance?.Cleanup(map));
+		}
+	}
+
+	[HarmonyPatch(typeof(MemoryUtility))]
+	[HarmonyPatch(nameof(MemoryUtility.ClearAllMapsAndWorld))]
+	static class MemoryUtility_ClearAllMapsAndWorld_Patch
+	{
+		public static void Prefix()
+		{
+			Find.Maps?.ForEach(map => ForcedWork.Instance?.Cleanup(map));
 		}
 	}
 
