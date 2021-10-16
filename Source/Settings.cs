@@ -76,6 +76,12 @@ namespace AchtungMod
 			Scribe_Values.Look(ref workMarkers, "workMarkers", WorkMarkers.Animated, true);
 			Scribe_Values.Look(ref buildingSmartDefault, "buildingSmartDefault", false, true);
 			Scribe_Values.Look(ref maxForcedItems, "maxForcedItems", 64, true);
+
+			if (Scribe.mode == LoadSaveMode.PostLoadInit && Achtung.harmony != null)
+			{
+				// ForbidUtility_InAllowedArea_Patch.FixPatch();
+				ForbidUtility_IsForbidden_Patch.FixPatch();
+			}
 		}
 
 		public static void DoWindowContents(Rect canvas)
@@ -104,7 +110,7 @@ namespace AchtungMod
 			list.Gap(10);
 			list.ValueLabeled("HealthLevel", ref Achtung.Settings.healthLevel);
 			list.Gap(10);
-			list.CheckboxEnhanced("IgnoreForbidden", ref Achtung.Settings.ignoreForbidden);
+			list.CheckboxEnhanced("IgnoreForbidden", ref Achtung.Settings.ignoreForbidden, null, () => ForbidUtility_IsForbidden_Patch.FixPatch());
 			list.CheckboxEnhanced("IgnoreRestrictions", ref Achtung.Settings.ignoreRestrictions);
 			list.CheckboxEnhanced("IgnoreAssignments", ref Achtung.Settings.ignoreAssignments);
 			list.Gap(10);

@@ -552,13 +552,15 @@ namespace AchtungMod
 			return vector2;
 		}
 
-		public static void CheckboxEnhanced(this Listing_Standard listing, string name, ref bool value, string tooltip = null)
+		public static void CheckboxEnhanced(this Listing_Standard listing, string name, ref bool value, string tooltip = null, Action onChange = null)
 		{
 			var startHeight = listing.CurHeight;
 
 			Text.Font = GameFont.Small;
 			GUI.color = Color.white;
+			var oldValue = value;
 			listing.CheckboxLabeled((name + "Title").Translate(), ref value);
+			if (onChange != null && value != oldValue) onChange();
 
 			Text.Font = GameFont.Tiny;
 			listing.ColumnWidth -= 34;

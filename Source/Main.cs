@@ -24,12 +24,12 @@ namespace AchtungMod
 		{
 			Controller.InstallDefs();
 
-			var harmony = new Harmony("net.pardeike.rimworld.mods.achtung");
-			harmony.PatchAll();
+			Achtung.harmony = new Harmony("net.pardeike.rimworld.mods.achtung");
+			Achtung.harmony.PatchAll();
 
 			const string sameSpotId = "net.pardeike.rimworld.mod.samespot";
-			IsSameSpotInstalled = harmony.GetPatchedMethods()
-				.Any(method => Harmony.GetPatchInfo(method).Transpilers.Any(transpiler => transpiler.owner == sameSpotId));
+			IsSameSpotInstalled = Achtung.harmony.GetPatchedMethods()
+				.Any(method => Harmony.GetPatchInfo(method)?.Transpilers.Any(transpiler => transpiler.owner == sameSpotId) ?? false);
 
 			// multiplayer
 			//
@@ -40,6 +40,7 @@ namespace AchtungMod
 
 	public class Achtung : Mod
 	{
+		public static Harmony harmony = null;
 		public static AchtungSettings Settings;
 
 		public Achtung(ModContentPack content) : base(content)
@@ -160,7 +161,7 @@ namespace AchtungMod
 	{
 		public static bool Prefix(Pawn p, bool forced, ref bool __result)
 		{
-			if (p?.Map != null && Achtung.Settings.ignoreRestrictions)
+			if (p?.Map != null && p.RaceProps.Humanlike && Achtung.Settings.ignoreRestrictions)
 			{
 				var forcedWork = ForcedWork.Instance;
 				if (forced || forcedWork.HasForcedJob(p))
@@ -179,10 +180,23 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(ForbidUtility.InAllowedArea))]
 	static class ForbidUtility_InAllowedArea_Patch
 	{
+		// public static bool Prepare() => Achtung.Settings.ignoreRestrictions;
+
+		/*public static void FixPatch()
+		{
+			var method = SymbolExtensions.GetMethodInfo(() => ForbidUtility.InAllowedArea(default, default));
+			var hasPatch = Harmony.GetPatchInfo(method)?.Owners.Contains(Achtung.harmony.Id) ?? false;
+			if (Prepare() != hasPatch)
+			{
+				if (hasPatch) Achtung.harmony.Unpatch(method, HarmonyPatchType.All, Achtung.harmony.Id);
+				else _ = new PatchClassProcessor(Achtung.harmony, typeof(ForbidUtility_InAllowedArea_Patch)).Patch();
+			}
+		}*/
+
 		public static void Postfix(IntVec3 c, Pawn forPawn, ref bool __result)
 		{
 			var map = forPawn?.Map;
-			if (map == null)
+			if (map == null || forPawn.RaceProps.Humanlike == false)
 				return;
 
 			var forcedWork = ForcedWork.Instance;
@@ -359,9 +373,25 @@ namespace AchtungMod
 	[HarmonyPatch(new Type[] { typeof(Thing), typeof(Pawn) })]
 	static class ForbidUtility_IsForbidden_Patch
 	{
-		public static bool Prefix(Pawn pawn, ref bool __result)
+		public static bool Prepare() => Achtung.Settings.ignoreForbidden;
+
+		public static void FixPatch()
 		{
-			if (pawn?.Map != null && Achtung.Settings.ignoreForbidden)
+			Thing _thing = null;
+			Pawn _pawn = null;
+			var method = SymbolExtensions.GetMethodInfo(() => ForbidUtility.IsForbidden(_thing, _pawn));
+			var hasPatch = Harmony.GetPatchInfo(method)?.Owners.Contains(Achtung.harmony.Id) ?? false;
+			if (Prepare() != hasPatch)
+			{
+				if (hasPatch) Achtung.harmony.Unpatch(method, HarmonyPatchType.All, Achtung.harmony.Id);
+				else _ = new PatchClassProcessor(Achtung.harmony, typeof(ForbidUtility_IsForbidden_Patch)).Patch();
+			}
+		}
+
+		[HarmonyPrefix]
+		public static bool Patch(Pawn pawn, ref bool __result)
+		{
+			if (pawn?.Map != null && pawn.RaceProps.Humanlike && Achtung.Settings.ignoreForbidden)
 			{
 				var forcedWork = ForcedWork.Instance;
 				if (forcedWork.HasForcedJob(pawn))
@@ -478,8 +508,8 @@ namespace AchtungMod
 
 		static bool IgnoreForbiddenHauling(WorkGiver_Scanner workgiver, Thing thing)
 		{
-			if (workgiver is WorkGiver_Haul && thing?.def != null && thing.def.alwaysHaulable == false && thing.def.EverHaulable == false) return false;
 			if (Achtung.Settings.ignoreForbidden == false) return false;
+			if (workgiver is WorkGiver_Haul && thing?.def != null && thing.def.alwaysHaulable == false && thing.def.EverHaulable == false) return false;
 			return workgiver.Ignorable();
 		}
 
