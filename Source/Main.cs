@@ -40,12 +40,44 @@ namespace AchtungMod
 
 	public class Achtung : Mod
 	{
+		// public static MagicTutor tutor;
 		public static Harmony harmony = null;
 		public static AchtungSettings Settings;
 
 		public Achtung(ModContentPack content) : base(content)
 		{
 			Settings = GetSettings<AchtungSettings>();
+
+			/* TODO enable later
+			 * 
+			tutor = new MagicTutor(this);
+			tutor.RegisterContext("force-button", new HintWithSettingsButton()
+			{
+				isMenu = true,
+				withSettingsButton = false,
+				message = "Click the white FORCE button to make this colonist start working uninterruptedly.\n\nThey will continue to work on adjacted cells and items until all is done or they reach the configured mental break level."
+			});
+			tutor.RegisterContext("exclamation-mark", new HintWithSettingsButton()
+			{
+				withSettingsButton = true,
+				message = "The ! icon indicates that cells or things are forced."
+			});
+			tutor.RegisterContext("go-here", new HintWithSettingsButton()
+			{
+				visibleTime = TimeSpan.FromSeconds(4),
+				withSettingsButton = true,
+				message = "Drafting a colonist to a position that also contains items makes it impossible to decide between positioning and context menu.\n\nTo solve this you can configure a hotkey that switches between both modes."
+			});
+			tutor.RegisterContext("position-by-key", new HintWithSettingsButton()
+			{
+				visibleTime = TimeSpan.FromSeconds(4),
+				withSettingsButton = true,
+				message = "Your Achtung settings are set so you need to hold the configured hotkey to position your colonists instead of showing the context menu. Find out more in the Achtung mod settings."
+			});
+			tutor.RegisterContext("clean-room", new StandardHint() { message = "This command will issue a job that cleans all of the room until it is 100% clean." });
+			tutor.RegisterContext("fight-fire", new StandardHint() { message = "This command will put out fires with priority closest to the point you chose. It works outside the home zone and is roughly 10% more efficient than vanilla." });
+			tutor.Start();
+			*/
 		}
 
 		public override void DoSettingsWindowContents(Rect inRect)
@@ -121,6 +153,20 @@ namespace AchtungMod
 		}
 	}
 
+	// a way to store an extra property on a pawn
+	// we subclass Pawn_Thinker and hope for nobody doing the same thing
+	//
+	[HarmonyPatch(typeof(PawnComponentsUtility))]
+	[HarmonyPatch(nameof(PawnComponentsUtility.AddComponentsForSpawn))]
+	static class PawnComponentsUtility_AddComponentsForSpawn_Patch
+	{
+		[HarmonyPriority(int.MinValue)]
+		public static void Postfix(Pawn pawn)
+		{
+			pawn.thinker = new Pawn_AchtungThinker(pawn);
+		}
+	}
+
 	// build-in "Ignore Me Passing" functionality
 	//
 	[HarmonyPatch(typeof(GenConstruct))]
@@ -174,6 +220,72 @@ namespace AchtungMod
 		}
 	}
 
+	// replace toil conditions that call IsForbidden with a new condition
+	// that calls the original condition only every 60 ticks to improve tps
+	// with the risk of pawns in extreme cases using forbidden cells/items
+	//
+	[HarmonyPatch(typeof(Toil))]
+	[HarmonyPatch(nameof(Toil.AddEndCondition))]
+	static class Toil_AddEndCondition_Patch
+	{
+		public static readonly MethodInfo mIsForbidden = SymbolExtensions.GetMethodInfo(() => ForbidUtility.IsForbidden(null, (Pawn)null));
+		public static readonly Dictionary<MethodInfo, bool> hasForbiddenState = new Dictionary<MethodInfo, bool>();
+
+		public static void Prefix(Toil __instance, ref Func<JobCondition> newEndCondition)
+		{
+			var method = newEndCondition?.Method;
+			if (method == null) return;
+
+			if (hasForbiddenState.TryGetValue(method, out var hasForbidden) == false)
+			{
+				hasForbidden = PatchProcessor.ReadMethodBody(method).Any(pair => pair.Value is MethodInfo method && method == mIsForbidden);
+				_ = hasForbiddenState.TryAdd(method, hasForbidden);
+			}
+			if (hasForbidden)
+			{
+				Func<JobCondition> condition = newEndCondition;
+				newEndCondition = delegate
+				{
+					if (__instance.actor?.IsHashIntervalTick(60) ?? true)
+						return condition();
+					return JobCondition.Ongoing;
+				};
+			}
+		}
+	}
+
+	// replace toil conditions that call IsForbidden with a new condition
+	// that calls the original condition only every 60 ticks to improve tps
+	// with the risk of pawns in extreme cases using forbidden cells/items
+	//
+	[HarmonyPatch(typeof(Toil))]
+	[HarmonyPatch(nameof(Toil.AddFailCondition))]
+	static class Toil_AddFailCondition_Patch
+	{
+		public static void Prefix(Toil __instance, ref Func<bool> newFailCondition)
+		{
+			var method = newFailCondition?.Method;
+			if (method == null) return;
+
+			if (Toil_AddEndCondition_Patch.hasForbiddenState.TryGetValue(method, out var hasForbidden) == false)
+			{
+				var mIsForbidden = Toil_AddEndCondition_Patch.mIsForbidden;
+				hasForbidden = PatchProcessor.ReadMethodBody(method).Any(pair => pair.Value is MethodInfo method && method == mIsForbidden);
+				_ = Toil_AddEndCondition_Patch.hasForbiddenState.TryAdd(method, hasForbidden);
+			}
+			if (hasForbidden)
+			{
+				Func<bool> condition = newFailCondition;
+				newFailCondition = delegate
+				{
+					if (__instance.actor?.IsHashIntervalTick(60) ?? true)
+						return condition();
+					return false;
+				};
+			}
+		}
+	}
+
 	// allow for jobs outside allowed area
 	//
 	[HarmonyPatch(typeof(ForbidUtility))]
@@ -203,18 +315,14 @@ namespace AchtungMod
 			if (forcedWork.HasForcedJob(forPawn))
 			{
 				if (Achtung.Settings.ignoreRestrictions)
-				{
 					__result = true;
-					return;
-				}
-
 				return;
 			}
 
 			if (__result == true)
 			{
-				// ignore forced work cells if colonist is not forced
-				if (forcedWork.IsForbiddenCell(map, c))
+				// ignore any forced work cells if colonist is not forced
+				if (forcedWork.hasForcedJobs && forcedWork.IsForbiddenCell(map, c))
 					__result = false;
 			}
 		}

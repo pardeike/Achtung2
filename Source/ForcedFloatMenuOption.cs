@@ -154,8 +154,9 @@ namespace AchtungMod
 			Text.Font = GameFont.Tiny;
 			GUI.color = Color.black;
 			Text.Anchor = TextAnchor.MiddleCenter;
-			rect.y++;
-			Widgets.Label(rect, ForcedLabelText);
+			var labelRect = rect;
+			labelRect.y++;
+			Widgets.Label(labelRect, ForcedLabelText);
 			Text.Anchor = TextAnchor.UpperLeft;
 
 			var selected = Widgets.ButtonInvisible(rect);
@@ -166,6 +167,20 @@ namespace AchtungMod
 					return true;
 			}
 			return false;
+			/* TODO enable later
+			return Achtung.tutor?.HintWithRect("force-button", true, rect.ContractedBy(0, 20), (hintUsed) =>
+			{
+				var selected = Widgets.ButtonInvisible(rect);
+				if (selected)
+				{
+					hintUsed();
+					var success = ForceAction();
+					if (success)
+						return true;
+				}
+				return false;
+			});
+			*/
 		}
 
 		[SyncMethod] // multiplayer

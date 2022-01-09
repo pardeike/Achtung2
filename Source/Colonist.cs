@@ -8,7 +8,7 @@ namespace AchtungMod
 	public class Colonist
 	{
 		public Pawn pawn;
-		public Vector3 designation;
+		public IntVec3 designation;
 		public IntVec3 lastOrder;
 		public Vector3 startPosition;
 		public Vector3 offsetFromCenter;
@@ -20,7 +20,7 @@ namespace AchtungMod
 			startPosition = pawn.DrawPos;
 			lastOrder = IntVec3.Invalid;
 			offsetFromCenter = Vector3.zero;
-			designation = Vector3.zero;
+			designation = IntVec3.Invalid;
 			originalDraftStatus = Tools.GetDraftingStatus(pawn);
 		}
 
@@ -32,8 +32,7 @@ namespace AchtungMod
 			{
 				if (cell.Standable(pawn.Map) && ReachabilityUtility.CanReach(pawn, cell, PathEndMode.OnCell, Danger.Deadly))
 				{
-					designation = cell.ToVector3Shifted();
-					designation.y = Altitudes.AltitudeFor(AltitudeLayer.Pawn);
+					designation = cell;
 					return cell;
 				}
 			}
@@ -41,8 +40,7 @@ namespace AchtungMod
 			var bestCell = RCellFinder.BestOrderedGotoDestNear(cell, pawn);
 			if (bestCell.InBounds(pawn.Map))
 			{
-				designation = bestCell.ToVector3Shifted();
-				designation.y = Altitudes.AltitudeFor(AltitudeLayer.Pawn);
+				designation = bestCell;
 				return bestCell;
 			}
 			return IntVec3.Invalid;

@@ -544,8 +544,9 @@ namespace AchtungMod
 			}
 		}
 
-		public static Vector2 LabelDrawPosFor(Vector3 drawPos, float worldOffsetZ)
+		public static Vector2 LabelDrawPosFor(IntVec3 cell, float worldOffsetZ)
 		{
+			var drawPos = cell.ToVector3Shifted();
 			drawPos.z += worldOffsetZ;
 			var vector2 = Find.Camera.WorldToScreenPoint(drawPos) / Prefs.UIScale;
 			vector2.y = UI.screenHeight - vector2.y;

@@ -84,7 +84,18 @@ namespace AchtungMod
 			{
 				forceMenu = Tools.IsModKeyPressed(Achtung.Settings.forceCommandMenuKey);
 				if (Achtung.Settings.forceCommandMenuMode == CommandMenuMode.PressForPosition)
+				{
+					// TODO enable later
+					// if (forceMenu)
+					//		Achtung.tutor.Acknowledge("position-by-key");
 					forceMenu = !forceMenu;
+				}
+				else
+				{
+					// TODO enable later
+					// if (forceMenu)
+					//		Achtung.tutor.Acknowledge("go-here");
+				}
 			}
 
 			var map = Find.CurrentMap;
@@ -98,13 +109,22 @@ namespace AchtungMod
 			{
 				var allHaveWeapons = colonists.All(colonist => FloatMenuUtility.GetRangedAttackAction(colonist.pawn, cell, out _) != null);
 				if (allHaveWeapons)
+				{
+					// TODO enable later
+					// Achtung.tutor.HintWithCell("go-here", actions.Count(true) > 0, cell);
 					return true;
+				}
 			}
 
 			if (forceMenu || (subjectClicked && achtungPressed == false) || standableClicked == false)
 			{
 				if (actions.Count(false) > 0)
 					Find.WindowStack.Add(actions.GetWindow());
+				else
+				{
+					// TODO enable later
+					// Achtung.tutor.HintWithCell("position-by-key", Achtung.Settings.forceCommandMenuMode == CommandMenuMode.PressForPosition, cell);
+				}
 				Event.current.Use();
 				return false;
 			}
@@ -116,11 +136,19 @@ namespace AchtungMod
 			if (allDrafted)
 			{
 				StartDragging(pos, achtungPressed);
+				// TODO enable later
+				// Achtung.tutor.HintWithCell("go-here", actions.Count(true) > 0, cell);
 				return true;
 			}
 
 			if (actions.Count(false) > 0)
 				Find.WindowStack.Add(actions.GetWindow());
+			else
+			{
+				// TODO enable later
+				// Achtung.tutor.HintWithCell("position-by-key", Achtung.Settings.forceCommandMenuMode == CommandMenuMode.PressForPosition, cell);
+			}
+
 			Event.current.Use();
 			return false;
 		}
@@ -256,7 +284,7 @@ namespace AchtungMod
 			driver.StartJob(pawn, target, clickCell);
 		}
 
-		private static void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType)
+		private static void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType, string context)
 		{
 			var driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
 			var clickCell = new LocalTargetInfo(IntVec3.FromVector3(clickPos));
@@ -268,6 +296,9 @@ namespace AchtungMod
 				{
 					var suffix = existingJobs.Count > 0 ? " " + "AlreadyDoing".Translate("" + (existingJobs.Count + 1)) : new TaggedString("");
 					options.Add(new FloatMenuOption(driver.GetLabel() + suffix, () => StartWorkSynced(driverType, pawn, target, clickCell), MenuOptionPriority.Low));
+					// TODO enable later
+					_ = context;
+					// options.Add(Achtung.tutor.FloatMenuOption(context, driver.GetLabel() + suffix, () => StartWorkSynced(driverType, pawn, target, clickCell), MenuOptionPriority.Low));
 				}
 			}
 		}
@@ -275,10 +306,8 @@ namespace AchtungMod
 		public static IEnumerable<FloatMenuOption> AchtungChoicesAtFor(Vector3 clickPos, Pawn pawn)
 		{
 			var options = new List<FloatMenuOption>();
-
-			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_CleanRoom));
-			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_FightFire));
-
+			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_CleanRoom), "clean-room");
+			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_FightFire), "fight-fire");
 			return options;
 		}
 
@@ -289,13 +318,26 @@ namespace AchtungMod
 			if (map == null || forcedWork == null)
 				return;
 
+			//var firstTime = true;
 			var currentViewRect = Find.CameraDriver.CurrentViewRect;
-			forcedWork.ForcedJobsForMap(map)
-				.DoIf(forcedJob => forcedJob.pawn.Spawned && forcedJob.pawn.Map == map && Find.Selector.IsSelected(forcedJob.pawn), forcedJob =>
-				{
-					forcedJob.AllCells(true).Distinct()
-						.DoIf(cell => currentViewRect.Contains(cell), cell => Tools.DrawForceIcon(cell.x, cell.z));
-				});
+			var forcedJobs = forcedWork.ForcedJobsForMap(map);
+			if (forcedJobs != null)
+				forcedJobs
+					.DoIf(forcedJob => forcedJob.pawn.Spawned && forcedJob.pawn.Map == map && Find.Selector.IsSelected(forcedJob.pawn), forcedJob =>
+					{
+						forcedJob.AllCells(true).Distinct()
+							.DoIf(cell => currentViewRect.Contains(cell), cell =>
+							{
+								Tools.DrawForceIcon(cell.x, cell.z);
+								/* TODO enable later
+								 * Achtung.tutor.HintWithCell("exclamation-mark", firstTime, cell, _ =>
+								{
+									Tools.DrawForceIcon(cell.x, cell.z);
+									firstTime = false;
+								});
+								*/
+							});
+					});
 		}
 
 		/*private void DrawReservations()
@@ -334,13 +376,14 @@ namespace AchtungMod
 				colonists.Do(c =>
 				{
 					var pos = c.designation;
-					if (pos == Vector3.zero)
+					if (pos == IntVec3.Invalid)
 						return;
 
-					Tools.DrawMarker(pos);
+					var vec = pos.ToVector3Shifted();
+					Tools.DrawMarker(vec);
 					if (drawColonistPreviews)
 					{
-						c.pawn.Drawer.renderer.RenderPawnAt(pos);
+						c.pawn.Drawer.renderer.RenderPawnAt(vec);
 						c.pawn.DrawExtraSelectionOverlays();
 					}
 				});
@@ -349,7 +392,7 @@ namespace AchtungMod
 
 		public void HandleDrawingOnGUI()
 		{
-			colonists.DoIf(c => (c.designation != Vector3.zero), c =>
+			colonists.DoIf(c => c.designation.IsValid, c =>
 			{
 				var labelPos = Tools.LabelDrawPosFor(c.designation, -0.6f);
 				GenMapUI.DrawPawnLabel(c.pawn, labelPos, 1f, 9999f, null);
