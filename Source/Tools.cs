@@ -295,32 +295,22 @@ namespace AchtungMod
 			return -neighbourScore;
 		}
 
-		/*public static IEnumerable<IntVec3> AllCells(this LocalTargetInfo item)
-		{
-			if (item.HasThing)
-			{
-				var thing = item.Thing;
-				var size = thing.def.size;
-				if (size.x + size.z == 1)
-					yield return thing.Position;
-				else
-					foreach (var cell in thing.OccupiedRect().Cells)
-						yield return cell;
-				yield break;
-			}
-			yield return item.Cell;
-		}*/
-
 		public static IEnumerable<IntVec3> AllCells(this Thing thing)
 		{
 			if (thing == null)
 				yield break;
+
 			var size = thing.def.size;
-			if (size.x + size.z == 1)
+			if (size.x == 1 && size.z == 1)
+			{
 				yield return thing.Position;
-			else
-				foreach (var cell in thing.OccupiedRect().Cells)
-					yield return cell;
+				yield break;
+			}
+
+			var rect = GenAdj.OccupiedRect(thing.Position, thing.Rotation, size);
+			for (var z = rect.minZ; z <= rect.maxZ; z++)
+				for (var x = rect.minX; x <= rect.maxX; x++)
+					yield return new IntVec3(x, 0, z);
 		}
 
 		public static void Do<T>(this IEnumerable<T> sequence, Action<T> action)

@@ -163,6 +163,15 @@ namespace AchtungMod
 		[HarmonyPriority(int.MinValue)]
 		public static void Postfix(Pawn pawn)
 		{
+			var t = pawn.thinker.GetType();
+			while (true)
+			{
+				var t2 = t.BaseType;
+				if (t2 == null || t2 == typeof(object)) break;
+				t = t2;
+			}
+			if (t != typeof(Pawn_Thinker))
+				Log.Error($"Achtung identified a potential mod conflict: The instance for pawn.thinker is of type {t} but should be {typeof(Pawn_Thinker)}. As a result Achtung performance is degraded");
 			pawn.thinker = new Pawn_AchtungThinker(pawn);
 		}
 	}
