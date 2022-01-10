@@ -405,8 +405,6 @@ namespace AchtungMod
 					.Distinct()
 					.SelectMany(thing => thing.AllCells())
 					.Distinct()
-					.SelectMany(cell => Nearby(ref cell, true))
-					.Distinct()
 					.SelectMany(cell => thingGrid.ThingsAt(cell))
 					.Distinct()
 					.ToList();
@@ -462,14 +460,15 @@ namespace AchtungMod
 					continue;
 
 				var visitedNeighbours = new HashSet<Thing>();
-				var neighbours = targets.Select(target => target.item.Thing).Where(thing => thing.Spawned).ToList();
+				var neighbours = targets.Select(target => target.item.Thing).Where(thing => thing.Spawned).ToHashSet();
 				while (cancelled == false && neighbours.Count > 0 && (Achtung.Settings.maxForcedItems >= AchtungSettings.UnlimitedForcedItems || neighbours.Count < Achtung.Settings.maxForcedItems))
 				{
-					var newNeighbours = new List<Thing>();
+					var newNeighbours = new HashSet<Thing>();
 					var thingGrid = pawn.Map.thingGrid;
-					for (var i = 0; cancelled == false && i < neighbours.Count; i++)
+					var neighboursEnumerator = neighbours.GetEnumerator();
+					while (cancelled == false && neighboursEnumerator.MoveNext())
 					{
-						var neighbour = neighbours[i];
+						var neighbour = neighboursEnumerator.Current;
 						var nearbys = neighbour.AllCells()
 							.SelectMany(cell => Nearby(ref cell, true))
 							.Distinct()
@@ -481,18 +480,18 @@ namespace AchtungMod
 							var thing = nearbys[j];
 							if (visitedNeighbours.Contains(thing) == false)
 							{
-								if (HasJob(thing))
+								if (neighbours.Contains(thing) == false && HasJob(thing))
 								{
 									var item = new LocalTargetInfo(thing);
 									_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
-									newNeighbours.Add(thing);
+									_ = newNeighbours.Add(thing);
 								}
 								_ = visitedNeighbours.Add(thing);
 							}
 						}
 						yield return null;
 					}
-					neighbours = newNeighbours.ToList();
+					neighbours = newNeighbours;
 					yield return null;
 				}
 			}

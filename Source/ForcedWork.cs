@@ -167,7 +167,7 @@ namespace AchtungMod
 			return allForcedJobs[pawn].count == 1;
 		}
 
-		public static LocalTargetInfo HasJobItem(Pawn pawn, WorkGiver_Scanner workgiver, IntVec3 pos)
+		public static LocalTargetInfo HasJobItem(Pawn pawn, WorkGiver_Scanner workgiver, IntVec3 pos, bool expandSearch)
 		{
 			var radial = GenRadial.ManualRadialPattern;
 			for (var i = 0; i < radial.Length; i++)
@@ -182,6 +182,8 @@ namespace AchtungMod
 					if (thing.GetThingJob(pawn, workgiver, true) != null)
 						return new LocalTargetInfo(thing);
 				}
+
+				if (expandSearch == false) break;
 			}
 			return null;
 		}

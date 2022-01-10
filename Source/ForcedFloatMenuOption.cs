@@ -192,28 +192,29 @@ namespace AchtungMod
 			forcedWork.Prepare(forcePawn);
 
 			var workgiverDefs = ForcedWork.GetCombinedDefs(forceWorkgiver);
-			foreach (var workgiverDef in workgiverDefs)
-			{
-				var workgiver = workgiverDef.giverClass == null ? null : workgiverDef.Worker as WorkGiver_Scanner;
-				if (workgiver == null) continue;
-
-				var item = ForcedWork.HasJobItem(forcePawn, workgiver, cell);
-				if (item == null) continue;
-
-				Tools.CancelWorkOn(forcePawn, item);
-
-				if (forcedWork.AddForcedJob(forcePawn, workgiverDefs, item))
+			foreach (var expandSearch in new[] { false, true })
+				foreach (var workgiverDef in workgiverDefs)
 				{
-					var job = ForcedWork.GetJobItem(forcePawn, workgiver, item);
-					var success = job != null && forcePawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, cell);
-					if (success == false)
+					var workgiver = workgiverDef.giverClass == null ? null : workgiverDef.Worker as WorkGiver_Scanner;
+					if (workgiver == null) continue;
+
+					var item = ForcedWork.HasJobItem(forcePawn, workgiver, cell, expandSearch);
+					if (item == null) continue;
+
+					Tools.CancelWorkOn(forcePawn, item);
+
+					if (forcedWork.AddForcedJob(forcePawn, workgiverDefs, item))
 					{
-						forcedWork.Prepare(forcePawn); // AddForcedJob unprepares, so re-enable it
-						continue;
+						var job = ForcedWork.GetJobItem(forcePawn, workgiver, item);
+						var success = job != null && forcePawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, cell);
+						if (success == false)
+						{
+							forcedWork.Prepare(forcePawn); // AddForcedJob unprepares, so re-enable it
+							continue;
+						}
 					}
+					return true;
 				}
-				return true;
-			}
 
 			forcedWork.RemoveForcedJob(forcePawn);
 			Messages.Message(forcePawn.Name.ToStringShort + " could not find more forced work. The remaining work is most likely reserved or not accessible.", MessageTypeDefOf.RejectInput);
