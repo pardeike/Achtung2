@@ -1,98 +1,96 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
-	<PositioningEnabledTitle>Spezielle Positionierung von Kolonisten</PositioningEnabledTitle>
-	<PositioningEnabledExplained>Aktiviert die Mauskommandos für die Kampfpositionen (siehe Einstellungen unten)</PositioningEnabledExplained>
+	<PositioningEnabledTitle>Benutzerdef. Positionierung via Maus</PositioningEnabledTitle>
+	<PositioningEnabledExplained>Aktiviert die Kampfpositionierung beim Klicken/Ziehen der Maus (siehe Einstellungen unten).</PositioningEnabledExplained>
 
-	<AchtungModifierTitle>Achtung! Taste</AchtungModifierTitle>
-	<AchtungModifierExplained>Diese Taste versetzt beim Positionieren Kolonisten in den Kampfmodus.
-Während des Rechtsklicks gedrückt halten um die Formation beim Bewegen an die Mausposition beizubehalten
-Die Formation kann während der Bewegung mit Q und E rotiert werden</AchtungModifierExplained>
+	<AchtungModifierTitle>Achtung!-Taste</AchtungModifierTitle>
+	<AchtungModifierExplained>Wenn du diese Taste gedrückt hältst und deine Kolonisten via Rechtsklick bewegst, werden sie automatisch in den Kampfmodus versetzt. Beim Halten können die ausgewählten Kolonisten in ihrer aktuellen Formation an deinem Mauszeiger bewegt werden. Die Formation kann mittels Q und E rotiert werden.</AchtungModifierExplained>
 
-	<ForceCommandMenuModeTitle>Kontextmenümodus</ForceCommandMenuModeTitle>
-	<ForceCommandMenuModeExplained>Auto = Normales Verhalten (Kampfmodus entscheidet)\nZeige Menü = Für das Kontextmenu, Taste gedrückt halten\nSetze Position = Für das Positionieren, Taste gedrückt halten</ForceCommandMenuModeExplained>
-	<ForceCommandMenuKeyTitle>Kontextmenütaste</ForceCommandMenuKeyTitle>
+	<ForceCommandMenuModeTitle>Kontextmenü-Modus</ForceCommandMenuModeTitle>
+	<ForceCommandMenuModeExplained>Auto = Normales Verhalten (Kampfmodus entscheidet)\nMenü anzeigen = Taste für Kontextmenüanzeige gedrückt halten\nPositionieren = Taste zum Positionieren gedrückt halten</ForceCommandMenuModeExplained>
+	<ForceCommandMenuKeyTitle>Kontextmenü-Taste</ForceCommandMenuKeyTitle>
 
-	<ForcedCommandState>Angewiesen bis zum Ende zu arbeiten.</ForcedCommandState>
+	<ForcedCommandState>Gezwungen zu arbeiten, bis alles erledigt ist.</ForcedCommandState>
 
-	<ForceMenuButtonText>Erzwinge</ForceMenuButtonText>
+	<ForceMenuButtonText>Erzw.</ForceMenuButtonText>
 
-	<IncreaseForceRadius>Radius größer</IncreaseForceRadius>
-	<IncreaseForceRadiusDesc>Erhöht die Suchentfernung für erzwungene Arbeit (momentan {0})</IncreaseForceRadiusDesc>
-	<DecreaseForceRadius>Radius kleiner</DecreaseForceRadius>
-	<DecreaseForceRadiusDesc>Verringert die Suchentfernung für erzwungene Arbeit (momentan {0})</DecreaseForceRadiusDesc>
+	<IncreaseForceRadius>Radius vergrößern</IncreaseForceRadius>
+	<IncreaseForceRadiusDesc>Vergrößere den Suchbereich für erzw. Arbeit (der aktuelle Radius ist {0}).</IncreaseForceRadiusDesc>
+	<DecreaseForceRadius>Radius verkleinern</DecreaseForceRadius>
+	<DecreaseForceRadiusDesc>Verkleinere den Suchbereich für erzw. Arbeit (der aktuelle Radius ist {0}).</DecreaseForceRadiusDesc>
 	<BuildingSmart>Cleveres Bauen</BuildingSmart>
-	<BuildingSmartDesc>Cleveres Bauen verhindert Löcher oder Feststecken aber ist langsamer und wird immer in Kreisen um den Startpunkt ausführt</BuildingSmartDesc>
+	<BuildingSmartDesc>Cleveres Bauen verhindert, dass Lücken entstehen oder der Bauarbeiter stecken bleibt, ist aber langsamer und erfolgt immer um den Startpunkt herum.</BuildingSmartDesc>
 
-	<Notes>Notizen</Notes>
-	<Note1>Mit Achtung enthält das Kontextmenu sowohl normale als auch Kampfkommandos</Note1>
-	<Note2>Während Kolonisten entlang einer Linie positioniert werden, versetzt ein Rechtsklick sie in die Kampfposition</Note2>
+	<Notes>Hinweise</Notes>
+	<Note1>Wenn du Achtung! verwendest, enthält das Kontextmenü sowohl normale als auch kampfrelevante Befehle.</Note1>
+	<Note2>Wenn du deine Kolonisten via Achtung!-Taste + Rechtsklick bewegst, werden sie automatisch in den Kampfmodus versetzt.</Note2>
 
 	<CommandMenuModeOptionAuto>Auto</CommandMenuModeOptionAuto>
-	<CommandMenuModeOptionPressForMenu>Zeige Menü</CommandMenuModeOptionPressForMenu>
-	<CommandMenuModeOptionPressForPosition>Setze Position</CommandMenuModeOptionPressForPosition>
+	<CommandMenuModeOptionPressForMenu>Menü anzeigen</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForPosition>Positionieren</CommandMenuModeOptionPressForPosition>
 
 	<AchtungModKeyOptionNone>Keine</AchtungModKeyOptionNone>
 	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
-	<AchtungModKeyOptionCtrl>Ctrl</AchtungModKeyOptionCtrl>
-	<AchtungModKeyOptionShift>Shift</AchtungModKeyOptionShift>
+	<AchtungModKeyOptionCtrl>Strg</AchtungModKeyOptionCtrl>
+	<AchtungModKeyOptionShift>Umschalt</AchtungModKeyOptionShift>
 	<AchtungModKeyOptionMeta>Win/Cmd</AchtungModKeyOptionMeta>
 
-	<BreakLevelTitle>Mentale Zusammenbruchsgrenze</BreakLevelTitle>
-	<BreakLevelExplained>Setzt eine obere Grenze für ausgeführte Achtung! Jobs</BreakLevelExplained>
+	<BreakLevelTitle>Nervenzusammenbruch bei erzw. Arbeit</BreakLevelTitle>
+	<BreakLevelExplained>Bestimme die Stärke des Nervenzusammenbruchs, die Kolonisten dazu veranlasst, ihre erzw. Arbeit automatisch zu beenden.</BreakLevelExplained>
 	<BreakLevelOptionNone>Ignorieren</BreakLevelOptionNone>
-	<BreakLevelOptionMinor>Gering</BreakLevelOptionMinor>
-	<BreakLevelOptionMajor>Bedeutent</BreakLevelOptionMajor>
+	<BreakLevelOptionMinor>Leicht</BreakLevelOptionMinor>
+	<BreakLevelOptionMajor>Schwer</BreakLevelOptionMajor>
 	<BreakLevelOptionAlmostExtreme>Fast extrem</BreakLevelOptionAlmostExtreme>
 	<BreakLevelOptionExtreme>Extrem</BreakLevelOptionExtreme>
 
-	<HealthLevelTitle>Erlaubter Gesundheitszustand</HealthLevelTitle>
-	<HealthLevelExplained>Setzt eine Gesundheitsgrenze für ausgeführte Achtung! Jobs</HealthLevelExplained>
+	<HealthLevelTitle>Gesundheitszustand bei erzw. Arbeit</HealthLevelTitle>
+	<HealthLevelExplained>Bestimme den Gesundheitszustand, der Kolonisten dazu veranlasst, ihre erzw. Arbeit automatisch zu beenden.</HealthLevelExplained>
 	<HealthLevelOptionNone>Ignorieren</HealthLevelOptionNone>
-	<HealthLevelOptionShouldBeTendedNow>Einfache Hilfe</HealthLevelOptionShouldBeTendedNow>
-	<HealthLevelOptionPrefersMedicalRest>Medizinische Hilfe</HealthLevelOptionPrefersMedicalRest>
-	<HealthLevelOptionNeedsMedicalRest>Notwendige Bettruhe</HealthLevelOptionNeedsMedicalRest>
+	<HealthLevelOptionShouldBeTendedNow>Jetzt behandelbar</HealthLevelOptionShouldBeTendedNow>
+	<HealthLevelOptionPrefersMedicalRest>Medizinische Behandlung</HealthLevelOptionPrefersMedicalRest>
+	<HealthLevelOptionNeedsMedicalRest>Benötigt Bettruhe</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>Schockzustand</HealthLevelOptionInPainShock>
 
-	<IgnoreForbiddenTitle>Ignoriere verbotene Dinge</IgnoreForbiddenTitle>
-	<IgnoreForbiddenExplained>Ignoriert verbotene (rotes Kreuz) Dinge während erzwungener Arbeit</IgnoreForbiddenExplained>
-	<IgnoreRestrictionsTitle>Ignoriere Zonenbegrenzungen</IgnoreRestrictionsTitle>
-	<IgnoreRestrictionsExplained>Ignoriert Zonen während erzwungener Arbeit</IgnoreRestrictionsExplained>
-	<IgnoreAssignmentsTitle>Ignoriere Arbeitseinstellungen</IgnoreAssignmentsTitle>
-	<IgnoreAssignmentsExplained>Ignoriert leere, unzugewiesene Arbeitsprioriteten</IgnoreAssignmentsExplained>
+	<IgnoreForbiddenTitle>Verbotene Objekte ignorieren</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Kolonisten ignorieren verbotene Objekte bei erzw. Arbeiten.</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>Sperrgebiete ignorieren</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Kolonisten ignorieren Zonenbeschränkungen bei erzw. Arbeiten.</IgnoreRestrictionsExplained>
+	<IgnoreAssignmentsTitle>Arbeitszuweisungen ignorieren</IgnoreAssignmentsTitle>
+	<IgnoreAssignmentsExplained>Kolonisten ignorieren ungesetzte Arbeitsprioritäten.</IgnoreAssignmentsExplained>
 
-	<BuildingSmartDefaultTitle>Cleveres Bauen als Vorwahl für neue Achtung! Jobs</BuildingSmartDefaultTitle>
-	<BuildingSmartDefaultExplained>Schaltet den schlaueren Baumodus für neue Jobs an</BuildingSmartDefaultExplained>
+	<BuildingSmartDefaultTitle>Cleveres Bauen für neue erzw. Arbeiten aktivieren</BuildingSmartDefaultTitle>
+	<BuildingSmartDefaultExplained>Ändert die Standardbauweise bei erzw. Arbeiten.</BuildingSmartDefaultExplained>
 
-	<WorkMarkersTitle>Erzwungene Arbeitspositionen</WorkMarkersTitle>
-	<WorkMarkersExplained>Stellen mit erzwungener Arbeit werden mit Markierungen angezeigt</WorkMarkersExplained>
-	<WorkMarkersOptionAnimated>Animieren</WorkMarkersOptionAnimated>
+	<WorkMarkersTitle>Symbole für erzw. Arbeiten</WorkMarkersTitle>
+	<WorkMarkersExplained>Erzw. Arbeiten werden mit kleinen Symbolen gekennzeichnet.</WorkMarkersExplained>
+	<WorkMarkersOptionAnimated>Animiert</WorkMarkersOptionAnimated>
 	<WorkMarkersOptionStatic>Statisch</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Aus</WorkMarkersOptionOff>
 
-	<MaxForcedItemsTitle>Maximale Anzahl erzwungener Sachen</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Begrenzt die Menge erzwungener Arbeit für langsame Computer</MaxForcedItemsExplained>
+	<MaxForcedItemsTitle>Limit erzw. Objekte</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Begrenzt die Anzahl erzw. Objekte für langsamere Computer.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Unbegrenzt</MaxForcedItemsUnlimited>
 
 	<JobInterruptedLabel>Abgebrochen: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
-	<JobInterruptedBadHealth>{0} ist in schlechter gesundheitlicher Verfassung</JobInterruptedBadHealth>
+	<JobInterruptedBadHealth>{0} ist in schlechter Verfassung</JobInterruptedBadHealth>
 
-	<CleanRoomLabel>Diesen Raum säubern</CleanRoomLabel>
-	<CleanRoomInfoText>Raum wird gesäubert</CleanRoomInfoText>
-	<CleanRoomDescription>Einen Raum komplett sauber machen</CleanRoomDescription>
-	<CleanRoomReport>Säubere{0}: {1}</CleanRoomReport>
+	<CleanRoomLabel>Reinige diesen Raum</CleanRoomLabel>
+	<CleanRoomInfoText>Raum gründlich reinigen</CleanRoomInfoText>
+	<CleanRoomDescription>Reinige einen Raum, bis er komplett sauber ist.</CleanRoomDescription>
+	<CleanRoomReport>Reinigt{0}: {1}</CleanRoomReport>
 
-	<FireFightLabel>Bekämpfe Feuer</FireFightLabel>
-	<FireFightInfoText>Bekämpfe ein Feuer</FireFightInfoText>
-	<FireFightDescription>Bekämpft Feuer (auch ausserhalb des Heimgebietes)</FireFightDescription>
-	<FireFightReport>Bekämpfe Feuer: {0}</FireFightReport>
+	<FireFightLabel>Lösche Feuer</FireFightLabel>
+	<FireFightInfoText>Feuer löschen</FireFightInfoText>
+	<FireFightDescription>Lösche ein Feuer (auch außerhalb des Heimatgebiets).</FireFightDescription>
+	<FireFightReport>Löscht Feuer: {0}</FireFightReport>
 
-	<SowZoneLabel>Sähe Zone/Raum</SowZoneLabel>
-	<SowZoneInfoText>Sähe eine Zone/Raum</SowZoneInfoText>
-	<SowZoneDescription>Säht eine komplette Zone oder Raum</SowZoneDescription>
-	<SowZoneReport>Sähe{0}: {1}</SowZoneReport>
+	<SowZoneLabel>Baue Pflanzen in dieser Zone/Raum an</SowZoneLabel>
+	<SowZoneInfoText>Pflanzen in Zone/Raum anbauen</SowZoneInfoText>
+	<SowZoneDescription>Baue Pflanzen in einer Zone oder einem Raum an.</SowZoneDescription>
+	<SowZoneReport>Baut{0} an: {1}</SowZoneReport>
 
-	<AlreadyDoing>(Job #{0})</AlreadyDoing>
+	<AlreadyDoing>(Arbeit #{0})</AlreadyDoing>
 
 </LanguageData>
