@@ -95,4 +95,8 @@ The formation can be rotated using Q and E</AchtungModifierExplained>
 
 	<AlreadyDoing>(Job #{0})</AlreadyDoing>
 
+	<CouldNotFindMoreForcedWork>{0} could not find more forced work. The remaining work is most likely reserved or not accessible.</CouldNotFindMoreForcedWork>
+	<NoForcedWork>No forced work</NoForcedWork>
+	<ForcedWorkWasInterrupted>Forced work of {0} was interrupted.</ForcedWorkWasInterrupted>
+
 </LanguageData>

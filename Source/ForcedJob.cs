@@ -280,7 +280,7 @@ namespace AchtungMod
 			}
 
 			if (exist)
-				Find.LetterStack.ReceiveLetter("No forced work", pawn.Name.ToStringShort + " could not find more forced work. The remaining work is most likely reserved or not accessible.", LetterDefOf.NeutralEvent, pawn);
+				Find.LetterStack.ReceiveLetter("NoForcedWork".Translate(), "CouldNotFindMoreForcedWork".Translate(pawn.Name.ToStringShort), LetterDefOf.NeutralEvent, pawn);
 
 			return false;
 		}
@@ -307,7 +307,7 @@ namespace AchtungMod
 
 			if (condition == JobCondition.InterruptForced)
 			{
-				Messages.Message("Forced work of " + pawn.Name.ToStringShort + " was interrupted.", MessageTypeDefOf.RejectInput);
+				Messages.Message("ForcedWorkWasInterrupted".Translate(pawn.Name.ToStringShort), MessageTypeDefOf.RejectInput);
 				forcedWork.Remove(pawn);
 				return Performance.ContinueJob_Stop(false);
 			}

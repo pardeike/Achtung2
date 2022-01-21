@@ -93,4 +93,8 @@
 
 	<AlreadyDoing>(Arbeit #{0})</AlreadyDoing>
 
+	<CouldNotFindMoreForcedWork>{0} konnte keine erzw. Arbeit finden. Die verbleibende Arbeit ist wahrscheinlich reserviert oder nicht zugänglich.</CouldNotFindMoreForcedWork>
+	<NoForcedWork>Keine erzw. Arbeit.</NoForcedWork>
+	<ForcedWorkWasInterrupted>Erzw. Arbeit von {0} wurde unterbrochen.</ForcedWorkWasInterrupted>
+
 </LanguageData>

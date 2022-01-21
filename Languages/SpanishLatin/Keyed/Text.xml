@@ -88,4 +88,8 @@ La formación puede rotar usando las teclas Q y E.</AchtungModifierExplained>
 
 	<AlreadyDoing>(Job #{0})</AlreadyDoing>
 
+	<CouldNotFindMoreForcedWork>{0} No se pudo encontrar más trabajo forzado.El trabajo restante es muy probablemente reservado o no accesible.</CouldNotFindMoreForcedWork>
+	<NoForcedWork>No hay trabajo forzado</NoForcedWork>
+	<ForcedWorkWasInterrupted>Se interrumpió el trabajo forzado de {0}.</ForcedWorkWasInterrupted>
+
 </LanguageData>

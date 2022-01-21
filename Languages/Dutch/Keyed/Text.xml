@@ -93,4 +93,8 @@
 
 	<AlreadyDoing>(Taak #{0})</AlreadyDoing>
 
+	<CouldNotFindMoreForcedWork>{0} kon niet meer gedwongen werk vinden.Het resterende werk is waarschijnlijk gereserveerd of niet toegankelijk.</CouldNotFindMoreForcedWork>
+	<NoForcedWork>Geen gedwongen werk</NoForcedWork>
+	<ForcedWorkWasInterrupted>Geforceerd werk van {0} werd onderbroken.</ForcedWorkWasInterrupted>
+
 </LanguageData>
