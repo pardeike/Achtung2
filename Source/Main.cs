@@ -1,4 +1,5 @@
-﻿using BrrainzTools;
+﻿using Brrainz;
+using BrrainzTools;
 using HarmonyLib;
 using Multiplayer.API;
 using RimWorld;
@@ -35,6 +36,8 @@ namespace AchtungMod
 			//
 			if (MP.enabled)
 				MP.RegisterAll();
+
+			CrossPromotion.Install(76561197973010050);
 		}
 	}
 

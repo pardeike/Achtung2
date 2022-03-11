@@ -153,11 +153,11 @@ namespace BrrainzTools
 			return AddMetadata(info.Transpilers.OrderBy(t => t.priority).Select(t => t.PatchMethod));
 		}
 
-		static IEnumerable<ModInfo> GetFinalizers(Patches info)
+		/*static IEnumerable<ModInfo> GetFinalizers(Patches info)
 		{
 			if (info == null) return new List<ModInfo>().AsEnumerable();
 			return AddMetadata(info.Finalizers.OrderBy(t => t.priority).Select(t => t.PatchMethod));
-		}
+		}*/
 
 		static ModMetaData GetModMetaData(Assembly assembly)
 		{
