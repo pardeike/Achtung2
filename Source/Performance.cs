@@ -61,13 +61,15 @@ namespace AchtungMod
 			if (enabled) w_ContinueJob.Restart();
 		}
 
-		public static bool ContinueJob_Stop(bool result)
+		public static bool ContinueJob_Stop(ForcedJob forcedJob, bool result)
 		{
 			if (enabled)
 			{
 				var elapsed = w_ContinueJob.ElapsedMilliseconds;
 				ContinueJob_Max = Math.Max(ContinueJob_Max, elapsed);
 			}
+			if (forcedJob != null)
+				forcedJob.reentranceFlag = false;
 			return result;
 		}
 

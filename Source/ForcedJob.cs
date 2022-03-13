@@ -45,6 +45,7 @@ namespace AchtungMod
 		public Pawn pawn = null;
 		public List<WorkGiverDef> workgiverDefs = new List<WorkGiverDef>();
 		public bool isThingJob = false;
+		public bool reentranceFlag = false;
 		public IntVec3 lastLocation = IntVec3.Invalid;
 		public Thing lastThing = null;
 		public bool initialized = false;
@@ -310,18 +311,21 @@ namespace AchtungMod
 			var forcedJob = forcedWork.GetForcedJob(pawn);
 			Performance.Report(forcedJob, pawn);
 			if (forcedJob == null)
-				return Performance.ContinueJob_Stop(false);
+				return Performance.ContinueJob_Stop(null, false);
+			if (forcedJob.reentranceFlag)
+				return Performance.ContinueJob_Stop(forcedJob, false);
+			forcedJob.reentranceFlag = true;
 			if (forcedJob.initialized == false)
 			{
 				forcedJob.initialized = true;
-				return Performance.ContinueJob_Stop(false);
+				return Performance.ContinueJob_Stop(forcedJob, false);
 			}
 
 			if (condition == JobCondition.InterruptForced)
 			{
 				Messages.Message("ForcedWorkWasInterrupted".Translate(pawn.Name.ToStringShort), MessageTypeDefOf.RejectInput);
 				forcedWork.Remove(pawn);
-				return Performance.ContinueJob_Stop(false);
+				return Performance.ContinueJob_Stop(forcedJob, false);
 			}
 
 			forcedJob.ExpandTargets();
@@ -337,7 +341,7 @@ namespace AchtungMod
 					job.playerForced = true;
 					ForcedWork.QueueJob(pawn, job);
 					Performance.GetNextJob_Stop();
-					return Performance.ContinueJob_Stop(true);
+					return Performance.ContinueJob_Stop(forcedJob, true);
 				}
 
 				forcedWork.RemoveForcedJob(pawn);
@@ -349,7 +353,7 @@ namespace AchtungMod
 			Performance.GetNextJob_Stop();
 
 			forcedWork.Remove(pawn);
-			return Performance.ContinueJob_Stop(false);
+			return Performance.ContinueJob_Stop(forcedJob, false);
 		}
 
 		public void ChangeCellRadius(int delta)
