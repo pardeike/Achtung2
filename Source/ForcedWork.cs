@@ -77,6 +77,11 @@ namespace AchtungMod
 
 		public void UpdatePawnForcedJobs(Pawn pawn, ForcedJobs jobs)
 		{
+			if (pawn.thinker == null)
+			{
+				pawn.thinker = new Pawn_AchtungThinker(pawn) { forcedJobs = jobs };
+				return;
+			}
 			if (pawn.thinker is Pawn_AchtungThinker achtungThinker)
 				achtungThinker.forcedJobs = jobs;
 		}
@@ -107,6 +112,13 @@ namespace AchtungMod
 			if (allForcedJobs.TryGetValue(pawn, out var forcedJobs) == false)
 				return false;
 			return forcedJobs.count > 0;
+		}
+
+		public ForcedJobs GetForcedJobsInstance(Pawn pawn)
+		{
+			if (allForcedJobs.TryGetValue(pawn, out var forcedJobs))
+				return forcedJobs;
+			return new ForcedJobs();
 		}
 
 		public ForcedJob GetForcedJob(Pawn pawn)
@@ -155,16 +167,22 @@ namespace AchtungMod
 
 		public bool AddForcedJob(Pawn pawn, List<WorkGiverDef> workgiverDefs, LocalTargetInfo item)
 		{
-			Unprepare(pawn);
-
-			var forcedJob = new ForcedJob(pawn, item, workgiverDefs);
 			if (allForcedJobs.ContainsKey(pawn) == false)
 				allForcedJobs[pawn] = new ForcedJobs();
+
+			var firstJob = allForcedJobs[pawn].count == 0;
+			if (firstJob)
+				Prepare(pawn);
+			else
+				Unprepare(pawn);
+
+			var forcedJob = new ForcedJob(pawn, item, workgiverDefs);
 			allForcedJobs[pawn].jobs.Add(forcedJob);
 			allForcedJobs[pawn].UpdateCount();
+
 			hasForcedJobs = allForcedJobs.Count > 0;
 			UpdatePawnForcedJobs(pawn, allForcedJobs[pawn]);
-			return allForcedJobs[pawn].count == 1;
+			return firstJob;
 		}
 
 		public static LocalTargetInfo HasJobItem(Pawn pawn, WorkGiver_Scanner workgiver, IntVec3 pos, bool expandSearch)
@@ -308,7 +326,6 @@ namespace AchtungMod
 
 				_ = allForcedJobs.RemoveAll(pair => pair.Value.count == 0);
 				hasForcedJobs = allForcedJobs.Count > 0;
-				allForcedJobs.Do(pair => UpdatePawnForcedJobs(pair.Key, pair.Value));
 			}
 		}
 

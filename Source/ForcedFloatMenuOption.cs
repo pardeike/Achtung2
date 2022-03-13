@@ -171,10 +171,9 @@ namespace AchtungMod
 						var job = ForcedWork.GetJobItem(forcePawn, workgiver, item);
 						var success = job != null && forcePawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, cell);
 						if (success == false)
-						{
-							forcedWork.Prepare(forcePawn); // AddForcedJob unprepares, so re-enable it
 							continue;
-						}
+						else
+							ForcedWork.Instance.Unprepare(forcePawn);
 					}
 					return true;
 				}

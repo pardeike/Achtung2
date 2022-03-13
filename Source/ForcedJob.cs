@@ -103,6 +103,7 @@ namespace AchtungMod
 			lastLocation = item.Cell;
 
 			isThingJob = item.HasThing;
+			Expand();
 			CreateCoroutines();
 		}
 
@@ -143,6 +144,17 @@ namespace AchtungMod
 					.Distinct();
 			else
 				return validTargets.Select(target => target.item.Cell);
+		}
+
+		public void Expand()
+		{
+			var count = Achtung.Settings.maxForcedItems;
+			var iterator = ExpandThingTargets();
+			for (var i = 1; i < count; i++)
+				_ = iterator.MoveNext();
+			iterator = ExpandCellTargets();
+			for (var i = 1; i < count; i++)
+				_ = iterator.MoveNext();
 		}
 
 		public IEnumerable<WorkGiver_Scanner> WorkGivers => workgiverDefs

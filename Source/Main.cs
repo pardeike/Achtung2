@@ -175,7 +175,8 @@ namespace AchtungMod
 			}
 			if (t != typeof(Pawn_Thinker))
 				Log.Error($"Achtung identified a potential mod conflict: The instance for pawn.thinker is of type {t} but should be {typeof(Pawn_Thinker)}. As a result Achtung performance is degraded");
-			pawn.thinker = new Pawn_AchtungThinker(pawn);
+
+			pawn.thinker = new Pawn_AchtungThinker(pawn) { forcedJobs = ForcedWork.Instance.GetForcedJobsInstance(pawn) };
 		}
 	}
 
@@ -304,19 +305,6 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(ForbidUtility.InAllowedArea))]
 	static class ForbidUtility_InAllowedArea_Patch
 	{
-		// public static bool Prepare() => Achtung.Settings.ignoreRestrictions;
-
-		/*public static void FixPatch()
-		{
-			var method = SymbolExtensions.GetMethodInfo(() => ForbidUtility.InAllowedArea(default, default));
-			var hasPatch = Harmony.GetPatchInfo(method)?.Owners.Contains(Achtung.harmony.Id) ?? false;
-			if (Prepare() != hasPatch)
-			{
-				if (hasPatch) Achtung.harmony.Unpatch(method, HarmonyPatchType.All, Achtung.harmony.Id);
-				else _ = new PatchClassProcessor(Achtung.harmony, typeof(ForbidUtility_InAllowedArea_Patch)).Patch();
-			}
-		}*/
-
 		public static void Postfix(IntVec3 c, Pawn forPawn, ref bool __result)
 		{
 			var map = forPawn?.Map;
@@ -324,6 +312,9 @@ namespace AchtungMod
 				return;
 
 			var forcedWork = ForcedWork.Instance;
+			if (forcedWork.hasForcedJobs == false)
+				return;
+
 			if (forcedWork.HasForcedJob(forPawn))
 			{
 				if (Achtung.Settings.ignoreRestrictions)
@@ -334,7 +325,7 @@ namespace AchtungMod
 			if (__result == true)
 			{
 				// ignore any forced work cells if colonist is not forced
-				if (forcedWork.hasForcedJobs && forcedWork.IsForbiddenCell(map, c))
+				if (forcedWork.IsForbiddenCell(map, c))
 					__result = false;
 			}
 		}
