@@ -195,7 +195,8 @@ namespace AchtungMod
 			return targets
 				.Where(target => target.IsValidTarget() && Tools.IsFreeTarget(pawn, target))
 				.OrderByDescending(target => target.materialScore)
-				.Select(target => target.item.Thing);
+				.Select(target => target.item.Thing)
+				.OfType<Thing>();
 		}
 
 		public IEnumerable<LocalTargetInfo> GetSortedTargets(HashSet<int> planned)
@@ -275,7 +276,7 @@ namespace AchtungMod
 					{
 						job = item.Cell.GetCellJob(pawn, workgiver);
 						if (job == null)
-							job = item.Thing.GetThingJob(pawn, workgiver);
+							job = item.Thing?.GetThingJob(pawn, workgiver);
 					}
 
 					if (job != null)
@@ -476,7 +477,7 @@ namespace AchtungMod
 					continue;
 
 				var visitedNeighbours = new HashSet<Thing>();
-				var neighbours = targets.Select(target => target.item.Thing).Where(thing => thing.Spawned).ToHashSet();
+				var neighbours = targets.Select(target => target.item.Thing).OfType<Thing>().Where(thing => thing.Spawned).ToHashSet();
 				while (cancelled == false && neighbours.Count > 0 && (Achtung.Settings.maxForcedItems >= AchtungSettings.UnlimitedForcedItems || neighbours.Count < Achtung.Settings.maxForcedItems))
 				{
 					var newNeighbours = new HashSet<Thing>();
@@ -575,6 +576,7 @@ namespace AchtungMod
 				}
 
 				var cells = targets.Select(target => target.item.Thing)
+					.OfType<Thing>()
 					.SelectMany(thing => thing.AllCells())
 					.Union(targets.Select(target => target.item.Cell))
 					.Distinct()
@@ -587,7 +589,7 @@ namespace AchtungMod
 					var cell = cells[i];
 					if (HasJob(ref cell) == false)
 						if (pawn.Map.thingGrid.ThingsListAtFast(cell).All(thing => thing.Spawned == false || HasJob(thing) == false))
-							_ = targets.RemoveWhere(target => target.item.Cell == cell || target.item.Thing.AllCells().Contains(cell));
+							_ = targets.RemoveWhere(target => target.item.Cell == cell || (target.item.Thing?.AllCells().Contains(cell) ?? false));
 					if (i % (tm.Paused ? 64 : 4) == 0)
 					{
 						yielded = true;
