@@ -200,7 +200,7 @@ namespace AchtungMod
 	//
 	[HarmonyPatch(typeof(Pawn_WorkSettings))]
 	[HarmonyPatch(nameof(Pawn_WorkSettings.WorkIsActive))]
-	static class GenConstruct_CanConstruct_Patch
+	static class Pawn_WorkSettings_WorkIsActive_Patch
 	{
 		public static void Postfix(Pawn ___pawn, WorkTypeDef w, ref bool __result)
 		{

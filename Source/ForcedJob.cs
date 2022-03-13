@@ -552,6 +552,12 @@ namespace AchtungMod
 					continue;
 				}
 
+				if (ForcedWork.Instance.HasForcedJob(pawn) == false)
+				{
+					yield return null;
+					continue;
+				}
+
 				var cells = targets.Select(target => target.item.Thing)
 					.SelectMany(thing => thing.AllCells())
 					.Union(targets.Select(target => target.item.Cell))
