@@ -1,7 +1,10 @@
 ﻿using RimWorld;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Verse;
 using Verse.AI;
+using static RimWorld.MechClusterSketch;
+using static UnityEngine.GraphicsBuffer;
 
 namespace AchtungMod
 {
@@ -37,7 +40,28 @@ namespace AchtungMod
 				}
 			}
 
-			var bestCell = RCellFinder.BestOrderedGotoDestNear(cell, pawn);
+			var bestCell = IntVec3.Invalid;
+			if (ModsConfig.BiotechActive && pawn.IsColonyMech && MechanitorUtility.InMechanitorCommandRange(pawn, cell) == false)
+			{
+				var overseer = pawn.GetOverseer();
+				var map = overseer.MapHeld;
+				if (map == pawn.MapHeld)
+				{ 
+					var mechanitor = overseer.mechanitor;
+					foreach (var newPos in GenRadial.RadialCellsAround(cell, 20f, false))
+						if (mechanitor.CanCommandTo(newPos))
+							if (map.pawnDestinationReservationManager.CanReserve(newPos, pawn, true) 
+								&& newPos.Standable(map) 
+								&& pawn.CanReach(newPos, PathEndMode.OnCell, Danger.Deadly, false, false, TraverseMode.ByPawn)
+							)
+							{
+								bestCell = newPos;
+								break;
+							}
+				}
+			}
+			else
+				bestCell = RCellFinder.BestOrderedGotoDestNear(cell, pawn);
 			if (bestCell.InBounds(pawn.Map))
 			{
 				designation = bestCell;
