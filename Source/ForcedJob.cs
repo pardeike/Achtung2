@@ -306,7 +306,7 @@ namespace AchtungMod
 			_ = tracker;
 			_ = lastJob;
 
-			if (pawn == null || pawn.IsColonist == false) return false;
+			if (pawn == null || (pawn.IsColonist == false && pawn.IsColonyMech == false)) return false;
 			var forcedWork = ForcedWork.Instance;
 
 			var forcedJob = forcedWork.GetForcedJob(pawn);

@@ -102,7 +102,7 @@ namespace AchtungMod
 			var cell = IntVec3.FromVector3(pos);
 
 			var thingsClicked = map.thingGrid.ThingsListAt(cell);
-			var subjectClicked = thingsClicked.OfType<Pawn>().Where(pawn => pawn.IsColonist == false || pawn.Drafted == false).Any();
+			var subjectClicked = thingsClicked.OfType<Pawn>().Where(pawn => (pawn.IsColonist == false && pawn.IsColonyMech == false) || pawn.Drafted == false).Any();
 			var standableClicked = cell.Standable(map);
 
 			if (subjectClicked && colonists.Count > 1 && achtungPressed == false && forceMenu == false)

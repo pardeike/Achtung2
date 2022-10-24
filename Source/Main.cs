@@ -1026,9 +1026,13 @@ namespace AchtungMod
 				var handler = new ExceptionAnalyser(__exception);
 
 				var mods = handler.GetInvolvedMods(new[] { "brrainz.achtung" }).Select(info => info.metaData.GetWorkshopName() ?? info.metaData.Name).Distinct();
-				var possibleMods = mods.Any() ? $". Possible mods in order of likeliness: {mods.Join()}" : "";
+				var errorStr = "There was an error while generating the menu.";
+				if (mods.Count() == 1)
+					errorStr = $"{mods.First()} caused an error while producing this menu.";
+				else
+					errorStr = $"One of the following mods caused an error while producing this menu: {mods.Join()}.";
 				__result ??= new List<FloatMenuOption>();
-				__result.Add(new FloatMenuOption($"Achtung found that some other mod(s) caused the following error: {__exception.GetType().Name}{possibleMods}. Select to copy annotated stacktrace to clipboard", () =>
+				__result.Add(new FloatMenuOption($"{errorStr}. Select to copy enhanced stacktrace to the clipboard and report it in the RimWorld discord.", () =>
 				{
 					var te = new TextEditor { text = handler.GetStacktrace() };
 					te.SelectAll();
