@@ -72,7 +72,7 @@ namespace AchtungMod
 
 			var actions = new MultiActions(colonists, UI.MouseMapPosition());
 			var achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
-			var allDrafted = colonists.All(colonist => colonist.pawn.Drafted || achtungPressed);
+			var allDrafted = colonists.All(colonist => colonist.pawn.Drafted || colonist.pawn.IsColonyMechPlayerControlled || achtungPressed);
 			var mixedDrafted = !allDrafted && colonists.Any(colonist => colonist.pawn.Drafted);
 
 			var forceMenu = false;
@@ -155,14 +155,15 @@ namespace AchtungMod
 
 		private void StartDragging(Vector3 pos, bool asGroup)
 		{
-			groupMovement = asGroup;
+			var draftedColonists = colonists.Where(colonist => colonist.pawn.Drafted).ToList();
 
+			groupMovement = asGroup;
 			if (groupMovement)
 			{
-				groupCenter.x = colonists.Sum(colonist => colonist.startPosition.x) / colonists.Count;
-				groupCenter.z = colonists.Sum(colonist => colonist.startPosition.z) / colonists.Count;
+				groupCenter.x = draftedColonists.Sum(colonist => colonist.startPosition.x) / draftedColonists.Count;
+				groupCenter.z = draftedColonists.Sum(colonist => colonist.startPosition.z) / draftedColonists.Count;
 				groupRotation = 0;
-				groupRotationWas45 = Tools.Has45DegreeOffset(colonists);
+				groupRotationWas45 = Tools.Has45DegreeOffset(draftedColonists);
 			}
 			else
 			{
@@ -170,7 +171,8 @@ namespace AchtungMod
 				lineStart.y = Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays);
 			}
 
-			colonists.Do(colonist => colonist.offsetFromCenter = colonist.startPosition - groupCenter);
+			draftedColonists
+				.Do(colonist => colonist.offsetFromCenter = colonist.startPosition - groupCenter);
 
 			isDragging = true;
 			Event.current.Use();
@@ -189,6 +191,8 @@ namespace AchtungMod
 
 		public void MouseDrag(Vector3 pos)
 		{
+			var draftedColonists = colonists.Where(colonist => colonist.pawn.Drafted).ToList();
+
 			if (Event.current.button != (int)Button.right)
 				return;
 
@@ -197,19 +201,19 @@ namespace AchtungMod
 
 			if (groupMovement)
 			{
-				colonists.Do(colonist => colonist.OrderTo(pos + Tools.RotateBy(colonist.offsetFromCenter, groupRotation, groupRotationWas45)));
+				draftedColonists.Do(colonist => colonist.OrderTo(pos + Tools.RotateBy(colonist.offsetFromCenter, groupRotation, groupRotationWas45)));
 				Event.current.Use();
 				return;
 			}
 
 			lineEnd = pos;
 			lineEnd.y = Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays);
-			var count = colonists.Count;
+			var count = draftedColonists.Count;
 			var dragVector = lineEnd - lineStart;
 
 			var delta = count > 1 ? dragVector / (count - 1) : Vector3.zero;
 			var linePosition = count == 1 ? lineEnd : lineStart;
-			Tools.OrderColonistsAlongLine(colonists, lineStart, lineEnd).Do(colonist =>
+			Tools.OrderColonistsAlongLine(draftedColonists, lineStart, lineEnd).Do(colonist =>
 			{
 				colonist.OrderTo(linePosition);
 				linePosition += delta;
@@ -241,6 +245,8 @@ namespace AchtungMod
 					}
 				}
 
+				var draftedColonists = colonists.Where(colonist => colonist.pawn.Drafted).ToList();
+
 				switch (key)
 				{
 					case KeyCode.Q:
@@ -249,7 +255,7 @@ namespace AchtungMod
 							groupRotation -= 45;
 
 							var pos = UI.MouseMapPosition();
-							colonists.Do(colonist => colonist.OrderTo(pos + Tools.RotateBy(colonist.offsetFromCenter, groupRotation, groupRotationWas45)));
+							draftedColonists.Do(colonist => colonist.OrderTo(pos + Tools.RotateBy(colonist.offsetFromCenter, groupRotation, groupRotationWas45)));
 
 							Event.current.Use();
 						}
@@ -261,7 +267,7 @@ namespace AchtungMod
 							groupRotation += 45;
 
 							var pos = UI.MouseMapPosition();
-							colonists.Do(colonist => colonist.OrderTo(pos + Tools.RotateBy(colonist.offsetFromCenter, groupRotation, groupRotationWas45)));
+							draftedColonists.Do(colonist => colonist.OrderTo(pos + Tools.RotateBy(colonist.offsetFromCenter, groupRotation, groupRotationWas45)));
 
 							Event.current.Use();
 						}
