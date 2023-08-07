@@ -74,117 +74,138 @@ namespace AchtungMod
 		public static IEnumerable<Colonist> ColonistsForActions(IEnumerable<MultiAction> subActions)
 		{
 			return subActions.Select(action => action.colonist).Distinct();
-		}
+        }
 
-		private T AllEqual<T, S>(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, S> compareFunc, Func<FloatMenuOption, T> valueFunc, T defaultValue) where T : class where S : class
-		{
-			if (options.Count() == 0) return defaultValue;
-			var valueToCompare = compareFunc(options.First());
-			var result = valueFunc(options.First());
-			if (options.All(option =>
+        private T AllEqual<T>(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, FloatMenuOption, bool> compareFunc, Func<FloatMenuOption, T> valueFunc, T defaultValue = default)
+        {
+            if (options.Count() == 0) return defaultValue;
+			var firstOption = options.First();
+            var result = valueFunc(options.First());
+            if (options.All(option => compareFunc(firstOption, option)))
+                result = defaultValue;
+            return result;
+        }
+
+        private T AllEqual<T>(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, T> valueFunc, T defaultValue = default) where T : IComparable
+        {
+            if (options.Count() == 0) return defaultValue;
+            var result = valueFunc(options.First());
+            if (options.All(option => valueFunc(option)?.CompareTo(result) == 0) == false)
+                result = defaultValue;
+            return result;
+        }
+
+        private T? AllEqual<T>(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, T?> eval) where T : struct, IComparable
+        {
+            if (options.Count() == 0) return null;
+            var result = eval(options.First());
+            if (options.All(option =>
 			{
-				var val = compareFunc(option);
-				return val == null || val == valueToCompare;
+				var valueToCompare = eval(option);
+				var h1 = valueToCompare.HasValue;
+				var h2 = result.HasValue;
+                if (h1 == false && h2 == false) return true;
+				if (h1 == false || h2 == false) return false;
+				return valueToCompare.Value.CompareTo(result.Value) == 0;
 			}) == false)
-				result = defaultValue;
-			return result;
-		}
+                result = null;
+            return result;
+        }
 
-		private static float AllEqualFloat(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, float> eval, float defaultValue)
-		{
-			if (options.Count() == 0) return defaultValue;
-			var result = eval(options.First());
-			if (options.All(option => eval(option) == result) == false)
-				result = defaultValue;
-			return result;
-		}
-
-		static readonly FloatMenuSizeMode noSizeMode = (FloatMenuSizeMode)999;
-		private static FloatMenuSizeMode AllEqualFloatMenuSizeMode(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, FloatMenuSizeMode> eval)
-		{
-			if (options.Count() == 0) return noSizeMode;
-			var result = eval(options.First());
-			if (options.All(option => eval(option) == result) == false)
-				result = noSizeMode;
-			return result;
-		}
-
-		private static Color AllEqualColor(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, Color> eval, Color defaultValue)
-		{
-			if (options.Count() == 0) return defaultValue;
-			var result = eval(options.First());
-			if (!options.All(option => eval(option) == result))
-				result = defaultValue;
-			return result;
-		}
-
-		static readonly Color noColor = new Color();
+		//static readonly Color noColor = new Color();
 		public FloatMenuOption GetOption(string title, IEnumerable<MultiAction> multiActions)
 		{
 			var pawns = multiActions.Select(ma => ma.colonist.pawn).ToList();
 			var actions = multiActions.ToList();
 			var priority = actions.Max(a => a.option.Priority);
+			var orderInPriority = actions.Max(a => a.option.orderInPriority);
 
-			var options = actions.Select(action => action.option);
-			var mouseoverGuiAction = AllEqual(options, o => o.mouseoverGuiAction?.Method, o => o.mouseoverGuiAction, null);
-			var revalidateClickTarget = AllEqual(options, o => o.revalidateClickTarget, o => o.revalidateClickTarget, null);
-			var extraPartWidth = AllEqualFloat(options, o => o.extraPartWidth, 0f);
-			var extraPartOnGUI = AllEqual(options, o => o.extraPartOnGUI?.Method, o => o.extraPartOnGUI, null);
-			var revalidateWorldClickTarget = AllEqual(options, o => o.revalidateWorldClickTarget, o => o.revalidateWorldClickTarget, null);
+            var options = actions.Select(action => action.option);
+			var autoTakeable = AllEqual(options, o => o.autoTakeable);
+			var autoTakeablePriority = AllEqual(options, o => o.autoTakeablePriority);
+			var mouseoverGuiAction = AllEqual(options, (o1, o2) => o1.mouseoverGuiAction == o2.mouseoverGuiAction, o => o.mouseoverGuiAction);
+			var revalidateClickTarget = AllEqual(options, (o1, o2) => o1.revalidateClickTarget == o2.revalidateClickTarget, o => o.revalidateClickTarget);
+			var extraPartWidth = AllEqual(options, o => o.extraPartWidth);
+			var extraPartOnGUI = AllEqual(options, (o1, o2) => o1.extraPartOnGUI == o2.extraPartOnGUI, o => o.extraPartOnGUI);
+			var revalidateWorldClickTarget = AllEqual(options, (o1, o2) => o1.revalidateWorldClickTarget == o2.revalidateWorldClickTarget, o => o.revalidateWorldClickTarget);
+            var tutorTag = AllEqual(options, o => o.tutorTag);
+            var thingStyle = AllEqual(options, (o1, o2) => o1.thingStyle == o2.thingStyle, o => o.thingStyle);
+            var forceBasicStyle = AllEqual(options, o => o.forceBasicStyle);
+            var tooltip = AllEqual(options, (o1, o2) => o1.tooltip?.text == o2.tooltip?.text, o => o.tooltip);
+			var extraPartRightJustified = AllEqual(options, o => o.extraPartRightJustified);
+			var graphicIndexOverride = AllEqual(options, o => o.graphicIndexOverride);
+			var sizeMode = AllEqual(options, o => o.sizeMode);
+			var drawPlaceHolderIcon = AllEqual(options, o => o.drawPlaceHolderIcon);
+			var playSelectionSound = AllEqual(options, o => o.playSelectionSound);
+			var shownItem = AllEqual(options, (o1, o2) => o1.shownItem == o2.shownItem, o => o.shownItem);
+			var iconThing = AllEqual(options, (o1, o2) => o1.iconThing == o2.iconThing, o => o.iconThing);
+			var itemIcon = AllEqual(options, (o1, o2) => o1.itemIcon == o2.itemIcon, o => o.itemIcon);
+			var iconJustification = AllEqual(options, o => o.iconJustification);
+			var iconColor = AllEqual(options, (o1, o2) => o1.iconColor == o2.iconColor, o => o.iconColor);
+			var forceThingColor = AllEqual(options, (o1, o2) => o1.forceThingColor == o2.forceThingColor, o => o.forceThingColor);
 
-			var option = new FloatMenuOption(title, delegate
-			{
-				actions.Do(multiAction =>
-				{
-					var colonistAction = multiAction.GetAction();
-					colonistAction();
-				});
-			}, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget);
+            var option = new FloatMenuOption(
+                title,
+                () => actions.Do(multiAction => multiAction.GetAction()()),
+                iconThing,
+                iconColor,
+                priority,
+                mouseoverGuiAction,
+                revalidateClickTarget,
+                extraPartWidth,
+                extraPartOnGUI,
+                revalidateWorldClickTarget,
+                playSelectionSound,
+                orderInPriority
+            )
+            {
+                autoTakeable = autoTakeable,
+                autoTakeablePriority = autoTakeablePriority,
+                tutorTag = tutorTag,
+                thingStyle = thingStyle,
+                forceBasicStyle = forceBasicStyle,
+                tooltip = tooltip,
+                extraPartRightJustified = extraPartRightJustified,
+                graphicIndexOverride = graphicIndexOverride,
+                sizeMode = sizeMode,
+                drawPlaceHolderIcon = drawPlaceHolderIcon,
+                shownItem = shownItem,
+                itemIcon = itemIcon,
+                iconJustification = iconJustification,
+                forceThingColor = forceThingColor
+            };
 
-			// support for our special force menu options. we need to call all internal
-			// subactions from when the extra buttons calls them
-			//
-			var forcedOptions = options.OfType<ForcedFloatMenuOption>().ToList();
+            // support for our special force menu options. we need to call all internal
+            // subactions from when the extra buttons calls them
+            //
+            var forcedOptions = options.OfType<ForcedFloatMenuOption>().ToList();
 			if (extraPartOnGUI != null && forcedOptions.Count > 0)
 			{
-				option = new ForcedMultiFloatMenuOption(pawns, title)
-				{
-					options = options.OfType<ForcedFloatMenuOption>().ToList(),
-				};
+				option = new ForcedMultiFloatMenuOption(pawns, title) { options = options.OfType<ForcedFloatMenuOption>().ToList() };
 				option.extraPartOnGUI = drawRect => ((ForcedMultiFloatMenuOption)option).RenderExtraPartOnGui(drawRect);
 			}
 
-			option.action = delegate
-			{
-				actions.Do(multiAction =>
-				{
-					var colonistAction = multiAction.GetAction();
-					colonistAction();
-				});
-			};
 			option.Disabled = actions.All(a => a.option.Disabled);
-			option.mouseoverGuiAction = mouseoverGuiAction;
-			option.revalidateClickTarget = revalidateClickTarget;
-			option.extraPartWidth = extraPartWidth;
-			if (option.extraPartOnGUI == null)
-				option.extraPartOnGUI = extraPartOnGUI;
-			option.revalidateWorldClickTarget = revalidateWorldClickTarget;
-
-			var itemIcon = AllEqual(options, o => o.itemIcon, o => o.itemIcon, null);
-			if (itemIcon != null)
-			{
-				option.itemIcon = itemIcon;
-				option.iconColor = AllEqualColor(options, o => o.iconColor, noColor);
-			}
-
-			var sizeMode = AllEqualFloatMenuSizeMode(options, o => o.sizeMode);
-			if (sizeMode != noSizeMode)
-				option.sizeMode = sizeMode;
-
 			return option;
 		}
 
-		public Window GetWindow()
+        public List<FloatMenuOption> GetAutoTakeableActions()
+        {
+            var options = new List<FloatMenuOption>();
+            GetKeys().Do(key =>
+            {
+                var subActions = ActionsForKey(key).ToList();
+                var colonists = ColonistsForActions(subActions);
+                var title = subActions.First().EnhancedLabel(totalColonistsInvolved > 1 ? colonists : null);
+                var option = GetOption(title, subActions);
+                if (option.autoTakeable)
+                    options.Add(option);
+            });
+			options.SortBy(option => -option.autoTakeablePriority);
+			return options;
+        }
+
+        public Window GetWindow()
 		{
 			var options = new List<FloatMenuOption>();
 			GetKeys().Do(key =>
@@ -193,6 +214,7 @@ namespace AchtungMod
 				var colonists = ColonistsForActions(subActions);
 				var title = subActions.First().EnhancedLabel(totalColonistsInvolved > 1 ? colonists : null);
 				var option = GetOption(title, subActions);
+				Log.Warning($"{option.labelInt} [{option.autoTakeable}] [{option.autoTakeablePriority}]");
 				options.Add(option);
 			});
 

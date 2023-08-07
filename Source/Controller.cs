@@ -53,7 +53,33 @@ namespace AchtungMod
 			.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
 		}
 
-		public bool MouseDown(Vector3 pos)
+        void ShowMenu(MultiActions actions, bool forceMenu, Map map, IntVec3 cell)
+        {
+			if (actions.Count(false) > 0)
+			{
+				var optionTaken = false;
+                if (cell.InBounds(map) && forceMenu == false)
+				{
+					var autoTakableOptions = actions.GetAutoTakeableActions();
+					var first = autoTakableOptions.FirstOrDefault();
+                    if (first != null)
+					{
+						optionTaken = true;
+						first.Chosen(true, null);
+                    }
+				}
+                if (optionTaken == false)
+	               Find.WindowStack.Add(actions.GetWindow());
+			}
+			else
+			{
+				// TODO enable later
+				// Achtung.tutor.HintWithCell("position-by-key", Achtung.Settings.forceCommandMenuMode == CommandMenuMode.PressForPosition, cell);
+			}
+            Event.current.Use();
+        }
+
+        public bool MouseDown(Vector3 pos)
 		{
 			colonists = Tools.GetSelectedColonists();
 
@@ -118,14 +144,7 @@ namespace AchtungMod
 
 			if (forceMenu || (subjectClicked && achtungPressed == false) || standableClicked == false)
 			{
-				if (actions.Count(false) > 0)
-					Find.WindowStack.Add(actions.GetWindow());
-				else
-				{
-					// TODO enable later
-					// Achtung.tutor.HintWithCell("position-by-key", Achtung.Settings.forceCommandMenuMode == CommandMenuMode.PressForPosition, cell);
-				}
-				Event.current.Use();
+				ShowMenu(actions, forceMenu, map, cell);
 				return false;
 			}
 
@@ -141,17 +160,9 @@ namespace AchtungMod
 				return true;
 			}
 
-			if (actions.Count(false) > 0)
-				Find.WindowStack.Add(actions.GetWindow());
-			else
-			{
-				// TODO enable later
-				// Achtung.tutor.HintWithCell("position-by-key", Achtung.Settings.forceCommandMenuMode == CommandMenuMode.PressForPosition, cell);
-			}
-
-			Event.current.Use();
+            ShowMenu(actions, forceMenu, map, cell);
 			return false;
-		}
+        }
 
 		private void StartDragging(Vector3 pos, bool asGroup)
 		{
