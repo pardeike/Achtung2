@@ -53,33 +53,33 @@ namespace AchtungMod
 			.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
 		}
 
-        void ShowMenu(MultiActions actions, bool forceMenu, Map map, IntVec3 cell)
-        {
+		void ShowMenu(MultiActions actions, bool forceMenu, Map map, IntVec3 cell)
+		{
 			if (actions.Count(false) > 0)
 			{
 				var optionTaken = false;
-                if (cell.InBounds(map) && forceMenu == false)
+				if (cell.InBounds(map) && forceMenu == false)
 				{
 					var autoTakableOptions = actions.GetAutoTakeableActions();
 					var first = autoTakableOptions.FirstOrDefault();
-                    if (first != null)
+					if (first != null)
 					{
 						optionTaken = true;
 						first.Chosen(true, null);
-                    }
+					}
 				}
-                if (optionTaken == false)
-	               Find.WindowStack.Add(actions.GetWindow());
+				if (optionTaken == false)
+					Find.WindowStack.Add(actions.GetWindow());
 			}
 			else
 			{
 				// TODO enable later
 				// Achtung.tutor.HintWithCell("position-by-key", Achtung.Settings.forceCommandMenuMode == CommandMenuMode.PressForPosition, cell);
 			}
-            Event.current.Use();
-        }
+			Event.current.Use();
+		}
 
-        public bool MouseDown(Vector3 pos)
+		public bool MouseDown(Vector3 pos)
 		{
 			colonists = Tools.GetSelectedColonists();
 
@@ -160,9 +160,9 @@ namespace AchtungMod
 				return true;
 			}
 
-            ShowMenu(actions, forceMenu, map, cell);
+			ShowMenu(actions, forceMenu, map, cell);
 			return false;
-        }
+		}
 
 		private void StartDragging(Vector3 pos, bool asGroup)
 		{

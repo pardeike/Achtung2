@@ -147,7 +147,7 @@ namespace AchtungMod
 	}
 
 	[HarmonyPatch(typeof(Game))]
-	[HarmonyPatch(nameof(Game.DeinitAndRemoveMap))]
+	[HarmonyPatch(nameof(Game.DeinitAndRemoveMap_NewTemp))]
 	static class Game_DeinitAndRemoveMap_Patch
 	{
 		public static void Prefix(Map map)
