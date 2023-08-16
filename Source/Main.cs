@@ -876,14 +876,14 @@ namespace AchtungMod
 		public static readonly Texture2D BuildingSmart = ContentFinder<Texture2D>.Get("BuildingSmart", true);
 		public static readonly Texture2D BuildingSmartOff = ContentFinder<Texture2D>.Get("BuildingSmartOff", true);
 
-		[SyncMethod] // multiplayer
-		public static void ChangeCellRadiusSynced(Pawn pawn, int delta)
-		{
-			var forcedWork = ForcedWork.Instance;
-			var forcedJob = forcedWork.GetForcedJob(pawn);
-			if (forcedJob != null && forcedJob.cellRadius + delta >= 0)
-				forcedJob.ChangeCellRadius(delta);
-		}
+		//[SyncMethod] // multiplayer
+		//public static void ChangeCellRadiusSynced(Pawn pawn, int delta)
+		//{
+		//	var forcedWork = ForcedWork.Instance;
+		//	var forcedJob = forcedWork.GetForcedJob(pawn);
+		//	if (forcedJob != null && forcedJob.cellRadius + delta >= 0)
+		//		forcedJob.ChangeCellRadius(delta);
+		//}
 
 		[SyncMethod] // multiplayer
 		public static void ToggleSmartBuildingSynced(Pawn pawn)
@@ -904,9 +904,8 @@ namespace AchtungMod
 			if (forcedJob == null)
 				yield break;
 
+			/*
 			var radius = forcedJob.cellRadius;
-			var smart = forcedJob.buildSmart;
-
 			yield return new Command_Action
 			{
 				defaultLabel = "IncreaseForceRadius".Translate(),
@@ -924,7 +923,9 @@ namespace AchtungMod
 				activateSound = radius > 0 ? SoundDefOf.Designate_ZoneAdd : SoundDefOf.Designate_Failed,
 				action = delegate { ChangeCellRadiusSynced(___pawn, -1); }
 			};
+			*/
 
+			var smart = forcedJob.buildSmart;
 			yield return new Command_Action
 			{
 				defaultLabel = "BuildingSmart".Translate(),

@@ -372,10 +372,10 @@ namespace AchtungMod
 			return Performance.ContinueJob_Stop(forcedJob, false);
 		}
 
-		public void ChangeCellRadius(int delta)
-		{
-			cellRadius += delta;
-		}
+		//public void ChangeCellRadius(int delta)
+		//{
+		//	cellRadius += delta;
+		//}
 
 		public void ToggleSmartBuilding()
 		{
