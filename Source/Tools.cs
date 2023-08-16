@@ -1,5 +1,4 @@
-﻿using HarmonyLib;
-using Multiplayer.API;
+﻿using Multiplayer.API;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -19,6 +18,7 @@ namespace AchtungMod
 		public static Material forceIconMaterial;
 		public static Material markerMaterial;
 		public static Material lineMaterial;
+		public static Material forceRadiusMaterial = SolidColorMaterials.SimpleSolidColorMaterial(Color.white.ToTransparent(0.5f));
 		public static string goHereLabel;
 
 		private static string _version;
@@ -140,7 +140,8 @@ namespace AchtungMod
 
 		public static bool IsOfType<T>(this WorkGiverDef def) where T : class
 		{
-			if (def.giverClass == null) return false;
+			if (def.giverClass == null)
+				return false;
 			return (def.Worker as T) != null;
 		}
 
@@ -158,13 +159,19 @@ namespace AchtungMod
 
 		public static bool IsFreeTarget(Pawn pawn, ForcedTarget target)
 		{
-			return pawn.Map.reservationManager.reservations
-				.Any(res => res.Target.Cell == target.item.Cell && res.Claimant != pawn) == false;
+			var otherRervations = pawn.Map.reservationManager.reservations
+				.Where(reservation => reservation.claimant != pawn)
+				.ToArray();
+			if (otherRervations.Length == 0)
+				return true;
+			var item = target.item;
+			return otherRervations.All(reservation => reservation.target != item);
 		}
 
 		public static bool WillBlock(this LocalTargetInfo info)
 		{
-			if (info.HasThing == false) return false;
+			if (info.HasThing == false)
+				return false;
 			var thing = info.Thing;
 			var thingDef = thing.def;
 			if (thing is Blueprint blueprint)
@@ -315,9 +322,11 @@ namespace AchtungMod
 
 		public static void Do<T>(this IEnumerable<T> sequence, Action<T> action)
 		{
-			if (sequence == null) return;
+			if (sequence == null)
+				return;
 			var enumerator = sequence.GetEnumerator();
-			while (enumerator.MoveNext()) action(enumerator.Current);
+			while (enumerator.MoveNext())
+				action(enumerator.Current);
 		}
 
 		public static void DoIf<T>(this IEnumerable<T> sequence, Func<T, bool> condition, Action<T> action)
@@ -390,8 +399,7 @@ namespace AchtungMod
 
 		public static bool GetDraftingStatus(Pawn pawn)
 		{
-			if (pawn.drafter == null)
-				pawn.drafter = new Pawn_DraftController(pawn);
+			pawn.drafter ??= new Pawn_DraftController(pawn);
 			return pawn.drafter.Drafted;
 		}
 
@@ -521,6 +529,52 @@ namespace AchtungMod
 			});
 		}
 
+		/*
+		static Vector2? _mouseDownPosition = null;
+		public static bool MouseTrackingButton(Rect rect, Action<bool> tick = null, Action mouseDown = null, Action<Vector2, Event> mouseDragged = null, Action<Vector2, Event> mouseUp = null)
+		{
+			var isOver = Mouse.IsOver(rect);
+			Log.Warning($"mouse {Event.current.mousePosition} {rect} -> {isOver}");
+			tick?.Invoke(isOver);
+
+			var current = Event.current;
+			switch (current.type)
+			{
+				case EventType.MouseDown:
+				{
+					if (isOver)
+					{
+						_mouseDownPosition = current.mousePosition;
+						mouseDown?.Invoke();
+						current.Use();
+					}
+					break;
+				}
+				case EventType.MouseDrag:
+				{
+					if (_mouseDownPosition.HasValue)
+					{
+						mouseDragged?.Invoke(_mouseDownPosition.Value, current);
+						current.Use();
+					}
+					break;
+				}
+				case EventType.MouseUp:
+				{
+					if (_mouseDownPosition.HasValue)
+					{
+						mouseUp?.Invoke(_mouseDownPosition.Value, current);
+						current.Use();
+						_mouseDownPosition = null;
+						return true;
+					}
+					break;
+				}
+			}
+			return false;
+		}
+		*/
+
 		public static void Note(this Listing_Standard listing, string name, GameFont font = GameFont.Small)
 		{
 			if (name.CanTranslate())
@@ -551,7 +605,8 @@ namespace AchtungMod
 			GUI.color = Color.white;
 			var oldValue = value;
 			listing.CheckboxLabeled((name + "Title").Translate(), ref value);
-			if (onChange != null && value != oldValue) onChange();
+			if (onChange != null && value != oldValue)
+				onChange();
 
 			Text.Font = GameFont.Tiny;
 			listing.ColumnWidth -= 34;
@@ -566,7 +621,8 @@ namespace AchtungMod
 			if (Mouse.IsOver(rect))
 			{
 				Widgets.DrawHighlight(rect);
-				if (!tooltip.NullOrEmpty()) TooltipHandler.TipRegion(rect, tooltip);
+				if (!tooltip.NullOrEmpty())
+					TooltipHandler.TipRegion(rect, tooltip);
 			}
 
 			listing.Gap(6);
@@ -609,7 +665,8 @@ namespace AchtungMod
 			if (Mouse.IsOver(rect))
 			{
 				Widgets.DrawHighlight(rect);
-				if (!tooltip.NullOrEmpty()) TooltipHandler.TipRegion(rect, tooltip);
+				if (!tooltip.NullOrEmpty())
+					TooltipHandler.TipRegion(rect, tooltip);
 			}
 
 			listing.Gap(6);
@@ -654,7 +711,8 @@ namespace AchtungMod
 			if (Mouse.IsOver(rect))
 			{
 				Widgets.DrawHighlight(rect);
-				if (!tooltip.NullOrEmpty()) TooltipHandler.TipRegion(rect, tooltip);
+				if (!tooltip.NullOrEmpty())
+					TooltipHandler.TipRegion(rect, tooltip);
 
 				if (Event.current.isMouse && Event.current.button == 0 && Event.current.type == EventType.MouseDown)
 				{

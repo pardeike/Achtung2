@@ -88,10 +88,7 @@ namespace AchtungMod
 			AchtungSettings.DoWindowContents(inRect);
 		}
 
-		public override string SettingsCategory()
-		{
-			return "Achtung!";
-		}
+		public override string SettingsCategory() => "Achtung!";
 	}
 
 	[HarmonyPatch(typeof(World))]
@@ -170,7 +167,8 @@ namespace AchtungMod
 			while (true)
 			{
 				var t2 = t.BaseType;
-				if (t2 == null || t2 == typeof(object)) break;
+				if (t2 == null || t2 == typeof(object))
+					break;
 				t = t2;
 			}
 			if (t != typeof(Pawn_Thinker))
@@ -197,6 +195,16 @@ namespace AchtungMod
 		}
 	}
 
+	[HarmonyPatch(typeof(DesignatorManager))]
+	[HarmonyPatch(nameof(DesignatorManager.DesignatorManagerUpdate))]
+	static class DesignatorManager_DesignatorManagerUpdate_Patch
+	{
+		public static void Postfix()
+		{
+			MouseTracker.GetInstance().OnGUI();
+		}
+	}
+
 	// allow for disabled work types when option is on and we have a forced job
 	//
 	[HarmonyPatch(typeof(Pawn_WorkSettings))]
@@ -205,9 +213,12 @@ namespace AchtungMod
 	{
 		public static void Postfix(Pawn ___pawn, WorkTypeDef w, ref bool __result)
 		{
-			if (__result == true) return;
-			if (Achtung.Settings.ignoreAssignments == false) return;
-			if (ForcedWork.Instance.HasForcedJob(___pawn) == false) return;
+			if (__result == true)
+				return;
+			if (Achtung.Settings.ignoreAssignments == false)
+				return;
+			if (ForcedWork.Instance.HasForcedJob(___pawn) == false)
+				return;
 			__result = ___pawn.workSettings.GetPriority(w) == 0;
 		}
 	}
@@ -247,7 +258,8 @@ namespace AchtungMod
 		public static void Prefix(Toil __instance, ref Func<JobCondition> newEndCondition)
 		{
 			var method = newEndCondition?.Method;
-			if (method == null) return;
+			if (method == null)
+				return;
 
 			if (hasForbiddenState.TryGetValue(method, out var hasForbidden) == false)
 			{
@@ -278,7 +290,8 @@ namespace AchtungMod
 		public static void Prefix(Toil __instance, ref Func<bool> newFailCondition)
 		{
 			var method = newFailCondition?.Method;
-			if (method == null) return;
+			if (method == null)
+				return;
 
 			if (Toil_AddEndCondition_Patch.hasForbiddenState.TryGetValue(method, out var hasForbidden) == false)
 			{
@@ -341,8 +354,7 @@ namespace AchtungMod
 		{
 			var instr = instructions.ToList();
 
-			var f_NotInHomeAreaTrans = AccessTools.Field(typeof(WorkGiver_FixBrokenDownBuilding), nameof(WorkGiver_FixBrokenDownBuilding.NotInHomeAreaTrans));
-			if (f_NotInHomeAreaTrans == null) throw new Exception("Cannot find method WorkGiver_FixBrokenDownBuilding.NotInHomeAreaTrans");
+			var f_NotInHomeAreaTrans = AccessTools.Field(typeof(WorkGiver_FixBrokenDownBuilding), nameof(WorkGiver_FixBrokenDownBuilding.NotInHomeAreaTrans)) ?? throw new Exception("Cannot find method WorkGiver_FixBrokenDownBuilding.NotInHomeAreaTrans");
 			var i = instr.FindIndex(inst => inst.LoadsField(f_NotInHomeAreaTrans));
 			if (i > 0)
 			{
@@ -477,6 +489,39 @@ namespace AchtungMod
 		}
 	}
 
+	[HarmonyPatch]
+	static class Toils_Construct_MakeSolidThingFromBlueprintIfNecessary_Patch
+	{
+		public static IEnumerable<MethodBase> TargetMethods()
+		{
+			return typeof(Toils_Construct).GetNestedTypes(AccessTools.all)
+				.SelectMany(t => AccessTools.GetDeclaredMethods(t))
+				.Where(m => m.Name.Contains("<MakeSolidThingFromBlueprintIfNecessary>"));
+		}
+
+		static bool IsForced(Pawn pawn) => ForcedWork.Instance.HasForcedJob(pawn);
+
+		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			var matcher = new CodeMatcher(instructions)
+				.MatchStartForward(new CodeMatch(code => code.operand is MethodInfo method && method.Name == "Reserve"))
+				.MatchStartBackwards(new CodeMatch(name: "branch"), new CodeMatch(opcode: OpCodes.Ldloc_0));
+
+			var branch = matcher.NamedMatch("branch");
+			if (branch.Branches(out _) == false)
+			{
+				Log.Error("Cannot find branch before ldloc.0...Reserve");
+				return instructions;
+			}
+
+			return matcher.Advance(1).InsertAndAdvance(
+				new CodeInstruction(OpCodes.Ldloc_0),
+				CodeInstruction.Call(() => IsForced(default)),
+				new CodeInstruction(OpCodes.Brtrue, branch.operand)
+			).InstructionEnumeration();
+		}
+	}
+
 	// ignore forbidden for forced jobs
 	//
 	[HarmonyPatch(typeof(ForbidUtility))]
@@ -494,8 +539,10 @@ namespace AchtungMod
 			var hasPatch = Harmony.GetPatchInfo(method)?.Owners.Contains(Achtung.harmony.Id) ?? false;
 			if (Prepare() != hasPatch)
 			{
-				if (hasPatch) Achtung.harmony.Unpatch(method, HarmonyPatchType.All, Achtung.harmony.Id);
-				else _ = new PatchClassProcessor(Achtung.harmony, typeof(ForbidUtility_IsForbidden_Patch)).Patch();
+				if (hasPatch)
+					Achtung.harmony.Unpatch(method, HarmonyPatchType.All, Achtung.harmony.Id);
+				else
+					_ = new PatchClassProcessor(Achtung.harmony, typeof(ForbidUtility_IsForbidden_Patch)).Patch();
 			}
 		}
 
@@ -619,8 +666,10 @@ namespace AchtungMod
 
 		static bool IgnoreForbiddenHauling(WorkGiver_Scanner workgiver, Thing thing)
 		{
-			if (Achtung.Settings.ignoreForbidden == false) return false;
-			if (workgiver is WorkGiver_Haul && thing?.def != null && thing.def.alwaysHaulable == false && thing.def.EverHaulable == false) return false;
+			if (Achtung.Settings.ignoreForbidden == false)
+				return false;
+			if (workgiver is WorkGiver_Haul && thing?.def != null && thing.def.alwaysHaulable == false && thing.def.EverHaulable == false)
+				return false;
 			return workgiver.Ignorable();
 		}
 
@@ -728,8 +777,10 @@ namespace AchtungMod
 			var f_pawn = AccessTools.Field(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.pawn));
 			var f_curJob = AccessTools.Field(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.curJob));
 
-			if (m_CleanupCurrentJob == null) throw new Exception("Cannot find method Pawn_JobTracker.CleanupCurrentJob");
-			if (f_pawn == null) throw new Exception("Cannot find field Pawn_JobTracker.pawn");
+			if (m_CleanupCurrentJob == null)
+				throw new Exception("Cannot find method Pawn_JobTracker.CleanupCurrentJob");
+			if (f_pawn == null)
+				throw new Exception("Cannot find field Pawn_JobTracker.pawn");
 
 			var instrList = instructions.ToList();
 			for (var i = 0; i < instrList.Count; i++)

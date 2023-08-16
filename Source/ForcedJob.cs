@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using HarmonyLib;
+using RimWorld;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -126,13 +127,16 @@ namespace AchtungMod
 		{
 			cancelled = true;
 
-			if (expanderThing != null) Find.CameraDriver.StopCoroutine(expanderThing);
+			if (expanderThing != null)
+				Find.CameraDriver.StopCoroutine(expanderThing);
 			expanderThing = null;
 
-			if (expanderCell != null) Find.CameraDriver.StopCoroutine(expanderCell);
+			if (expanderCell != null)
+				Find.CameraDriver.StopCoroutine(expanderCell);
 			expanderCell = null;
 
-			if (contractor != null) Find.CameraDriver.StopCoroutine(contractor);
+			if (contractor != null)
+				Find.CameraDriver.StopCoroutine(contractor);
 			contractor = null;
 		}
 
@@ -208,9 +212,13 @@ namespace AchtungMod
 			var pathGrid = map.pathing.For(pawn).pathGrid;
 			var mapWidth = map.Size.x;
 
-			var forbiddenCells = buildSmart ? map.reservationManager.reservations.Select(reservation => reservation.target.Cell)
-				.SelectMany(cell => GenRadial.RadialCellsAround(cell, 1, true))
-				.Distinct().ToHashSet() : new HashSet<IntVec3>();
+			var forbiddenCells = buildSmart
+				? map.reservationManager.reservations
+					.Where(reservation => reservation.claimant != pawn)
+					.Select(reservation => reservation.target.Cell)
+					.SelectMany(cell => GenRadial.RadialCellsAround(cell, 1, true))
+					.Distinct().ToHashSet()
+				: new HashSet<IntVec3>();
 
 			return targets
 				.Where(target =>
@@ -226,7 +234,8 @@ namespace AchtungMod
 						return -1;
 
 					var reverseDistance = maxSquaredDistance - pos.DistanceToSquared(cell);
-					if (reverseDistance < 0) reverseDistance = 0;
+					if (reverseDistance < 0)
+						reverseDistance = 0;
 					if (buildSmart && isThingJob)
 					{
 						var willBlock = target.item.WillBlock();
@@ -249,45 +258,50 @@ namespace AchtungMod
 
 			var workGiversByPrio = WorkGivers.OrderBy(worker =>
 			{
-				if (worker is WorkGiver_ConstructDeliverResourcesToBlueprints) return 1;
-				if (worker is WorkGiver_ConstructDeliverResourcesToFrames) return 2;
-				if (worker is WorkGiver_ConstructDeliverResources) return 3;
-				if (worker is WorkGiver_Haul) return 4;
-				if (worker is WorkGiver_PlantsCut) return 5;
-				if (worker is WorkGiver_ConstructFinishFrames) return 6;
-				if (worker is WorkGiver_ConstructAffectFloor) return 7;
+				if (worker is WorkGiver_ConstructDeliverResourcesToBlueprints)
+					return 1;
+				if (worker is WorkGiver_ConstructDeliverResourcesToFrames)
+					return 2;
+				if (worker is WorkGiver_ConstructDeliverResources)
+					return 3;
+				if (worker is WorkGiver_Haul)
+					return 4;
+				if (worker is WorkGiver_PlantsCut)
+					return 5;
+				if (worker is WorkGiver_ConstructFinishFrames)
+					return 6;
+				if (worker is WorkGiver_ConstructAffectFloor)
+					return 7;
 				return 999;
 			});
 
 			var exist = false;
 			foreach (var workgiver in workGiversByPrio)
 			{
-				foreach (var item in GetSortedTargets(new HashSet<int>()))
+				foreach (var target in GetSortedTargets(new HashSet<int>()))
 				{
 					exist = true;
 
 					if (isThingJob)
 					{
-						job = item.Thing.GetThingJob(pawn, workgiver);
-						if (job == null)
-							job = item.Cell.GetCellJob(pawn, workgiver);
+						job = target.Thing.GetThingJob(pawn, workgiver);
+						job ??= target.Cell.GetCellJob(pawn, workgiver);
 					}
 					else
 					{
-						job = item.Cell.GetCellJob(pawn, workgiver);
-						if (job == null)
-							job = item.Thing?.GetThingJob(pawn, workgiver);
+						job = target.Cell.GetCellJob(pawn, workgiver);
+						job ??= target.Thing?.GetThingJob(pawn, workgiver);
 					}
 
 					if (job != null)
 					{
 						if (isThingJob)
 						{
-							lastThing = item.Thing;
-							lastLocation = item.Thing.Position;
+							lastThing = target.Thing;
+							lastLocation = target.Thing.Position;
 						}
 						else
-							lastLocation = item.Cell;
+							lastLocation = target.Cell;
 						return true;
 					}
 				}
@@ -306,7 +320,8 @@ namespace AchtungMod
 			_ = tracker;
 			_ = lastJob;
 
-			if (pawn == null || (pawn.IsColonist == false && pawn.IsColonyMech == false)) return false;
+			if (pawn == null || (pawn.IsColonist == false && pawn.IsColonyMech == false))
+				return false;
 			var forcedWork = ForcedWork.Instance;
 
 			var forcedJob = forcedWork.GetForcedJob(pawn);
@@ -403,13 +418,15 @@ namespace AchtungMod
 			if (cellRadius > 0 && cellRadius <= GenRadial.MaxRadialPatternRadius)
 				return GenRadial.RadialCellsAround(cell, cellRadius, useCenter);
 			var cell2 = cell;
-			if (useCenter) return GenAdj.AdjacentCellsAndInside.Select(vec => cell2 + vec);
+			if (useCenter)
+				return GenAdj.AdjacentCellsAndInside.Select(vec => cell2 + vec);
 			return GenAdj.AdjacentCells.Select(vec => cell2 + vec);
 		}
 
 		public void ExpandTargets()
 		{
-			if (cancelled || lastLocation.IsValid == false) return;
+			if (cancelled || lastLocation.IsValid == false)
+				return;
 			var thingGrid = pawn.Map.thingGrid;
 
 			if (isThingJob && lastThing != null)
@@ -598,7 +615,8 @@ namespace AchtungMod
 					if (cancelled)
 						yield break;
 				}
-				if (yielded == false) yield return null;
+				if (yielded == false)
+					yield return null;
 			}
 		}
 
@@ -667,7 +685,8 @@ namespace AchtungMod
 
 		public bool IsBuilding()
 		{
-			if (item.HasThing == false) return false;
+			if (item.HasThing == false)
+				return false;
 			var thing = item.Thing;
 			if (thing is Frame frame)
 				return frame.def.entityDefToBuild == ThingDefOf.Wall;
@@ -731,7 +750,8 @@ namespace AchtungMod
 
 		public static Job GetThingJob(this Thing thing, Pawn pawn, WorkGiver_Scanner workgiver, bool ignoreReserve = false)
 		{
-			if (thing == null || thing.Spawned == false) return null;
+			if (thing == null || thing.Spawned == false)
+				return null;
 			var potentialWork = workgiver.PotentialWorkThingRequest.Accepts(thing) || workgiver.PotentialWorkThingsGlobal(pawn) != null && workgiver.PotentialWorkThingsGlobal(pawn).Contains(thing);
 			if ((workgiver as WorkGiver_Haul) != null && potentialWork == false)
 				potentialWork = ShouldBeHaulable(thing);
@@ -753,7 +773,8 @@ namespace AchtungMod
 										(ignoreReserve == false && pawn.CanReserveAndReach(thing, workgiver.PathEndMode, Danger.Deadly))
 										||
 										(ignoreReserve && pawn.CanReach(thing, workgiver.PathEndMode, Danger.Deadly))
-									) return job;
+									)
+										return job;
 								}
 						}
 					}
@@ -762,7 +783,8 @@ namespace AchtungMod
 
 		public static Job GetCellJob(this IntVec3 cell, Pawn pawn, WorkGiver_Scanner workgiver, bool ignoreReserve = false)
 		{
-			if (cell.IsValid == false) return null;
+			if (cell.IsValid == false)
+				return null;
 			if (workgiver.PotentialWorkCellsGlobal(pawn).Contains(cell))
 				if (workgiver.MissingRequiredCapacity(pawn) == null)
 					if (workgiver.HasJobOnCell(pawn, cell, ignoreReserve))

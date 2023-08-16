@@ -46,19 +46,22 @@ namespace AchtungMod
 
 		public static void EndCurrentJob_Start()
 		{
-			if (enabled) w_EndCurrentJob.Restart();
+			if (enabled)
+				w_EndCurrentJob.Restart();
 		}
 
 		public static void EndCurrentJob_Stop()
 		{
-			if (enabled == false) return;
+			if (enabled == false)
+				return;
 			var elapsed = w_EndCurrentJob.ElapsedMilliseconds;
 			EndCurrentJob_Max = Math.Max(EndCurrentJob_Max, elapsed);
 		}
 
 		public static void ContinueJob_Start()
 		{
-			if (enabled) w_ContinueJob.Restart();
+			if (enabled)
+				w_ContinueJob.Restart();
 		}
 
 		public static bool ContinueJob_Stop(ForcedJob forcedJob, bool result)
@@ -75,24 +78,28 @@ namespace AchtungMod
 
 		public static void GetNextJob_Start()
 		{
-			if (enabled) w_GetNextJob.Restart();
+			if (enabled)
+				w_GetNextJob.Restart();
 		}
 
 		public static void GetNextJob_Count()
 		{
-			if (enabled) w_GetNextJobCount++;
+			if (enabled)
+				w_GetNextJobCount++;
 		}
 
 		public static void GetNextJob_Stop()
 		{
-			if (enabled == false) return;
+			if (enabled == false)
+				return;
 			var elapsed = w_GetNextJob.ElapsedMilliseconds;
 			GetNextJob_Max = Math.Max(GetNextJob_Max, elapsed);
 		}
 
 		public static void Report(ForcedJob forcedJob, Pawn pawn)
 		{
-			if (enabled == false) return;
+			if (enabled == false)
+				return;
 
 			var ticks = GenTicks.TicksAbs;
 			if (ticks > logNextTicks)
@@ -100,7 +107,8 @@ namespace AchtungMod
 				logNextTicks = ticks + 30;
 
 				var description = forcedJob == null ? "" : forcedJob.workgiverDefs.Join(wgd => wgd?.defName);
-				if (description == "ConstructDeliverResourcesToFrames, ConstructDeliverResourcesToBlueprints, Replant, DeliverResourcesToFrames, DeliverResourcesToBlueprints, ConstructFinishFrames") description = "<construct>";
+				if (description == "ConstructDeliverResourcesToFrames, ConstructDeliverResourcesToBlueprints, Replant, DeliverResourcesToFrames, DeliverResourcesToBlueprints, ConstructFinishFrames")
+					description = "<construct>";
 
 				File.AppendAllText(logPath, $"[{DateTime.Now:yyyyMMddHHmmss.ffff}] [EndCurrentJob] [{pawn.LabelShortCap}] [{w_GetNextJobCount}] [{GetNextJob_Max}/{ContinueJob_Max}/{EndCurrentJob_Max}] [{description}]\r\n");
 
@@ -111,10 +119,11 @@ namespace AchtungMod
 			}
 		}
 
-		static HashSet<string> knownExceptions = new HashSet<string>();
+		static readonly HashSet<string> knownExceptions = new HashSet<string>();
 		public static void Log(Exception exception)
 		{
-			if (enabled == false) return;
+			if (enabled == false)
+				return;
 			var str = exception.ToString();
 			if (knownExceptions.Add(str))
 				File.AppendAllText(logPath, $"EXCEPTION: {exception}\r\n");

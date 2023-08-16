@@ -26,12 +26,12 @@ namespace AchtungMod
 		public bool isDragging;
 		public bool drawColonistPreviews;
 
-		public static Controller controller;
+		public static Controller instance;
+
 		public static Controller GetInstance()
 		{
-			if (controller == null)
-				controller = new Controller();
-			return controller;
+			instance ??= new Controller();
+			return instance;
 		}
 
 		public Controller()
@@ -338,26 +338,27 @@ namespace AchtungMod
 			//var firstTime = true;
 			var currentViewRect = Find.CameraDriver.CurrentViewRect;
 			var forcedJobs = forcedWork.ForcedJobsForMap(map);
-			if (forcedJobs != null)
-				forcedJobs
-					.DoIf(forcedJob => forcedJob.pawn.Spawned && forcedJob.pawn.Map == map && Find.Selector.IsSelected(forcedJob.pawn), forcedJob =>
+			forcedJobs?.DoIf(forcedJob => forcedJob.pawn.Spawned && forcedJob.pawn.Map == map && Find.Selector.IsSelected(forcedJob.pawn), forcedJob =>
+			{
+				forcedJob.AllCells(true).Distinct()
+					.DoIf(cell => currentViewRect.Contains(cell), cell =>
 					{
-						forcedJob.AllCells(true).Distinct()
-							.DoIf(cell => currentViewRect.Contains(cell), cell =>
-							{
-								Tools.DrawForceIcon(cell.x, cell.z);
-								/* TODO enable later
-								 * Achtung.tutor.HintWithCell("exclamation-mark", firstTime, cell, _ =>
-								{
-									Tools.DrawForceIcon(cell.x, cell.z);
-									firstTime = false;
-								});
-								*/
-							});
+						Tools.DrawForceIcon(cell.x, cell.z);
+						/* TODO enable later
+							* Achtung.tutor.HintWithCell("exclamation-mark", firstTime, cell, _ =>
+						{
+							Tools.DrawForceIcon(cell.x, cell.z);
+							firstTime = false;
+						});
+						*/
 					});
+			});
 		}
 
-		/*private void DrawReservations()
+		/*
+		static readonly Color thingColor = Color.red.ToTransparent(0.2f);
+		static readonly Color cellColor = Color.green.ToTransparent(0.2f);
+		private void DrawReservations()
 		{
 			var reservationManager = Find.CurrentMap?.reservationManager;
 			if (reservationManager == null)
@@ -365,17 +366,9 @@ namespace AchtungMod
 
 			var selector = Find.Selector;
 			reservationManager.ReservationsReadOnly
-				.DoIf(res => selector.IsSelected(res.Claimant), res => Tools.DebugPosition(res.Target.Cell.ToVector3(), res.Target.HasThing ? new Color(1f, 0f, 0f, 0.2f) : new Color(0f, 1f, 0f, 0.2f)));
-
-			reservationManager?
-				.AllReservedThings()?
-				.Where(t => t != null)
-				.Do(thing => Tools.DebugPosition(thing.Position.ToVector3(), new Color(1f, 0f, 0f, 0.2f)));
-
-			//var forcedWork = ForcedWork.Instance;
-			//forcedWork.GetForbiddenLocations()
-			//	.Do(cell => Tools.DebugPosition(cell.ToVector3(), new Color(0f, 0f, 1f, 0.2f)));
-		}*/
+				.DoIf(res => selector.IsSelected(res.Claimant), res => Tools.DebugPosition(res.Target.Cell.ToVector3(), res.Target.HasThing ? thingColor : cellColor));
+		}
+		*/
 
 		public void HandleDrawing()
 		{

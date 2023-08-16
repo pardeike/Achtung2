@@ -45,7 +45,8 @@ namespace AchtungMod
 
 		public void AddMultiAction(Colonist colonist, bool draftMode, FloatMenuOption option)
 		{
-			if (Tools.IsGoHereOption(option) == false) allActions.Add(new MultiAction(colonist, draftMode, option));
+			if (Tools.IsGoHereOption(option) == false)
+				allActions.Add(new MultiAction(colonist, draftMode, option));
 		}
 
 		public int Count(bool onlyActive)
@@ -78,17 +79,19 @@ namespace AchtungMod
 
 		private T AllEqual<T>(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, FloatMenuOption, bool> compareFunc, Func<FloatMenuOption, T> valueFunc, T defaultValue = default)
 		{
-			if (options.Count() == 0) return defaultValue;
+			if (options.Count() == 0)
+				return defaultValue;
 			var firstOption = options.First();
 			var result = valueFunc(options.First());
-			if (options.All(option => compareFunc(firstOption, option)))
+			if (options.All(option => compareFunc(firstOption, option)) == false)
 				result = defaultValue;
 			return result;
 		}
 
 		private T AllEqual<T>(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, T> valueFunc, T defaultValue = default) where T : IComparable
 		{
-			if (options.Count() == 0) return defaultValue;
+			if (options.Count() == 0)
+				return defaultValue;
 			var result = valueFunc(options.First());
 			if (options.All(option => valueFunc(option)?.CompareTo(result) == 0) == false)
 				result = defaultValue;
@@ -97,15 +100,18 @@ namespace AchtungMod
 
 		private T? AllEqual<T>(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, T?> eval) where T : struct, IComparable
 		{
-			if (options.Count() == 0) return null;
+			if (options.Count() == 0)
+				return null;
 			var result = eval(options.First());
 			if (options.All(option =>
 			{
 				var valueToCompare = eval(option);
 				var h1 = valueToCompare.HasValue;
 				var h2 = result.HasValue;
-				if (h1 == false && h2 == false) return true;
-				if (h1 == false || h2 == false) return false;
+				if (h1 == false && h2 == false)
+					return true;
+				if (h1 == false || h2 == false)
+					return false;
 				return valueToCompare.Value.CompareTo(result.Value) == 0;
 			}) == false)
 				result = null;
@@ -126,7 +132,7 @@ namespace AchtungMod
 			var mouseoverGuiAction = AllEqual(options, (o1, o2) => o1.mouseoverGuiAction == o2.mouseoverGuiAction, o => o.mouseoverGuiAction);
 			var revalidateClickTarget = AllEqual(options, (o1, o2) => o1.revalidateClickTarget == o2.revalidateClickTarget, o => o.revalidateClickTarget);
 			var extraPartWidth = AllEqual(options, o => o.extraPartWidth);
-			var extraPartOnGUI = AllEqual(options, (o1, o2) => o1.extraPartOnGUI == o2.extraPartOnGUI, o => o.extraPartOnGUI);
+			var extraPartOnGUI = AllEqual(options, (o1, o2) => o1.extraPartOnGUI?.Method == o2.extraPartOnGUI?.Method, o => o.extraPartOnGUI);
 			var revalidateWorldClickTarget = AllEqual(options, (o1, o2) => o1.revalidateWorldClickTarget == o2.revalidateWorldClickTarget, o => o.revalidateWorldClickTarget);
 			var tutorTag = AllEqual(options, o => o.tutorTag);
 			var thingStyle = AllEqual(options, (o1, o2) => o1.thingStyle == o2.thingStyle, o => o.thingStyle);
@@ -193,7 +199,7 @@ namespace AchtungMod
 		{
 			var options = new List<FloatMenuOption>();
 			var keys = GetKeys();
-			if (keys.Any(key => ActionsForKey(key).Select(action => action.option).Any(option => option.Disabled || option.autoTakeable == false)))
+			if (keys.Any(key => ActionsForKey(key).Any(action => action.option.Disabled == false && action.option.autoTakeable == false)))
 				return options;
 			keys.Do(key =>
 			{

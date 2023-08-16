@@ -26,8 +26,7 @@ namespace AchtungMod
 		{
 			get
 			{
-				if (instance == null)
-					instance = Find.World.GetComponent<ForcedWork>();
+				instance ??= Find.World.GetComponent<ForcedWork>();
 				return instance;
 			}
 			set
@@ -201,7 +200,8 @@ namespace AchtungMod
 						return new LocalTargetInfo(thing);
 				}
 
-				if (expandSearch == false) break;
+				if (expandSearch == false)
+					break;
 			}
 			return null;
 		}
@@ -215,7 +215,8 @@ namespace AchtungMod
 
 		public IEnumerable<ForcedJob> ForcedJobsForMap(Map map)
 		{
-			if (hasForcedJobs == false) return new List<ForcedJob>();
+			if (hasForcedJobs == false)
+				return new List<ForcedJob>();
 			return allForcedJobs
 				.Where(pair => pair.Key.Map == map)
 				.SelectMany(pair => pair.Value.jobs ?? new List<ForcedJob>());
@@ -228,7 +229,8 @@ namespace AchtungMod
 				.Any(pair =>
 				{
 					var forcedJobs = pair.Value;
-					if (forcedJobs == null) return false;
+					if (forcedJobs == null)
+						return false;
 					return forcedJobs.jobs.Any(job => job.IsForbiddenCell(cell));
 				});
 		}
@@ -263,13 +265,16 @@ namespace AchtungMod
 
 		public override void WorldComponentTick()
 		{
-			if (Find.TickManager.TicksGame % 139 != 0) return;
+			if (Find.TickManager.TicksGame % 139 != 0)
+				return;
 			var pawns = allForcedJobs.Keys.ToArray();
 			var n = pawns.Length;
-			if (n == 0) return;
+			if (n == 0)
+				return;
 			var pawn = pawns[++counter % n];
 			var map = pawn.Map;
-			if (map == null) return;
+			if (map == null)
+				return;
 
 			void ShowNote(string txt)
 			{
@@ -315,8 +320,7 @@ namespace AchtungMod
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				if (allForcedJobs == null)
-					allForcedJobs = new Dictionary<Pawn, ForcedJobs>();
+				allForcedJobs ??= new Dictionary<Pawn, ForcedJobs>();
 
 				foreach (var forced in allForcedJobs.Values)
 				{

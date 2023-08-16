@@ -16,7 +16,7 @@ namespace AchtungMod
 
 		public ForcedMultiFloatMenuOption(List<Pawn> pawns, string label) : base(pawns, label, null, MenuOptionPriority.Default, null, null, 0f, null, null, false, 0) { }
 
-		public override bool ForceAction()
+		public override bool ForceAction(bool useTracking)
 		{
 			var forcedWork = ForcedWork.Instance;
 			var sharedCells = new List<IntVec3>();
@@ -29,13 +29,13 @@ namespace AchtungMod
 					foreach (var cell in sharedCells)
 					{
 						option.forceCell = cell;
-						if (option.ForceAction())
+						if (option.ForceAction(useTracking))
 							break;
 					}
 				}
 				else
 				{
-					if (option.ForceAction())
+					if (option.ForceAction(useTracking))
 					{
 						var jobItem = forcedWork.GetForcedJobs(option.forcePawn).FirstOrDefault();
 						if (jobItem != null)
@@ -72,10 +72,12 @@ namespace AchtungMod
 			if (action == null)
 				return new FloatMenuOption(label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget, playSelectionSound, orderInPriority);
 
-			var option = new ForcedFloatMenuOption(new List<Pawn> { pawn }, label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget, playSelectionSound, orderInPriority) { };
-			option.forcePawn = pawn;
-			option.forceCell = IntVec3.FromVector3(clickPos);
-			option.forceWorkgiver = workgiver;
+			var option = new ForcedFloatMenuOption(new List<Pawn> { pawn }, label, action, priority, mouseoverGuiAction, revalidateClickTarget, extraPartWidth, extraPartOnGUI, revalidateWorldClickTarget, playSelectionSound, orderInPriority)
+			{
+				forcePawn = pawn,
+				forceCell = IntVec3.FromVector3(clickPos),
+				forceWorkgiver = workgiver
+			};
 			option.extraPartOnGUI = extraPartRect => option.RenderExtraPartOnGui(extraPartRect);
 			return option;
 		}
@@ -119,13 +121,13 @@ namespace AchtungMod
 			rect.y += padding;
 			rect.height -= 2 * padding;
 
-			var highlight = Mouse.IsOver(buttonRect) ? 1 : 0;
-			GUI.DrawTexture(rect, Forcing[highlight], ScaleMode.ScaleToFit);
+			var isOver = Mouse.IsOver(buttonRect);
+			GUI.DrawTexture(rect, Forcing[isOver ? 1 : 0], ScaleMode.ScaleToFit);
 
-			var selected = Widgets.ButtonInvisible(rect);
+			var selected = isOver && Input.GetMouseButtonDown(0);
 			if (selected)
 			{
-				var success = ForceAction();
+				var success = ForceAction(true);
 				if (success)
 					return true;
 			}
@@ -147,7 +149,7 @@ namespace AchtungMod
 		}
 
 		[SyncMethod] // multiplayer
-		public static bool ForceActionSynced(Pawn forcePawn, WorkGiver_Scanner forceWorkgiver, int x, int z)
+		public static bool ForceActionSynced(Pawn forcePawn, WorkGiver_Scanner forceWorkgiver, int x, int z, bool useTracking)
 		{
 			var cell = new IntVec3(x, 0, z);
 
@@ -159,10 +161,12 @@ namespace AchtungMod
 				foreach (var workgiverDef in workgiverDefs)
 				{
 					var workgiver = workgiverDef.giverClass == null ? null : workgiverDef.Worker as WorkGiver_Scanner;
-					if (workgiver == null) continue;
+					if (workgiver == null)
+						continue;
 
 					var item = ForcedWork.HasJobItem(forcePawn, workgiver, cell, expandSearch);
-					if (item == null) continue;
+					if (item == null)
+						continue;
 
 					Tools.CancelWorkOn(forcePawn, item);
 
@@ -175,6 +179,17 @@ namespace AchtungMod
 						else
 							ForcedWork.Instance.Unprepare(forcePawn);
 					}
+
+					if (useTracking)
+					{
+						MouseTracker.StartDragging(forcePawn, cell, cellRadius =>
+						{
+							var forcedJob = ForcedWork.Instance.GetForcedJob(forcePawn);
+							if (forcedJob != null)
+								forcedJob.cellRadius = cellRadius;
+						});
+					}
+
 					return true;
 				}
 
@@ -183,9 +198,9 @@ namespace AchtungMod
 			return false;
 		}
 
-		public virtual bool ForceAction()
+		public virtual bool ForceAction(bool useTracking)
 		{
-			return ForceActionSynced(forcePawn, forceWorkgiver, forceCell.x, forceCell.z);
+			return ForceActionSynced(forcePawn, forceWorkgiver, forceCell.x, forceCell.z, useTracking);
 		}
 	}
 }
