@@ -118,6 +118,17 @@ namespace AchtungMod
 			return result;
 		}
 
+		static readonly FloatMenuSizeMode noSizeMode = (FloatMenuSizeMode)999;
+		private static FloatMenuSizeMode AllEqualFloatMenuSizeMode(IEnumerable<FloatMenuOption> options, Func<FloatMenuOption, FloatMenuSizeMode> eval)
+		{
+			if (options.Count() == 0)
+				return noSizeMode;
+			var result = eval(options.First());
+			if (options.All(option => eval(option) == result) == false)
+				result = noSizeMode;
+			return result;
+		}
+
 		//static readonly Color noColor = new Color();
 		public FloatMenuOption GetOption(string title, IEnumerable<MultiAction> multiActions)
 		{
@@ -140,7 +151,6 @@ namespace AchtungMod
 			var tooltip = AllEqual(options, (o1, o2) => o1.tooltip?.text == o2.tooltip?.text, o => o.tooltip);
 			var extraPartRightJustified = AllEqual(options, o => o.extraPartRightJustified);
 			var graphicIndexOverride = AllEqual(options, o => o.graphicIndexOverride);
-			var sizeMode = AllEqual(options, o => o.sizeMode);
 			var drawPlaceHolderIcon = AllEqual(options, o => o.drawPlaceHolderIcon);
 			var playSelectionSound = AllEqual(options, o => o.playSelectionSound);
 			var shownItem = AllEqual(options, (o1, o2) => o1.shownItem == o2.shownItem, o => o.shownItem);
@@ -173,7 +183,6 @@ namespace AchtungMod
 				tooltip = tooltip,
 				extraPartRightJustified = extraPartRightJustified,
 				graphicIndexOverride = graphicIndexOverride,
-				sizeMode = sizeMode,
 				drawPlaceHolderIcon = drawPlaceHolderIcon,
 				shownItem = shownItem,
 				itemIcon = itemIcon,
@@ -191,7 +200,12 @@ namespace AchtungMod
 				option.extraPartOnGUI = drawRect => ((ForcedMultiFloatMenuOption)option).RenderExtraPartOnGui(drawRect);
 			}
 
+			option.action = () => actions.Do(multiAction => multiAction.GetAction()());
 			option.Disabled = actions.All(a => a.option.Disabled);
+			var sizeMode = AllEqualFloatMenuSizeMode(options, o => o.sizeMode);
+			if (sizeMode != noSizeMode)
+				option.sizeMode = sizeMode;
+
 			return option;
 		}
 
