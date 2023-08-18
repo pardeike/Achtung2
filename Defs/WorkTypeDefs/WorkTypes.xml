@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<WorkTypeDef>
+		<defName>Rescuing</defName>
+		<labelShort>Rescue</labelShort>
+		<pawnLabel>Rescue</pawnLabel>
+		<gerundLabel>Rescuing</gerundLabel>
+		<description>Rescue colonists</description>
+		<verb>Rescue</verb>
+		<naturalPriority>1310</naturalPriority>
+		<alwaysStartActive>true</alwaysStartActive>
+		<workTags>
+			<li>Caring</li>
+			<li>Commoner</li>
+			<li>AllWork</li>
+		</workTags>
+	</WorkTypeDef>
+</Defs>

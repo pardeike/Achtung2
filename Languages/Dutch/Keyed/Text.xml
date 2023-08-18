@@ -5,7 +5,7 @@
 	<PositioningEnabledExplained>Maakt gevechtspositionering mogelijk voor je muisklikken/slepen (zie onderstaande instellingen)</PositioningEnabledExplained>
 
 	<AchtungModifierTitle>Achtung! toets</AchtungModifierTitle>
-	<AchtungModifierExplained>Als je deze toets ingedrukt houdt, worden kolonisten geforceerd als ze de opdrachten Verplaatsen of Verplaatsen-in-formatie krijgen.\nAls je hem vasthoudt, kunnen de geselecteerde kolonisten in hun huidige formatie naar je cursor worden verplaatst door de rechtermuisknop ingedrukt te houden en te slepen. Zodra de rechtermuisknop wordt ingedrukt, kan de Achtung! toets worden losgelaten.\nDe formatie kan worden gedraaid met Q en E</AchtungModifierExplained>
+	<AchtungModifierExplained>Als je deze toets ingedrukt houdt, worden kolonisten geforceerd als ze de opdrachten Verplaatsen of Verplaatsen-in-formatie krijgen.\nAls je hem vasthoudt, kunnen de geselecteerde kolonisten in hun huidige formatie naar je cursor worden verplaatst door de rechtermuisknop ingedrukt te houden en te slepen. Zodra de rechtermuisknop wordt ingedrukt, kan de Achtung! toets worden losgelaten.\nDe formatie kan worden gedraaid met Q en E.</AchtungModifierExplained>
 
 	<ForceCommandMenuModeTitle>Contextmenu Modus</ForceCommandMenuModeTitle>
 	<ForceCommandMenuModeExplained>Auto = normaal gedrag (wapenstatus beslist)\nToon Menu = Toets ingedrukt houden voor contextmenu\nZet Positie = Toets ingedrukt houden om naar positie te bevelen</ForceCommandMenuModeExplained>
@@ -52,12 +52,12 @@
 	<HealthLevelOptionNeedsMedicalRest>Medische rust nodig</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>In pijnshock</HealthLevelOptionInPainShock>
 
-	<IgnoreForbiddenTitle>Negeer verboden voorwerpen</IgnoreForbiddenTitle>
-	<IgnoreForbiddenExplained>Negeert verboden (rood gekruiste) items bij gedwongen werk</IgnoreForbiddenExplained>
-	<IgnoreRestrictionsTitle>Negeer toegestane zones</IgnoreRestrictionsTitle>
-	<IgnoreRestrictionsExplained>Negeert zonebeperkingen bij gedwongen werk</IgnoreRestrictionsExplained>
-	<IgnoreAssignmentsTitle>Negeer toewijzingen van werktypes</IgnoreAssignmentsTitle>
-	<IgnoreAssignmentsExplained>Negeert niet-ingestelde werkprioriteiten</IgnoreAssignmentsExplained>
+	<IgnoreForbiddenTitle>Negeer verboden markeringen</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Staat gedwongen werk toe op verboden voorwerpen</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>Negeer zonebeperkingen</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Staat gedwongen werk toe in beperkte gebieden</IgnoreRestrictionsExplained>
+	<IgnoreAssignmentsTitle>Negeer werktype toewijzingen</IgnoreAssignmentsTitle>
+	<IgnoreAssignmentsExplained>Toestaan bij ontbrekende werkprioriteiten</IgnoreAssignmentsExplained>
 
 	<BuildingSmartDefaultTitle>Slim bouwen is standaard voor nieuwe Achtung! banen</BuildingSmartDefaultTitle>
 	<BuildingSmartDefaultExplained>Stelt de standaard in voor hoe nieuwe jobs hun bouwvolgorde kiezen</BuildingSmartDefaultExplained>

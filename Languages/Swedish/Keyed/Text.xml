@@ -5,8 +5,7 @@
 	<PositioningEnabledExplained>Aktiverar muskommandos för positioneringen av kolonister (se inställningar nere)</PositioningEnabledExplained>
 
 	<AchtungModifierTitle>Achtung! knapp</AchtungModifierTitle>
-	<AchtungModifierExplained>Trygg knappen för att försätta kolonister i kampmodus när du positionera dem.
-Höll i för att flytta kolonister i deras formation. Formationen kan roteras med Q och E</AchtungModifierExplained>
+	<AchtungModifierExplained>Trygg knappen för att försätta kolonister i kampmodus när du positionera dem. Höll i för att flytta kolonister i deras formation. Formationen kan roteras med Q och E.</AchtungModifierExplained>
 
 	<ForceCommandMenuModeTitle>Kontextmenymodus</ForceCommandMenuModeTitle>
 	<ForceCommandMenuModeExplained>Auto = Vanlig beteende (kampmodus bestämmer)\nVisa meny = Håll knappen för kontextmenyn\nPositionera = Håll knappen för att beordra till position</ForceCommandMenuModeExplained>
@@ -17,9 +16,9 @@ Höll i för att flytta kolonister i deras formation. Formationen kan roteras me
 	<ForceMenuButtonText>Tvinga</ForceMenuButtonText>
 
 	<IncreaseForceRadius>Öka avstånd</IncreaseForceRadius>
-	<IncreaseForceRadiusDesc>Öka sökavståndet för tvångsarbete (just nu {0})</IncreaseForceRadiusDesc>
+	<IncreaseForceRadiusDesc>Öka sökavståndet för påtvingat arbete (just nu {0})</IncreaseForceRadiusDesc>
 	<DecreaseForceRadius>Minska avstånd</DecreaseForceRadius>
-	<DecreaseForceRadiusDesc>Minska sökavståndet för tvångsarbete (just nu {0})</DecreaseForceRadiusDesc>
+	<DecreaseForceRadiusDesc>Minska sökavståndet för påtvingat arbete (just nu {0})</DecreaseForceRadiusDesc>
 	<BuildingSmart>Smart byggande</BuildingSmart>
 	<BuildingSmartDesc>Smart byggande förhindrar hål eller att kolonister fastna men tar mer tid och utförs alltid i circlar rund startpunkten</BuildingSmartDesc>
 
@@ -53,18 +52,18 @@ Höll i för att flytta kolonister i deras formation. Formationen kan roteras me
 	<HealthLevelOptionNeedsMedicalRest>Sängbunden</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>I shock</HealthLevelOptionInPainShock>
 
-	<IgnoreForbiddenTitle>Ignorera förbjudna saker</IgnoreForbiddenTitle>
-	<IgnoreForbiddenExplained>Ignorerar förbjudna (röd kors) föremål vid tvångsarbete</IgnoreForbiddenExplained>
-	<IgnoreRestrictionsTitle>Ignorera begränsade områden</IgnoreRestrictionsTitle>
-	<IgnoreRestrictionsExplained>Ignorera zonbegränsningar vid tvångsarbete</IgnoreRestrictionsExplained>
-	<IgnoreAssignmentsTitle>Ignorera arbetstypsuppdrag</IgnoreAssignmentsTitle>
-	<IgnoreAssignmentsExplained>Ignorerar tomma arbetsprioriteringar</IgnoreAssignmentsExplained>
+	<IgnoreForbiddenTitle>Ignorera förbjudna markeringar</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Tillåter påtvingat arbete på förbjudna objekt</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>Ignorera zonrestriktioner</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Tillåter påtvingat arbete i begränsade områden</IgnoreRestrictionsExplained>
+	<IgnoreAssignmentsTitle>Ignorera arbetstypstilldelningar</IgnoreAssignmentsTitle>
+	<IgnoreAssignmentsExplained>Tillåter påtvingat arbete när arbetsprioriteringar inte är inställda</IgnoreAssignmentsExplained>
 
 	<BuildingSmartDefaultTitle>Smart byggande är på för nya jobs</BuildingSmartDefaultTitle>
 	<BuildingSmartDefaultExplained>Förvalet för nya Achtung! jobs är att de byggs på ett smart sätt</BuildingSmartDefaultExplained>
 
 	<WorkMarkersTitle>Tvingade arbetspositioner</WorkMarkersTitle>
-	<WorkMarkersExplained>Platser med tvångsarbete visas med små markörer</WorkMarkersExplained>
+	<WorkMarkersExplained>Platser med påtvingat arbete visas med små markörer</WorkMarkersExplained>
 	<WorkMarkersOptionAnimated>Animaterat</WorkMarkersOptionAnimated>
 	<WorkMarkersOptionStatic>Statiskt</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Av</WorkMarkersOptionOff>
@@ -94,8 +93,8 @@ Höll i för att flytta kolonister i deras formation. Formationen kan roteras me
 
 	<AlreadyDoing>(Job #{0})</AlreadyDoing>
 
-	<CouldNotFindMoreForcedWork>{0} kunde inte hitta mer tvångsarbete. Det återstående arbetet är troligen reserverat eller inte tillgängligt.</CouldNotFindMoreForcedWork>
-	<NoForcedWork>Inget tvångsarbete</NoForcedWork>
-	<ForcedWorkWasInterrupted>Tvångsarbete av {0} avbröts.</ForcedWorkWasInterrupted>
+	<CouldNotFindMoreForcedWork>{0} kunde inte hitta mer påtvingat arbete. Det återstående arbetet är troligen reserverat eller inte tillgängligt.</CouldNotFindMoreForcedWork>
+	<NoForcedWork>Inget påtvingat arbete</NoForcedWork>
+	<ForcedWorkWasInterrupted>Påtvingat arbete av {0} avbröts.</ForcedWorkWasInterrupted>
 
 </LanguageData>

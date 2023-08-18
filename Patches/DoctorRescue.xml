@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+	<Operation Class="PatchOperationSequence">
+		<success>Always</success>
+		<operations>
+			<li Class="PatchOperationReplace">
+				<xpath>/Defs/WorkGiverDef[defName="DoctorRescue"]/workType</xpath>
+				<value>
+					<workType>Rescuing</workType>
+				</value>
+			</li>
+			<li Class="PatchOperationReplace">
+				<xpath>/Defs/WorkGiverDef[defName="DoctorRescue"]/directOrderable</xpath>
+				<value>
+					<directOrderable>true</directOrderable>
+				</value>
+			</li>
+		</operations>
+	</Operation>
+</Patch>

@@ -40,7 +40,7 @@ namespace AchtungMod
 						var jobItem = forcedWork.GetForcedJobs(option.forcePawn).FirstOrDefault();
 						if (jobItem != null)
 						{
-							sharedCells = jobItem.GetSortedTargets(new HashSet<int>()).Select(item => item.Cell).ToList();
+							sharedCells = jobItem.GetSortedTargets(new HashSet<int>()).Select(item => item.cellInt).ToList();
 							result = true;
 						}
 					}
@@ -94,7 +94,7 @@ namespace AchtungMod
 				if (Achtung.Settings.ignoreForbidden)
 				{
 					var reservations = pawns.Where(pawn => ForcedWork.Instance.HasForcedJob(pawn) == false)
-						.SelectMany(pawn => new List<Thing> { pawn.CurJob.targetA.Thing, pawn.CurJob.targetB.Thing, pawn.CurJob.targetC.Thing }.OfType<Thing>())
+						.SelectMany(pawn => new List<Thing> { pawn.CurJob.targetA.thingInt, pawn.CurJob.targetB.thingInt, pawn.CurJob.targetC.thingInt }.OfType<Thing>())
 						.Where(thing => thing.IsForbidden(Faction.OfPlayer))
 						.SelectMany(thing => thing.Map.reservationManager.reservations.Select(reservation => (thing, reservation))
 						.Where(item => item.reservation.Target == item.thing))
@@ -186,12 +186,19 @@ namespace AchtungMod
 						{
 							var forcedJob = ForcedWork.Instance.GetForcedJob(forcePawn);
 							if (forcedJob != null)
+							{
 								forcedJob.cellRadius = cellRadius;
+								// forcedJob.ExpandTargets();
+							}
 						});
 					}
 
 					return true;
 				}
+
+			// TODO: check if when we track we can fake success wtihout side effects
+			if (useTracking)
+				return true;
 
 			forcedWork.RemoveForcedJob(forcePawn);
 			Messages.Message("CouldNotFindMoreForcedWork".Translate(forcePawn.Name.ToStringShort), MessageTypeDefOf.RejectInput);

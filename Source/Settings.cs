@@ -101,6 +101,11 @@ namespace AchtungMod
 				list.Gap(-2);
 				list.ValueLabeled("ForceCommandMenuKey", ref Achtung.Settings.forceCommandMenuKey);
 			}
+			list.Gap(20);
+			var r = list.GetRect(Tools.menuExampleTexture.height);
+			r.width = r.height * Tools.menuExampleTexture.width / Tools.menuExampleTexture.height;
+			GUI.color = Color.white;
+			GenUI.DrawTextureWithMaterial(r, Tools.menuExampleTexture, null, new Rect(0f, 0f, 1f, 1f));
 
 			list.NewColumn();
 			list.curX += 30 - Listing.ColumnSpacing;

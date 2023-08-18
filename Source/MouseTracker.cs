@@ -64,7 +64,7 @@ namespace AchtungMod
 			if (delta > 0)
 				GenDraw.DrawRadiusRing(center, delta, Color.black);
 
-			if (delta != lastDelta)
+			if (delta != lastDelta && delta < GenRadial.MaxRadialPatternRadius)
 			{
 				foreach (var action in mouseMovedActions.Values)
 					action(delta);

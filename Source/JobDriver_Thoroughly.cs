@@ -64,8 +64,8 @@ namespace AchtungMod
 			Thing dummyThing = null;
 			if (Scribe.mode == LoadSaveMode.Saving && currentItem != null)
 			{
-				dummyCell = currentItem.Cell;
-				dummyThing = currentItem.Thing;
+				dummyCell = currentItem.cellInt;
+				dummyThing = currentItem.thingInt;
 			}
 			Scribe_Values.Look(ref dummyCell, "current-cell", IntVec3.Invalid, false);
 			Scribe_References.Look(ref dummyThing, "current-thing-ref");
@@ -87,9 +87,11 @@ namespace AchtungMod
 		public List<Job> SameJobTypesOngoing()
 		{
 			var jobs = new List<Job>();
-			if (pawn.jobs == null) return jobs;
+			if (pawn.jobs == null)
+				return jobs;
 			var queue = pawn.jobs.jobQueue;
-			if (queue == null) return jobs;
+			if (queue == null)
+				return jobs;
 			for (var i = -1; i < queue.Count; i++)
 			{
 				var aJob = i == -1 ? pawn.CurJob : queue[i].job;
@@ -108,7 +110,8 @@ namespace AchtungMod
 
 		public float Progress()
 		{
-			if (currentWorkCount <= 0f || totalWorkCount <= 0f) return 0f;
+			if (currentWorkCount <= 0f || totalWorkCount <= 0f)
+				return 0f;
 			return (totalWorkCount - currentWorkCount) / totalWorkCount;
 		}
 
@@ -128,7 +131,7 @@ namespace AchtungMod
 
 		public virtual void InitAction()
 		{
-			workLocations = new HashSet<IntVec3>() { TargetA.Cell };
+			workLocations = new HashSet<IntVec3>() { TargetA.cellInt };
 			currentItem = null;
 			isMoving = false;
 			subCounter = 0;
@@ -149,14 +152,15 @@ namespace AchtungMod
 		{
 			return
 				currentItem == null ||
-				(currentItem.HasThing && currentItem.Thing.Destroyed) ||
-				currentItem.Cell.IsValid == false ||
-				(currentItem.Cell.x == 0 && currentItem.Cell.z == 0);
+				(currentItem.HasThing && currentItem.thingInt.Destroyed) ||
+				currentItem.cellInt.IsValid == false ||
+				(currentItem.cellInt.x == 0 && currentItem.cellInt.z == 0);
 		}
 
 		public void CheckJobCancelling()
 		{
-			if (Find.TickManager.TicksGame % 149 != 0) return;
+			if (Find.TickManager.TicksGame % 149 != 0)
+				return;
 
 			if (pawn.Dead || pawn.Downed || pawn.HasAttachment(ThingDefOf.Fire))
 			{
@@ -209,7 +213,8 @@ namespace AchtungMod
 			if (pawn.Position.AdjacentTo8WayOrInside(currentItem))
 			{
 				var itemCompleted = DoWorkToItem();
-				if (itemCompleted) currentItem = null;
+				if (itemCompleted)
+					currentItem = null;
 			}
 			else if (!isMoving)
 			{

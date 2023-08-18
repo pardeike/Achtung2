@@ -46,9 +46,11 @@ namespace AchtungMod
 		// public static MagicTutor tutor;
 		public static Harmony harmony = null;
 		public static AchtungSettings Settings;
+		public static string rootDir;
 
 		public Achtung(ModContentPack content) : base(content)
 		{
+			rootDir = content.RootDir;
 			Settings = GetSettings<AchtungSettings>();
 
 			/* TODO enable later
@@ -102,6 +104,18 @@ namespace AchtungMod
 		}
 	}
 
+	[HarmonyPatch(typeof(UIRoot_Entry))]
+	[HarmonyPatch(nameof(UIRoot_Entry.Init))]
+	static class VideoPatch1
+	{
+		public static void Postfix()
+		{
+			var dialog = new Dialog_ModFeatures(typeof(Achtung));
+			if (dialog.TopicCount > 0)
+				Find.WindowStack.Add(dialog);
+		}
+	}
+
 	[HarmonyPatch(typeof(Map))]
 	[HarmonyPatch(nameof(Map.FinalizeInit))]
 	static class Map_FinalizeInit_Patch
@@ -109,6 +123,13 @@ namespace AchtungMod
 		public static void Postfix(Map __instance)
 		{
 			ForcedWork.Instance?.Prepare(__instance);
+
+			LongEventHandler.ExecuteWhenFinished(() =>
+			{
+				var dialog = new Dialog_ModFeatures(typeof(Achtung));
+				if (dialog.TopicCount > 0)
+					Find.WindowStack.Add(dialog);
+			});
 		}
 	}
 
@@ -338,7 +359,7 @@ namespace AchtungMod
 			if (__result == true)
 			{
 				// ignore any forced work cells if colonist is not forced
-				if (forcedWork.IsForbiddenCell(map, c))
+				if (forcedWork.NonForcedShouldIgnore(map, c))
 					__result = false;
 			}
 		}
@@ -354,7 +375,9 @@ namespace AchtungMod
 		{
 			var instr = instructions.ToList();
 
-			var f_NotInHomeAreaTrans = AccessTools.Field(typeof(WorkGiver_FixBrokenDownBuilding), nameof(WorkGiver_FixBrokenDownBuilding.NotInHomeAreaTrans)) ?? throw new Exception("Cannot find method WorkGiver_FixBrokenDownBuilding.NotInHomeAreaTrans");
+			var f_NotInHomeAreaTrans = AccessTools.Field(typeof(WorkGiver_FixBrokenDownBuilding), nameof(WorkGiver_FixBrokenDownBuilding.NotInHomeAreaTrans));
+			if (f_NotInHomeAreaTrans == null)
+				throw new Exception("Cannot find method WorkGiver_FixBrokenDownBuilding.NotInHomeAreaTrans");
 			var i = instr.FindIndex(inst => inst.LoadsField(f_NotInHomeAreaTrans));
 			if (i > 0)
 			{
@@ -533,9 +556,7 @@ namespace AchtungMod
 
 		public static void FixPatch()
 		{
-			Thing _thing = null;
-			Pawn _pawn = null;
-			var method = SymbolExtensions.GetMethodInfo(() => ForbidUtility.IsForbidden(_thing, _pawn));
+			var method = SymbolExtensions.GetMethodInfo(() => ForbidUtility.IsForbidden(null, (Pawn)null));
 			var hasPatch = Harmony.GetPatchInfo(method)?.Owners.Contains(Achtung.harmony.Id) ?? false;
 			if (Prepare() != hasPatch)
 			{
@@ -714,7 +735,7 @@ namespace AchtungMod
 				foundCount++;
 				list[idx - 2].opcode = OpCodes.Nop;
 				list[idx].opcode = OpCodes.Call;
-				list[idx].operand = SymbolExtensions.GetMethodInfo(() => GetPriority(null, WorkTypeDefOf.Doctor));
+				list[idx].operand = SymbolExtensions.GetMethodInfo(() => GetPriority(default, default));
 			}
 			if (foundCount != 2)
 				Log.Error("Cannot find 2x Pawn_WorkSettings.GetPriority in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
@@ -876,15 +897,6 @@ namespace AchtungMod
 		public static readonly Texture2D BuildingSmart = ContentFinder<Texture2D>.Get("BuildingSmart", true);
 		public static readonly Texture2D BuildingSmartOff = ContentFinder<Texture2D>.Get("BuildingSmartOff", true);
 
-		//[SyncMethod] // multiplayer
-		//public static void ChangeCellRadiusSynced(Pawn pawn, int delta)
-		//{
-		//	var forcedWork = ForcedWork.Instance;
-		//	var forcedJob = forcedWork.GetForcedJob(pawn);
-		//	if (forcedJob != null && forcedJob.cellRadius + delta >= 0)
-		//		forcedJob.ChangeCellRadius(delta);
-		//}
-
 		[SyncMethod] // multiplayer
 		public static void ToggleSmartBuildingSynced(Pawn pawn)
 		{
@@ -903,27 +915,6 @@ namespace AchtungMod
 			var forcedJob = forcedWork.GetForcedJob(___pawn);
 			if (forcedJob == null)
 				yield break;
-
-			/*
-			var radius = forcedJob.cellRadius;
-			yield return new Command_Action
-			{
-				defaultLabel = "IncreaseForceRadius".Translate(),
-				defaultDesc = "IncreaseForceRadiusDesc".Translate(radius),
-				icon = ForceRadiusExpand,
-				activateSound = SoundDefOf.Designate_ZoneAdd,
-				action = delegate { ChangeCellRadiusSynced(___pawn, 1); }
-			};
-
-			yield return new Command_Action
-			{
-				defaultLabel = "DecreaseForceRadius".Translate(),
-				defaultDesc = "DecreaseForceRadiusDesc".Translate(radius),
-				icon = radius > 0 ? ForceRadiusShrink : ForceRadiusShrinkOff,
-				activateSound = radius > 0 ? SoundDefOf.Designate_ZoneAdd : SoundDefOf.Designate_Failed,
-				action = delegate { ChangeCellRadiusSynced(___pawn, -1); }
-			};
-			*/
 
 			var smart = forcedJob.buildSmart;
 			yield return new Command_Action
@@ -1015,8 +1006,8 @@ namespace AchtungMod
 
 		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
-			var fromMethod = SymbolExtensions.GetMethodInfo(() => Log.Error(""));
-			var toMethod = SymbolExtensions.GetMethodInfo(() => Log.Warning(""));
+			var fromMethod = SymbolExtensions.GetMethodInfo(() => Log.Error(default));
+			var toMethod = SymbolExtensions.GetMethodInfo(() => Log.Warning(default));
 			return instructions.MethodReplacer(fromMethod, toMethod);
 		}
 	}

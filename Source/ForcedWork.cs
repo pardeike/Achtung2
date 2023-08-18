@@ -209,8 +209,8 @@ namespace AchtungMod
 		public static Job GetJobItem(Pawn pawn, WorkGiver_Scanner workgiver, LocalTargetInfo item)
 		{
 			if (item.HasThing)
-				return item.Thing.GetThingJob(pawn, workgiver);
-			return item.Cell.GetCellJob(pawn, workgiver);
+				return item.thingInt.GetThingJob(pawn, workgiver);
+			return item.cellInt.GetCellJob(pawn, workgiver);
 		}
 
 		public IEnumerable<ForcedJob> ForcedJobsForMap(Map map)
@@ -222,7 +222,7 @@ namespace AchtungMod
 				.SelectMany(pair => pair.Value.jobs ?? new List<ForcedJob>());
 		}
 
-		public bool IsForbiddenCell(Map map, IntVec3 cell)
+		public bool NonForcedShouldIgnore(Map map, IntVec3 cell)
 		{
 			return allForcedJobs
 				.Where(pair => pair.Key.Map == map)
@@ -231,7 +231,7 @@ namespace AchtungMod
 					var forcedJobs = pair.Value;
 					if (forcedJobs == null)
 						return false;
-					return forcedJobs.jobs.Any(job => job.IsForbiddenCell(cell));
+					return forcedJobs.jobs.Any(job => job.NonForcedShouldIgnore(cell));
 				});
 		}
 

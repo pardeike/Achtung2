@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# IDE0011: Add braces
+dotnet_diagnostic.IDE0011.severity = silent

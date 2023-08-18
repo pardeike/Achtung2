@@ -15,6 +15,7 @@ namespace AchtungMod
 	[StaticConstructorOnStartup]
 	static class Tools
 	{
+		public static Texture2D menuExampleTexture;
 		public static Material forceIconMaterial;
 		public static Material markerMaterial;
 		public static Material lineMaterial;
@@ -41,6 +42,7 @@ namespace AchtungMod
 
 		static Tools()
 		{
+			menuExampleTexture = ContentFinder<Texture2D>.Get("MenuExample", true);
 			forceIconMaterial = MaterialPool.MatFrom("ForceIcon", ShaderDatabase.Cutout);
 			markerMaterial = MaterialPool.MatFrom("AchtungMarker", ShaderDatabase.Transparent);
 			lineMaterial = MaterialPool.MatFrom(GenDraw.LineTexPath, ShaderDatabase.Transparent, new Color(1f, 0.5f, 0.5f));
@@ -172,7 +174,7 @@ namespace AchtungMod
 		{
 			if (info.HasThing == false)
 				return false;
-			var thing = info.Thing;
+			var thing = info.thingInt;
 			var thingDef = thing.def;
 			if (thing is Blueprint blueprint)
 			{
@@ -189,10 +191,38 @@ namespace AchtungMod
 			return thingDef.passability == Traversability.Impassable;
 		}
 
+		public static IEnumerable<XY> Expand(this IEnumerable<XY> existing, int radius, Func<XY, bool> predicate)
+		{
+			if (radius == 0)
+				yield break;
+			var visited = new HashSet<XY>(existing);
+			var queue = new Queue<XY>(visited);
+			for (var i = 1; i <= radius && queue.Count > 0; i++)
+			{
+				while (queue.Count > 0)
+				{
+					var cell = queue.Dequeue();
+					for (var j = 0; j < 8; j++)
+					{
+						var newCell = cell + XY.Adjacent[j];
+						if (visited.Contains(newCell))
+							continue;
+
+						if (predicate(newCell))
+						{
+							visited.Add(newCell);
+							queue.Enqueue(newCell);
+							yield return newCell;
+						}
+					}
+				}
+			}
+		}
+
 		public static void NeighbourCount(IntVec3 pos, PathGrid grid, List<ReservationManager.Reservation> reservations, HashSet<int> planned, int mapWidth, out int count, out bool isCorner, out bool isRoomCorner)
 		{
 			var idx = CellIndicesUtility.CellToIndex(pos.x, pos.z, mapWidth);
-			if (planned.Contains(idx) || grid.Walkable(pos) == false || reservations.Any(rsv => rsv.target.Cell == pos))
+			if (planned.Contains(idx) || grid.Walkable(pos) == false || reservations.Any(rsv => rsv.target.cellInt == pos))
 			{
 				count = -1;
 				isCorner = false;
@@ -204,7 +234,7 @@ namespace AchtungMod
 			{
 				var vec = pos + GenAdj.CardinalDirectionsAround[i];
 				idx = CellIndicesUtility.CellToIndex(vec.x, vec.z, mapWidth);
-				counts[i] = planned.Contains(idx) || grid.Walkable(vec) == false || reservations.Any(rsv => rsv.target.Cell == vec) ? 1 : 0;
+				counts[i] = planned.Contains(idx) || grid.Walkable(vec) == false || reservations.Any(rsv => rsv.target.cellInt == vec) ? 1 : 0;
 			}
 			count = counts.Sum();
 			isCorner = count == 2 && counts[0] != counts[2];
@@ -218,7 +248,7 @@ namespace AchtungMod
 					{
 						var vec = pos + GenAdj.CardinalDirectionsAround[i] + GenAdj.CardinalDirectionsAround[j];
 						idx = CellIndicesUtility.CellToIndex(vec.x, vec.z, mapWidth);
-						if (planned.Contains(idx) == false && grid.Walkable(vec) && reservations.Any(rsv => rsv.target.Cell == vec) == false)
+						if (planned.Contains(idx) == false && grid.Walkable(vec) && reservations.Any(rsv => rsv.target.cellInt == vec) == false)
 						{
 							isRoomCorner = true;
 							break;
@@ -302,7 +332,7 @@ namespace AchtungMod
 			return -neighbourScore;
 		}
 
-		public static IEnumerable<IntVec3> AllCells(this Thing thing)
+		public static IEnumerable<XY> AllCells(this Thing thing)
 		{
 			if (thing == null)
 				yield break;
@@ -317,7 +347,7 @@ namespace AchtungMod
 			var rect = GenAdj.OccupiedRect(thing.Position, thing.Rotation, size);
 			for (var z = rect.minZ; z <= rect.maxZ; z++)
 				for (var x = rect.minX; x <= rect.maxX; x++)
-					yield return new IntVec3(x, 0, z);
+					yield return new XY(x, z);
 		}
 
 		public static void Do<T>(this IEnumerable<T> sequence, Action<T> action)

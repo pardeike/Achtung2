@@ -117,7 +117,8 @@ namespace BrrainzTools
 			if (method is MethodInfo replacement)
 			{
 				var original = Harmony.GetOriginalMethod(replacement);
-				if (original == null) return null;
+				if (original == null)
+					return null;
 				return Harmony.GetPatchInfo(original);
 			}
 			return null;
@@ -125,31 +126,38 @@ namespace BrrainzTools
 
 		static ModMetaData GetMetadataIfMod(MethodBase method)
 		{
-			if (method == null) return null;
+			if (method == null)
+				return null;
 			var assembly = method.DeclaringType?.Assembly;
-			if (assembly == null) return null;
+			if (assembly == null)
+				return null;
 			var references = assembly.GetReferencedAssemblies();
-			if (references.Any(assemblyName => assemblyName.Name == RimworldAssemblyName) == false) return null;
+			if (references.Any(assemblyName => assemblyName.Name == RimworldAssemblyName) == false)
+				return null;
 			var metaData = GetModMetaData(assembly);
-			if (metaData == null || metaData.IsCoreMod) return null;
+			if (metaData == null || metaData.IsCoreMod)
+				return null;
 			return metaData;
 		}
 
 		static IEnumerable<ModInfo> GetPrefixes(Patches info)
 		{
-			if (info == null) return new List<ModInfo>().AsEnumerable();
+			if (info == null)
+				return new List<ModInfo>().AsEnumerable();
 			return AddMetadata(info.Prefixes.OrderBy(t => t.priority).Select(t => t.PatchMethod));
 		}
 
 		static IEnumerable<ModInfo> GetPostfixes(Patches info)
 		{
-			if (info == null) return new List<ModInfo>().AsEnumerable();
+			if (info == null)
+				return new List<ModInfo>().AsEnumerable();
 			return AddMetadata(info.Postfixes.OrderBy(t => t.priority).Select(t => t.PatchMethod));
 		}
 
 		static IEnumerable<ModInfo> GetTranspilers(Patches info)
 		{
-			if (info == null) return new List<ModInfo>().AsEnumerable();
+			if (info == null)
+				return new List<ModInfo>().AsEnumerable();
 			return AddMetadata(info.Transpilers.OrderBy(t => t.priority).Select(t => t.PatchMethod));
 		}
 
@@ -184,11 +192,13 @@ namespace BrrainzTools
 
 		static bool AddHarmonyFrames(StackTrace trace, StringBuilder sb)
 		{
-			if (trace.FrameCount == 0) return false;
+			if (trace.FrameCount == 0)
+				return false;
 			for (var i = 0; i < trace.FrameCount; i++)
 			{
 				var frame = trace.GetFrame(i);
-				if (i > 0) _ = sb.Append('\n');
+				if (i > 0)
+					_ = sb.Append('\n');
 				_ = sb.Append("  at ");
 
 				var method = GetExpandedMethod(frame, out var patches);

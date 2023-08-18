@@ -52,12 +52,12 @@
 	<HealthLevelOptionNeedsMedicalRest>Benötigt Bettruhe</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>Schockzustand</HealthLevelOptionInPainShock>
 
-	<IgnoreForbiddenTitle>Verbotene Objekte ignorieren</IgnoreForbiddenTitle>
-	<IgnoreForbiddenExplained>Kolonisten ignorieren verbotene Objekte bei erzw. Arbeiten.</IgnoreForbiddenExplained>
-	<IgnoreRestrictionsTitle>Sperrgebiete ignorieren</IgnoreRestrictionsTitle>
-	<IgnoreRestrictionsExplained>Kolonisten ignorieren Zonenbeschränkungen bei erzw. Arbeiten.</IgnoreRestrictionsExplained>
+	<IgnoreForbiddenTitle>Verbotene Markierungen ignorieren</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Erlaube erzwungene Arbeit an verbotenen Objekten</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>Zonenbeschränkungen ignorieren</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Erlaube erzwungene Arbeit in eingeschränkten Bereichen</IgnoreRestrictionsExplained>
 	<IgnoreAssignmentsTitle>Arbeitszuweisungen ignorieren</IgnoreAssignmentsTitle>
-	<IgnoreAssignmentsExplained>Kolonisten ignorieren ungesetzte Arbeitsprioritäten.</IgnoreAssignmentsExplained>
+	<IgnoreAssignmentsExplained>Erlaube erzwungene Arbeit trotz fehlender Arbeitsprioritäten</IgnoreAssignmentsExplained>
 
 	<BuildingSmartDefaultTitle>Cleveres Bauen für neue erzw. Arbeiten aktivieren</BuildingSmartDefaultTitle>
 	<BuildingSmartDefaultExplained>Ändert die Standardbauweise bei erzw. Arbeiten.</BuildingSmartDefaultExplained>

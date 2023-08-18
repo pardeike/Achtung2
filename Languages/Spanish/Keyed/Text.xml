@@ -5,8 +5,7 @@
 	<PositioningEnabledExplained>Permite el posicionamiento en combate con un click o arrastre de tu ratón (ver preferencias abajo)</PositioningEnabledExplained>
 
 	<AchtungModifierTitle>tecla de Achtung!</AchtungModifierTitle>
-	<AchtungModifierExplained>Manteniendo pulsada esta tecla se forzará el reclutamiento de los colonos cuando reciban órdenes de movimiento o en formación. Cuando se mantenga pulsada, permitirá mover a los colonos seleccionados sin perder su formación actual, pulsando y arrastrando con el botón derecho del ratón. Una vez que el botón derecho del ratón se mantenga pulsado, la tecla Achtung! puede ser liberada.
-La formación puede rotar usando las teclas Q y E.</AchtungModifierExplained>
+	<AchtungModifierExplained>Manteniendo pulsada esta tecla se forzará el reclutamiento de los colonos cuando reciban órdenes de movimiento o en formación. Cuando se mantenga pulsada, permitirá mover a los colonos seleccionados sin perder su formación actual, pulsando y arrastrando con el botón derecho del ratón. Una vez que el botón derecho del ratón se mantenga pulsado, la tecla Achtung! puede ser liberada. La formación puede rotar usando las teclas Q y E.</AchtungModifierExplained>
 
 	<ForceCommandMenuModeTitle>Modo de menú contextual</ForceCommandMenuModeTitle>
 	<ForceCommandMenuModeExplained>Auto = comportamiento normal (el estado de reclutamiento decide)\nMostrar menú = Mantenga presionada la tecla para el menú\nEstablecer posición = Mantenga presionada la tecla para posicionamiento</ForceCommandMenuModeExplained>
@@ -53,12 +52,12 @@ La formación puede rotar usando las teclas Q y E.</AchtungModifierExplained>
 	<HealthLevelOptionNeedsMedicalRest>Necesita descanso médico</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>En estado de shock</HealthLevelOptionInPainShock>
 
-	<IgnoreForbiddenTitle>Ignorar las cosas prohibidas</IgnoreForbiddenTitle>
-	<IgnoreForbiddenExplained>Ignora los artículos prohibidos (cruzados en rojo) al realizar trabajos forzados</IgnoreForbiddenExplained>
-	<IgnoreRestrictionsTitle>Ignorar las áreas restringidas</IgnoreRestrictionsTitle>
-	<IgnoreRestrictionsExplained>Ignorar las restricciones de zona al hacer trabajos forzados</IgnoreRestrictionsExplained>
+	<IgnoreForbiddenTitle>Ignorar marcas prohibidas</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Permite trabajo forzado en objetos prohibidos</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>Ignorar restricciones de zona</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Permite trabajo forzado en áreas restringidas</IgnoreRestrictionsExplained>
 	<IgnoreAssignmentsTitle>Ignorar asignaciones de tipo de trabajo</IgnoreAssignmentsTitle>
-	<IgnoreAssignmentsExplained>Ignora las prioridades de trabajo que no están establecidas</IgnoreAssignmentsExplained>
+	<IgnoreAssignmentsExplained>Permite el trabajo forzoso sin prioridades establecidas</IgnoreAssignmentsExplained>
 
 	<BuildingSmartDefaultTitle>Edificio inteligente es la opción predeterminada para nuevos trabajos</BuildingSmartDefaultTitle>
 	<BuildingSmartDefaultExplained>Establece la forma predeterminada de cómo los nuevos trabajos eligen su orden de construcción</BuildingSmartDefaultExplained>
