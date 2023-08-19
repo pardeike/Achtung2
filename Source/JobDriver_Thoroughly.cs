@@ -64,7 +64,7 @@ namespace AchtungMod
 			Thing dummyThing = null;
 			if (Scribe.mode == LoadSaveMode.Saving && currentItem != null)
 			{
-				dummyCell = currentItem.cellInt;
+				dummyCell = currentItem.Cell;
 				dummyThing = currentItem.thingInt;
 			}
 			Scribe_Values.Look(ref dummyCell, "current-cell", IntVec3.Invalid, false);
@@ -131,7 +131,7 @@ namespace AchtungMod
 
 		public virtual void InitAction()
 		{
-			workLocations = new HashSet<IntVec3>() { TargetA.cellInt };
+			workLocations = new HashSet<IntVec3>() { TargetA.Cell };
 			currentItem = null;
 			isMoving = false;
 			subCounter = 0;
@@ -153,8 +153,8 @@ namespace AchtungMod
 			return
 				currentItem == null ||
 				(currentItem.HasThing && currentItem.thingInt.Destroyed) ||
-				currentItem.cellInt.IsValid == false ||
-				(currentItem.cellInt.x == 0 && currentItem.cellInt.z == 0);
+				currentItem.Cell.IsValid == false ||
+				(currentItem.Cell.x == 0 && currentItem.Cell.z == 0);
 		}
 
 		public void CheckJobCancelling()

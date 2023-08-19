@@ -1,4 +1,5 @@
-﻿using Multiplayer.API;
+﻿using HarmonyLib;
+using Multiplayer.API;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Reflection;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using Verse.Noise;
 using Verse.Sound;
 using static HarmonyLib.AccessTools;
 
@@ -191,38 +193,40 @@ namespace AchtungMod
 			return thingDef.passability == Traversability.Impassable;
 		}
 
-		public static IEnumerable<XY> Expand(this IEnumerable<XY> existing, int radius, Func<XY, bool> predicate)
+		public static IEnumerable<XY> Expand(this IEnumerable<XY> existing, Map map, int radius)
 		{
 			if (radius == 0)
 				yield break;
 			var visited = new HashSet<XY>(existing);
 			var queue = new Queue<XY>(visited);
+			var added = new Queue<XY>();
 			for (var i = 1; i <= radius && queue.Count > 0; i++)
 			{
 				while (queue.Count > 0)
 				{
 					var cell = queue.Dequeue();
-					for (var j = 0; j < 8; j++)
+					var j = Rand.Range(0, 8);
+					for (var k = 0; k < 8; k++)
 					{
-						var newCell = cell + XY.Adjacent[j];
+						var newCell = cell + XY.Adjacent[(j + k) % 8];
 						if (visited.Contains(newCell))
 							continue;
-
-						if (predicate(newCell))
-						{
-							visited.Add(newCell);
-							queue.Enqueue(newCell);
-							yield return newCell;
-						}
+						if (newCell.InBounds(map) == false)
+							continue;
+						visited.Add(newCell);
+						added.Enqueue(newCell);
+						yield return newCell;
 					}
 				}
+				queue = added;
+				added = new Queue<XY>();
 			}
 		}
 
 		public static void NeighbourCount(IntVec3 pos, PathGrid grid, List<ReservationManager.Reservation> reservations, HashSet<int> planned, int mapWidth, out int count, out bool isCorner, out bool isRoomCorner)
 		{
 			var idx = CellIndicesUtility.CellToIndex(pos.x, pos.z, mapWidth);
-			if (planned.Contains(idx) || grid.Walkable(pos) == false || reservations.Any(rsv => rsv.target.cellInt == pos))
+			if (planned.Contains(idx) || grid.Walkable(pos) == false || reservations.Any(rsv => rsv.target.Cell == pos))
 			{
 				count = -1;
 				isCorner = false;
@@ -234,7 +238,7 @@ namespace AchtungMod
 			{
 				var vec = pos + GenAdj.CardinalDirectionsAround[i];
 				idx = CellIndicesUtility.CellToIndex(vec.x, vec.z, mapWidth);
-				counts[i] = planned.Contains(idx) || grid.Walkable(vec) == false || reservations.Any(rsv => rsv.target.cellInt == vec) ? 1 : 0;
+				counts[i] = planned.Contains(idx) || grid.Walkable(vec) == false || reservations.Any(rsv => rsv.target.Cell == vec) ? 1 : 0;
 			}
 			count = counts.Sum();
 			isCorner = count == 2 && counts[0] != counts[2];
@@ -248,7 +252,7 @@ namespace AchtungMod
 					{
 						var vec = pos + GenAdj.CardinalDirectionsAround[i] + GenAdj.CardinalDirectionsAround[j];
 						idx = CellIndicesUtility.CellToIndex(vec.x, vec.z, mapWidth);
-						if (planned.Contains(idx) == false && grid.Walkable(vec) && reservations.Any(rsv => rsv.target.cellInt == vec) == false)
+						if (planned.Contains(idx) == false && grid.Walkable(vec) && reservations.Any(rsv => rsv.target.Cell == vec) == false)
 						{
 							isRoomCorner = true;
 							break;

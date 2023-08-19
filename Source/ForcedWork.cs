@@ -3,6 +3,7 @@ using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Jobs;
 using Verse;
 using Verse.AI;
 
@@ -190,13 +191,14 @@ namespace AchtungMod
 			for (var i = 0; i < radial.Length; i++)
 			{
 				var cell = pos + radial[i];
-
-				if (cell.GetCellJob(pawn, workgiver, true) != null)
+				var job = cell.GetCellJob(pawn, workgiver, expandSearch);
+				if (job != null)
 					return new LocalTargetInfo(cell);
 				var things = pawn.Map.thingGrid.ThingsAt(cell);
 				foreach (var thing in things)
 				{
-					if (thing.GetThingJob(pawn, workgiver, true) != null)
+					job = thing.GetThingJob(pawn, workgiver, expandSearch);
+					if (job != null)
 						return new LocalTargetInfo(thing);
 				}
 
@@ -210,7 +212,7 @@ namespace AchtungMod
 		{
 			if (item.HasThing)
 				return item.thingInt.GetThingJob(pawn, workgiver);
-			return item.cellInt.GetCellJob(pawn, workgiver);
+			return item.Cell.GetCellJob(pawn, workgiver);
 		}
 
 		public IEnumerable<ForcedJob> ForcedJobsForMap(Map map)

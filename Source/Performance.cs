@@ -107,7 +107,7 @@ namespace AchtungMod
 				logNextTicks = ticks + 30;
 
 				var description = forcedJob == null ? "" : forcedJob.workgiverDefs.Join(wgd => wgd?.defName);
-				if (description == "ConstructDeliverResourcesToFrames, ConstructDeliverResourcesToBlueprints, Replant, DeliverResourcesToFrames, DeliverResourcesToBlueprints, ConstructFinishFrames")
+				if (description.Contains("DeliverResourcesToBlueprints"))
 					description = "<construct>";
 
 				File.AppendAllText(logPath, $"[{DateTime.Now:yyyyMMddHHmmss.ffff}] [EndCurrentJob] [{pawn.LabelShortCap}] [{w_GetNextJobCount}] [{GetNextJob_Max}/{ContinueJob_Max}/{EndCurrentJob_Max}] [{description}]\r\n");

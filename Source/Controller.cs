@@ -365,7 +365,7 @@ namespace AchtungMod
 
 			var selector = Find.Selector;
 			reservationManager.ReservationsReadOnly
-				.DoIf(res => selector.IsSelected(res.Claimant), res => Tools.DebugPosition(res.Target.cellInt.ToVector3(), res.Target.HasThing ? thingColor : cellColor));
+				.DoIf(res => selector.IsSelected(res.Claimant), res => Tools.DebugPosition(res.Target.Cell.ToVector3(), res.Target.HasThing ? thingColor : cellColor));
 		}
 
 		public void HandleDrawing()

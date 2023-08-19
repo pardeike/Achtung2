@@ -190,15 +190,9 @@ namespace AchtungMod
 				forceThingColor = forceThingColor
 			};
 
-			// support for our special force menu options. we need to call all internal
-			// subactions from when the extra buttons calls them
-			//
-			var forcedOptions = options.OfType<ForcedFloatMenuOption>().ToList();
-			if (extraPartOnGUI != null && forcedOptions.Count > 0)
-			{
-				option = new ForcedMultiFloatMenuOption(pawns, title) { options = options.OfType<ForcedFloatMenuOption>().ToList() };
-				option.extraPartOnGUI = drawRect => ((ForcedMultiFloatMenuOption)option).RenderExtraPartOnGui(drawRect);
-			}
+			var hasForcedOptions = options.Any(o => o is ForcedFloatMenuOption);
+			if (hasForcedOptions)
+				option = new ForcedMultiFloatMenuOption(pawns, options.ToList(), extraPartOnGUI, title);
 
 			option.action = () => actions.Do(multiAction => multiAction.GetAction()());
 			option.Disabled = actions.All(a => a.option.Disabled);

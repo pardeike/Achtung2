@@ -7,6 +7,7 @@ using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
@@ -524,9 +525,31 @@ namespace AchtungMod
 
 		static bool IsForced(Pawn pawn) => ForcedWork.Instance.HasForcedJob(pawn);
 
+		static void EnqueueWhenForced(Pawn pawn, Blueprint blueprint, Thing thing)
+		{
+			var forcedJob = ForcedWork.Instance.GetForcedJob(pawn);
+			forcedJob?.Replace(blueprint, thing);
+		}
+
 		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
+			var m_TryReplaceWithSolidThing = AccessTools.Method(typeof(Blueprint), nameof(Blueprint.TryReplaceWithSolidThing));
 			var matcher = new CodeMatcher(instructions)
+				.MatchEndForward(
+					new CodeMatch(code => code.opcode == OpCodes.Ldloca || code.opcode == OpCodes.Ldloca_S, name: "thingVar"),
+					new CodeMatch(code => code.opcode == OpCodes.Ldloca || code.opcode == OpCodes.Ldloca_S),
+					new CodeMatch(operand: m_TryReplaceWithSolidThing),
+					new CodeMatch(code => code.Branches(out var _)),
+					new CodeMatch()
+				);
+
+			matcher
+				.InsertAndAdvance(
+					new CodeInstruction(OpCodes.Ldloc_0),
+					new CodeInstruction(OpCodes.Ldloc_2),
+					new CodeInstruction(OpCodes.Ldloc, matcher.NamedMatch("thingVar").operand),
+					CodeInstruction.Call(() => EnqueueWhenForced(default, default, default))
+				)
 				.MatchStartForward(new CodeMatch(code => code.operand is MethodInfo method && method.Name == "Reserve"))
 				.MatchStartBackwards(new CodeMatch(name: "branch"), new CodeMatch(opcode: OpCodes.Ldloc_0));
 

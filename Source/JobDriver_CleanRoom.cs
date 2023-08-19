@@ -23,7 +23,7 @@ namespace AchtungMod
 			if (Achtung.Settings.ignoreAssignments == false && thePawn.workSettings.GetPriority(cleanDef) == 0)
 				return null;
 
-			if (AllFilth(clickCell.cellInt).Any())
+			if (AllFilth(clickCell.Cell).Any())
 				return new List<LocalTargetInfo> { clickCell };
 			return null;
 		}

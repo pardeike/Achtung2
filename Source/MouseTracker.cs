@@ -21,6 +21,7 @@ namespace AchtungMod
 		public Vector2 start;
 		public int lastDelta = -1;
 		public Dictionary<Pawn, Action<int>> mouseMovedActions = new Dictionary<Pawn, Action<int>>();
+		public Dictionary<Pawn, Action> mouseUpActions = new Dictionary<Pawn, Action>();
 
 		public static MouseTracker GetInstance()
 		{
@@ -28,7 +29,7 @@ namespace AchtungMod
 			return instance;
 		}
 
-		public static void StartDragging(Pawn pawn, IntVec3 center, Action<int> callback)
+		public static void StartDragging(Pawn pawn, IntVec3 center, Action<int> mouseMovedCallback, Action mouseUpCallback)
 		{
 			var tracker = GetInstance();
 			if (tracker.dragging == DragState.stopped)
@@ -36,7 +37,8 @@ namespace AchtungMod
 				tracker.center = center;
 				tracker.dragging = DragState.starting;
 			}
-			tracker.mouseMovedActions[pawn] = callback;
+			tracker.mouseMovedActions[pawn] = mouseMovedCallback;
+			tracker.mouseUpActions[pawn] = mouseUpCallback;
 		}
 
 		public void OnGUI()
@@ -55,7 +57,10 @@ namespace AchtungMod
 			if (Input.GetMouseButton(0) == false)
 			{
 				dragging = DragState.stopped;
+				foreach (var action in mouseUpActions.Values)
+					action();
 				mouseMovedActions.Clear();
+				mouseUpActions.Clear();
 				return;
 
 			}

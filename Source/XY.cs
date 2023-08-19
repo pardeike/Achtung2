@@ -24,7 +24,7 @@ namespace AchtungMod
 
 		public static implicit operator XY(IntVec3 v3) => new XY((short)v3.x, (short)v3.z);
 		public static implicit operator IntVec3(XY xy) => new IntVec3(xy.x, 0, xy.y);
-		public static implicit operator XY(LocalTargetInfo info) { var cell = info.cellInt; return new XY((short)cell.x, (short)cell.z); }
+		public static implicit operator XY(LocalTargetInfo info) { var cell = info.Cell; return new XY((short)cell.x, (short)cell.z); }
 		public static implicit operator LocalTargetInfo(XY xy) => new LocalTargetInfo() { thingInt = null, cellInt = xy };
 
 		public static XY operator +(XY a, XY b) => new XY((short)(a.x + b.x), (short)(a.y + b.y));

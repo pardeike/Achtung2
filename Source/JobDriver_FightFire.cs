@@ -18,7 +18,7 @@ namespace AchtungMod
 				return null;
 			if (Achtung.Settings.ignoreAssignments == false && thePawn.workSettings.GetPriority(WorkTypeDefOf.Firefighter) == 0)
 				return null;
-			var item = thePawn.Map.thingGrid.ThingAt(clickCell.cellInt, ThingDefOf.Fire);
+			var item = thePawn.Map.thingGrid.ThingAt(clickCell.Cell, ThingDefOf.Fire);
 			if (item == null)
 				return null;
 			var canFight = item.Destroyed == false && thePawn.CanReach(item, PathEndMode.Touch, thePawn.NormalMaxDanger()) && thePawn.CanReserve(item, 1);
