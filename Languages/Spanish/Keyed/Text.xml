@@ -1,6 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
+	<Topic_Welcome>¡Bienvenido a Achtung!</Topic_Welcome>
+	<Topic_Forcing>Forzar</Topic_Forcing>
+	<Topic_Formations>Formaciones</Topic_Formations>
+	<Topic_Cooperation>Cooperación</Topic_Cooperation>
+	<Topic_ThreeModes>Tres Modos</Topic_ThreeModes>
+
 	<PositioningEnabledTitle>Posicionamiento del ratón personalizado</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Permite el posicionamiento en combate con un click o arrastre de tu ratón (ver preferencias abajo)</PositioningEnabledExplained>
 

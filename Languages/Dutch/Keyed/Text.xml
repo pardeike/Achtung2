@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
+	<Topic_Welcome>Welkom bij Achtung!</Topic_Welcome>
+	<Topic_Forcing>Dwingen</Topic_Forcing>
+	<Topic_Formations>Formaties</Topic_Formations>
+	<Topic_Cooperation>Samenwerking</Topic_Cooperation>
+	<Topic_ThreeModes>Drie Modi</Topic_ThreeModes>
+
 	<PositioningEnabledTitle>Aangepaste muispositionering</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Maakt gevechtspositionering mogelijk voor je muisklikken/slepen (zie onderstaande instellingen)</PositioningEnabledExplained>
 

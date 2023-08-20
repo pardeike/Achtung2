@@ -1,6 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
+	<Topic_Welcome>Willkommen zu Achtung!</Topic_Welcome>
+	<Topic_Forcing>Erzwingen</Topic_Forcing>
+	<Topic_Formations>Formationen</Topic_Formations>
+	<Topic_Cooperation>Zusammenarbeit</Topic_Cooperation>
+	<Topic_ThreeModes>Drei Modi</Topic_ThreeModes>
+
 	<PositioningEnabledTitle>Benutzerdef. Positionierung via Maus</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Aktiviert die Kampfpositionierung beim Klicken/Ziehen der Maus (siehe Einstellungen unten).</PositioningEnabledExplained>
 

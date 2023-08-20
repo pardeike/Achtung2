@@ -1,6 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
+	<Topic_Welcome>Välkommen till Achtung!</Topic_Welcome>
+	<Topic_Forcing>Tvinga</Topic_Forcing>
+	<Topic_Formations>Formationer</Topic_Formations>
+	<Topic_Cooperation>Samarbete</Topic_Cooperation>
+	<Topic_ThreeModes>Tre Lägen</Topic_ThreeModes>
+
 	<PositioningEnabledTitle>Aktivera positioningen för kolonister</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Aktiverar muskommandos för positioneringen av kolonister (se inställningar nere)</PositioningEnabledExplained>
 

@@ -104,17 +104,17 @@ namespace AchtungMod
 		}
 	}
 
-	[HarmonyPatch(typeof(UIRoot_Entry))]
-	[HarmonyPatch(nameof(UIRoot_Entry.Init))]
-	static class VideoPatch1
-	{
-		public static void Postfix()
-		{
-			var dialog = new Dialog_ModFeatures(typeof(Achtung));
-			if (dialog.TopicCount > 0)
-				Find.WindowStack.Add(dialog);
-		}
-	}
+	// [HarmonyPatch(typeof(UIRoot_Entry))]
+	// [HarmonyPatch(nameof(UIRoot_Entry.Init))]
+	// static class VideoPatch1
+	// {
+	// 	public static void Postfix()
+	// 	{
+	// 		var dialog = new Dialog_ModFeatures(typeof(Achtung));
+	// 		if (dialog.TopicCount > 0)
+	// 			Find.WindowStack.Add(dialog);
+	// 	}
+	// }
 
 	[HarmonyPatch(typeof(Map))]
 	[HarmonyPatch(nameof(Map.FinalizeInit))]
@@ -241,6 +241,23 @@ namespace AchtungMod
 			if (ForcedWork.Instance.HasForcedJob(___pawn) == false)
 				return;
 			__result = ___pawn.workSettings.GetPriority(w) == 0;
+		}
+	}
+	//
+	[HarmonyPatch(typeof(Alert_HunterLacksRangedWeapon))]
+	[HarmonyPatch(nameof(Alert_HunterLacksRangedWeapon.HuntersWithoutRangedWeapon), MethodType.Getter)]
+	static class Alert_HunterLacksRangedWeapon_HuntersWithoutRangedWeapon_Patch
+	{
+		static bool WorkIsActive(Pawn_WorkSettings instance, WorkTypeDef w)
+		{
+			return instance.GetPriority(w) > 0; // "unpatch" it
+		}
+
+		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			var fromMethod = SymbolExtensions.GetMethodInfo((Pawn_WorkSettings workSettings) => workSettings.WorkIsActive(null));
+			var toMethod = SymbolExtensions.GetMethodInfo(() => WorkIsActive(null, null));
+			return instructions.MethodReplacer(fromMethod, toMethod);
 		}
 	}
 
@@ -401,6 +418,32 @@ namespace AchtungMod
 
 			foreach (var inst in instr)
 				yield return inst;
+		}
+	}
+
+	[HarmonyPatch(typeof(BeautyDrawer))]
+	[HarmonyPatch(nameof(BeautyDrawer.ShouldShow))]
+	static class BeautyDrawer_ShouldShow_Patch
+	{
+		public static void Postfix(ref bool __result)
+		{
+			if (__result == false)
+				return;
+			if (Find.Selector.SelectedPawns.Count(pawn => pawn.IsColonist && pawn.Drafted) > 1)
+				__result = false;
+		}
+	}
+	//
+	[HarmonyPatch(typeof(CellInspectorDrawer))]
+	[HarmonyPatch(nameof(CellInspectorDrawer.ShouldShow))]
+	static class CellInspectorDrawer_ShouldShow_Patch
+	{
+		public static void Postfix(ref bool __result)
+		{
+			if (__result == false)
+				return;
+			if (Find.Selector.SelectedPawns.Count(pawn => pawn.IsColonist && pawn.Drafted) > 1)
+				__result = false;
 		}
 	}
 

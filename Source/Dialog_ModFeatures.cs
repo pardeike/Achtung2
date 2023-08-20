@@ -2,12 +2,31 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 using UnityEngine;
 using UnityEngine.Video;
 using Verse;
 
 namespace AchtungMod
 {
+	[DataContract]
+	class Configuration
+	{
+		[DataMember] string[] Dismissed { get; set; } = new string[0];
+
+		internal bool IsDismissed(string topic) => Dismissed.Contains(topic);
+
+		internal void MarkDismissed(string topic)
+		{
+			if (IsDismissed(topic) == false)
+			{
+				Dismissed = Dismissed.Concat(new[] { topic }).ToArray();
+				Dialog_ModFeatures.Save();
+			}
+		}
+	}
+
 	internal class Dialog_ModFeatures : Window
 	{
 		const float listWidth = 240;
@@ -22,9 +41,12 @@ namespace AchtungMod
 		VideoPlayer videoPlayer;
 		string title = "";
 
+		static readonly string configurationPath = Path.Combine(GenFilePaths.ConfigFolderPath, "ModFeatures.json");
+		static Configuration configuration = new Configuration();
+
 		readonly string resourceDir;
-		readonly string[] topicResources;
-		readonly Texture2D[] topicTextures;
+		string[] topicResources;
+		Texture2D[] topicTextures;
 
 		string TopicTranslated(int i) => $"Topic_{topicResources[i].Substring(3).Replace(".png", "").Replace(".mp4", "")}".Translate();
 		string TopicType(int i) => topicResources[i].EndsWith(".png") ? "image" : "video";
@@ -39,15 +61,54 @@ namespace AchtungMod
 			silenceAmbientSound = true;
 			closeOnClickedOutside = true;
 
+			Load();
+
 			var rootDir = LoadedModManager.RunningMods.FirstOrDefault(mod => mod.assemblies.loadedAssemblies.Contains(type.Assembly))?.RootDir;
 			if (rootDir == null)
 				throw new Exception($"Could not find root mod directory for {type.Assembly.FullName}");
 			resourceDir = $"{rootDir}{Path.DirectorySeparatorChar}{ModMetaData.AboutFolderName}{Path.DirectorySeparatorChar}Resources";
 
+			ReloadTextures();
+		}
+
+		internal void ReloadTextures()
+		{
 			topicResources = Directory.GetFiles(resourceDir)
 				.Select(f => Path.GetFileName(f))
+				.Where(topic => configuration.IsDismissed(topic) == false)
 				.ToArray();
 			topicTextures = new Texture2D[topicResources.Length];
+		}
+
+		static void Load()
+		{
+			try
+			{
+				if (File.Exists(configurationPath))
+				{
+					var serializer = new DataContractJsonSerializer(typeof(Configuration));
+					using var stream = new FileStream(configurationPath, FileMode.Open);
+					configuration = (Configuration)serializer.ReadObject(stream);
+					return;
+				}
+			}
+			catch
+			{
+			}
+			configuration = new Configuration();
+		}
+
+		internal static void Save()
+		{
+			try
+			{
+				var serializer = new DataContractJsonSerializer(typeof(Configuration));
+				using var stream = new FileStream(configurationPath, FileMode.OpenOrCreate);
+				serializer.WriteObject(stream, configuration);
+			}
+			finally
+			{
+			}
 		}
 
 		public override float Margin => margin;
@@ -103,6 +164,8 @@ namespace AchtungMod
 			videoPlayer.Play();
 		}
 
+		static readonly Color[] frameColors = new[] { Color.yellow.ToTransparent(0.2f), Color.yellow.ToTransparent(0.3f), };
+		static readonly Color[] bgColors = new[] { Color.yellow.ToTransparent(0.05f), Color.yellow.ToTransparent(0.1f), };
 		public override void DoWindowContents(Rect inRect)
 		{
 			var font = Text.Font;
@@ -119,7 +182,24 @@ namespace AchtungMod
 			for (var i = 0; i < topicResources.Length; i++)
 			{
 				var r = new Rect(0f, (rowHeight + rowSpacing) * i, viewRect.width, rowHeight);
-				if (Widgets.ButtonText(r, TopicTranslated(i)))
+				var hover = Mouse.IsOver(r) ? 1 : 0;
+				Widgets.DrawBoxSolid(r, bgColors[hover]);
+				Widgets.DrawBox(r, 1, SolidColorMaterials.NewSolidColorTexture(frameColors[hover]));
+				var anchor = Text.Anchor;
+				Text.Anchor = TextAnchor.MiddleLeft;
+				Widgets.Label(r.RightPartPixels(r.width - margin), TopicTranslated(i));
+				Text.Anchor = anchor;
+				r = r.RightPartPixels(rowHeight).ExpandedBy(-titleHeight / 2);
+				if (Widgets.ButtonImage(r, MainTabWindow_Quests.DismissIcon))
+				{
+					configuration.MarkDismissed(topicResources[i]);
+					currentTexture = null;
+					title = "";
+					ReloadTextures();
+					if (TopicCount == 0)
+						Close();
+				}
+				else if (hover == 1 && Mouse.IsOver(r) == false && Input.GetMouseButton(0))
 					ShowTopic(i);
 			}
 			Widgets.EndScrollView();

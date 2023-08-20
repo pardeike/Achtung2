@@ -2,11 +2,10 @@
 <LanguageData>
 
 	<Topic_Welcome>Welcome to Achtung!</Topic_Welcome>
-	<Topic_ThreeModes>Three Modes</Topic_ThreeModes>
-	<Topic_DraftUndraft>Drafted &amp; Undrafted</Topic_DraftUndraft>
-	<Topic_Lineup>Lineup</Topic_Lineup>
 	<Topic_Forcing>Forcing</Topic_Forcing>
-	<Topic_ForceAdvanced>Advanced Forcing</Topic_ForceAdvanced>
+	<Topic_Formations>Formations</Topic_Formations>
+	<Topic_Cooperation>Cooperation</Topic_Cooperation>
+	<Topic_ThreeModes>Three Modes</Topic_ThreeModes>
 
 	<PositioningEnabledTitle>Custom mouse positioning</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Enables combat positioning for your mouse clicks/drags (see settings below)</PositioningEnabledExplained>
