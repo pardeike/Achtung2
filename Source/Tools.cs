@@ -1,5 +1,4 @@
-﻿using HarmonyLib;
-using Multiplayer.API;
+﻿using Multiplayer.API;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -8,7 +7,6 @@ using System.Reflection;
 using UnityEngine;
 using Verse;
 using Verse.AI;
-using Verse.Noise;
 using Verse.Sound;
 using static HarmonyLib.AccessTools;
 
