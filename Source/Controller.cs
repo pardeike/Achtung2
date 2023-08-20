@@ -355,18 +355,18 @@ namespace AchtungMod
 			});
 		}
 
-		static readonly Color thingColor = Color.red.ToTransparent(0.2f);
-		static readonly Color cellColor = Color.green.ToTransparent(0.2f);
-		private void DrawReservations()
-		{
-			var reservationManager = Find.CurrentMap?.reservationManager;
-			if (reservationManager == null)
-				return;
-
-			var selector = Find.Selector;
-			reservationManager.ReservationsReadOnly
-				.DoIf(res => selector.IsSelected(res.Claimant), res => Tools.DebugPosition(res.Target.Cell.ToVector3(), res.Target.HasThing ? thingColor : cellColor));
-		}
+		//static readonly Color thingColor = Color.red.ToTransparent(0.2f);
+		//static readonly Color cellColor = Color.green.ToTransparent(0.2f);
+		//private void DrawReservations()
+		//{
+		//	var reservationManager = Find.CurrentMap?.reservationManager;
+		//	if (reservationManager == null)
+		//		return;
+		//
+		//	var selector = Find.Selector;
+		//	reservationManager.ReservationsReadOnly
+		//		.DoIf(res => selector.IsSelected(res.Claimant), res => Tools.DebugPosition(res.Target.Cell.ToVector3(), res.Target.HasThing ? thingColor : cellColor));
+		//}
 
 		public void HandleDrawing()
 		{
@@ -374,7 +374,7 @@ namespace AchtungMod
 				DrawForcedJobs();
 
 			// for debugging reservations
-			DrawReservations();
+			// DrawReservations();
 
 			if (isDragging)
 			{
