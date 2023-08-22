@@ -17,6 +17,9 @@
 	<ForceCommandMenuModeExplained>Auto = Normales Verhalten (Kampfmodus entscheidet)\nMenü anzeigen = Taste für Kontextmenüanzeige gedrückt halten\nPositionieren = Taste zum Positionieren gedrückt halten</ForceCommandMenuModeExplained>
 	<ForceCommandMenuKeyTitle>Kontextmenü-Taste</ForceCommandMenuKeyTitle>
 
+	<RescueEnabledTitle>'Rettung' Arbeitsprioritätsspalte</RescueEnabledTitle>
+	<RescueEnabledExplained>Aktiviert die automatische Rettung von Kolonisten und fügt eine Spalte in der Arbeitsansicht hinzu</RescueEnabledExplained>
+
 	<ForcedCommandState>Gezwungen zu arbeiten, bis alles erledigt ist.</ForcedCommandState>
 
 	<ForceMenuButtonText>Erzw.</ForceMenuButtonText>

@@ -667,10 +667,17 @@ namespace AchtungMod
 		{
 			if (thing == null || thing.Spawned == false)
 				return null;
-			var potentialWork = scanner.PotentialWorkThingRequest.Accepts(thing) || scanner.PotentialWorkThingsGlobal(pawn) != null && scanner.PotentialWorkThingsGlobal(pawn).Contains(thing);
-			if ((scanner as WorkGiver_Haul) != null && potentialWork == false)
+			var potentialWork = scanner.PotentialWorkThingRequest.Accepts(thing);
+			if (potentialWork == false)
+			{
+				var workThingsGlobal = scanner.PotentialWorkThingsGlobal(pawn);
+				workThingsGlobal ??= pawn.Map.listerThings.ThingsMatching(scanner.PotentialWorkThingRequest);
+				if (workThingsGlobal != null && workThingsGlobal.Contains(thing))
+					potentialWork = true;
+			}
+			if (potentialWork == false && scanner is WorkGiver_Haul)
 				potentialWork = ShouldBeHaulable(thing);
-			else if ((scanner as WorkGiver_Merge) != null && potentialWork == false)
+			else if (potentialWork == false && scanner is WorkGiver_Merge)
 				potentialWork = ShouldBeMergeable(thing);
 
 			if (potentialWork)

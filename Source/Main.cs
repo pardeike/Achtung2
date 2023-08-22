@@ -100,6 +100,12 @@ namespace AchtungMod
 		public static void Prefix()
 		{
 			ForcedWork.Instance = null;
+
+			var rescuing = DefDatabase<WorkTypeDef>.GetNamedSilentFail(Tools.rescuingWorkTypeDef.defName);
+			var doctorRescueWorkGiver = DefDatabase<WorkGiverDef>.GetNamed("DoctorRescue");
+			if (rescuing == null && Achtung.Settings.rescueEnabled)
+				Tools.savedWorkTypeDef = DynamicWorkTypes.AddWorkTypeDef(Tools.rescuingWorkTypeDef, doctorRescueWorkGiver);
+
 			Log.Message($"Achtung v{Performance.GetModVersionString()} Info: To make Achtung log some performance info, create an empty 'AchtungPerformance.txt' file in same directory as Player.log");
 		}
 	}
@@ -759,7 +765,7 @@ namespace AchtungMod
 			return workgiver.Ignorable();
 		}
 
-		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase original)
+		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var m_GetPriority = AccessTools.Method(typeof(Pawn_WorkSettings), nameof(Pawn_WorkSettings.GetPriority));
 			var floatMenuOptionConstructorArgs = new[] { typeof(string), typeof(Action), typeof(MenuOptionPriority), typeof(Action<Rect>), typeof(Thing), typeof(float), typeof(Func<Rect, bool>), typeof(WorldObject), typeof(bool), typeof(int) };

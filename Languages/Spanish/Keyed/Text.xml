@@ -17,6 +17,9 @@
 	<ForceCommandMenuModeExplained>Auto = comportamiento normal (el estado de reclutamiento decide)\nMostrar menú = Mantenga presionada la tecla para el menú\nEstablecer posición = Mantenga presionada la tecla para posicionamiento</ForceCommandMenuModeExplained>
 	<ForceCommandMenuKeyTitle>Tecla del menú contextual</ForceCommandMenuKeyTitle>
 
+	<RescueEnabledTitle>Columna de prioridad de trabajo 'Rescate'</RescueEnabledTitle>
+	<RescueEnabledExplained>Habilita el rescate automático de peones y añade una columna en la pestaña de trabajo</RescueEnabledExplained>
+
 	<ForcedCommandState>Tiene la orden de trabajar hasta terminar la tarea.</ForcedCommandState>
 
 	<ForceMenuButtonText>Forzar</ForceMenuButtonText>

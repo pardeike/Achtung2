@@ -17,6 +17,9 @@
 	<ForceCommandMenuModeExplained>Auto = normal behavior (draft status decides)\nShow Menu = Hold key for context menu\nSet Position = Hold key to order to position</ForceCommandMenuModeExplained>
 	<ForceCommandMenuKeyTitle>Context Menu Key</ForceCommandMenuKeyTitle>
 
+	<RescueEnabledTitle>'Rescue' work priority column</RescueEnabledTitle>
+	<RescueEnabledExplained>Enables the automatic rescue of pawns and adds a column on the work tab</RescueEnabledExplained>
+
 	<ForcedCommandState>Ordered to work until done.</ForcedCommandState>
 
 	<ForceMenuButtonText>Force</ForceMenuButtonText>

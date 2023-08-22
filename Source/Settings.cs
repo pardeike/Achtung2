@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using RimWorld;
+using UnityEngine;
 using Verse;
 
 namespace AchtungMod
@@ -47,6 +48,7 @@ namespace AchtungMod
 	public class AchtungSettings : ModSettings
 	{
 		public bool positioningEnabled = true;
+		public bool rescueEnabled = true;
 		public AchtungModKey achtungKey = AchtungModKey.Alt;
 		public CommandMenuMode forceCommandMenuMode = CommandMenuMode.PressForMenu;
 		public AchtungModKey forceCommandMenuKey = AchtungModKey.Ctrl;
@@ -101,11 +103,19 @@ namespace AchtungMod
 				list.Gap(-2);
 				list.ValueLabeled("ForceCommandMenuKey", ref Achtung.Settings.forceCommandMenuKey);
 			}
-			list.Gap(20);
-			var r = list.GetRect(Tools.menuExampleTexture.height);
-			r.width = r.height * Tools.menuExampleTexture.width / Tools.menuExampleTexture.height;
-			GUI.color = Color.white;
-			GenUI.DrawTextureWithMaterial(r, Tools.menuExampleTexture, null, new Rect(0f, 0f, 1f, 1f));
+			list.Gap(18);
+			list.CheckboxEnhanced("RescueEnabled", ref Achtung.Settings.rescueEnabled);
+			var rescuing = DefDatabase<WorkTypeDef>.GetNamedSilentFail(Tools.rescuingWorkTypeDef.defName);
+			var doctorRescueWorkGiver = DefDatabase<WorkGiverDef>.GetNamed("DoctorRescue");
+			if (rescuing == null && Achtung.Settings.rescueEnabled)
+				Tools.savedWorkTypeDef = DynamicWorkTypes.AddWorkTypeDef(Tools.rescuingWorkTypeDef, doctorRescueWorkGiver);
+			else if (rescuing != null && Achtung.Settings.rescueEnabled == false)
+				DynamicWorkTypes.RemoveWorkTypeDef(Tools.rescuingWorkTypeDef, Tools.savedWorkTypeDef, doctorRescueWorkGiver);
+
+			// var r = list.GetRect(Tools.menuExampleTexture.height);
+			// r.width = r.height * Tools.menuExampleTexture.width / Tools.menuExampleTexture.height;
+			// GUI.color = Color.white;
+			// GenUI.DrawTextureWithMaterial(r, Tools.menuExampleTexture, null, new Rect(0f, 0f, 1f, 1f));
 
 			list.NewColumn();
 			list.curX += 30 - Listing.ColumnSpacing;

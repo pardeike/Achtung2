@@ -17,6 +17,9 @@
 	<ForceCommandMenuModeExplained>Auto = normaal gedrag (wapenstatus beslist)\nToon Menu = Toets ingedrukt houden voor contextmenu\nZet Positie = Toets ingedrukt houden om naar positie te bevelen</ForceCommandMenuModeExplained>
 	<ForceCommandMenuKeyTitle>Context Menu Toets</ForceCommandMenuKeyTitle>
 
+	<RescueEnabledTitle>'Redden' werkprioriteit kolom</RescueEnabledTitle>
+	<RescueEnabledExplained>Maakt het automatisch redden van pionnen mogelijk en voegt een kolom toe aan het werk-tabblad</RescueEnabledExplained>
+
 	<ForcedCommandState>Bevolen te werken tot het klaar is.</ForcedCommandState>
 
 	<ForceMenuButtonText>Dwingen</ForceMenuButtonText>

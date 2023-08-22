@@ -21,6 +21,20 @@ namespace AchtungMod
 		public static Material lineMaterial;
 		public static Material forceRadiusMaterial = SolidColorMaterials.SimpleSolidColorMaterial(Color.white.ToTransparent(0.5f));
 		public static string goHereLabel;
+		public static WorkTypeDef savedWorkTypeDef = null;
+
+		public static WorkTypeDef rescuingWorkTypeDef = new WorkTypeDef()
+		{
+			defName = "Rescuing",
+			labelShort = "rescue",
+			pawnLabel = "Rescue",
+			gerundLabel = "Rescuing",
+			description = "Rescue colonists",
+			verb = "Rescue",
+			naturalPriority = 1310,
+			alwaysStartActive = true,
+			workTags = WorkTags.Caring | WorkTags.Commoner | WorkTags.AllWork
+		};
 
 		private static string _version;
 		public static string Version

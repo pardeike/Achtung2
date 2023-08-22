@@ -17,6 +17,9 @@
 	<ForceCommandMenuModeExplained>Auto = Vanlig beteende (kampmodus bestämmer)\nVisa meny = Håll knappen för kontextmenyn\nPositionera = Håll knappen för att beordra till position</ForceCommandMenuModeExplained>
 	<ForceCommandMenuKeyTitle>Kontextmenyknapp</ForceCommandMenuKeyTitle>
 
+	<RescueEnabledTitle>'Rädda' arbetsprioritetskolumn</RescueEnabledTitle>
+	<RescueEnabledExplained>Aktiverar automatisk räddning av kolonister och lägger till en kolumn på arbetsfliken</RescueEnabledExplained>
+
 	<ForcedCommandState>Kommenderad att slutföra sitt arbete.</ForcedCommandState>
 
 	<ForceMenuButtonText>Tvinga</ForceMenuButtonText>
