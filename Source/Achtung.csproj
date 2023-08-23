@@ -50,6 +50,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Brrainz.RimWorld.CrossPromotion" Version="1.1.1" />
+		<PackageReference Include="Brrainz.RimWorld.ModFeatures" Version="1.0.0" />
 		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.4.3704" GeneratePathProperty="true" />
 		<PackageReference Include="Lib.Harmony" Version="2.2.2" ExcludeAssets="runtime" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
@@ -57,7 +58,6 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="ModFeatures" Version="1.0.0" />
 		<PackageReference Include="RimWorld.MultiplayerAPI" Version="0.4.0" />
 		<PackageReference Include="TaskPubliciser" Version="1.0.3" />
 	</ItemGroup>

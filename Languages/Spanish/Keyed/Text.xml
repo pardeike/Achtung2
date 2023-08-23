@@ -110,4 +110,9 @@
 	<NoForcedWork>No hay trabajo forzado</NoForcedWork>
 	<ForcedWorkWasInterrupted>Se interrumpió el trabajo forzado de {0}.</ForcedWorkWasInterrupted>
 
+	<WorkType_Rescue_Label>rescate</WorkType_Rescue_Label>
+	<WorkType_Rescue_PawnLabel>Rescate</WorkType_Rescue_PawnLabel>
+	<WorkType_Rescue_GerundLabel>Rescate de Colonos</WorkType_Rescue_GerundLabel>
+	<WorkType_Rescue_Description>Los colonos heridos son llevados a camas donde pueden ser tratados</WorkType_Rescue_Description>
+
 </LanguageData>

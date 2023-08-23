@@ -110,4 +110,9 @@
 	<NoForcedWork>Inget påtvingat arbete</NoForcedWork>
 	<ForcedWorkWasInterrupted>Påtvingat arbete av {0} avbröts.</ForcedWorkWasInterrupted>
 
+	<WorkType_Rescue_Label>rädda</WorkType_Rescue_Label>
+	<WorkType_Rescue_PawnLabel>Rädda</WorkType_Rescue_PawnLabel>
+	<WorkType_Rescue_GerundLabel>Kolonisträddning</WorkType_Rescue_GerundLabel>
+	<WorkType_Rescue_Description>Skadade kolonister tas till sängar där de kan behandlas.</WorkType_Rescue_Description>
+
 </LanguageData>

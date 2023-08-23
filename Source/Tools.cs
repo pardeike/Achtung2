@@ -23,13 +23,13 @@ namespace AchtungMod
 		public static string goHereLabel;
 		public static WorkTypeDef savedWorkTypeDef = null;
 
-		public static WorkTypeDef rescuingWorkTypeDef = new WorkTypeDef()
+		public static WorkTypeDef RescuingWorkTypeDef => new WorkTypeDef()
 		{
 			defName = "Rescuing",
-			labelShort = "rescue",
-			pawnLabel = "Rescue",
-			gerundLabel = "Rescuing",
-			description = "Rescue colonists",
+			labelShort = "WorkType_Rescue_Label".Translate(),
+			pawnLabel = "WorkType_Rescue_PawnLabel".Translate(),
+			gerundLabel = "WorkType_Rescue_GerundLabel".Translate(),
+			description = "WorkType_Rescue_Description".Translate(),
 			verb = "Rescue",
 			naturalPriority = 1310,
 			alwaysStartActive = true,

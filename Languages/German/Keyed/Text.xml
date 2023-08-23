@@ -110,4 +110,9 @@
 	<NoForcedWork>Keine erzw. Arbeit.</NoForcedWork>
 	<ForcedWorkWasInterrupted>Erzw. Arbeit von {0} wurde unterbrochen.</ForcedWorkWasInterrupted>
 
+	<WorkType_Rescue_Label>rettung</WorkType_Rescue_Label>
+	<WorkType_Rescue_PawnLabel>Rettung </WorkType_Rescue_PawnLabel>
+	<WorkType_Rescue_GerundLabel>Kolonistenrettung</WorkType_Rescue_GerundLabel>
+	<WorkType_Rescue_Description>Verwundete Kolonisten werden zu Betten gebracht wo sie behandelt werden können</WorkType_Rescue_Description>
+
 </LanguageData>

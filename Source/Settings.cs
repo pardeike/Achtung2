@@ -105,12 +105,12 @@ namespace AchtungMod
 			}
 			list.Gap(18);
 			list.CheckboxEnhanced("RescueEnabled", ref Achtung.Settings.rescueEnabled);
-			var rescuing = DefDatabase<WorkTypeDef>.GetNamedSilentFail(Tools.rescuingWorkTypeDef.defName);
+			var rescuing = DefDatabase<WorkTypeDef>.GetNamedSilentFail(Tools.RescuingWorkTypeDef.defName);
 			var doctorRescueWorkGiver = DefDatabase<WorkGiverDef>.GetNamed("DoctorRescue");
 			if (rescuing == null && Achtung.Settings.rescueEnabled)
-				Tools.savedWorkTypeDef = DynamicWorkTypes.AddWorkTypeDef(Tools.rescuingWorkTypeDef, doctorRescueWorkGiver);
+				Tools.savedWorkTypeDef = DynamicWorkTypes.AddWorkTypeDef(Tools.RescuingWorkTypeDef, doctorRescueWorkGiver);
 			else if (rescuing != null && Achtung.Settings.rescueEnabled == false)
-				DynamicWorkTypes.RemoveWorkTypeDef(Tools.rescuingWorkTypeDef, Tools.savedWorkTypeDef, doctorRescueWorkGiver);
+				DynamicWorkTypes.RemoveWorkTypeDef(Tools.RescuingWorkTypeDef, Tools.savedWorkTypeDef, doctorRescueWorkGiver);
 
 			// var r = list.GetRect(Tools.menuExampleTexture.height);
 			// r.width = r.height * Tools.menuExampleTexture.width / Tools.menuExampleTexture.height;

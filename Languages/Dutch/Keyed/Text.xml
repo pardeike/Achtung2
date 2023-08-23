@@ -110,4 +110,9 @@
 	<NoForcedWork>Geen gedwongen werk</NoForcedWork>
 	<ForcedWorkWasInterrupted>Geforceerd werk van {0} werd onderbroken.</ForcedWorkWasInterrupted>
 
+	<WorkType_Rescue_Label>redden</WorkType_Rescue_Label>
+	<WorkType_Rescue_PawnLabel>Redden</WorkType_Rescue_PawnLabel>
+	<WorkType_Rescue_GerundLabel>Kolonistenredding</WorkType_Rescue_GerundLabel>
+	<WorkType_Rescue_Description>Gewonde kolonisten worden naar bedden gebracht waar ze behandeld kunnen worden.</WorkType_Rescue_Description>
+
 </LanguageData>
