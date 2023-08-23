@@ -38,6 +38,7 @@ namespace AchtungMod
 				MP.RegisterAll();
 
 			CrossPromotion.Install(76561197973010050);
+			ModFeatures.Install<Achtung>();
 		}
 	}
 
@@ -110,18 +111,6 @@ namespace AchtungMod
 		}
 	}
 
-	// [HarmonyPatch(typeof(UIRoot_Entry))]
-	// [HarmonyPatch(nameof(UIRoot_Entry.Init))]
-	// static class VideoPatch1
-	// {
-	// 	public static void Postfix()
-	// 	{
-	// 		var dialog = new Dialog_ModFeatures(typeof(Achtung));
-	// 		if (dialog.TopicCount > 0)
-	// 			Find.WindowStack.Add(dialog);
-	// 	}
-	// }
-
 	[HarmonyPatch(typeof(Map))]
 	[HarmonyPatch(nameof(Map.FinalizeInit))]
 	static class Map_FinalizeInit_Patch
@@ -129,13 +118,6 @@ namespace AchtungMod
 		public static void Postfix(Map __instance)
 		{
 			ForcedWork.Instance?.Prepare(__instance);
-
-			LongEventHandler.ExecuteWhenFinished(() =>
-			{
-				var dialog = new Dialog_ModFeatures(typeof(Achtung));
-				if (dialog.TopicCount > 0)
-					Find.WindowStack.Add(dialog);
-			});
 		}
 	}
 

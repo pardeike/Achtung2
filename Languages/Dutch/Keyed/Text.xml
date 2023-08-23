@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
-	<Topic_Welcome>Welkom bij Achtung!</Topic_Welcome>
-	<Topic_Forcing>Dwingen</Topic_Forcing>
-	<Topic_Formations>Formaties</Topic_Formations>
-	<Topic_Cooperation>Samenwerking</Topic_Cooperation>
-	<Topic_ThreeModes>Drie Modi</Topic_ThreeModes>
+	<Feature_Achtung_Welcome>Welkom bij Achtung!</Feature_Achtung_Welcome>
+	<Feature_Achtung_Forcing>Dwingen</Feature_Achtung_Forcing>
+	<Feature_Achtung_MenuError>Menufout</Feature_Achtung_MenuError>
+	<Feature_Achtung_Formations>Formaties</Feature_Achtung_Formations>
+	<Feature_Achtung_Cooperation>Samenwerking</Feature_Achtung_Cooperation>
+	<Feature_Achtung_ThreeModes>Drie Modi</Feature_Achtung_ThreeModes>
+	<Feature_Achtung_Settings>Instellingen</Feature_Achtung_Settings>
+	<Feature_Achtung_Draftstatus>Ontwerpstatus</Feature_Achtung_Draftstatus>
+	<Feature_Achtung_Rescue>Redding</Feature_Achtung_Rescue>
 
 	<PositioningEnabledTitle>Aangepaste muispositionering</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Maakt gevechtspositionering mogelijk voor je muisklikken/slepen (zie onderstaande instellingen)</PositioningEnabledExplained>

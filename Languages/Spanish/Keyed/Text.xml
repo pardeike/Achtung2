@@ -1,11 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
-	<Topic_Welcome>¡Bienvenido a Achtung!</Topic_Welcome>
-	<Topic_Forcing>Forzar</Topic_Forcing>
-	<Topic_Formations>Formaciones</Topic_Formations>
-	<Topic_Cooperation>Cooperación</Topic_Cooperation>
-	<Topic_ThreeModes>Tres Modos</Topic_ThreeModes>
+	<Feature_Achtung_Welcome>¡Bienvenido a Achtung!</Feature_Achtung_Welcome>
+	<Feature_Achtung_Forcing>Forzar</Feature_Achtung_Forcing>
+	<Feature_Achtung_MenuError>Error de Menú</Feature_Achtung_MenuError>
+	<Feature_Achtung_Formations>Formaciones</Feature_Achtung_Formations>
+	<Feature_Achtung_Cooperation>Cooperación</Feature_Achtung_Cooperation>
+	<Feature_Achtung_ThreeModes>Tres Modos</Feature_Achtung_ThreeModes>
+	<Feature_Achtung_Settings>Configuración</Feature_Achtung_Settings>
+	<Feature_Achtung_Draftstatus>État de mobilisation</Feature_Achtung_Draftstatus>
+	<Feature_Achtung_Rescue>Rescate</Feature_Achtung_Rescue>
 
 	<PositioningEnabledTitle>Posicionamiento del ratón personalizado</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Permite el posicionamiento en combate con un click o arrastre de tu ratón (ver preferencias abajo)</PositioningEnabledExplained>

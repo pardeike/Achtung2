@@ -1,11 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
-	<Topic_Welcome>Welcome to Achtung!</Topic_Welcome>
-	<Topic_Forcing>Forcing</Topic_Forcing>
-	<Topic_Formations>Formations</Topic_Formations>
-	<Topic_Cooperation>Cooperation</Topic_Cooperation>
-	<Topic_ThreeModes>Three Modes</Topic_ThreeModes>
+	<Feature_Achtung_Welcome>Welcome to Achtung!</Feature_Achtung_Welcome>
+	<Feature_Achtung_Forcing>Forcing</Feature_Achtung_Forcing>
+	<Feature_Achtung_MenuError>Menu Error</Feature_Achtung_MenuError>
+	<Feature_Achtung_Formations>Formations</Feature_Achtung_Formations>
+	<Feature_Achtung_Cooperation>Cooperation</Feature_Achtung_Cooperation>
+	<Feature_Achtung_ThreeModes>Three Modes</Feature_Achtung_ThreeModes>
+	<Feature_Achtung_Settings>Settings</Feature_Achtung_Settings>
+	<Feature_Achtung_Draftstatus>Draft Status</Feature_Achtung_Draftstatus>
+	<Feature_Achtung_Rescue>Rescue</Feature_Achtung_Rescue>
 
 	<PositioningEnabledTitle>Custom mouse positioning</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Enables combat positioning for your mouse clicks/drags (see settings below)</PositioningEnabledExplained>

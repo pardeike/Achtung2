@@ -1,11 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
-	<Topic_Welcome>Välkommen till Achtung!</Topic_Welcome>
-	<Topic_Forcing>Tvinga</Topic_Forcing>
-	<Topic_Formations>Formationer</Topic_Formations>
-	<Topic_Cooperation>Samarbete</Topic_Cooperation>
-	<Topic_ThreeModes>Tre Lägen</Topic_ThreeModes>
+	<Feature_Achtung_Welcome>Välkommen till Achtung!</Feature_Achtung_Welcome>
+	<Feature_Achtung_Forcing>Tvinga</Feature_Achtung_Forcing>
+	<Feature_Achtung_MenuError>Menyfel</Feature_Achtung_MenuError>
+	<Feature_Achtung_Formations>Formationer</Feature_Achtung_Formations>
+	<Feature_Achtung_Cooperation>Samarbete</Feature_Achtung_Cooperation>
+	<Feature_Achtung_ThreeModes>Tre Lägen</Feature_Achtung_ThreeModes>
+	<Feature_Achtung_Settings>Inställningar</Feature_Achtung_Settings>
+	<Feature_Achtung_Draftstatus>Wapenstatus</Feature_Achtung_Draftstatus>
+	<Feature_Achtung_Rescue>Räddning</Feature_Achtung_Rescue>
 
 	<PositioningEnabledTitle>Aktivera positioningen för kolonister</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Aktiverar muskommandos för positioneringen av kolonister (se inställningar nere)</PositioningEnabledExplained>

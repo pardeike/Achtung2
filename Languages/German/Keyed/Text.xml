@@ -1,11 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
-	<Topic_Welcome>Willkommen zu Achtung!</Topic_Welcome>
-	<Topic_Forcing>Erzwingen</Topic_Forcing>
-	<Topic_Formations>Formationen</Topic_Formations>
-	<Topic_Cooperation>Zusammenarbeit</Topic_Cooperation>
-	<Topic_ThreeModes>Drei Modi</Topic_ThreeModes>
+	<Feature_Achtung_Welcome>Willkommen zu Achtung!</Feature_Achtung_Welcome>
+	<Feature_Achtung_Forcing>Erzwingen</Feature_Achtung_Forcing>
+	<Feature_Achtung_MenuError>Menüfehler</Feature_Achtung_MenuError>
+	<Feature_Achtung_Formations>Formationen</Feature_Achtung_Formations>
+	<Feature_Achtung_Cooperation>Zusammenarbeit</Feature_Achtung_Cooperation>
+	<Feature_Achtung_ThreeModes>Drei Modi</Feature_Achtung_ThreeModes>
+	<Feature_Achtung_Settings>Einstellungen</Feature_Achtung_Settings>
+	<Feature_Achtung_Draftstatus>Kampfstatus</Feature_Achtung_Draftstatus>
+	<Feature_Achtung_Rescue>Rettung</Feature_Achtung_Rescue>
 
 	<PositioningEnabledTitle>Benutzerdef. Positionierung via Maus</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Aktiviert die Kampfpositionierung beim Klicken/Ziehen der Maus (siehe Einstellungen unten).</PositioningEnabledExplained>
