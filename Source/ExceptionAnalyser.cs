@@ -18,7 +18,7 @@ namespace BrrainzTools
 	class ExceptionAnalyser
 	{
 		readonly Exception exception;
-		static readonly Dictionary<Assembly, ModMetaData> MetaDataCache = new Dictionary<Assembly, ModMetaData>();
+		static readonly Dictionary<Assembly, ModMetaData> MetaDataCache = new();
 		static readonly string RimworldAssemblyName = typeof(Pawn).Assembly.GetName().Name;
 
 		static readonly AccessTools.FieldRef<StackTrace, StackTrace[]> captured_traces_ref = AccessTools.FieldRefAccess<StackTrace, StackTrace[]>("captured_traces");

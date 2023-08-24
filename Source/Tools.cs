@@ -22,7 +22,7 @@ namespace AchtungMod
 		public static string goHereLabel;
 		public static WorkTypeDef savedWorkTypeDef = null;
 
-		public static WorkTypeDef RescuingWorkTypeDef => new WorkTypeDef()
+		public static WorkTypeDef RescuingWorkTypeDef => new()
 		{
 			defName = "Rescuing",
 			labelShort = "WorkType_Rescue_Label".Translate(),

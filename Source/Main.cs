@@ -279,7 +279,7 @@ namespace AchtungMod
 	static class Toil_AddEndCondition_Patch
 	{
 		public static readonly MethodInfo mIsForbidden = SymbolExtensions.GetMethodInfo(() => ForbidUtility.IsForbidden(null, (Pawn)null));
-		public static readonly Dictionary<MethodInfo, bool> hasForbiddenState = new Dictionary<MethodInfo, bool>();
+		public static readonly Dictionary<MethodInfo, bool> hasForbiddenState = new();
 
 		public static void Prefix(Toil __instance, ref Func<JobCondition> newEndCondition)
 		{
@@ -1071,7 +1071,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(Pawn.GetInspectString))]
 	static class Pawn_GetInspectString_Patch
 	{
-		static readonly Dictionary<Pawn, string> cache = new Dictionary<Pawn, string>();
+		static readonly Dictionary<Pawn, string> cache = new();
 
 		public static void Postfix(Pawn __instance, ref string __result)
 		{

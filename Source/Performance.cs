@@ -14,9 +14,9 @@ namespace AchtungMod
 		static readonly bool enabled;
 		static readonly string logPath = Path.Combine(GenFilePaths.SaveDataFolderPath, "AchtungPerformance.txt");
 
-		static readonly Stopwatch w_EndCurrentJob = new Stopwatch();
-		static readonly Stopwatch w_ContinueJob = new Stopwatch();
-		static readonly Stopwatch w_GetNextJob = new Stopwatch();
+		static readonly Stopwatch w_EndCurrentJob = new();
+		static readonly Stopwatch w_ContinueJob = new();
+		static readonly Stopwatch w_GetNextJob = new();
 
 		static int w_GetNextJobCount = 0;
 		static int logNextTicks = 0;
@@ -119,7 +119,7 @@ namespace AchtungMod
 			}
 		}
 
-		static readonly HashSet<string> knownExceptions = new HashSet<string>();
+		static readonly HashSet<string> knownExceptions = new();
 		public static void Log(Exception exception)
 		{
 			if (enabled == false)

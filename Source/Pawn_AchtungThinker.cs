@@ -8,7 +8,7 @@ namespace AchtungMod
 	//
 	public class Pawn_AchtungThinker : Pawn_Thinker
 	{
-		public ForcedJobs forcedJobs = new ForcedJobs();
+		public ForcedJobs forcedJobs = new();
 
 		public Pawn_AchtungThinker(Pawn pawn) : base(pawn) { }
 	}

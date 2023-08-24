@@ -10,13 +10,13 @@ namespace AchtungMod
 {
 	public class ForcedWork : WorldComponent
 	{
-		Dictionary<Pawn, ForcedJobs> allForcedJobs = new Dictionary<Pawn, ForcedJobs>();
+		Dictionary<Pawn, ForcedJobs> allForcedJobs = new();
 		public bool hasForcedJobs = false; //optimization
 		private List<Pawn> forcedJobsKeysWorkingList;
 		private List<ForcedJobs> forcedJobsValuesWorkingList;
 		private int counter;
 
-		public readonly HashSet<Pawn> preparing = new HashSet<Pawn>();
+		public readonly HashSet<Pawn> preparing = new();
 		//readonly Dictionary<Pawn, HashSet<IntVec3>> forbiddenLocations = new Dictionary<Pawn, HashSet<IntVec3>>();
 
 		public ForcedWork(World world) : base(world) { }

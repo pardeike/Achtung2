@@ -11,7 +11,7 @@ namespace AchtungMod
 {
 	public class ForcedJobs : IExposable
 	{
-		public List<ForcedJob> jobs = new List<ForcedJob>();
+		public List<ForcedJob> jobs = new();
 		public int count; // optimization
 
 		public ForcedJobs()
@@ -40,12 +40,12 @@ namespace AchtungMod
 
 	public class ForcedJob : IExposable
 	{
-		private HashSet<ForcedTarget> targets = new HashSet<ForcedTarget>();
+		private HashSet<ForcedTarget> targets = new();
 		const int ticksWaitPaused = 4;
 		const int ticksWaitRunning = 64;
 
 		public Pawn pawn = null;
-		public List<WorkGiverDef> workgiverDefs = new List<WorkGiverDef>();
+		public List<WorkGiverDef> workgiverDefs = new();
 		public bool isThingJob = false;
 		public bool reentranceFlag = false;
 		public XY lastLocation = XY.Invalid;
@@ -56,7 +56,7 @@ namespace AchtungMod
 		public bool started = false;
 		public bool cancelled = false;
 		public Coroutine expanderThing, expanderCell, contractor;
-		static readonly Dictionary<BuildableDef, int> TypeScores = new Dictionary<BuildableDef, int>
+		static readonly Dictionary<BuildableDef, int> TypeScores = new()
 		{
 			{ ThingDefOf.PowerConduit, 1000 },
 			{ ThingDefOf.Wall, 900 },
