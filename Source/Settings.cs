@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using Brrainz;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -111,11 +112,6 @@ namespace AchtungMod
 				Tools.savedWorkTypeDef = DynamicWorkTypes.AddWorkTypeDef(Tools.RescuingWorkTypeDef, doctorRescueWorkGiver);
 			else if (rescuing != null && Achtung.Settings.rescueEnabled == false)
 				DynamicWorkTypes.RemoveWorkTypeDef(Tools.RescuingWorkTypeDef, Tools.savedWorkTypeDef, doctorRescueWorkGiver);
-
-			// var r = list.GetRect(Tools.menuExampleTexture.height);
-			// r.width = r.height * Tools.menuExampleTexture.width / Tools.menuExampleTexture.height;
-			// GUI.color = Color.white;
-			// GenUI.DrawTextureWithMaterial(r, Tools.menuExampleTexture, null, new Rect(0f, 0f, 1f, 1f));
 
 			list.NewColumn();
 			list.curX += 30 - Listing.ColumnSpacing;

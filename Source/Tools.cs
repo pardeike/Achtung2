@@ -15,7 +15,6 @@ namespace AchtungMod
 	[StaticConstructorOnStartup]
 	static class Tools
 	{
-		public static Texture2D menuExampleTexture;
 		public static Material forceIconMaterial;
 		public static Material markerMaterial;
 		public static Material lineMaterial;
@@ -56,7 +55,6 @@ namespace AchtungMod
 
 		static Tools()
 		{
-			menuExampleTexture = ContentFinder<Texture2D>.Get("MenuExample", true);
 			forceIconMaterial = MaterialPool.MatFrom("ForceIcon", ShaderDatabase.Cutout);
 			markerMaterial = MaterialPool.MatFrom("AchtungMarker", ShaderDatabase.Transparent);
 			lineMaterial = MaterialPool.MatFrom(GenDraw.LineTexPath, ShaderDatabase.Transparent, new Color(1f, 0.5f, 0.5f));

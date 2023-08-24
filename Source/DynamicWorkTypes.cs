@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace AchtungMod
+namespace Brrainz
 {
 	public class DynamicWorkTypes
 	{
@@ -83,13 +83,16 @@ namespace AchtungMod
 
 		public static void RemoveWorkTypeDef(WorkTypeDef def, WorkTypeDef savedDef, WorkGiverDef workGiver)
 		{
+			var oldWorkGiver = workGiver.workType;
 			workGiver.workType = savedDef;
 			DefDatabase<WorkTypeDef>.Remove(def);
-			var columnDef = DefDatabase<PawnColumnDef>.AllDefsListForReading.First(d => d.workType == def);
-			DefDatabase<PawnColumnDef>.Remove(columnDef);
+
+			var columnDef = DefDatabase<PawnColumnDef>.AllDefsListForReading.FirstOrDefault(d => d.workType == oldWorkGiver);
+			if (columnDef != null)
+				DefDatabase<PawnColumnDef>.Remove(columnDef);
 
 			PawnTableDef workTable = PawnTableDefOf.Work;
-			workTable.columns.RemoveAll(col => col.workType == def);
+			workTable.columns.RemoveAll(col => col.workType == oldWorkGiver);
 			Update(workTable);
 
 			Reload<WorkTypeDef>();
