@@ -101,7 +101,6 @@ namespace BrrainzTools
 			{
 				var method = Harmony.GetMethodFromStackframe(frame);
 				var patches = FindPatches(method);
-				//modInfos.AddRange(GetFinalizers(patches));
 				modInfos.AddRange(GetPostfixes(patches));
 				modInfos.AddRange(GetPrefixes(patches));
 				modInfos.AddRange(GetTranspilers(patches));
@@ -160,12 +159,6 @@ namespace BrrainzTools
 				return new List<ModInfo>().AsEnumerable();
 			return AddMetadata(info.Transpilers.OrderBy(t => t.priority).Select(t => t.PatchMethod));
 		}
-
-		/*static IEnumerable<ModInfo> GetFinalizers(Patches info)
-		{
-			if (info == null) return new List<ModInfo>().AsEnumerable();
-			return AddMetadata(info.Finalizers.OrderBy(t => t.priority).Select(t => t.PatchMethod));
-		}*/
 
 		static ModMetaData GetModMetaData(Assembly assembly)
 		{

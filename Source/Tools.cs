@@ -61,21 +61,6 @@ namespace AchtungMod
 			goHereLabel = "GoHere".Translate();
 		}
 
-#if DEBUG
-		public static void Debug(string text)
-		{
-			Log.Warning(text);
-		}
-		public static void Debug(Thing thing, string text)
-		{
-			if (text != null && Find.Selector.IsSelected(thing))
-				Log.Warning(text);
-		}
-#else
-		public static void Debug(string text) { _ = text; }
-		public static void Debug(Thing thing, string text) { _ = thing; _ = text; }
-#endif
-
 		public static string PawnOverBreakLevel(Pawn pawn)
 		{
 			if (pawn.InMentalState)
@@ -513,9 +498,6 @@ namespace AchtungMod
 
 		public static void DrawForceIcon(int x, int z)
 		{
-			// for strong visual debugging
-			// DebugPosition(pos, new Color(1f, 1f, 0f, 0.3f));
-
 			var pos = new Vector3(x + 0.75f, Altitudes.AltitudeFor(AltitudeLayer.MoteOverhead), z + 0.75f);
 			if (Achtung.Settings.workMarkers == WorkMarkers.Static)
 			{
@@ -572,52 +554,6 @@ namespace AchtungMod
 				return vec.x * 1000 + vec.z;
 			});
 		}
-
-		/*
-		static Vector2? _mouseDownPosition = null;
-		public static bool MouseTrackingButton(Rect rect, Action<bool> tick = null, Action mouseDown = null, Action<Vector2, Event> mouseDragged = null, Action<Vector2, Event> mouseUp = null)
-		{
-			var isOver = Mouse.IsOver(rect);
-			Log.Warning($"mouse {Event.current.mousePosition} {rect} -> {isOver}");
-			tick?.Invoke(isOver);
-
-			var current = Event.current;
-			switch (current.type)
-			{
-				case EventType.MouseDown:
-				{
-					if (isOver)
-					{
-						_mouseDownPosition = current.mousePosition;
-						mouseDown?.Invoke();
-						current.Use();
-					}
-					break;
-				}
-				case EventType.MouseDrag:
-				{
-					if (_mouseDownPosition.HasValue)
-					{
-						mouseDragged?.Invoke(_mouseDownPosition.Value, current);
-						current.Use();
-					}
-					break;
-				}
-				case EventType.MouseUp:
-				{
-					if (_mouseDownPosition.HasValue)
-					{
-						mouseUp?.Invoke(_mouseDownPosition.Value, current);
-						current.Use();
-						_mouseDownPosition = null;
-						return true;
-					}
-					break;
-				}
-			}
-			return false;
-		}
-		*/
 
 		public static void Note(this Listing_Standard listing, string name, GameFont font = GameFont.Small)
 		{

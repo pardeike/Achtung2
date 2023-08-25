@@ -50,12 +50,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Remove="Tutor.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<None Include="..\.editorconfig" Link=".editorconfig" />
-		<None Include="Tutor.cs" />
 	</ItemGroup>
 
 	<ItemGroup>

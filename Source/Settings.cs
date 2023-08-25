@@ -81,10 +81,7 @@ namespace AchtungMod
 			Scribe_Values.Look(ref maxForcedItems, "maxForcedItems", 64, true);
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit && Achtung.harmony != null)
-			{
-				// ForbidUtility_InAllowedArea_Patch.FixPatch();
 				ForbidUtility_IsForbidden_Patch.FixPatch();
-			}
 		}
 
 		public static void DoWindowContents(Rect canvas)

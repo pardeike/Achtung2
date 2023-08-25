@@ -44,7 +44,6 @@ namespace AchtungMod
 
 	public class Achtung : Mod
 	{
-		// public static MagicTutor tutor;
 		public static Harmony harmony = null;
 		public static AchtungSettings Settings;
 		public static string rootDir;
@@ -53,37 +52,6 @@ namespace AchtungMod
 		{
 			rootDir = content.RootDir;
 			Settings = GetSettings<AchtungSettings>();
-
-			/* TODO enable later
-			 * 
-			tutor = new MagicTutor(this);
-			tutor.RegisterContext("force-button", new HintWithSettingsButton()
-			{
-				isMenu = true,
-				withSettingsButton = false,
-				message = "Click the white FORCE button to make this colonist start working uninterruptedly.\n\nThey will continue to work on adjacted cells and items until all is done or they reach the configured mental break level."
-			});
-			tutor.RegisterContext("exclamation-mark", new HintWithSettingsButton()
-			{
-				withSettingsButton = true,
-				message = "The ! icon indicates that cells or things are forced."
-			});
-			tutor.RegisterContext("go-here", new HintWithSettingsButton()
-			{
-				visibleTime = TimeSpan.FromSeconds(4),
-				withSettingsButton = true,
-				message = "Drafting a colonist to a position that also contains items makes it impossible to decide between positioning and context menu.\n\nTo solve this you can configure a hotkey that switches between both modes."
-			});
-			tutor.RegisterContext("position-by-key", new HintWithSettingsButton()
-			{
-				visibleTime = TimeSpan.FromSeconds(4),
-				withSettingsButton = true,
-				message = "Your Achtung settings are set so you need to hold the configured hotkey to position your colonists instead of showing the context menu. Find out more in the Achtung mod settings."
-			});
-			tutor.RegisterContext("clean-room", new StandardHint() { message = "This command will issue a job that cleans all of the room until it is 100% clean." });
-			tutor.RegisterContext("fight-fire", new StandardHint() { message = "This command will put out fires with priority closest to the point you chose. It works outside the home zone and is roughly 10% more efficient than vanilla." });
-			tutor.Start();
-			*/
 		}
 
 		public override void DoSettingsWindowContents(Rect inRect)

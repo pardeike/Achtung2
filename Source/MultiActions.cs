@@ -129,7 +129,6 @@ namespace AchtungMod
 			return result;
 		}
 
-		//static readonly Color noColor = new Color();
 		public FloatMenuOption GetOption(string title, IEnumerable<MultiAction> multiActions)
 		{
 			var pawns = multiActions.Select(ma => ma.colonist.pawn).ToList();

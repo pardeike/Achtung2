@@ -59,10 +59,6 @@ namespace AchtungMod
 					return true;
 				actionSelected = true;
 
-				// TODO necessary?
-				// foreach (var pawn in forcedPawns)
-				// 	ForcedWork.Instance.Unprepare(pawn);
-
 				var success = options.Any(option =>
 				{
 					if (option is ForcedFloatMenuOption forceOption)
@@ -72,36 +68,10 @@ namespace AchtungMod
 					return false;
 				});
 
-				// TODO necessary?
-				// if (success && Achtung.Settings.ignoreForbidden)
-				// {
-				// 	var reservations = forcedPawns.Where(pawn => ForcedWork.Instance.HasForcedJob(pawn) == false)
-				// 		.SelectMany(pawn => new List<Thing> { pawn.CurJob.targetA.thingInt, pawn.CurJob.targetB.thingInt, pawn.CurJob.targetC.thingInt }.OfType<Thing>())
-				// 		.Where(thing => thing.IsForbidden(Faction.OfPlayer))
-				// 		.SelectMany(thing => thing.Map.reservationManager.reservations.Select(reservation => (thing, reservation))
-				// 		.Where(item => item.reservation.Target == item.thing))
-				// 		.ToList();
-				// 	reservations.Do(item => item.reservation.Claimant.jobs.EndCurrentOrQueuedJob(item.reservation.job, JobCondition.InterruptForced, true));
-				// }
-
 				if (success)
 					return true;
 			}
 			return false;
-			/* TODO enable later
-			return Achtung.tutor?.HintWithRect("force-button", true, rect.ContractedBy(0, 20), (hintUsed) =>
-			{
-				var selected = Widgets.ButtonInvisible(rect);
-				if (selected)
-				{
-					hintUsed();
-					var success = ForceAction();
-					if (success)
-						return true;
-				}
-				return false;
-			});
-			*/
 		}
 
 		public bool ForceAction(ForcedFloatMenuOption option) => ForceActionSynced(forcedPawns, option.forceWorkgiver, option.forceCell.x, option.forceCell.z);
