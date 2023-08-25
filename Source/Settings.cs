@@ -68,6 +68,7 @@ namespace AchtungMod
 		{
 			base.ExposeData();
 			Scribe_Values.Look(ref positioningEnabled, "positioningEnabled", true, true);
+			Scribe_Values.Look(ref rescueEnabled, "rescueEnabled", true, true);
 			Scribe_Values.Look(ref achtungKey, "achtungKey", AchtungModKey.Alt, true);
 			Scribe_Values.Look(ref forceCommandMenuMode, "forceCommandMenuMode", CommandMenuMode.Auto, true);
 			Scribe_Values.Look(ref forceCommandMenuKey, "forceCommandMenuKey", AchtungModKey.Ctrl, true);
@@ -114,7 +115,7 @@ namespace AchtungMod
 			var rescuing = DefDatabase<WorkTypeDef>.GetNamedSilentFail(Tools.RescuingWorkTypeDef.defName);
 			var doctorRescueWorkGiver = DefDatabase<WorkGiverDef>.GetNamed("DoctorRescue");
 			if (rescuing == null && Achtung.Settings.rescueEnabled)
-				Tools.savedWorkTypeDef = DynamicWorkTypes.AddWorkTypeDef(Tools.RescuingWorkTypeDef, doctorRescueWorkGiver);
+				Tools.savedWorkTypeDef = DynamicWorkTypes.AddWorkTypeDef(Tools.RescuingWorkTypeDef, WorkTypeDefOf.Doctor, doctorRescueWorkGiver);
 			else if (rescuing != null && Achtung.Settings.rescueEnabled == false)
 				DynamicWorkTypes.RemoveWorkTypeDef(Tools.RescuingWorkTypeDef, Tools.savedWorkTypeDef, doctorRescueWorkGiver);
 
@@ -134,7 +135,8 @@ namespace AchtungMod
 			list.Gap(10);
 			list.ValueLabeled("WorkMarkers", ref Achtung.Settings.workMarkers);
 			list.Gap(10);
-			list.SliderLabeled("MaxForcedItems", ref Achtung.Settings.maxForcedItems, 0, UnlimitedForcedItems, (n) => n >= UnlimitedForcedItems ? "MaxForcedItemsUnlimited".Translate().ToString() : $"{n}");
+			static string forcedItemsString(int n) => n == 0 ? "Disabled".Translate().ToString() : n >= UnlimitedForcedItems ? "MaxForcedItemsUnlimited".Translate().ToString() : $"{n}";
+			list.SliderLabeled("MaxForcedItems", ref Achtung.Settings.maxForcedItems, 0, UnlimitedForcedItems, forcedItemsString);
 
 			list.End();
 

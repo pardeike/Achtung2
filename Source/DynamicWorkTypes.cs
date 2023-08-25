@@ -5,23 +5,50 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace AchtungMod
+namespace Brrainz
 {
+	[StaticConstructorOnStartup]
 	public class DynamicWorkTypes
 	{
+		internal static readonly Dictionary<WorkTypeDef, WorkTypeDef> disabledWorkTypePairs = new();
+
+		static DynamicWorkTypes()
+		{
+			var harmony = new Harmony("brrainz.lib.dynamicworktypes");
+			var method = SymbolExtensions.GetMethodInfo((Pawn pawn) => pawn.GetDisabledWorkTypes(default));
+			var postfix = SymbolExtensions.GetMethodInfo(() => Pawn_GetDisabledWorkTypes_Postfix(default));
+			harmony.Patch(method, postfix: new HarmonyMethod(postfix) { priority = Priority.Last });
+		}
+
+		public static List<WorkTypeDef> Pawn_GetDisabledWorkTypes_Postfix(List<WorkTypeDef> input)
+		{
+			var output = new List<WorkTypeDef>(input);
+			foreach (var pair in DynamicWorkTypes.disabledWorkTypePairs)
+				if (input.Contains(pair.Key))
+					output.Add(pair.Value);
+			return output;
+		}
+
 		static void Reload<T>() where T : Def
 		{
 			DefDatabase<T>.ClearCachedData();
 			DefDatabase<T>.ResolveAllReferences(false, true);
 		}
 
-		static void UpdatePawns()
+		static void UpdatePawns(int index, int copyFrom)
 		{
 			Find.Maps.Do(map => map.mapPawns.AllPawnsSpawned.DoIf(p => p.workSettings != null, p =>
 			{
-				p.workSettings.priorities = null;
+				if (copyFrom != -1)
+				{
+					var value = p.workSettings.priorities.values[copyFrom];
+					p.workSettings.priorities.values.Insert(index, value);
+				}
+				else
+					p.workSettings.priorities.values.Remove(index);
 				p.workSettings.workGiversDirty = true;
-				p.workSettings.EnableAndInitialize();
+				p.cachedDisabledWorkTypes = null;
+				p.cachedDisabledWorkTypesPermanent = null;
 				p.workSettings.CacheWorkGiversInOrder();
 				p.Notify_DisabledWorkTypesChanged();
 			}));
@@ -44,9 +71,10 @@ namespace AchtungMod
 			}
 		}
 
-		public static WorkTypeDef AddWorkTypeDef(WorkTypeDef def, WorkGiverDef workgiver)
+		public static WorkTypeDef AddWorkTypeDef(WorkTypeDef def, WorkTypeDef copyFrom, WorkGiverDef workgiver)
 		{
 			DefDatabase<WorkTypeDef>.Add(def);
+			disabledWorkTypePairs[copyFrom] = def;
 
 			var saved = workgiver.workType;
 			workgiver.workType = def;
@@ -76,15 +104,21 @@ namespace AchtungMod
 
 			Reload<PawnColumnDef>();
 			Reload<PawnTableDef>();
-			UpdatePawns();
+
+			var index = DefDatabase<WorkTypeDef>.defsList.IndexOf(def);
+			var indexToCopy = DefDatabase<WorkTypeDef>.defsList.IndexOf(copyFrom);
+			UpdatePawns(index, indexToCopy);
 
 			return saved;
 		}
 
 		public static void RemoveWorkTypeDef(WorkTypeDef def, WorkTypeDef savedDef, WorkGiverDef workGiver)
 		{
+			_ = disabledWorkTypePairs.Remove(savedDef);
+
 			var oldWorkGiver = workGiver.workType;
 			workGiver.workType = savedDef;
+			var index = DefDatabase<WorkTypeDef>.defsList.IndexOf(def);
 			DefDatabase<WorkTypeDef>.Remove(def);
 
 			var columnDef = DefDatabase<PawnColumnDef>.AllDefsListForReading.FirstOrDefault(d => d.workType == oldWorkGiver);
@@ -99,7 +133,7 @@ namespace AchtungMod
 			Reload<WorkGiverDef>();
 			Reload<PawnColumnDef>();
 			Reload<PawnTableDef>();
-			UpdatePawns();
+			UpdatePawns(index, -1);
 		}
 	}
 }
