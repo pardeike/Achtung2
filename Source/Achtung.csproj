@@ -55,7 +55,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Brrainz.RimWorld.CrossPromotion" Version="1.1.1" />
-		<PackageReference Include="Brrainz.RimWorld.ModFeatures" Version="1.2.1" />
+		<PackageReference Include="Brrainz.RimWorld.ModFeatures" Version="1.2.3" />
 		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.4.3704" GeneratePathProperty="true" />
 		<PackageReference Include="Lib.Harmony" Version="2.2.2" ExcludeAssets="runtime" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
