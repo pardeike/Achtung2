@@ -1,4 +1,5 @@
-﻿using Multiplayer.API;
+﻿using HarmonyLib;
+using Multiplayer.API;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -73,6 +74,8 @@ namespace AchtungMod
 				if (optionTaken == false)
 					Find.WindowStack.Add(actions.GetWindow());
 			}
+			if (Achtung.Settings.positioningEnabled == false)
+				return true;
 			Event.current.Use();
 			return false;
 		}
