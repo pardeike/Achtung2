@@ -6,7 +6,7 @@
 	<Feature_Achtung_MenuError>Error de Menú</Feature_Achtung_MenuError>
 	<Feature_Achtung_Formations>Formaciones</Feature_Achtung_Formations>
 	<Feature_Achtung_Cooperation>Cooperación</Feature_Achtung_Cooperation>
-	<Feature_Achtung_ThreeModes>Tres Modos</Feature_Achtung_ThreeModes>
+	<Feature_Achtung_FourModes>Cuatro Modos</Feature_Achtung_FourModes>
 	<Feature_Achtung_Settings>Configuración</Feature_Achtung_Settings>
 	<Feature_Achtung_Draftstatus>État de mobilisation</Feature_Achtung_Draftstatus>
 	<Feature_Achtung_Rescue>Rescate</Feature_Achtung_Rescue>
@@ -17,9 +17,20 @@
 	<AchtungModifierTitle>tecla de Achtung!</AchtungModifierTitle>
 	<AchtungModifierExplained>Manteniendo pulsada esta tecla se forzará el reclutamiento de los colonos cuando reciban órdenes de movimiento o en formación. Cuando se mantenga pulsada, permitirá mover a los colonos seleccionados sin perder su formación actual, pulsando y arrastrando con el botón derecho del ratón. Una vez que el botón derecho del ratón se mantenga pulsado, la tecla Achtung! puede ser liberada. La formación puede rotar usando las teclas Q y E.</AchtungModifierExplained>
 
-	<ForceCommandMenuModeTitle>Modo de menú contextual</ForceCommandMenuModeTitle>
-	<ForceCommandMenuModeExplained>Auto = comportamiento normal (el estado de reclutamiento decide)\nMostrar menú = Mantenga presionada la tecla para el menú\nEstablecer posición = Mantenga presionada la tecla para posicionamiento</ForceCommandMenuModeExplained>
-	<ForceCommandMenuKeyTitle>Tecla del menú contextual</ForceCommandMenuKeyTitle>
+	<ForceCommandMenuModeTitle>Modo de Clic Derecho</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Tecla de Sustitución para Clic Derecho</ForceCommandMenuKeyTitle>
+
+	<CommandMenuModeOptionAuto>Dependiente del Estado</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionAutoExplained>El estado de alistamiento del colono decide si se muestra el menú contextual o se mueve a la ubicación clickeada</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionPressForMenu>Tecla para Menú</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForMenuExplained>Mantén presionada la tecla para anular la acción predeterminada y mostrar el menú contextual</CommandMenuModeOptionPressForMenuExplained>
+	<CommandMenuModeOptionPressForPosition>Tecla para Posición</CommandMenuModeOptionPressForPosition>
+	<CommandMenuModeOptionPressForPositionExplained>Mantén presionada la tecla para anular el menú contextual y emitir un comando de posicionamiento</CommandMenuModeOptionPressForPositionExplained>
+	<CommandMenuModeOptionDelayed>Cambio Retenido</CommandMenuModeOptionDelayed>
+	<CommandMenuModeOptionDelayedExplained>Mantén pulsado el botón derecho del ratón; la acción cambiará de posicionamiento a mostrar el menú contextual después del retardo definido</CommandMenuModeOptionDelayedExplained>
+
+	<DelayTitle>Duración de Retención</DelayTitle>
+	<DelayExplained>Duración en milisegundos para mantener presionado el clic derecho antes de que aparezca el menú contextual, anulando el posicionamiento</DelayExplained>
 
 	<RescueEnabledTitle>Columna de prioridad de trabajo 'Rescate'</RescueEnabledTitle>
 	<RescueEnabledExplained>Habilita el rescate automático de peones y añade una columna en la pestaña de trabajo</RescueEnabledExplained>
@@ -37,11 +48,6 @@
 
 	<Notes>Notas</Notes>
 	<Note1>Cuando utilice Achtung! el menú contextual contendrá ambas órdenes: de reclutamiento y libres.</Note1>
-	<Note2>Cuando posicione a un colono libre a lo largo de una línea, un click izquierdo reclutará a los colonos en su posición actual.</Note2>
-
-	<CommandMenuModeOptionAuto>Auto</CommandMenuModeOptionAuto>
-	<CommandMenuModeOptionPressForMenu>Mostrar menú</CommandMenuModeOptionPressForMenu>
-	<CommandMenuModeOptionPressForPosition>Establecer posición</CommandMenuModeOptionPressForPosition>
 
 	<AchtungModKeyOptionNone>Deshabilitado</AchtungModKeyOptionNone>
 	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>

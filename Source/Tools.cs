@@ -652,7 +652,7 @@ namespace AchtungMod
 			listing.Gap(6);
 		}
 
-		public static void ValueLabeled<T>(this Listing_Standard listing, string name, ref T value, string tooltip = null)
+		public static void ValueLabeled<T>(this Listing_Standard listing, string name, bool useValueForExplain, ref T value, string tooltip = null)
 		{
 			var startHeight = listing.CurHeight;
 
@@ -667,14 +667,15 @@ namespace AchtungMod
 			Widgets.Label(rect, (name + "Title").Translate());
 
 			Text.Anchor = TextAnchor.MiddleRight;
+			var valueLabel = typeof(T).Name + "Option" + value.ToString();
 			if (typeof(T).IsEnum)
-				Widgets.Label(rect, (typeof(T).Name + "Option" + value.ToString()).Translate());
+				Widgets.Label(rect, valueLabel.Translate());
 			else
 				Widgets.Label(rect, value.ToString());
 
 			Text.Anchor = savedAnchor;
 
-			var key = name + "Explained";
+			var key = (useValueForExplain ? valueLabel : name) + "Explained";
 			if (key.CanTranslate())
 			{
 				Text.Font = GameFont.Tiny;

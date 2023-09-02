@@ -6,7 +6,7 @@
 	<Feature_Achtung_MenuError>Menufout</Feature_Achtung_MenuError>
 	<Feature_Achtung_Formations>Formaties</Feature_Achtung_Formations>
 	<Feature_Achtung_Cooperation>Samenwerking</Feature_Achtung_Cooperation>
-	<Feature_Achtung_ThreeModes>Drie Modi</Feature_Achtung_ThreeModes>
+	<Feature_Achtung_FourModes>Vier Modi</Feature_Achtung_FourModes>
 	<Feature_Achtung_Settings>Instellingen</Feature_Achtung_Settings>
 	<Feature_Achtung_Draftstatus>Ontwerpstatus</Feature_Achtung_Draftstatus>
 	<Feature_Achtung_Rescue>Redding</Feature_Achtung_Rescue>
@@ -17,9 +17,20 @@
 	<AchtungModifierTitle>Achtung! toets</AchtungModifierTitle>
 	<AchtungModifierExplained>Als je deze toets ingedrukt houdt, worden kolonisten geforceerd als ze de opdrachten Verplaatsen of Verplaatsen-in-formatie krijgen.\nAls je hem vasthoudt, kunnen de geselecteerde kolonisten in hun huidige formatie naar je cursor worden verplaatst door de rechtermuisknop ingedrukt te houden en te slepen. Zodra de rechtermuisknop wordt ingedrukt, kan de Achtung! toets worden losgelaten.\nDe formatie kan worden gedraaid met Q en E.</AchtungModifierExplained>
 
-	<ForceCommandMenuModeTitle>Contextmenu Modus</ForceCommandMenuModeTitle>
-	<ForceCommandMenuModeExplained>Auto = normaal gedrag (wapenstatus beslist)\nToon Menu = Toets ingedrukt houden voor contextmenu\nZet Positie = Toets ingedrukt houden om naar positie te bevelen</ForceCommandMenuModeExplained>
-	<ForceCommandMenuKeyTitle>Context Menu Toets</ForceCommandMenuKeyTitle>
+	<ForceCommandMenuModeTitle>Rechterklik Modus</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Rechterklik Vervangtoets</ForceCommandMenuKeyTitle>
+
+	<CommandMenuModeOptionAuto>Afhankelijk van Ontwerp</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionAutoExplained>De ontwerpstatus van de kolonist bepaalt of het contextmenu wordt getoond of dat er naar de aangeklikte locatie wordt verplaatst</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionPressForMenu>Toets voor Menu</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForMenuExplained>Houd de toets ingedrukt om de standaardactie te negeren en in plaats daarvan het contextmenu weer te geven</CommandMenuModeOptionPressForMenuExplained>
+	<CommandMenuModeOptionPressForPosition>Toets voor Positie</CommandMenuModeOptionPressForPosition>
+	<CommandMenuModeOptionPressForPositionExplained>Houd de toets ingedrukt om het contextmenu te negeren en een positiecommando uit te voeren</CommandMenuModeOptionPressForPositionExplained>
+	<CommandMenuModeOptionDelayed>Knop-Verschuiving</CommandMenuModeOptionDelayed>
+	<CommandMenuModeOptionDelayedExplained>Houd de rechtermuisknop ingedrukt; de actie zal na de gedefinieerde vertraging overschakelen van positionering naar het weergeven van het contextmenu</CommandMenuModeOptionDelayedExplained>
+
+	<DelayTitle>Vasthoudtijd</DelayTitle>
+	<DelayExplained>Duur in milliseconden om de rechtermuisknop ingedrukt te houden voordat het contextmenu verschijnt, positionering overschrijdend</DelayExplained>
 
 	<RescueEnabledTitle>'Redden' werkprioriteit kolom</RescueEnabledTitle>
 	<RescueEnabledExplained>Maakt het automatisch redden van pionnen mogelijk en voegt een kolom toe aan het werk-tabblad</RescueEnabledExplained>
@@ -37,11 +48,6 @@
 
 	<Notes>Opmerkingen</Notes>
 	<Note1>Bij gebruik van Achtung bevat het contextmenu commando's voor zowel de gevechtsmodus als de normale modus.</Note1>
-	<Note2>Bij het positioneren van kolonisten die hun wapen niet hebben getrokken langs een lijn, zal een linkerklik de kolonisten hun wapens laten trekken.</Note2>
-
-	<CommandMenuModeOptionAuto>Auto</CommandMenuModeOptionAuto>
-	<CommandMenuModeOptionPressForMenu>Toon Menu</CommandMenuModeOptionPressForMenu>
-	<CommandMenuModeOptionPressForPosition>Zet Positie</CommandMenuModeOptionPressForPosition>
 
 	<AchtungModKeyOptionNone>Uitgeschakeld</AchtungModKeyOptionNone>
 	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>

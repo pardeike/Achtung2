@@ -39,13 +39,16 @@ namespace Brrainz
 		{
 			Find.Maps.Do(map => map.mapPawns.AllPawnsSpawned.DoIf(p => p.workSettings != null, p =>
 			{
-				if (copyFrom != -1)
+				if (p.workSettings.EverWork)
 				{
-					var value = p.workSettings.priorities.values[copyFrom];
-					p.workSettings.priorities.values.Insert(index, value);
+					if (copyFrom != -1)
+					{
+						var value = p.workSettings.priorities.values[copyFrom];
+						p.workSettings.priorities.values.Insert(index, value);
+					}
+					else
+						p.workSettings.priorities.values.Remove(index);
 				}
-				else
-					p.workSettings.priorities.values.Remove(index);
 				p.workSettings.workGiversDirty = true;
 				p.cachedDisabledWorkTypes = null;
 				p.cachedDisabledWorkTypesPermanent = null;

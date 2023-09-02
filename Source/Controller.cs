@@ -58,6 +58,7 @@ namespace AchtungMod
 		{
 			if (actions == null)
 				return true;
+			var menuAdded = false;
 			if (actions.Count(false) > 0)
 			{
 				var optionTaken = false;
@@ -72,17 +73,21 @@ namespace AchtungMod
 					}
 				}
 				if (optionTaken == false)
+				{
 					Find.WindowStack.Add(actions.GetWindow());
+					menuAdded = true;
+				}
 			}
-			if (Achtung.Settings.positioningEnabled == false)
+			if (menuAdded == false && Achtung.Settings.positioningEnabled == false)
 				return true;
 			Event.current.Use();
 			return false;
 		}
 
-		public bool MouseDown(Vector3 pos)
+		public bool MouseDown(Vector3 pos, int button, bool longPress)
 		{
-			colonists = Tools.GetSelectedColonists();
+			if (longPress == false)
+				colonists = Tools.GetSelectedColonists();
 
 			if (colonists.Count == 0)
 				return true;
@@ -92,14 +97,14 @@ namespace AchtungMod
 			if (doPositioning == false && doForceMenu == false)
 				return true;
 
-			if (isDragging && Event.current.button == (int)Button.left && groupMovement == false)
+			if (isDragging && button == (int)Button.left && groupMovement == false)
 			{
 				Tools.DraftWithSound(colonists, true);
 				EndDragging();
 				return true;
 			}
 
-			if (Event.current.button != (int)Button.right)
+			if (button != (int)Button.right)
 				return true;
 
 			var actions = doForceMenu ? new MultiActions(colonists, UI.MouseMapPosition()) : null;
@@ -107,15 +112,14 @@ namespace AchtungMod
 			var allDrafted = colonists.All(colonist => colonist.pawn.Drafted || colonist.pawn.IsColonyMechPlayerControlled || achtungPressed);
 			var mixedDrafted = !allDrafted && colonists.Any(colonist => colonist.pawn.Drafted);
 
-			var forceMenu = false;
-			if (Achtung.Settings.forceCommandMenuMode == CommandMenuMode.Auto && !mixedDrafted)
-				forceMenu = allDrafted == false;
-			else
+			var forceMenu = Achtung.Settings.forceCommandMenuMode switch
 			{
-				forceMenu = Tools.IsModKeyPressed(Achtung.Settings.forceCommandMenuKey);
-				if (Achtung.Settings.forceCommandMenuMode == CommandMenuMode.PressForPosition)
-					forceMenu = !forceMenu;
-			}
+				CommandMenuMode.Auto => mixedDrafted == false && allDrafted == false,
+				CommandMenuMode.PressForMenu => Tools.IsModKeyPressed(Achtung.Settings.forceCommandMenuKey),
+				CommandMenuMode.PressForPosition => Tools.IsModKeyPressed(Achtung.Settings.forceCommandMenuKey) == false,
+				CommandMenuMode.Delayed => longPress,
+				_ => false
+			};
 
 			var map = Find.CurrentMap;
 			var cell = IntVec3.FromVector3(pos);
@@ -142,7 +146,7 @@ namespace AchtungMod
 				Tools.DraftWithSound(colonists, true);
 
 			// in multiplayer, drafting will update pawn.Drafted in the same tick, so we fake it
-			if (allDrafted && doPositioning)
+			if (allDrafted && doPositioning && longPress == false)
 			{
 				StartDragging(pos, achtungPressed);
 				return true;
@@ -380,14 +384,30 @@ namespace AchtungMod
 			});
 		}
 
+		static int longPressThreshold = -1;
 		public bool HandleEvents()
 		{
+			if (Find.WindowStack.IsOpen<FloatMenu>())
+			{
+				isDragging = false;
+				return true;
+			}
+
 			var pos = UI.MouseMapPosition();
 			var runOriginal = true;
+			if (Achtung.Settings.forceCommandMenuMode == CommandMenuMode.Delayed
+				&& longPressThreshold > -1
+				&& Event.current.rawType == EventType.Layout
+				&& Environment.TickCount > longPressThreshold)
+			{
+				longPressThreshold = -1;
+				return MouseDown(pos, (int)Button.right, true);
+			}
 			switch (Event.current.rawType)
 			{
 				case EventType.MouseDown:
-					runOriginal = MouseDown(pos);
+					longPressThreshold = Environment.TickCount + Achtung.Settings.menuDelay;
+					runOriginal = MouseDown(pos, Event.current.button, false);
 					MouseDrag(pos);
 					break;
 
@@ -396,6 +416,7 @@ namespace AchtungMod
 					break;
 
 				case EventType.MouseUp:
+					longPressThreshold = -1;
 					MouseUp();
 					break;
 

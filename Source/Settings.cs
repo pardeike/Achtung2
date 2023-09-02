@@ -18,7 +18,8 @@ namespace AchtungMod
 	{
 		Auto,
 		PressForMenu,
-		PressForPosition
+		PressForPosition,
+		Delayed
 	}
 
 	public enum BreakLevel
@@ -51,7 +52,7 @@ namespace AchtungMod
 		public bool positioningEnabled = true;
 		public bool rescueEnabled = true;
 		public AchtungModKey achtungKey = AchtungModKey.Alt;
-		public CommandMenuMode forceCommandMenuMode = CommandMenuMode.PressForMenu;
+		public CommandMenuMode forceCommandMenuMode = CommandMenuMode.Delayed;
 		public AchtungModKey forceCommandMenuKey = AchtungModKey.Ctrl;
 		public BreakLevel breakLevel = BreakLevel.AlmostExtreme;
 		public HealthLevel healthLevel = HealthLevel.InPainShock;
@@ -61,6 +62,7 @@ namespace AchtungMod
 		public WorkMarkers workMarkers = WorkMarkers.Animated;
 		public bool buildingSmartDefault = false;
 		public int maxForcedItems = 64;
+		public int menuDelay = 250;
 
 		public static readonly int UnlimitedForcedItems = 2000;
 
@@ -80,6 +82,7 @@ namespace AchtungMod
 			Scribe_Values.Look(ref workMarkers, "workMarkers", WorkMarkers.Animated, true);
 			Scribe_Values.Look(ref buildingSmartDefault, "buildingSmartDefault", false, true);
 			Scribe_Values.Look(ref maxForcedItems, "maxForcedItems", 64, true);
+			Scribe_Values.Look(ref menuDelay, "menuDelay", 250, true);
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit && Achtung.harmony != null)
 				ForbidUtility_IsForbidden_Patch.FixPatch();
@@ -101,14 +104,26 @@ namespace AchtungMod
 
 			list.Gap(4);
 			list.CheckboxEnhanced("PositioningEnabled", ref Achtung.Settings.positioningEnabled);
-			list.Gap(10);
-			list.ValueLabeled("AchtungModifier", ref Achtung.Settings.achtungKey);
-			list.Gap(10);
-			list.ValueLabeled("ForceCommandMenuMode", ref Achtung.Settings.forceCommandMenuMode);
-			if (Achtung.Settings.forceCommandMenuMode != CommandMenuMode.Auto)
+			if (Achtung.Settings.positioningEnabled)
 			{
-				list.Gap(-2);
-				list.ValueLabeled("ForceCommandMenuKey", ref Achtung.Settings.forceCommandMenuKey);
+				list.Gap(10);
+				list.ValueLabeled("AchtungModifier", false, ref Achtung.Settings.achtungKey);
+				list.Gap(10);
+				list.ValueLabeled("ForceCommandMenuMode", true, ref Achtung.Settings.forceCommandMenuMode);
+				switch (Achtung.Settings.forceCommandMenuMode)
+				{
+					case CommandMenuMode.Auto:
+						break;
+					case CommandMenuMode.PressForMenu:
+					case CommandMenuMode.PressForPosition:
+						list.Gap(-2);
+						list.ValueLabeled("ForceCommandMenuKey", false, ref Achtung.Settings.forceCommandMenuKey);
+						break;
+					case CommandMenuMode.Delayed:
+						list.Gap(-2);
+						list.SliderLabeled("Delay", ref Achtung.Settings.menuDelay, 0, 2000, n => $"{n} ms");
+						break;
+				}
 			}
 			list.Gap(18);
 			list.CheckboxEnhanced("RescueEnabled", ref Achtung.Settings.rescueEnabled);
@@ -123,9 +138,9 @@ namespace AchtungMod
 			list.curX += 30 - Listing.ColumnSpacing;
 
 			list.Gap(4);
-			list.ValueLabeled("BreakLevel", ref Achtung.Settings.breakLevel);
+			list.ValueLabeled("BreakLevel", false, ref Achtung.Settings.breakLevel);
 			list.Gap(10);
-			list.ValueLabeled("HealthLevel", ref Achtung.Settings.healthLevel);
+			list.ValueLabeled("HealthLevel", false, ref Achtung.Settings.healthLevel);
 			list.Gap(10);
 			list.CheckboxEnhanced("IgnoreForbidden", ref Achtung.Settings.ignoreForbidden, null, () => ForbidUtility_IsForbidden_Patch.FixPatch());
 			list.CheckboxEnhanced("IgnoreRestrictions", ref Achtung.Settings.ignoreRestrictions);
@@ -133,7 +148,7 @@ namespace AchtungMod
 			list.Gap(10);
 			list.CheckboxEnhanced("BuildingSmartDefault", ref Achtung.Settings.buildingSmartDefault);
 			list.Gap(10);
-			list.ValueLabeled("WorkMarkers", ref Achtung.Settings.workMarkers);
+			list.ValueLabeled("WorkMarkers", false, ref Achtung.Settings.workMarkers);
 			list.Gap(10);
 			static string forcedItemsString(int n) => n == 0 ? "Disabled".Translate().ToString() : n >= UnlimitedForcedItems ? "MaxForcedItemsUnlimited".Translate().ToString() : $"{n}";
 			list.SliderLabeled("MaxForcedItems", ref Achtung.Settings.maxForcedItems, 0, UnlimitedForcedItems, forcedItemsString);
@@ -141,13 +156,11 @@ namespace AchtungMod
 			list.End();
 
 			list = new Listing_Standard { ColumnWidth = canvas.width };
-			canvas.yMin = canvas.yMax - 100;
+			canvas.yMin = canvas.yMax - 80;
 			list.Begin(canvas);
 			list.Note("Notes", GameFont.Medium);
 			list.Gap(4);
 			list.Note("Note1");
-			list.Gap(4);
-			list.Note("Note2");
 			list.End();
 		}
 	}

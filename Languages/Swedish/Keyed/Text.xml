@@ -6,7 +6,7 @@
 	<Feature_Achtung_MenuError>Menyfel</Feature_Achtung_MenuError>
 	<Feature_Achtung_Formations>Formationer</Feature_Achtung_Formations>
 	<Feature_Achtung_Cooperation>Samarbete</Feature_Achtung_Cooperation>
-	<Feature_Achtung_ThreeModes>Tre Lägen</Feature_Achtung_ThreeModes>
+	<Feature_Achtung_FourModes>Fyra Lägen</Feature_Achtung_FourModes>
 	<Feature_Achtung_Settings>Inställningar</Feature_Achtung_Settings>
 	<Feature_Achtung_Draftstatus>Wapenstatus</Feature_Achtung_Draftstatus>
 	<Feature_Achtung_Rescue>Räddning</Feature_Achtung_Rescue>
@@ -17,9 +17,20 @@
 	<AchtungModifierTitle>Achtung! knapp</AchtungModifierTitle>
 	<AchtungModifierExplained>Trygg knappen för att försätta kolonister i kampmodus när du positionera dem. Höll i för att flytta kolonister i deras formation. Formationen kan roteras med Q och E.</AchtungModifierExplained>
 
-	<ForceCommandMenuModeTitle>Kontextmenymodus</ForceCommandMenuModeTitle>
-	<ForceCommandMenuModeExplained>Auto = Vanlig beteende (kampmodus bestämmer)\nVisa meny = Håll knappen för kontextmenyn\nPositionera = Håll knappen för att beordra till position</ForceCommandMenuModeExplained>
-	<ForceCommandMenuKeyTitle>Kontextmenyknapp</ForceCommandMenuKeyTitle>
+	<ForceCommandMenuModeTitle>Högerklicksläge</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Högerklick Överskridande Tangent</ForceCommandMenuKeyTitle>
+
+	<CommandMenuModeOptionAuto>Kampmodus-Beroende</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionAutoExplained>Kampmodus för kolonisten avgör om kontextmenyn visas eller om positionen flyttas till den klickade platsen</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionPressForMenu>Tangent för Meny</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForMenuExplained>Håll ned tangenten för att överskrida den förinställda åtgärden och istället visa kontextmenyn</CommandMenuModeOptionPressForMenuExplained>
+	<CommandMenuModeOptionPressForPosition>Tangent för Position</CommandMenuModeOptionPressForPosition>
+	<CommandMenuModeOptionPressForPositionExplained>Håll ned tangenten för att överskrida kontextmenyn och utfärda en positioneringskommando</CommandMenuModeOptionPressForPositionExplained>
+	<CommandMenuModeOptionDelayed>Håll-Switch</CommandMenuModeOptionDelayed>
+	<CommandMenuModeOptionDelayedExplained>Håll ner höger musknapp; åtgärden byter från positionering till att visa kontextmenyn efter den definierade fördröjningen</CommandMenuModeOptionDelayedExplained>
+
+	<DelayTitle>Hålltidslängd</DelayTitle>
+	<DelayExplained>Tidsintervall i millisekunder för att hålla ner höger musknapp innan kontextmenyn visas, som överskrider positionering</DelayExplained>
 
 	<RescueEnabledTitle>'Rädda' arbetsprioritetskolumn</RescueEnabledTitle>
 	<RescueEnabledExplained>Aktiverar automatisk räddning av kolonister och lägger till en kolumn på arbetsfliken</RescueEnabledExplained>
@@ -37,11 +48,6 @@
 
 	<Notes>Anmärkningar</Notes>
 	<Note1>Med Achtung innehåller kontextmenyn såväl normala som kampkommandos</Note1>
-	<Note2>Vid positionering av kolonister längs en rad kommer en vänsterklick sätta dem i kamppositioner</Note2>
-
-	<CommandMenuModeOptionAuto>Auto</CommandMenuModeOptionAuto>
-	<CommandMenuModeOptionPressForMenu>Visa meny</CommandMenuModeOptionPressForMenu>
-	<CommandMenuModeOptionPressForPosition>Positionera</CommandMenuModeOptionPressForPosition>
 
 	<AchtungModKeyOptionNone>Av</AchtungModKeyOptionNone>
 	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>

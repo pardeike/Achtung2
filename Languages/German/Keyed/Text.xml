@@ -6,7 +6,7 @@
 	<Feature_Achtung_MenuError>Menüfehler</Feature_Achtung_MenuError>
 	<Feature_Achtung_Formations>Formationen</Feature_Achtung_Formations>
 	<Feature_Achtung_Cooperation>Zusammenarbeit</Feature_Achtung_Cooperation>
-	<Feature_Achtung_ThreeModes>Drei Modi</Feature_Achtung_ThreeModes>
+	<Feature_Achtung_FourModes>Vier Modi</Feature_Achtung_FourModes>
 	<Feature_Achtung_Settings>Einstellungen</Feature_Achtung_Settings>
 	<Feature_Achtung_Draftstatus>Kampfstatus</Feature_Achtung_Draftstatus>
 	<Feature_Achtung_Rescue>Rettung</Feature_Achtung_Rescue>
@@ -17,9 +17,20 @@
 	<AchtungModifierTitle>Achtung!-Taste</AchtungModifierTitle>
 	<AchtungModifierExplained>Wenn du diese Taste gedrückt hältst und deine Kolonisten via Rechtsklick bewegst, werden sie automatisch in den Kampfmodus versetzt. Beim Halten können die ausgewählten Kolonisten in ihrer aktuellen Formation an deinem Mauszeiger bewegt werden. Die Formation kann mittels Q und E rotiert werden.</AchtungModifierExplained>
 
-	<ForceCommandMenuModeTitle>Kontextmenü-Modus</ForceCommandMenuModeTitle>
-	<ForceCommandMenuModeExplained>Auto = Normales Verhalten (Kampfmodus entscheidet)\nMenü anzeigen = Taste für Kontextmenüanzeige gedrückt halten\nPositionieren = Taste zum Positionieren gedrückt halten</ForceCommandMenuModeExplained>
-	<ForceCommandMenuKeyTitle>Kontextmenü-Taste</ForceCommandMenuKeyTitle>
+	<ForceCommandMenuModeTitle>Rechtsklick-Modus</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Rechtsklick-Überschreibungstaste</ForceCommandMenuKeyTitle>
+
+	<CommandMenuModeOptionAuto>Kampfmodusabhängig</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionAutoExplained>Der Kampfmodus des Kolonisten entscheidet, ob das Kontextmenü angezeigt wird oder zur angeklickten Position bewegt wird</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionPressForMenu>Taste für Menü</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForMenuExplained>Halten Sie die Taste gedrückt, um die Standardaktion zu überschreiben und stattdessen das Kontextmenü anzuzeigen</CommandMenuModeOptionPressForMenuExplained>
+	<CommandMenuModeOptionPressForPosition>Taste für Positionierung</CommandMenuModeOptionPressForPosition>
+	<CommandMenuModeOptionPressForPositionExplained>Halten Sie die Taste gedrückt, um das Kontextmenü zu überschreiben und einen Positions-Befehl auszugeben</CommandMenuModeOptionPressForPositionExplained>
+	<CommandMenuModeOptionDelayed>Halte-Umschaltung</CommandMenuModeOptionDelayed>
+	<CommandMenuModeOptionDelayedExplained>Halten Sie die rechte Maustaste gedrückt; die Aktion wechselt nach der definierten Verzögerung von Positionierung zum Anzeigen des Kontextmenüs</CommandMenuModeOptionDelayedExplained>
+
+	<DelayTitle>Halte-Dauer</DelayTitle>
+	<DelayExplained>Zeitspanne in Millisekunden, die die rechte Maustaste gedrückt gehalten werden muss, bevor das Kontextmenü erscheint und die Positionierung überschreitet</DelayExplained>
 
 	<RescueEnabledTitle>'Rettung' Arbeitsprioritätsspalte</RescueEnabledTitle>
 	<RescueEnabledExplained>Aktiviert die automatische Rettung von Kolonisten und fügt eine Spalte in der Arbeitsansicht hinzu</RescueEnabledExplained>
@@ -37,11 +48,6 @@
 
 	<Notes>Hinweise</Notes>
 	<Note1>Wenn du Achtung! verwendest, enthält das Kontextmenü sowohl normale als auch kampfrelevante Befehle.</Note1>
-	<Note2>Wenn du deine Kolonisten via Achtung!-Taste + Rechtsklick bewegst, werden sie automatisch in den Kampfmodus versetzt.</Note2>
-
-	<CommandMenuModeOptionAuto>Auto</CommandMenuModeOptionAuto>
-	<CommandMenuModeOptionPressForMenu>Menü anzeigen</CommandMenuModeOptionPressForMenu>
-	<CommandMenuModeOptionPressForPosition>Positionieren</CommandMenuModeOptionPressForPosition>
 
 	<AchtungModKeyOptionNone>Keine</AchtungModKeyOptionNone>
 	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>

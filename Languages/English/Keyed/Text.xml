@@ -6,7 +6,7 @@
 	<Feature_Achtung_MenuError>Menu Error</Feature_Achtung_MenuError>
 	<Feature_Achtung_Formations>Formations</Feature_Achtung_Formations>
 	<Feature_Achtung_Cooperation>Cooperation</Feature_Achtung_Cooperation>
-	<Feature_Achtung_ThreeModes>Three Modes</Feature_Achtung_ThreeModes>
+	<Feature_Achtung_FourModes>Four Modes</Feature_Achtung_FourModes>
 	<Feature_Achtung_Settings>Settings</Feature_Achtung_Settings>
 	<Feature_Achtung_Draftstatus>Draft Status</Feature_Achtung_Draftstatus>
 	<Feature_Achtung_Rescue>Rescue</Feature_Achtung_Rescue>
@@ -17,9 +17,20 @@
 	<AchtungModifierTitle>Achtung! key</AchtungModifierTitle>
 	<AchtungModifierExplained>Holding this key will Force Draft colonists when they're given Move or Move-in-Formation commands. When held it will allow the selected colonists to be moved in their current formation at your cursor by holding and dragging the right mouse button. Once the right mouse button is held the Achtung! Key may be released. The formation can be rotated using Q and E.</AchtungModifierExplained>
 
-	<ForceCommandMenuModeTitle>Context Menu Mode</ForceCommandMenuModeTitle>
-	<ForceCommandMenuModeExplained>Auto = normal behavior (draft status decides)\nShow Menu = Hold key for context menu\nSet Position = Hold key to order to position</ForceCommandMenuModeExplained>
-	<ForceCommandMenuKeyTitle>Context Menu Key</ForceCommandMenuKeyTitle>
+	<ForceCommandMenuModeTitle>Right-Click Mode</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Right-Click Override Key</ForceCommandMenuKeyTitle>
+
+	<CommandMenuModeOptionAuto>Draft-Dependent</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionAutoExplained>The draft status of the colonist decides whether to show the context menu or move to the clicked location</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionPressForMenu>Key for Menu</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForMenuExplained>Hold the key to override the default action and display the context menu instead</CommandMenuModeOptionPressForMenuExplained>
+	<CommandMenuModeOptionPressForPosition>Key for Position</CommandMenuModeOptionPressForPosition>
+	<CommandMenuModeOptionPressForPositionExplained>Hold the key to override the context menu and issue a positioning command</CommandMenuModeOptionPressForPositionExplained>
+	<CommandMenuModeOptionDelayed>Hold-Switch</CommandMenuModeOptionDelayed>
+	<CommandMenuModeOptionDelayedExplained>Hold down the right-click button; the action will switch from positioning to displaying the context menu after the defined delay</CommandMenuModeOptionDelayedExplained>
+	
+	<DelayTitle>Hold Duration</DelayTitle>
+	<DelayExplained>Duration in milliseconds to hold right-click before the context menu appears, overriding positioning</DelayExplained>
 
 	<RescueEnabledTitle>'Rescue' work priority column</RescueEnabledTitle>
 	<RescueEnabledExplained>Enables the automatic rescue of pawns and adds a column on the work tab</RescueEnabledExplained>
@@ -37,11 +48,6 @@
 
 	<Notes>Notes</Notes>
 	<Note1>When using Achtung the context menu contains both: drafted and undrafted commands</Note1>
-	<Note2>When positioning undrafted colonists along a line, a left click drafts colonists to their current positions</Note2>
-
-	<CommandMenuModeOptionAuto>Auto</CommandMenuModeOptionAuto>
-	<CommandMenuModeOptionPressForMenu>Show Menu</CommandMenuModeOptionPressForMenu>
-	<CommandMenuModeOptionPressForPosition>Set Position</CommandMenuModeOptionPressForPosition>
 
 	<AchtungModKeyOptionNone>Disabled</AchtungModKeyOptionNone>
 	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
