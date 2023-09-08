@@ -1,6 +1,5 @@
 ﻿using RimWorld;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -9,41 +8,9 @@ using Verse.AI;
 
 namespace AchtungMod
 {
-	public class ForcedJobs : IExposable
-	{
-		public List<ForcedJob> jobs = new();
-		public int count; // optimization
-
-		public ForcedJobs()
-		{
-			jobs = new List<ForcedJob>();
-			count = 0;
-		}
-
-		public void UpdateCount()
-		{
-			count = jobs.Count;
-		}
-
-		public void ExposeData()
-		{
-			jobs ??= new List<ForcedJob>();
-			_ = jobs.RemoveAll(job => job == null || job.IsEmpty());
-
-			Scribe_Collections.Look(ref jobs, "jobs", LookMode.Deep);
-
-			jobs ??= new List<ForcedJob>();
-			_ = jobs.RemoveAll(job => job == null || job.IsEmpty());
-			UpdateCount();
-		}
-	}
-
 	public class ForcedJob : IExposable
 	{
-		private HashSet<ForcedTarget> targets = new();
-		const int ticksWaitPaused = 4;
-		const int ticksWaitRunning = 64;
-
+		public HashSet<ForcedTarget> targets = new();
 		public Pawn pawn = null;
 		public List<WorkGiverDef> workgiverDefs = new();
 		public bool isThingJob = false;
@@ -107,41 +74,11 @@ namespace AchtungMod
 			lastLocation = item.Cell;
 
 			isThingJob = item.HasThing;
-			CreateCoroutines();
-		}
-
-		// called from ForcedWork.Prepare which is called from Map.FinalizeInit
-		public void Prepare()
-		{
-			CreateCoroutines();
-		}
-
-		void CreateCoroutines()
-		{
-			cancelled = false;
-			expanderThing ??= Find.CameraDriver.StartCoroutine(ExpandThingTargets(true));
-			expanderCell ??= Find.CameraDriver.StartCoroutine(ExpandCellTargets(true));
-			contractor ??= Find.CameraDriver.StartCoroutine(ContractTargets());
 		}
 
 		public void Start() => started = true;
 
-		public void Cleanup()
-		{
-			cancelled = true;
-
-			if (expanderThing != null)
-				Find.CameraDriver.StopCoroutine(expanderThing);
-			expanderThing = null;
-
-			if (expanderCell != null)
-				Find.CameraDriver.StopCoroutine(expanderCell);
-			expanderCell = null;
-
-			if (contractor != null)
-				Find.CameraDriver.StopCoroutine(contractor);
-			contractor = null;
-		}
+		public void Cleanup() => cancelled = true;
 
 		public IEnumerable<XY> AllCells(bool onlyValid = false)
 		{
@@ -406,131 +343,70 @@ namespace AchtungMod
 			}
 		}
 
-		public IEnumerator ExpandThingTargets(bool iterate)
+		public void ExpandThingTargets(Map map)
 		{
-			var tm = Find.TickManager;
-			long counter = 0;
-			while (cancelled == false && targets.Count > 0)
-			{
-				var needsYield = true;
-				if (Find.Maps.Count > 0)
-				{
-					var map = pawn.Map;
-					var thingGrid = map?.thingGrid;
-					if (thingGrid != null && pawn.Spawned)
-					{
-						var maxCountVerifier = Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems
-							? (Func<bool>)(() => targets.Count < Achtung.Settings.maxForcedItems)
-							: () => true;
+			var thingGrid = map.thingGrid;
+			if (thingGrid == null)
+				return;
 
-						var things = targets.Select(target => target.item.thingInt).Where(thing => thing != null && thing.Spawned).ToHashSet();
-						var newThings = things
-							.SelectMany(thing => thing.AllCells()).Union(targets.Select(target => target.XY)).Distinct()
-							.Expand(map, cellRadius + 1)
-							.SelectMany(cell => thingGrid.ThingsListAtFast(cell)).Distinct()
-							.ToArray();
-						for (var i = 0; i < newThings.Length && cancelled == false && maxCountVerifier(); i++)
-						{
-							var newThing = newThings[i];
-							if (things.Contains(newThing) == false && HasJob(newThing))
-							{
-								var item = new LocalTargetInfo(newThing);
-								_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
-							}
-							if (iterate && ++counter % (tm.Paused ? ticksWaitPaused : ticksWaitRunning) == 0)
-							{
-								needsYield = false;
-								yield return null;
-							}
-						}
-					}
+			var maxCountVerifier = Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems
+				? (Func<bool>)(() => targets.Count < Achtung.Settings.maxForcedItems)
+				: () => true;
+
+			var things = targets.Select(target => target.item.thingInt).Where(thing => thing != null && thing.Spawned).ToHashSet();
+			var newThings = things
+				.SelectMany(thing => thing.AllCells()).Union(targets.Select(target => target.XY)).Distinct()
+				.Expand(map, cellRadius + 1)
+				.SelectMany(cell => thingGrid.ThingsListAtFast(cell)).Distinct()
+				.ToArray();
+			for (var i = 0; i < newThings.Length && cancelled == false && maxCountVerifier(); i++)
+			{
+				var newThing = newThings[i];
+				if (things.Contains(newThing) == false && HasJob(newThing))
+				{
+					var item = new LocalTargetInfo(newThing);
+					_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
 				}
-				if (needsYield)
-					yield return null;
-				if (iterate == false)
-					break;
 			}
 		}
 
-		public IEnumerator ExpandCellTargets(bool iterate)
+		public void ExpandCellTargets(Map map)
 		{
-			var tm = Find.TickManager;
-			long counter = 0;
-			while (cancelled == false && targets.Count > 0)
-			{
-				var needsYield = true;
-				if (Find.Maps.Count > 0)
-				{
-					var map = pawn.Map;
-					if (map != null && pawn.Spawned)
-					{
-						var maxCountVerifier = Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems
+			var maxCountVerifier = Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems
 							? (Func<bool>)(() => targets.Count < Achtung.Settings.maxForcedItems)
 							: () => true;
 
-						var newCells = targets
-							.Select(target => target.XY)
-							.Expand(map, cellRadius + 1)
-							.ToArray();
-						for (var i = 0; i < newCells.Length && cancelled == false && maxCountVerifier(); i++)
-						{
-							var cell = newCells[i];
-							if (HasJob(cell))
-							{
-								var item = (LocalTargetInfo)cell;
-								_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
-							}
-							if (iterate && ++counter % (tm.Paused ? ticksWaitPaused : ticksWaitRunning) == 0)
-							{
-								needsYield = false;
-								yield return null;
-							}
-						}
-					}
+			var newCells = targets
+				.Select(target => target.XY)
+				.Expand(map, cellRadius + 1)
+				.ToArray();
+			for (var i = 0; i < newCells.Length && cancelled == false && maxCountVerifier(); i++)
+			{
+				var cell = newCells[i];
+				if (HasJob(cell))
+				{
+					var item = (LocalTargetInfo)cell;
+					_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
 				}
-				if (needsYield)
-					yield return null;
-				if (iterate == false)
-					break;
 			}
 		}
 
-		public IEnumerator ContractTargets()
+		public void ContractTargets(Map map)
 		{
-			var tm = Find.TickManager;
-			long counter = 0;
-			while (cancelled == false && targets.Count > 0)
-			{
-				var needsYield = true;
-				if (started && Find.Maps.Count > 0)
-				{
-					var map = pawn.Map;
-					if (map != null && pawn.Spawned && ForcedWork.Instance.HasForcedJob(pawn))
-					{
-						targets.RemoveWhere(targets => targets.item.thingInt?.Spawned == false);
+			targets.RemoveWhere(targets => targets.item.thingInt?.Spawned == false);
 
-						var cells = targets.Select(target => target.item.thingInt)
-							.OfType<Thing>()
-							.SelectMany(thing => thing.AllCells())
-							.Union(targets.Select(target => target.XY))
-							.Distinct()
-							.ToArray();
-						for (var i = 0; i < cells.Length && cancelled == false; i++)
-						{
-							var cell = cells[i];
-							if (cell.InBounds(map) && HasJob(cell) == false)
-								if (map.thingGrid.ThingsListAtFast(cell).All(thing => thing.Spawned == false || HasJob(thing) == false))
-									_ = targets.RemoveWhere(target => target.XY == cell || (target.item.thingInt?.AllCells().Contains(cell) ?? false));
-							if (++counter % (tm.Paused ? ticksWaitPaused : ticksWaitRunning) == 0)
-							{
-								needsYield = false;
-								yield return null;
-							}
-						}
-					}
-				}
-				if (needsYield)
-					yield return null;
+			var cells = targets.Select(target => target.item.thingInt)
+				.OfType<Thing>()
+				.SelectMany(thing => thing.AllCells())
+				.Union(targets.Select(target => target.XY))
+				.Distinct()
+				.ToArray();
+			for (var i = 0; i < cells.Length && cancelled == false; i++)
+			{
+				var cell = cells[i];
+				if (cell.InBounds(map) && HasJob(cell) == false)
+					if (map.thingGrid.ThingsListAtFast(cell).All(thing => thing.Spawned == false || HasJob(thing) == false))
+						_ = targets.RemoveWhere(target => target.XY == cell || (target.item.thingInt?.AllCells().Contains(cell) ?? false));
 			}
 		}
 
@@ -553,169 +429,6 @@ namespace AchtungMod
 			Scribe_Values.Look(ref buildSmart, "buildSmart", true, true);
 			Scribe_References.Look(ref lastThing, "lastThing");
 			Scribe_Values.Look(ref lastLocation, "lastLocation", XY.Invalid, true);
-
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-				_ = targets.RemoveWhere(target => target == null || target.item == null || target.item.IsValid == false || target.item.ThingDestroyed);
-		}
-	}
-
-	public class ForcedTarget : IExposable, IEquatable<ForcedTarget>
-	{
-		public LocalTargetInfo item = LocalTargetInfo.Invalid;
-		public XY XY => item.Cell;
-		public int materialScore = 0;
-
-		public ForcedTarget()
-		{
-			item = LocalTargetInfo.Invalid;
-			materialScore = 0;
-		}
-
-		public ForcedTarget(LocalTargetInfo item, int materialScore)
-		{
-			this.item = item;
-			this.materialScore = materialScore;
-		}
-
-		public void ExposeData()
-		{
-			Scribe_TargetInfo.Look(ref item, false, "item", LocalTargetInfo.Invalid);
-			Scribe_Values.Look(ref materialScore, "materialScore", 0, true);
-		}
-
-		public bool Equals(ForcedTarget other)
-		{
-			return item == other.item;
-		}
-
-		public override int GetHashCode()
-		{
-			return item.GetHashCode();
-		}
-
-		public bool IsValidTarget()
-		{
-			return item.HasThing == false || item.ThingDestroyed == false;
-		}
-
-		public bool IsBuilding()
-		{
-			if (item.HasThing == false)
-				return false;
-			var thing = item.thingInt;
-			if (thing is Frame frame)
-				return frame.def.entityDefToBuild == ThingDefOf.Wall;
-			if (thing is Blueprint_Build blueprint)
-				return blueprint.def.entityDefToBuild == ThingDefOf.Wall;
-			return false;
-		}
-
-		public override string ToString()
-		{
-			if (item.HasThing)
-				return $"{item.thingInt.def.defName}@{item.Cell.x}x{item.Cell.z}({materialScore})";
-			return $"{item.Cell.x}x{item.Cell.z}({materialScore})";
-		}
-	}
-
-	public static class ForcedExtensions
-	{
-		public static bool Ignorable(this WorkGiver_Scanner workgiver)
-		{
-			return (false
-				|| (workgiver as WorkGiver_Haul) != null
-				|| (workgiver as WorkGiver_Repair) != null
-				|| (workgiver as WorkGiver_ConstructAffectFloor) != null
-				|| (workgiver as WorkGiver_ConstructDeliverResources) != null
-				|| (workgiver as WorkGiver_ConstructFinishFrames) != null
-				|| (workgiver as WorkGiver_Flick) != null
-				|| (workgiver as WorkGiver_Miner) != null
-				|| (workgiver as WorkGiver_Refuel) != null
-				|| (workgiver as WorkGiver_RemoveRoof) != null
-				|| (workgiver as WorkGiver_Strip) != null
-				|| (workgiver as WorkGiver_TakeToBed) != null
-				|| (workgiver as WorkGiver_RemoveBuilding) != null
-			);
-		}
-
-		// fix for forbidden state in cached handlers
-		//
-		public static bool ShouldBeHaulable(Thing t)
-		{
-			// vanilla code but added 'Achtung.Settings.ignoreForbidden == false &&'
-			if (Achtung.Settings.ignoreForbidden == false && t.IsForbidden(Faction.OfPlayer))
-				return false;
-
-			if (!t.def.alwaysHaulable)
-			{
-				if (!t.def.EverHaulable)
-					return false;
-				// vanilla code but added 'Achtung.Settings.ignoreForbidden == false &&'
-				if (Achtung.Settings.ignoreForbidden == false && t.Map.designationManager.DesignationOn(t, DesignationDefOf.Haul) == null && !t.IsInAnyStorage())
-					return false;
-			}
-			return !t.IsInValidBestStorage();
-		}
-		//
-		public static bool ShouldBeMergeable(Thing t)
-		{
-			// vanilla code but added 'Achtung.Settings.ignoreForbidden ||'
-			return (Achtung.Settings.ignoreForbidden || !t.IsForbidden(Faction.OfPlayer)) && t.GetSlotGroup() != null && t.stackCount != t.def.stackLimit;
-		}
-
-		public static Job GetThingJob(this Thing thing, Pawn pawn, WorkGiver_Scanner scanner, bool ignoreReserve = false)
-		{
-			if (thing == null || thing.Spawned == false)
-				return null;
-			var potentialWork = scanner.PotentialWorkThingRequest.Accepts(thing);
-			if (potentialWork == false)
-			{
-				var workThingsGlobal = scanner.PotentialWorkThingsGlobal(pawn);
-				workThingsGlobal ??= pawn.Map.listerThings.ThingsMatching(scanner.PotentialWorkThingRequest);
-				if (workThingsGlobal != null && workThingsGlobal.Contains(thing))
-					potentialWork = true;
-			}
-			if (potentialWork == false && scanner is WorkGiver_Haul)
-				potentialWork = ShouldBeHaulable(thing);
-			else if (potentialWork == false && scanner is WorkGiver_Merge)
-				potentialWork = ShouldBeMergeable(thing);
-
-			if (potentialWork)
-				if (scanner.MissingRequiredCapacity(pawn) == null)
-					if (scanner.HasJobOnThing(pawn, thing, true))
-					{
-						var job = scanner.JobOnThing(pawn, thing, true);
-						if (job != null)
-						{
-							var ignorable = scanner.Ignorable();
-							if (Achtung.Settings.ignoreForbidden && ignorable || thing.IsForbidden(pawn) == false)
-								if (Achtung.Settings.ignoreRestrictions && ignorable || thing.Position.InAllowedArea(pawn))
-								{
-									if (
-										(ignoreReserve == false && pawn.CanReserveAndReach(thing, scanner.PathEndMode, Danger.Deadly))
-										||
-										(ignoreReserve && pawn.CanReach(thing, scanner.PathEndMode, Danger.Deadly))
-									)
-										return job;
-								}
-						}
-					}
-			return null;
-		}
-
-		public static Job GetCellJob(this IntVec3 cell, Pawn pawn, WorkGiver_Scanner workgiver, bool ignoreReserve = false)
-		{
-			if (cell.IsValid == false)
-				return null;
-			if (workgiver.PotentialWorkCellsGlobal(pawn).Contains(cell))
-				if (workgiver.MissingRequiredCapacity(pawn) == null)
-					if (workgiver.HasJobOnCell(pawn, cell, ignoreReserve))
-					{
-						var job = workgiver.JobOnCell(pawn, cell);
-						if (pawn.CanReach(cell, workgiver.PathEndMode, Danger.Deadly))
-							return job;
-					}
-			return null;
 		}
 	}
 }

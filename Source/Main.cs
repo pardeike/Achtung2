@@ -62,6 +62,33 @@ namespace AchtungMod
 		public override string SettingsCategory() => "Achtung!";
 	}
 
+	[HarmonyPatch(typeof(Game))]
+	[HarmonyPatch(nameof(Game.UpdatePlay))]
+	static class Game_UpdatePlay_Patch
+	{
+		static int counter = 0;
+
+		public static void Postfix()
+		{
+			if (Current.ProgramState != ProgramState.Playing)
+				return;
+
+			var jobs = ForcedWork.Instance.PrimaryForcedJobs();
+			var n = jobs.Length;
+			if (n == 0)
+				return;
+
+			var job = jobs[++counter % n];
+			var map = job?.pawn?.Map;
+			if (map == null)
+				return;
+
+			job.ExpandThingTargets(map);
+			job.ExpandCellTargets(map);
+			job.ContractTargets(map);
+		}
+	}
+
 	[HarmonyPatch(typeof(World))]
 	[HarmonyPatch(nameof(World.FinalizeInit))]
 	static class World_FinalizeInit_Patch
@@ -76,16 +103,6 @@ namespace AchtungMod
 				Tools.savedWorkTypeDef = DynamicWorkTypes.AddWorkTypeDef(Tools.RescuingWorkTypeDef, WorkTypeDefOf.Doctor, doctorRescueWorkGiver);
 
 			Log.Message($"Achtung v{Performance.GetModVersionString()} Info: To make Achtung log some performance info, create an empty 'AchtungPerformance.txt' file in same directory as Player.log");
-		}
-	}
-
-	[HarmonyPatch(typeof(Map))]
-	[HarmonyPatch(nameof(Map.FinalizeInit))]
-	static class Map_FinalizeInit_Patch
-	{
-		public static void Postfix(Map __instance)
-		{
-			ForcedWork.Instance?.Prepare(__instance);
 		}
 	}
 

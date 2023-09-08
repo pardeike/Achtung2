@@ -223,6 +223,16 @@ namespace AchtungMod
 				.SelectMany(pair => pair.Value.jobs ?? new List<ForcedJob>());
 		}
 
+		public ForcedJob[] PrimaryForcedJobs()
+		{
+			if (hasForcedJobs == false)
+				return new ForcedJob[0];
+			return allForcedJobs.Values
+				.Select(forcedJobs => forcedJobs.jobs.FirstOrDefault())
+				.OfType<ForcedJob>()
+				.ToArray();
+		}
+
 		public bool NonForcedShouldIgnore(Map map, IntVec3 cell)
 		{
 			return allForcedJobs
@@ -332,14 +342,6 @@ namespace AchtungMod
 				_ = allForcedJobs.RemoveAll(pair => pair.Value.count == 0);
 				hasForcedJobs = allForcedJobs.Count > 0;
 			}
-		}
-
-		public void Prepare(Map map)
-		{
-			allForcedJobs
-				.Where(pair => pair.Key?.Map == map)
-				.SelectMany(pair => pair.Value.jobs)
-				.Do(job => job?.Prepare());
 		}
 
 		public void Cleanup(Map map)

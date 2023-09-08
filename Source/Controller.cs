@@ -1,5 +1,4 @@
-﻿using HarmonyLib;
-using Multiplayer.API;
+﻿using Multiplayer.API;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -25,6 +24,7 @@ namespace AchtungMod
 		public int groupRotation;
 		public bool groupRotationWas45;
 		public bool isDragging;
+		public bool suppressMenu;
 		public bool drawColonistPreviews;
 
 		public static Controller instance;
@@ -41,6 +41,7 @@ namespace AchtungMod
 			lineStart = Vector3.zero;
 			lineEnd = Vector3.zero;
 			isDragging = false;
+			suppressMenu = false;
 			drawColonistPreviews = true;
 		}
 
@@ -76,6 +77,7 @@ namespace AchtungMod
 				{
 					Find.WindowStack.Add(actions.GetWindow());
 					menuAdded = true;
+					suppressMenu = true;
 				}
 			}
 			if (menuAdded == false && Achtung.Settings.positioningEnabled == false)
@@ -86,16 +88,19 @@ namespace AchtungMod
 
 		public bool MouseDown(Vector3 pos, int button, bool longPress)
 		{
-			if (longPress == false)
-				colonists = Tools.GetSelectedColonists();
-
-			if (colonists.Count == 0)
-				return true;
-
 			var doPositioning = Achtung.Settings.positioningEnabled;
 			var doForceMenu = Achtung.Settings.maxForcedItems > 0;
 			if (doPositioning == false && doForceMenu == false)
 				return true;
+
+			if (longPress == false)
+				colonists = Tools.GetSelectedColonists();
+
+			if (colonists.Count == 0)
+			{
+				suppressMenu = true;
+				return true;
+			}
 
 			if (isDragging && button == (int)Button.left && groupMovement == false)
 			{
@@ -105,7 +110,10 @@ namespace AchtungMod
 			}
 
 			if (button != (int)Button.right)
+			{
+				suppressMenu = true;
 				return true;
+			}
 
 			var actions = doForceMenu ? new MultiActions(colonists, UI.MouseMapPosition()) : null;
 			var achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
@@ -189,6 +197,7 @@ namespace AchtungMod
 				Event.current.Use();
 			}
 			isDragging = false;
+			suppressMenu = false;
 		}
 
 		public void MouseDrag(Vector3 pos)
@@ -212,6 +221,7 @@ namespace AchtungMod
 			lineEnd.y = Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays);
 			var count = draftedColonists.Count;
 			var dragVector = lineEnd - lineStart;
+			suppressMenu |= dragVector.MagnitudeHorizontalSquared() > 0.5f;
 
 			var delta = count > 1 ? dragVector / (count - 1) : Vector3.zero;
 			var linePosition = count == 1 ? lineEnd : lineStart;
@@ -277,6 +287,7 @@ namespace AchtungMod
 
 					case KeyCode.Escape:
 						isDragging = false;
+						suppressMenu = false;
 						Tools.CancelDrafting(colonists);
 						colonists.Clear();
 						Event.current.Use();
@@ -398,7 +409,8 @@ namespace AchtungMod
 			if (Achtung.Settings.forceCommandMenuMode == CommandMenuMode.Delayed
 				&& longPressThreshold > -1
 				&& Event.current.rawType == EventType.Layout
-				&& Environment.TickCount > longPressThreshold)
+				&& Environment.TickCount > longPressThreshold
+				&& suppressMenu == false)
 			{
 				longPressThreshold = -1;
 				return MouseDown(pos, (int)Button.right, true);
