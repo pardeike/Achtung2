@@ -2,6 +2,7 @@
 using System.Linq;
 using Verse.AI;
 using Verse;
+using UnityEngine.VR;
 
 namespace AchtungMod
 {
@@ -54,11 +55,13 @@ namespace AchtungMod
 		{
 			if (thing == null || thing.Spawned == false)
 				return null;
-			var potentialWork = scanner.PotentialWorkThingRequest.Accepts(thing);
+			var request = scanner.PotentialWorkThingRequest;
+			var potentialWork = request.IsUndefined == false && request.Accepts(thing);
 			if (potentialWork == false)
 			{
 				var workThingsGlobal = scanner.PotentialWorkThingsGlobal(pawn);
-				workThingsGlobal ??= pawn.Map.listerThings.ThingsMatching(scanner.PotentialWorkThingRequest);
+				if (request.IsUndefined == false)
+					workThingsGlobal ??= pawn.Map.listerThings.ThingsMatching(request);
 				if (workThingsGlobal != null && workThingsGlobal.Contains(thing))
 					potentialWork = true;
 			}
