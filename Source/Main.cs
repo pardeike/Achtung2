@@ -5,6 +5,7 @@ using Multiplayer.API;
 using RimWorld;
 using RimWorld.Planet;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -66,26 +67,51 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(Game.UpdatePlay))]
 	static class Game_UpdatePlay_Patch
 	{
+		static float deadline;
+		const float maxFrameTime = 1.0f / 60;
 		static int counter = 0;
+		static readonly IEnumerator it = Looper();
+
+		static IEnumerator Looper()
+		{
+			while (true)
+			{
+				var jobs = ForcedWork.Instance.PrimaryForcedJobs();
+				var n = jobs.Length;
+				if (n > 0)
+				{
+					var job = jobs[++counter % n];
+					var map = job?.pawn?.Map;
+					IEnumerator it;
+					if (map != null)
+					{
+						it = job.ExpandThingTargets(map);
+						while (it.MoveNext())
+							yield return null;
+
+						it = job.ExpandCellTargets(map);
+						while (it.MoveNext())
+							yield return null;
+
+						it = job.ContractTargets(map);
+						while (it.MoveNext())
+							yield return null;
+					}
+					else
+						yield return null;
+				}
+				else
+					yield return null;
+			}
+		}
+
+		public static void Prefix() => deadline = Time.realtimeSinceStartup + maxFrameTime;
 
 		public static void Postfix()
 		{
-			if (Current.ProgramState != ProgramState.Playing)
-				return;
-
-			var jobs = ForcedWork.Instance.PrimaryForcedJobs();
-			var n = jobs.Length;
-			if (n == 0)
-				return;
-
-			var job = jobs[++counter % n];
-			var map = job?.pawn?.Map;
-			if (map == null)
-				return;
-
-			job.ExpandThingTargets(map);
-			job.ExpandCellTargets(map);
-			job.ContractTargets(map);
+			if (Current.ProgramState == ProgramState.Playing)
+				while (Time.realtimeSinceStartup < deadline)
+					it.MoveNext();
 		}
 	}
 

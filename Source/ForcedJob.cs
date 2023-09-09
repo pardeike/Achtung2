@@ -1,5 +1,6 @@
 ﻿using RimWorld;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -343,15 +344,18 @@ namespace AchtungMod
 			}
 		}
 
-		public void ExpandThingTargets(Map map)
+		public IEnumerator ExpandThingTargets(Map map)
 		{
 			var thingGrid = map.thingGrid;
 			if (thingGrid == null)
-				return;
+				yield break;
 
 			var maxCountVerifier = Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems
 				? (Func<bool>)(() => targets.Count < Achtung.Settings.maxForcedItems)
 				: () => true;
+
+			if (maxCountVerifier() == false)
+				yield break;
 
 			var things = targets.Select(target => target.item.thingInt).Where(thing => thing != null && thing.Spawned).ToHashSet();
 			var newThings = things
@@ -359,39 +363,48 @@ namespace AchtungMod
 				.Expand(map, cellRadius + 1)
 				.SelectMany(cell => thingGrid.ThingsListAtFast(cell)).Distinct()
 				.ToArray();
+			yield return null;
+
 			for (var i = 0; i < newThings.Length && cancelled == false && maxCountVerifier(); i++)
 			{
 				var newThing = newThings[i];
 				if (things.Contains(newThing) == false && HasJob(newThing))
 				{
-					var item = new LocalTargetInfo(newThing);
+					LocalTargetInfo item = newThing;
 					_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
 				}
+				yield return null;
 			}
 		}
 
-		public void ExpandCellTargets(Map map)
+		public IEnumerator ExpandCellTargets(Map map)
 		{
 			var maxCountVerifier = Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems
 							? (Func<bool>)(() => targets.Count < Achtung.Settings.maxForcedItems)
 							: () => true;
 
+			if (maxCountVerifier() == false)
+				yield break;
+
 			var newCells = targets
 				.Select(target => target.XY)
 				.Expand(map, cellRadius + 1)
 				.ToArray();
+			yield return null;
+
 			for (var i = 0; i < newCells.Length && cancelled == false && maxCountVerifier(); i++)
 			{
 				var cell = newCells[i];
 				if (HasJob(cell))
 				{
-					var item = (LocalTargetInfo)cell;
-					_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
+					LocalTargetInfo item = cell;
+					_ = targets.Add(new ForcedTarget(item, 0));
 				}
+				yield return null;
 			}
 		}
 
-		public void ContractTargets(Map map)
+		public IEnumerator ContractTargets(Map map)
 		{
 			targets.RemoveWhere(targets => targets.item.thingInt?.Spawned == false);
 
@@ -401,12 +414,15 @@ namespace AchtungMod
 				.Union(targets.Select(target => target.XY))
 				.Distinct()
 				.ToArray();
+			yield return null;
+
 			for (var i = 0; i < cells.Length && cancelled == false; i++)
 			{
 				var cell = cells[i];
 				if (cell.InBounds(map) && HasJob(cell) == false)
 					if (map.thingGrid.ThingsListAtFast(cell).All(thing => thing.Spawned == false || HasJob(thing) == false))
 						_ = targets.RemoveWhere(target => target.XY == cell || (target.item.thingInt?.AllCells().Contains(cell) ?? false));
+				yield return null;
 			}
 		}
 
