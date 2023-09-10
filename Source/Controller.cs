@@ -80,6 +80,8 @@ namespace AchtungMod
 					suppressMenu = true;
 				}
 			}
+			if (menuAdded)
+				EndDragging();
 			if (menuAdded == false && Achtung.Settings.positioningEnabled == false)
 				return true;
 			Event.current.Use();

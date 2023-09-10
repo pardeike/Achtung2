@@ -7,6 +7,7 @@ using RimWorld.Planet;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -93,27 +94,44 @@ namespace AchtungMod
 			while (true)
 			{
 				var jobs = ForcedWork.Instance.PrimaryForcedJobs();
+				var didYield = false;
 				foreach (var job in jobs)
 				{
 					var map = job?.pawn?.Map;
 					if (map != null)
 					{
-						var it = job.ExpandThingTargets(map);
-						while (it.MoveNext())
-							yield return null;
+						if (job.cancelled == false)
+						{
+							var it = job.ExpandThingTargets(map);
+							while (it.MoveNext())
+							{
+								yield return null;
+								didYield = true;
+							}
+						}
 
-						it = job.ExpandCellTargets(map);
-						while (it.MoveNext())
-							yield return null;
+						if (job.cancelled == false)
+						{
+							var it = job.ExpandCellTargets(map);
+							while (it.MoveNext())
+							{
+								yield return null;
+								didYield = true;
+							}
+						}
 
-						it = job.ContractTargets(map);
-						while (it.MoveNext())
-							yield return null;
+						if (job.cancelled == false)
+						{
+							var it = job.ContractTargets(map);
+							while (it.MoveNext())
+							{
+								yield return null;
+								didYield = true;
+							}
+						}
 					}
-					else
-						yield return null;
 				}
-				if (jobs.Length == 0)
+				if (didYield == false)
 					yield return null;
 			}
 		}
