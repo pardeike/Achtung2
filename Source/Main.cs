@@ -63,29 +63,42 @@ namespace AchtungMod
 		public override string SettingsCategory() => "Achtung!";
 	}
 
+	[HarmonyPatch(typeof(CameraDriver))]
+	[HarmonyPatch(nameof(CameraDriver.Update))]
+	static class Root_Play_Update_Patch
+	{
+		public static bool isDragging = false;
+
+		public static void Prefix(Vector3 ___rootPos, out Vector3 __state)
+		{
+			__state = ___rootPos;
+		}
+
+		public static void Postfix(Vector3 ___rootPos, Vector3 __state)
+		{
+			isDragging = ___rootPos != __state;
+		}
+	}
+
 	[HarmonyPatch(typeof(Game))]
 	[HarmonyPatch(nameof(Game.UpdatePlay))]
 	static class Game_UpdatePlay_Patch
 	{
-		static float deadline;
-		const float maxFrameTime = 1.0f / 60;
-		static int counter = 0;
 		static readonly IEnumerator it = Looper();
+		const float maxDeltaTime = 0.03f;
+		const int iterations = 5000;
 
 		static IEnumerator Looper()
 		{
 			while (true)
 			{
 				var jobs = ForcedWork.Instance.PrimaryForcedJobs();
-				var n = jobs.Length;
-				if (n > 0)
+				foreach (var job in jobs)
 				{
-					var job = jobs[++counter % n];
 					var map = job?.pawn?.Map;
-					IEnumerator it;
 					if (map != null)
 					{
-						it = job.ExpandThingTargets(map);
+						var it = job.ExpandThingTargets(map);
 						while (it.MoveNext())
 							yield return null;
 
@@ -100,18 +113,26 @@ namespace AchtungMod
 					else
 						yield return null;
 				}
-				else
+				if (jobs.Length == 0)
 					yield return null;
 			}
 		}
 
-		public static void Prefix() => deadline = Time.realtimeSinceStartup + maxFrameTime;
-
 		public static void Postfix()
 		{
-			if (Current.ProgramState == ProgramState.Playing)
-				while (Time.realtimeSinceStartup < deadline)
-					it.MoveNext();
+			if (Current.ProgramState != ProgramState.Playing)
+				return;
+			var camera = Find.CameraDriver;
+			if (Root_Play_Update_Patch.isDragging)
+				return;
+			var s1 = (int)(camera.rootSize * 1000);
+			var s2 = (int)(camera.desiredSize * 1000);
+			if (s1 != s2)
+				return;
+
+			var n = (maxDeltaTime - Time.deltaTime) * iterations;
+			for (var i = 0; i < n; i++)
+				it.MoveNext();
 		}
 	}
 
