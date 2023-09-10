@@ -14,6 +14,9 @@ namespace AchtungMod
 		public HashSet<ForcedTarget> targets = new();
 		public Pawn pawn = null;
 		public List<WorkGiverDef> workgiverDefs = new();
+		public List<WorkGiver_Scanner> workgiverScanners = new();
+		public static readonly QuotaCache<Thing, bool> getThingJobCache = new(10);
+		public static readonly QuotaCache<IntVec3, bool> getCellJobCache = new(10);
 		public bool isThingJob = false;
 		public bool reentranceFlag = false;
 		public XY lastLocation = XY.Invalid;
@@ -58,6 +61,7 @@ namespace AchtungMod
 		public ForcedJob()
 		{
 			workgiverDefs = new List<WorkGiverDef>();
+			workgiverScanners = new List<WorkGiver_Scanner>();
 			targets = new HashSet<ForcedTarget>();
 			buildSmart = Achtung.Settings.buildingSmartDefault;
 			lastLocation = XY.Invalid;
@@ -68,6 +72,7 @@ namespace AchtungMod
 		{
 			this.pawn = pawn;
 			this.workgiverDefs = workgiverDefs.Where(wgd => wgd?.giverClass != null).ToList();
+			workgiverScanners = workgiverDefs.Select(wgd => wgd.Worker).OfType<WorkGiver_Scanner>().ToList();
 			targets = new HashSet<ForcedTarget>() { new ForcedTarget(item, MaterialScore(item)) };
 			buildSmart = Achtung.Settings.buildingSmartDefault;
 
@@ -91,9 +96,6 @@ namespace AchtungMod
 			else
 				return validTargets.Select(target => target.XY);
 		}
-
-		public IEnumerable<WorkGiver_Scanner> WorkGiverScanners => workgiverDefs
-			.Select(wgd => wgd.Worker).OfType<WorkGiver_Scanner>();
 
 		public static int MaterialScore(LocalTargetInfo item)
 		{
@@ -195,7 +197,7 @@ namespace AchtungMod
 		{
 			job = null;
 
-			var workGiversByPrio = WorkGiverScanners.OrderBy(worker =>
+			var workGiversByPrio = workgiverScanners.OrderBy(worker =>
 			{
 				if (worker is WorkGiver_ConstructDeliverResourcesToBlueprints)
 					return 1;
@@ -314,13 +316,13 @@ namespace AchtungMod
 			buildSmart = !buildSmart;
 		}
 
-		public bool HasJob(Thing thing)
+		public bool ThingHasJob(Thing thing)
 		{
 			try
 			{
 				lock (pawn.Map)
 				{
-					return WorkGiverScanners.Any(scanner => thing.GetThingJob(pawn, scanner, true) != null);
+					return getThingJobCache.Get(thing, t => workgiverScanners.Any(scanner => t.GetThingJob(pawn, scanner, true) != null));
 				}
 			}
 			catch
@@ -329,13 +331,13 @@ namespace AchtungMod
 			}
 		}
 
-		public bool HasJob(XY cell)
+		public bool CellHasJob(XY cell)
 		{
 			try
 			{
 				lock (pawn.Map)
 				{
-					return WorkGiverScanners.Any(scanner => ((IntVec3)cell).GetCellJob(pawn, scanner) != null);
+					return getCellJobCache.Get(cell, c => workgiverScanners.Any(scanner => ((IntVec3)c).GetCellJob(pawn, scanner) != null));
 				}
 			}
 			catch
@@ -368,7 +370,7 @@ namespace AchtungMod
 			for (var i = 0; i < newThings.Length && cancelled == false && maxCountVerifier(); i++)
 			{
 				var newThing = newThings[i];
-				if (things.Contains(newThing) == false && HasJob(newThing))
+				if (things.Contains(newThing) == false && ThingHasJob(newThing))
 				{
 					LocalTargetInfo item = newThing;
 					_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
@@ -395,7 +397,7 @@ namespace AchtungMod
 			for (var i = 0; i < newCells.Length && cancelled == false && maxCountVerifier(); i++)
 			{
 				var cell = newCells[i];
-				if (HasJob(cell))
+				if (CellHasJob(cell))
 				{
 					LocalTargetInfo item = cell;
 					_ = targets.Add(new ForcedTarget(item, 0));
@@ -419,8 +421,8 @@ namespace AchtungMod
 			for (var i = 0; i < cells.Length && cancelled == false; i++)
 			{
 				var cell = cells[i];
-				if (cell.InBounds(map) && HasJob(cell) == false)
-					if (map.thingGrid.ThingsListAtFast(cell).All(thing => thing.Spawned == false || HasJob(thing) == false))
+				if (cell.InBounds(map) && CellHasJob(cell) == false)
+					if (map.thingGrid.ThingsListAtFast(cell).All(thing => thing.Spawned == false || ThingHasJob(thing) == false))
 						_ = targets.RemoveWhere(target => target.XY == cell || (target.item.thingInt?.AllCells().Contains(cell) ?? false));
 				yield return null;
 			}

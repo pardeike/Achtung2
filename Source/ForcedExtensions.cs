@@ -2,7 +2,6 @@
 using System.Linq;
 using Verse.AI;
 using Verse;
-using UnityEngine.VR;
 
 namespace AchtungMod
 {
