@@ -92,7 +92,7 @@ namespace AchtungMod
 		{
 			while (true)
 			{
-				var jobs = ForcedWork.Instance.PrimaryForcedJobs();
+				var jobs = ForcedWork.Instance.AllForcedJobs();
 				var didYield = false;
 				foreach (var job in jobs)
 				{
