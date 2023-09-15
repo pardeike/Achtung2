@@ -221,6 +221,9 @@ namespace AchtungMod
 		[HarmonyPriority(int.MinValue)]
 		public static void Postfix(Pawn pawn)
 		{
+			if (pawn.IsColonist == false)
+				return;
+
 			var t = pawn.thinker.GetType();
 			while (true)
 			{
@@ -587,7 +590,7 @@ namespace AchtungMod
 		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var fromMethod = AccessTools.Method(typeof(ReservationManager), nameof(ReservationManager.CanReserve));
-			var toMethod = AccessTools.Method(typeof(ReservationManager_Reserve_Patch), nameof(ReservationManager_Reserve_Patch.CanReserve));
+			var toMethod = AccessTools.Method(typeof(ReservationManager_Reserve_Patch), nameof(CanReserve));
 			return instructions.MethodReplacer(fromMethod, toMethod);
 		}
 	}

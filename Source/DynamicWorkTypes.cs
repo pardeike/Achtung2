@@ -23,7 +23,7 @@ namespace Brrainz
 		public static List<WorkTypeDef> Pawn_GetDisabledWorkTypes_Postfix(List<WorkTypeDef> input)
 		{
 			var output = new List<WorkTypeDef>(input);
-			foreach (var pair in DynamicWorkTypes.disabledWorkTypePairs)
+			foreach (var pair in disabledWorkTypePairs)
 				if (input.Contains(pair.Key))
 					output.Add(pair.Value);
 			return output;

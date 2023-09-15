@@ -484,7 +484,7 @@ namespace AchtungMod
 					 if (isForced && hasTarget && destination == workItem)
 					 {
 						 pawn.ClearReservationsForJob(pawn.CurJob);
-						 pawn.jobs.EndCurrentJob(Verse.AI.JobCondition.InterruptForced, false);
+						 pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
 						 forcedWork.Remove(pawn);
 					 }
 				 });

@@ -169,11 +169,18 @@ namespace AchtungMod
 			if (allForcedJobs.ContainsKey(pawn) == false)
 				allForcedJobs[pawn] = new ForcedJobs();
 
-			var firstJob = allForcedJobs[pawn].count == 0;
-			if (firstJob)
+			var firstJob = allForcedJobs[pawn].jobs.FirstOrDefault();
+			if (firstJob == null)
 				Prepare(pawn);
 			else
 				Unprepare(pawn);
+
+			if (firstJob.targets.Count == 0)
+			{
+				allForcedJobs[pawn].jobs[0].Cleanup();
+				allForcedJobs[pawn].jobs.RemoveAt(0);
+				allForcedJobs[pawn].UpdateCount();
+			}
 
 			var forcedJob = new ForcedJob(pawn, item, workgiverDefs);
 			allForcedJobs[pawn].jobs.Add(forcedJob);
@@ -181,7 +188,7 @@ namespace AchtungMod
 
 			hasForcedJobs = allForcedJobs.Count > 0;
 			UpdatePawnForcedJobs(pawn, allForcedJobs[pawn]);
-			return firstJob;
+			return firstJob == null;
 		}
 
 		public static LocalTargetInfo HasJobItem(Pawn pawn, WorkGiver_Scanner workgiver, IntVec3 pos, bool expandSearch)
