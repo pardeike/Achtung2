@@ -85,8 +85,13 @@ namespace AchtungMod
 	static class Game_UpdatePlay_Patch
 	{
 		static readonly IEnumerator it = Looper();
-		const float maxDeltaTime = 0.03f;
+
+		// static readonly TimeSlice timeSlicer = new(3f, 0, 1000000, () => it.MoveNext());
+
+		static float maxDeltaTime = 0.04f;
 		const int iterations = 5000;
+		static int prevFrames = 0, tfps = 6;
+		static int prevTenthSecond = -1;
 
 		static IEnumerator Looper()
 		{
@@ -147,7 +152,26 @@ namespace AchtungMod
 			if (s1 != s2)
 				return;
 
+			// timeSlicer.Execute();
+
+			var tenthSecond = (Environment.TickCount / 100) % 100;
+			prevFrames++;
+			if (prevTenthSecond != tenthSecond)
+			{
+				prevTenthSecond = tenthSecond;
+				tfps = prevFrames;
+				prevFrames = 0;
+			}
+			if (tfps >= 5)
+				maxDeltaTime += 0.001f;
+			else if (tfps == 4)
+				maxDeltaTime -= 0.001f;
+			else if (tfps < 4)
+				maxDeltaTime = 0.04f;
+
 			var n = (maxDeltaTime - Time.deltaTime) * iterations;
+			if (n == 0)
+				Log.Warning($"tfps = {tfps}");
 			for (var i = 0; i < n; i++)
 				it.MoveNext();
 		}
