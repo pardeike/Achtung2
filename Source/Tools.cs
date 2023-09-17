@@ -726,5 +726,11 @@ namespace AchtungMod
 				}
 			}
 		}
+
+		public static int EnvTicks()
+		{
+			var n = Environment.TickCount;
+			return n >= 0 ? n : -n;
+		}
 	}
 }

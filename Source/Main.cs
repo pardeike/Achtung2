@@ -80,19 +80,45 @@ namespace AchtungMod
 		}
 	}
 
+	[HarmonyPatch(typeof(LetterStack))]
+	[HarmonyPatch(nameof(LetterStack.LettersOnGUI))]
+	static class LetterStack_LettersOnGUI_Patch
+	{
+		static void Prefix(ref float baseY)
+		{
+			if (Prefs.DevMode == false)
+				return;
+
+			const float rowHeight = 26f;
+			const float spacing = 4f;
+			var num = (float)UI.screenWidth - 200f;
+			var rect = new Rect(num, baseY + 10f - rowHeight, 193f - 2 * (spacing + rowHeight), rowHeight);
+			baseY -= rowHeight;
+			Text.Anchor = TextAnchor.MiddleRight;
+			Widgets.Label(rect, $"{Game_UpdatePlay_Patch.fps} (min {Game_UpdatePlay_Patch.minFps}) {Game_UpdatePlay_Patch.iterations}");
+			rect.xMin = rect.xMax + spacing;
+			rect.width = rowHeight;
+			if (Widgets.ButtonText(rect, "+"))
+				Game_UpdatePlay_Patch.minFps++;
+			rect.x += rowHeight + spacing;
+			if (Widgets.ButtonText(rect, "-"))
+				Game_UpdatePlay_Patch.minFps--;
+			Text.Anchor = TextAnchor.UpperLeft;
+		}
+	}
+
 	[HarmonyPatch(typeof(Game))]
 	[HarmonyPatch(nameof(Game.UpdatePlay))]
 	static class Game_UpdatePlay_Patch
 	{
 		static readonly IEnumerator it = Looper();
 
-		// static readonly TimeSlice timeSlicer = new(3f, 0, 1000000, () => it.MoveNext());
-
-		const int iterations = 5000;
-		const int minTfpsLimit = 2;
-		static float maxDeltaTime = 0.04f;
-		static int prevFrames = 0, tfps = 6;
-		static int prevTenthSecond = -1;
+		public static int minFps = 30;
+		public static int iterations = 0;
+		static int prevFrames = 0;
+		public static int fps = 0;
+		public static int[] fpsSlots = new int[10];
+		static int previousN = -1;
 
 		static IEnumerator Looper()
 		{
@@ -150,30 +176,26 @@ namespace AchtungMod
 				return;
 			var s1 = (int)(camera.rootSize * 1000);
 			var s2 = (int)(camera.desiredSize * 1000);
-			if (s1 != s2)
+			if (Math.Abs(s1 - s2) > 1) // can be 59999/60000 when completely zoomed out
 				return;
 
-			// timeSlicer.Execute();
-
-			var tenthSecond = (Environment.TickCount / 100) % 100;
+			var n = (Tools.EnvTicks() / 100) % 10;
 			prevFrames++;
-			if (prevTenthSecond != tenthSecond)
+			if (previousN != n)
 			{
-				prevTenthSecond = tenthSecond;
-				tfps = prevFrames;
+				previousN = n;
+				var old = fpsSlots[n];
+				fpsSlots[n] = prevFrames;
+				fps = fps - old + prevFrames;
 				prevFrames = 0;
 			}
-			if (tfps >= minTfpsLimit + 1)
-				maxDeltaTime += 0.001f;
-			else if (tfps == minTfpsLimit)
-				maxDeltaTime -= 0.001f;
-			else if (tfps < minTfpsLimit)
-				maxDeltaTime = 0.04f;
 
-			var n = (maxDeltaTime - Time.deltaTime) * iterations;
-			if (n == 0)
-				Log.Warning($"tfps = {tfps}");
-			for (var i = 0; i < n; i++)
+			if (fps < minFps)
+				iterations = 0;
+			else
+				iterations++;
+
+			for (var i = 0; i < iterations; i++)
 				it.MoveNext();
 		}
 	}
@@ -438,12 +460,15 @@ namespace AchtungMod
 				return;
 			}
 
+			// for now, this takes way too much cpu so we disable it and hope for the best
+			/*
 			if (__result == true)
 			{
 				// ignore any forced work cells if colonist is not forced
 				if (forcedWork.NonForcedShouldIgnore(map, c))
 					__result = false;
 			}
+			*/
 		}
 	}
 

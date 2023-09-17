@@ -410,7 +410,7 @@ namespace AchtungMod
 			if (Achtung.Settings.forceCommandMenuMode == CommandMenuMode.Delayed
 				&& longPressThreshold > -1
 				&& Event.current.rawType == EventType.Layout
-				&& Environment.TickCount > longPressThreshold
+				&& Tools.EnvTicks() > longPressThreshold
 				&& suppressMenu == false)
 			{
 				longPressThreshold = -1;
@@ -421,7 +421,7 @@ namespace AchtungMod
 				case EventType.MouseDown:
 					if (Event.current.button == (int)Button.right)
 						suppressMenu = false;
-					longPressThreshold = Event.current.button == (int)Button.right ? Environment.TickCount + Achtung.Settings.menuDelay : -1;
+					longPressThreshold = Event.current.button == (int)Button.right ? Tools.EnvTicks() + Achtung.Settings.menuDelay : -1;
 					runOriginal = MouseDown(pos, Event.current.button, false);
 					MouseDrag(pos);
 					break;
