@@ -55,14 +55,14 @@ namespace AchtungMod
 			.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
 		}
 
-		bool ShowMenu(MultiActions actions, bool forceMenu, Map map, IntVec3 cell)
+		bool ShowMenu(MultiActions actions, bool forceMenu, Map map, IntVec3 cell, Action gotoAction)
 		{
 			if (actions == null)
 				return true;
 			var menuAdded = false;
+			var optionTaken = false;
 			if (actions.Count(false) > 0)
 			{
-				var optionTaken = false;
 				if (cell.InBounds(map) && forceMenu == false)
 				{
 					var autoTakableOptions = actions.GetAutoTakeableActions();
@@ -82,6 +82,12 @@ namespace AchtungMod
 			}
 			if (menuAdded)
 				EndDragging();
+			if (optionTaken == false && menuAdded == false && actions.EveryoneHasGoto && gotoAction != null)
+			{
+				actions.allPawns.Do(pawn => Tools.SetDraftStatus(pawn, true, false));
+				gotoAction();
+				return true;
+			}
 			if (menuAdded == false && Achtung.Settings.positioningEnabled == false)
 				return true;
 			Event.current.Use();
@@ -99,10 +105,7 @@ namespace AchtungMod
 				colonists = Tools.GetSelectedColonists();
 
 			if (colonists.Count == 0)
-			{
-				suppressMenu = true;
 				return true;
-			}
 
 			if (isDragging && button == (int)Button.left && groupMovement == false)
 			{
@@ -112,10 +115,7 @@ namespace AchtungMod
 			}
 
 			if (button != (int)Button.right)
-			{
-				suppressMenu = true;
 				return true;
-			}
 
 			var actions = doForceMenu ? new MultiActions(colonists, UI.MouseMapPosition()) : null;
 			var achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
@@ -149,7 +149,7 @@ namespace AchtungMod
 			{
 				if (actions == null)
 					return true;
-				return ShowMenu(actions, forceMenu, map, cell);
+				return ShowMenu(actions, forceMenu, map, cell, null);
 			}
 
 			if (achtungPressed)
@@ -162,7 +162,7 @@ namespace AchtungMod
 				return true;
 			}
 
-			return ShowMenu(actions, forceMenu, map, cell);
+			return ShowMenu(actions, forceMenu, map, cell, () => StartDragging(pos, achtungPressed));
 		}
 
 		private void StartDragging(Vector3 pos, bool asGroup)
@@ -199,7 +199,6 @@ namespace AchtungMod
 				Event.current.Use();
 			}
 			isDragging = false;
-			suppressMenu = false;
 		}
 
 		public void MouseDrag(Vector3 pos)
@@ -420,7 +419,9 @@ namespace AchtungMod
 			switch (Event.current.rawType)
 			{
 				case EventType.MouseDown:
-					longPressThreshold = Environment.TickCount + Achtung.Settings.menuDelay;
+					if (Event.current.button == (int)Button.right)
+						suppressMenu = false;
+					longPressThreshold = Event.current.button == (int)Button.right ? Environment.TickCount + Achtung.Settings.menuDelay : -1;
 					runOriginal = MouseDown(pos, Event.current.button, false);
 					MouseDrag(pos);
 					break;

@@ -10,19 +10,25 @@ namespace AchtungMod
 	public class MultiActions
 	{
 		public Vector3 clickPos;
+		public readonly List<Pawn> allPawns;
 		readonly List<MultiAction> allActions;
-		int totalColonistsInvolved = 0;
+		readonly bool everyoneHasGoto = false;
+		readonly int totalColonistsInvolved = 0;
+		int gotoActionCount = 0;
 
 		public MultiActions(IEnumerable<Colonist> colonists, Vector3 clickPos)
 		{
 			this.clickPos = clickPos;
+			allPawns = colonists.Select(colonist => colonist.pawn).ToList();
 			allActions = new List<MultiAction>();
-			colonists.Do(colonist =>
-			{
-				AddColonist(colonist);
-				totalColonistsInvolved++;
-			});
+			totalColonistsInvolved = colonists.Count();
+			colonists.Do(AddColonist);
+			if (gotoActionCount == totalColonistsInvolved)
+				if (colonists.Any(colonist => colonist.pawn.Drafted))
+					everyoneHasGoto = true;
 		}
+
+		public bool EveryoneHasGoto => everyoneHasGoto;
 
 		public void AddColonist(Colonist colonist)
 		{
@@ -45,8 +51,11 @@ namespace AchtungMod
 
 		public void AddMultiAction(Colonist colonist, bool draftMode, FloatMenuOption option)
 		{
+			var action = new MultiAction(colonist, draftMode, option);
 			if (Tools.IsGoHereOption(option) == false)
-				allActions.Add(new MultiAction(colonist, draftMode, option));
+				allActions.Add(action);
+			else
+				gotoActionCount++;
 		}
 
 		public int Count(bool onlyActive)

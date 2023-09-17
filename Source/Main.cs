@@ -88,8 +88,9 @@ namespace AchtungMod
 
 		// static readonly TimeSlice timeSlicer = new(3f, 0, 1000000, () => it.MoveNext());
 
-		static float maxDeltaTime = 0.04f;
 		const int iterations = 5000;
+		const int minTfpsLimit = 2;
+		static float maxDeltaTime = 0.04f;
 		static int prevFrames = 0, tfps = 6;
 		static int prevTenthSecond = -1;
 
@@ -162,11 +163,11 @@ namespace AchtungMod
 				tfps = prevFrames;
 				prevFrames = 0;
 			}
-			if (tfps >= 5)
+			if (tfps >= minTfpsLimit + 1)
 				maxDeltaTime += 0.001f;
-			else if (tfps == 4)
+			else if (tfps == minTfpsLimit)
 				maxDeltaTime -= 0.001f;
-			else if (tfps < 4)
+			else if (tfps < minTfpsLimit)
 				maxDeltaTime = 0.04f;
 
 			var n = (maxDeltaTime - Time.deltaTime) * iterations;
