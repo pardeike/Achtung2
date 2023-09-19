@@ -192,7 +192,7 @@ namespace AchtungMod
 
 			if (fps < minFps)
 				iterations = 0;
-			else
+			else if (iterations < 800)
 				iterations++;
 
 			for (var i = 0; i < iterations; i++)
