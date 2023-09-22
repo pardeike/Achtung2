@@ -86,7 +86,7 @@ namespace AchtungMod
 	{
 		static void Prefix(ref float baseY)
 		{
-			if (Prefs.DevMode == false)
+			if (DebugViewSettings.drawPawnDebug == false || Prefs.DevMode == false)
 				return;
 
 			const float rowHeight = 26f;
@@ -179,21 +179,26 @@ namespace AchtungMod
 			if (Math.Abs(s1 - s2) > 1) // can be 59999/60000 when completely zoomed out
 				return;
 
-			var n = (Tools.EnvTicks() / 100) % 10;
-			prevFrames++;
-			if (previousN != n)
+			if (ForcedWork.Instance.hasForcedJobs)
 			{
-				previousN = n;
-				var old = fpsSlots[n];
-				fpsSlots[n] = prevFrames;
-				fps = fps - old + prevFrames;
-				prevFrames = 0;
-			}
+				var n = (Tools.EnvTicks() / 100) % 10;
+				prevFrames++;
+				if (previousN != n)
+				{
+					previousN = n;
+					var old = fpsSlots[n];
+					fpsSlots[n] = prevFrames;
+					fps = fps - old + prevFrames;
+					prevFrames = 0;
+				}
 
-			if (fps < minFps)
+				if (fps < minFps)
+					iterations = 0;
+				else if (iterations < 800)
+					iterations++;
+			}
+			else
 				iterations = 0;
-			else if (iterations < 800)
-				iterations++;
 
 			for (var i = 0; i < iterations; i++)
 				it.MoveNext();
@@ -443,7 +448,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(ForbidUtility.InAllowedArea))]
 	static class ForbidUtility_InAllowedArea_Patch
 	{
-		public static void Postfix(IntVec3 c, Pawn forPawn, ref bool __result)
+		public static void Postfix(/*IntVec3 c,*/ Pawn forPawn, ref bool __result)
 		{
 			var map = forPawn?.Map;
 			if (map == null || forPawn.RaceProps.Humanlike == false)

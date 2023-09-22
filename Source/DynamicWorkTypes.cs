@@ -31,6 +31,9 @@ namespace Brrainz
 
 		static void Reload<T>() where T : Def
 		{
+			if (typeof(T) == typeof(WorkTypeDef))
+				DefDatabase<WorkTypeDef>.AllDefs.Do(def => def.workGiversByPriority = new List<WorkGiverDef>());
+
 			DefDatabase<T>.ClearCachedData();
 			DefDatabase<T>.ResolveAllReferences(false, true);
 		}
