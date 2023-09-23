@@ -451,11 +451,11 @@ namespace AchtungMod
 		public static void Postfix(/*IntVec3 c,*/ Pawn forPawn, ref bool __result)
 		{
 			var map = forPawn?.Map;
-			if (map == null || forPawn.RaceProps.Humanlike == false)
+			if (map == null || __result || forPawn.RaceProps.Humanlike == false)
 				return;
 
 			var forcedWork = ForcedWork.Instance;
-			if (forcedWork.hasForcedJobs == false)
+			if (forcedWork.hasForcedJobs == false && forcedWork.IsPreparing(forPawn) == false)
 				return;
 
 			if (forcedWork.HasForcedJob(forPawn))
@@ -727,13 +727,13 @@ namespace AchtungMod
 			}
 		}
 
-		[HarmonyPrefix]
-		public static bool Patch(Pawn pawn, ref bool __result)
+		public static bool Prefix(Thing t, Pawn pawn, ref bool __result)
 		{
-			if (pawn?.Map != null && pawn.RaceProps.Humanlike && Achtung.Settings.ignoreForbidden)
+			if (pawn?.Map != null && pawn.RaceProps.Humanlike)
 			{
 				var forcedWork = ForcedWork.Instance;
-				if (forcedWork.HasForcedJob(pawn))
+				// t.IsForbidden() is necessary or else we allow a lot more jobs as a side effect
+				if (forcedWork.HasForcedJob(pawn) && t.IsForbidden(pawn.Faction))
 				{
 					__result = false;
 					return false;

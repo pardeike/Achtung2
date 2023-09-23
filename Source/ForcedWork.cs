@@ -95,6 +95,8 @@ namespace AchtungMod
 			_ = preparing.Remove(pawn);
 		}
 
+		public bool IsPreparing(Pawn pawn) => preparing.Contains(pawn);
+
 		public bool HasForcedJob(Pawn pawn, bool ignorePreparing = false)
 		{
 			if (pawn == null)
