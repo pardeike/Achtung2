@@ -22,7 +22,7 @@ namespace AchtungMod
 		public bool actionSelected = false;
 
 		public static float buttonSpace = 10;
-		public static float buttonSize = 16;
+		public static float buttonWidth = 32;
 
 		public ForcedMultiFloatMenuOption(List<Pawn> forcedPawns, List<FloatMenuOption> options, Func<Rect, bool> originalExtraPartOnGUI, string label)
 			: base(label, null, MenuOptionPriority.Default, null, null, 0f, null, null, false, 0)
@@ -36,16 +36,16 @@ namespace AchtungMod
 				return RenderExtraPartOnGui(extraPartRect);
 			};
 			// somehow necessary or else 'extraPartWidth' will be 0
-			extraPartWidth = buttonSpace + buttonSize;
+			extraPartWidth = buttonSpace + buttonWidth;
 		}
 
 		public bool RenderExtraPartOnGui(Rect drawRect)
 		{
 			var rect = drawRect;
-			rect.xMin = rect.xMax - buttonSize;
+			rect.xMin = rect.xMax - buttonWidth;
 			rect = rect.Rounded();
 			var buttonRect = rect;
-			var padding = Mathf.FloorToInt((rect.height - buttonSize) / 2);
+			var padding = Mathf.FloorToInt((rect.height - 16) / 2);
 			rect.y += padding;
 			rect.height -= 2 * padding;
 

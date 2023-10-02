@@ -40,7 +40,7 @@ namespace Brrainz
 
 		static void UpdatePawns(int index, int copyFrom)
 		{
-			Find.Maps.Do(map => map.mapPawns.AllPawnsSpawned.DoIf(p => p.workSettings != null, p =>
+			Find.Maps.Do(map => map.mapPawns.AllPawnsSpawned.DoIf(p => p.workSettings?.priorities != null, p =>
 			{
 				if (p.workSettings.EverWork)
 				{
