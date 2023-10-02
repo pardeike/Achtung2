@@ -200,8 +200,9 @@ namespace AchtungMod
 			else
 				iterations = 0;
 
-			for (var i = 0; i < iterations; i++)
-				it.MoveNext();
+			if (Scribe.mode == LoadSaveMode.Inactive)
+				for (var i = 0; i < iterations; i++)
+					it.MoveNext();
 		}
 	}
 

@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using HarmonyLib;
+using RimWorld;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace AchtungMod
 	public class ForcedJob : IExposable
 	{
 		public HashSet<ForcedTarget> targets = new();
+		public List<ForcedTarget> targets_temp_list = new();
 		public Pawn pawn = null;
 		public List<WorkGiverDef> workgiverDefs = new();
 		public List<WorkGiver_Scanner> workgiverScanners = new();
@@ -26,7 +28,6 @@ namespace AchtungMod
 		public bool buildSmart = Achtung.Settings.buildingSmartDefault;
 		public bool started = false;
 		public bool cancelled = false;
-		public Coroutine expanderThing, expanderCell, contractor;
 		static readonly Dictionary<BuildableDef, int> TypeScores = new()
 		{
 			{ ThingDefOf.PowerConduit, 1000 },
@@ -433,20 +434,37 @@ namespace AchtungMod
 			return targets.Count == 0;
 		}
 
-		public void ExposeData()
+		void ScribeTargets()
 		{
 			if (Scribe.mode == LoadSaveMode.Saving)
-				_ = targets.RemoveWhere(target => target == null || target.item == null || target.item.IsValid == false || target.item.ThingDestroyed);
+				targets_temp_list = targets.ToList();
 
+			Scribe_Collections.Look(ref targets_temp_list, "targets", LookMode.Deep);
+
+			if (Scribe.mode == LoadSaveMode.Saving)
+				targets_temp_list.Clear();
+
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				targets = new HashSet<ForcedTarget>(targets_temp_list);
+				targets_temp_list.Clear();
+			}
+		}
+
+		public void ExposeData()
+		{
 			Scribe_References.Look(ref pawn, "pawn");
 			Scribe_Collections.Look(ref workgiverDefs, "workgivers", LookMode.Def);
-			Scribe_Collections.Look(ref targets, "targets", LookMode.Deep);
+			ScribeTargets();
 			Scribe_Values.Look(ref isThingJob, "thingJob", false, true);
 			Scribe_Values.Look(ref initialized, "inited", false, true);
 			Scribe_Values.Look(ref cellRadius, "radius", 0, true);
 			Scribe_Values.Look(ref buildSmart, "buildSmart", true, true);
 			Scribe_References.Look(ref lastThing, "lastThing");
 			Scribe_Values.Look(ref lastLocation, "lastLocation", XY.Invalid, true);
+
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+				workgiverScanners = workgiverDefs.Select(wgd => wgd.Worker).OfType<WorkGiver_Scanner>().ToList();
 		}
 	}
 }

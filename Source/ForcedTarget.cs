@@ -29,15 +29,8 @@ namespace AchtungMod
 			Scribe_Values.Look(ref materialScore, "materialScore", 0, true);
 		}
 
-		public bool Equals(ForcedTarget other)
-		{
-			return item == other.item;
-		}
-
-		public override int GetHashCode()
-		{
-			return item.GetHashCode();
-		}
+		public bool Equals(ForcedTarget other) => item == other.item;
+		public override int GetHashCode() => item.GetHashCode();
 
 		public bool IsValidTarget()
 		{
