@@ -3,15 +3,10 @@ using System.Collections.Generic;
 
 namespace AchtungMod
 {
-	public class QuotaCache<S, T>
+	public class QuotaCache<S, T>(int maxRetrievals)
 	{
-		private readonly Dictionary<S, (T value, int count)> cache = new();
-		private readonly int maxRetrievals;
-
-		public QuotaCache(int maxRetrievals)
-		{
-			this.maxRetrievals = maxRetrievals;
-		}
+		private readonly Dictionary<S, (T value, int count)> cache = [];
+		private readonly int maxRetrievals = maxRetrievals;
 
 		private void Add(S key, T value)
 		{

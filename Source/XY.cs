@@ -16,10 +16,10 @@ namespace AchtungMod
 		public static XY Invalid => new(-500, -500);
 		public readonly bool IsValid => x != -500;
 		public readonly bool IsInvalid => x == -500;
-		public static XY[] Adjacent => new XY[8] {
+		public static XY[] Adjacent => [
 			new XY(1, 0), new XY(-1, 0), new XY(0, 1), new XY(0, -1),
 			new XY(1, 1), new XY(-1, -1), new XY(-1, 1), new XY(1, -1)
-		};
+		];
 		public readonly int MagnitudeManhattan => x < 0 ? -x : x + (y < 0 ? -y : y);
 
 		public static implicit operator XY(IntVec3 v3) => new((short)v3.x, (short)v3.z);

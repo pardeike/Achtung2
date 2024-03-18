@@ -5,20 +5,13 @@ using Verse;
 
 namespace AchtungMod
 {
-	public class MultiAction
+	public class MultiAction(Colonist colonist, bool draftMode, FloatMenuOption option)
 	{
-		public Colonist colonist;
-		public bool draftMode;
-		public FloatMenuOption option;
+		public Colonist colonist = colonist;
+		public bool draftMode = draftMode;
+		public FloatMenuOption option = option;
 
 		public string Key => option.Label;
-
-		public MultiAction(Colonist colonist, bool draftMode, FloatMenuOption option)
-		{
-			this.colonist = colonist;
-			this.draftMode = draftMode;
-			this.option = option;
-		}
 
 		public bool IsForced()
 		{

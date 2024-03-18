@@ -1,10 +1,8 @@
-﻿using HarmonyLib;
-using RimWorld;
+﻿using RimWorld;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using Verse;
 using Verse.AI;
 
@@ -12,13 +10,13 @@ namespace AchtungMod
 {
 	public class ForcedJob : IExposable
 	{
-		public HashSet<ForcedTarget> targets = new();
-		public List<ForcedTarget> targets_temp_list = new();
+		public HashSet<ForcedTarget> targets = [];
+		public List<ForcedTarget> targets_temp_list = [];
 		public Pawn pawn = null;
-		public List<WorkGiverDef> workgiverDefs = new();
-		public List<WorkGiver_Scanner> workgiverScanners = new();
-		public static readonly QuotaCache<Thing, bool> getThingJobCache = new(10);
-		public static readonly QuotaCache<IntVec3, bool> getCellJobCache = new(10);
+		public List<WorkGiverDef> workgiverDefs = [];
+		public List<WorkGiver_Scanner> workgiverScanners = [];
+		public readonly QuotaCache<Thing, bool> getThingJobCache = new(10);
+		public readonly QuotaCache<IntVec3, bool> getCellJobCache = new(10);
 		public bool isThingJob = false;
 		public bool reentranceFlag = false;
 		public XY lastLocation = XY.Invalid;
@@ -54,16 +52,15 @@ namespace AchtungMod
 			{ ThingDefOf.PassiveCooler, 2 },
 			{ ThingDefOf.Turret_Mortar, 2 },
 			{ ThingDefOf.StandingLamp, 1 },
-			{ ThingDefOf.PlantPot, 1 },
 			{ ThingDefOf.Grave, 1 },
 		};
 
 		// default constructor for deserialization
 		public ForcedJob()
 		{
-			workgiverDefs = new List<WorkGiverDef>();
-			workgiverScanners = new List<WorkGiver_Scanner>();
-			targets = new HashSet<ForcedTarget>();
+			workgiverDefs = [];
+			workgiverScanners = [];
+			targets = [];
 			buildSmart = Achtung.Settings.buildingSmartDefault;
 			lastLocation = XY.Invalid;
 		}
@@ -74,7 +71,7 @@ namespace AchtungMod
 			this.pawn = pawn;
 			this.workgiverDefs = workgiverDefs.Where(wgd => wgd?.giverClass != null).ToList();
 			workgiverScanners = workgiverDefs.Select(wgd => wgd.Worker).OfType<WorkGiver_Scanner>().ToList();
-			targets = new HashSet<ForcedTarget>() { new ForcedTarget(item, MaterialScore(item)) };
+			targets = [new ForcedTarget(item, MaterialScore(item))];
 			buildSmart = Achtung.Settings.buildingSmartDefault;
 
 			lastThing = item.thingInt;
@@ -160,7 +157,7 @@ namespace AchtungMod
 					.Select(reservation => reservation.target.Cell)
 					.SelectMany(cell => GenRadial.RadialCellsAround(cell, 1, true).ToXY())
 					.Distinct().ToHashSet()
-				: new HashSet<XY>();
+				: [];
 
 			return targets
 				.Where(target =>
@@ -220,7 +217,7 @@ namespace AchtungMod
 			var exist = false;
 			foreach (var workgiver in workGiversByPrio)
 			{
-				foreach (var target in GetSortedTargets(new HashSet<int>()))
+				foreach (var target in GetSortedTargets([]))
 				{
 					exist = true;
 
@@ -437,7 +434,7 @@ namespace AchtungMod
 		void ScribeTargets()
 		{
 			if (Scribe.mode == LoadSaveMode.Saving)
-				targets_temp_list = targets.ToList();
+				targets_temp_list = [.. targets];
 
 			Scribe_Collections.Look(ref targets_temp_list, "targets", LookMode.Deep);
 

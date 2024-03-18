@@ -255,7 +255,7 @@ namespace AchtungMod
 	}
 
 	[HarmonyPatch(typeof(Game))]
-	[HarmonyPatch(nameof(Game.DeinitAndRemoveMap_NewTemp))]
+	[HarmonyPatch(nameof(Game.DeinitAndRemoveMap))]
 	static class Game_DeinitAndRemoveMap_Patch
 	{
 		public static void Prefix(Map map)
@@ -384,7 +384,7 @@ namespace AchtungMod
 	static class Toil_AddEndCondition_Patch
 	{
 		public static readonly MethodInfo mIsForbidden = SymbolExtensions.GetMethodInfo(() => ForbidUtility.IsForbidden(null, (Pawn)null));
-		public static readonly Dictionary<MethodInfo, bool> hasForbiddenState = new();
+		public static readonly Dictionary<MethodInfo, bool> hasForbiddenState = [];
 
 		public static void Prefix(Toil __instance, ref Func<JobCondition> newEndCondition)
 		{
@@ -395,7 +395,7 @@ namespace AchtungMod
 			if (hasForbiddenState.TryGetValue(method, out var hasForbidden) == false)
 			{
 				hasForbidden = PatchProcessor.ReadMethodBody(method).Any(pair => pair.Value is MethodInfo method && method == mIsForbidden);
-				_ = hasForbiddenState.TryAdd(method, hasForbidden);
+				hasForbiddenState.Add(method, hasForbidden);
 			}
 			if (hasForbidden)
 			{
@@ -428,7 +428,7 @@ namespace AchtungMod
 			{
 				var mIsForbidden = Toil_AddEndCondition_Patch.mIsForbidden;
 				hasForbidden = PatchProcessor.ReadMethodBody(method).Any(pair => pair.Value is MethodInfo method && method == mIsForbidden);
-				_ = Toil_AddEndCondition_Patch.hasForbiddenState.TryAdd(method, hasForbidden);
+				Toil_AddEndCondition_Patch.hasForbiddenState.Add(method, hasForbidden);
 			}
 			if (hasForbidden)
 			{
@@ -823,6 +823,26 @@ namespace AchtungMod
 	// patch in our menu options
 	//
 	[HarmonyPatch(typeof(FloatMenuMakerMap))]
+	[HarmonyPatch(nameof(FloatMenuMakerMap.ScannerShouldSkip))]
+	static class FloatMenuMakerMap_ScannerShouldSkip_Patch
+	{
+		public static bool Prefix(WorkGiver_Scanner scanner, Thing t, ref bool __result)
+		{
+			if (Achtung.Settings.ignoreForbidden 
+				&& scanner is WorkGiver_Haul
+				&& t?.def != null 
+				&& t.def.alwaysHaulable 
+				&& t.def.EverHaulable)
+				{
+					__result = false;
+					return false;
+				}
+
+			return true;
+		}
+	}
+	//
+	[HarmonyPatch(typeof(FloatMenuMakerMap))]
 	[HarmonyPatch(nameof(FloatMenuMakerMap.AddJobGiverWorkOrders))]
 	static class FloatMenuMakerMap_AddJobGiverWorkOrders_Patch
 	{
@@ -839,100 +859,56 @@ namespace AchtungMod
 				__state.Unprepare(pawn);
 		}
 
-		public static int GetPriority(Pawn pawn, WorkTypeDef w)
+		public static int GetPriority(Pawn_WorkSettings workSettings, WorkTypeDef w, Pawn pawn)
 		{
-			if (Achtung.Settings.ignoreAssignments)
-				return pawn.WorkTypeIsDisabled(w) ? 0 : 1;
-			return pawn.workSettings.GetPriority(w);
+			if (Achtung.Settings.ignoreAssignments == false)
+				return workSettings.GetPriority(w);
+			return pawn.WorkTypeIsDisabled(w) ? 0 : 1;
 		}
 
-		static bool IgnoreForbiddenHauling(WorkGiver_Scanner workgiver, Thing thing)
-		{
-			if (Achtung.Settings.ignoreForbidden == false)
-				return false;
-			if (workgiver is WorkGiver_Haul && thing?.def != null && thing.def.alwaysHaulable == false && thing.def.EverHaulable == false)
-				return false;
-			return workgiver.Ignorable();
-		}
-
-		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
 		{
 			var m_GetPriority = AccessTools.Method(typeof(Pawn_WorkSettings), nameof(Pawn_WorkSettings.GetPriority));
 			var floatMenuOptionConstructorArgs = new[] { typeof(string), typeof(Action), typeof(MenuOptionPriority), typeof(Action<Rect>), typeof(Thing), typeof(float), typeof(Func<Rect, bool>), typeof(WorldObject), typeof(bool), typeof(int) };
 			var c_FloatMenuOption = AccessTools.Constructor(typeof(FloatMenuOption), floatMenuOptionConstructorArgs);
-			var m_CreateForcedMenuItem = SymbolExtensions.GetMethodInfo(() => ForcedFloatMenuOption.CreateForcedMenuItem(default, default, default, default, default, default, default, default, default, default, default, default, default));
-			var m_Accepts = SymbolExtensions.GetMethodInfo(() => new ThingRequest().Accepts(default));
-			var m_IgnoreForbiddenHauling = SymbolExtensions.GetMethodInfo(() => IgnoreForbiddenHauling(default, default));
-			if (c_FloatMenuOption == null)
-				Log.Error($"Cannot find constructor for FloatMenuOption() with argument types {floatMenuOptionConstructorArgs.Join(t => t.Name)}");
 
-			var list = instructions.ToList();
-
-			var idx = list.FindIndex(instr => instr.Calls(m_Accepts));
-			if (idx < 0 || idx >= list.Count)
-				Log.Error("Cannot find ThingRequest.Accepts in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
-			else
-			{
-				var loadThingVar = list[idx - 1];
-				var jump = list[idx + 1];
-				if (jump.Branches(out var label) == false)
-					Log.Error("Cannot find branch after ThingRequest.Accepts in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
-				else
-					list.InsertRange(idx + 2, new[]
-					{
-						list[idx + 2], // local variable 'WorkGiver_Scanner'
-						loadThingVar.Clone(), // clicked thing
-						new CodeInstruction(OpCodes.Call, m_IgnoreForbiddenHauling),
-						new CodeInstruction(OpCodes.Brtrue, label)
-					});
-			}
-
-			var foundCount = 0;
+			var matcher = new CodeMatcher(instructions, generator);
+			var count = 0;
 			while (true)
 			{
-				idx = list.FindIndex(instr => instr.Calls(m_GetPriority));
-				if (idx < 2 || idx >= list.Count)
+				matcher.MatchEndForward(
+					new CodeMatch(OpCodes.Isinst, typeof(WorkGiver_Scanner)),
+					CodeMatch.WithOpcodes([OpCodes.Stloc, OpCodes.Stloc_S], name: "workgiver-scanner")
+				);
+				if (matcher.IsInvalid)
 					break;
-				foundCount++;
-				list[idx - 2].opcode = OpCodes.Nop;
-				list[idx].opcode = OpCodes.Call;
-				list[idx].operand = SymbolExtensions.GetMethodInfo(() => GetPriority(default, default));
+
+				var workgiverScanner = matcher.NamedMatch("workgiver-scanner").operand;
+
+				matcher
+					.MatchStartForward(CodeMatch.Calls(m_GetPriority))
+					.ThrowIfInvalid("Cannot find call to Pawn_WorkSettings.GetPriority")
+					.RemoveInstruction()
+					.Insert(
+						new CodeInstruction(OpCodes.Ldarg_1),
+						new CodeInstruction(OpCodes.Call, SymbolExtensions.GetMethodInfo((int _) => GetPriority(default, default, default)))
+					)
+					.MatchStartForward(new CodeMatch(OpCodes.Newobj, c_FloatMenuOption))
+					.ThrowIfInvalid("Cannot find new FloatMenuOption")
+					.InsertAndAdvance(
+						new CodeInstruction(OpCodes.Ldarg_1),
+						new CodeInstruction(OpCodes.Ldarg_0),
+						new CodeInstruction(OpCodes.Ldloc, workgiverScanner)
+					)
+					.Set(OpCodes.Call, SymbolExtensions.GetMethodInfo(() => ForcedFloatMenuOption.CreateForcedMenuItem(default, default, default, default, default, default, default, default, default, default, default, default, default)));
+				
+				count++;
 			}
-			if (foundCount != 2)
-				Log.Error("Cannot find 2x Pawn_WorkSettings.GetPriority in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
-
-			foundCount = 0;
-			Enumerable.Range(0, list.Count)
-				.DoIf(i => list[i].opcode == OpCodes.Isinst && (Type)list[i].operand == typeof(WorkGiver_Scanner), i =>
-				{
-					idx = i + 1;
-					if (list[idx].opcode == OpCodes.Stloc_S)
-					{
-						var localVar = list[idx].operand;
-
-						idx = list.FindIndex(idx, code => code.opcode == OpCodes.Newobj && (ConstructorInfo)code.operand == c_FloatMenuOption);
-						if (idx < 0)
-							Log.Error("Cannot find 'Isinst WorkGiver_Scanner' in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
-						else
-						{
-							list[idx].opcode = OpCodes.Call;
-							list[idx].operand = m_CreateForcedMenuItem;
-							list.InsertRange(idx, new CodeInstruction[]
-							{
-								new CodeInstruction(OpCodes.Ldarg_1),
-								new CodeInstruction(OpCodes.Ldarg_0),
-								new CodeInstruction(OpCodes.Ldloc_S, localVar)
-							});
-
-							foundCount++;
-						}
-					}
-				});
-			if (foundCount != 2)
-				Log.Error("Cannot find 2x 'Isinst WorkGiver_Scanner', 'Stloc_S n' -> 'Newobj FloatMenuOption()' in RimWorld.FloatMenuMakerMap::AddJobGiverWorkOrders");
-
-			foreach (var instruction in list)
-				yield return instruction;
+			
+			if (count == 0)
+				Log.Error("Achtung could not add any patches to FloatMenuMakerMap.AddJobGiverWorkOrders, forcing will not work");
+			
+			return matcher.InstructionEnumeration();
 		}
 	}
 	//
@@ -1179,7 +1155,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(Pawn.GetInspectString))]
 	static class Pawn_GetInspectString_Patch
 	{
-		static readonly Dictionary<Pawn, string> cache = new();
+		static readonly Dictionary<Pawn, string> cache = [];
 
 		public static void Postfix(Pawn __instance, ref string __result)
 		{
@@ -1229,13 +1205,13 @@ namespace AchtungMod
 			{
 				var handler = new ExceptionAnalyser(__exception);
 
-				var mods = handler.GetInvolvedMods(new[] { "brrainz.achtung" }).Select(info => info.metaData.GetWorkshopName() ?? info.metaData.Name).Distinct();
+				var mods = handler.GetInvolvedMods(["brrainz.achtung"]).Select(info => info.metaData.GetWorkshopName() ?? info.metaData.Name).Distinct();
 				var errorStr = "There was an error while generating the menu.";
 				if (mods.Count() == 1)
 					errorStr = $"{mods.First()} caused an error while producing this menu.";
 				else
 					errorStr = $"One of the following mods caused an error while producing this menu: {mods.Join()}.";
-				__result ??= new List<FloatMenuOption>();
+				__result ??= [];
 				__result.Add(new FloatMenuOption($"{errorStr}. Select to copy enhanced stacktrace to the clipboard and report it in the RimWorld discord.", () =>
 				{
 					var te = new TextEditor { text = handler.GetStacktrace() };

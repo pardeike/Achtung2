@@ -131,7 +131,7 @@ namespace AchtungMod
 
 		public virtual void InitAction()
 		{
-			workLocations = new HashSet<IntVec3>() { TargetA.Cell };
+			workLocations = [TargetA.Cell];
 			currentItem = null;
 			isMoving = false;
 			subCounter = 0;

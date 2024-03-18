@@ -8,19 +8,15 @@ using Verse.AI;
 
 namespace AchtungMod
 {
-	public class ForcedWork : WorldComponent
+	public class ForcedWork(World world) : WorldComponent(world)
 	{
-		Dictionary<Pawn, ForcedJobs> allForcedJobs = new();
+		Dictionary<Pawn, ForcedJobs> allForcedJobs = [];
 		public bool hasForcedJobs = false; //optimization
 		private List<Pawn> forcedJobsKeysWorkingList;
 		private List<ForcedJobs> forcedJobsValuesWorkingList;
 		private int counter;
 
-		public readonly HashSet<Pawn> preparing = new();
-		//readonly Dictionary<Pawn, HashSet<IntVec3>> forbiddenLocations = new Dictionary<Pawn, HashSet<IntVec3>>();
-
-		public ForcedWork(World world) : base(world) { }
-
+		public readonly HashSet<Pawn> preparing = [];
 		static ForcedWork instance = null;
 		public static ForcedWork Instance
 		{
@@ -45,20 +41,20 @@ namespace AchtungMod
 			catch (Exception ex)
 			{
 				Log.Error($"Achtung cannot fetch a list of WorkGiverDefs for {typeof(T).FullName}: {ex}");
-				return new List<WorkGiverDef>();
+				return [];
 			}
 		}
 
-		static readonly List<WorkGiverDef> constructionDefs = AllWorkerDefs<WorkGiver_ConstructDeliverResources>().Concat(AllWorkerDefs<WorkGiver_ConstructFinishFrames>()).ToList();
+		static readonly List<WorkGiverDef> constructionDefs = [.. AllWorkerDefs<WorkGiver_ConstructDeliverResources>(), .. AllWorkerDefs<WorkGiver_ConstructFinishFrames>()];
 		public static List<WorkGiverDef> GetCombinedDefs(WorkGiver baseWorkgiver)
 		{
 			if (constructionDefs.Contains(baseWorkgiver.def))
-				return constructionDefs.ToList();
+				return [.. constructionDefs];
 
 			if (baseWorkgiver.IsOfType<WorkGiver_Warden>())
 				return AllWorkerDefs<WorkGiver_Warden>();
 
-			return new List<WorkGiverDef> { baseWorkgiver.def };
+			return [baseWorkgiver.def];
 		}
 
 		public static void QueueJob(Pawn pawn, Job job)
@@ -70,8 +66,8 @@ namespace AchtungMod
 		public List<ForcedJob> GetForcedJobs(Pawn pawn)
 		{
 			if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forced) == false)
-				return new List<ForcedJob>();
-			return forced.jobs ?? new List<ForcedJob>();
+				return [];
+			return forced.jobs ?? [];
 		}
 
 		public void UpdatePawnForcedJobs(Pawn pawn, ForcedJobs jobs)
@@ -222,13 +218,13 @@ namespace AchtungMod
 				return new List<ForcedJob>();
 			return allForcedJobs
 				.Where(pair => pair.Key.Map == map)
-				.SelectMany(pair => pair.Value.jobs ?? new List<ForcedJob>());
+				.SelectMany(pair => pair.Value.jobs ?? []);
 		}
 
 		public ForcedJob[] AllForcedJobs()
 		{
 			if (hasForcedJobs == false)
-				return new ForcedJob[0];
+				return [];
 			return allForcedJobs.Values
 				.SelectMany(forcedJobs => forcedJobs.jobs)
 				.OfType<ForcedJob>()
@@ -323,7 +319,7 @@ namespace AchtungMod
 			{
 				foreach (var forced in allForcedJobs.Values)
 				{
-					forced.jobs ??= new List<ForcedJob>();
+					forced.jobs ??= [];
 					forced.UpdateCount();
 				}
 
@@ -334,11 +330,11 @@ namespace AchtungMod
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				allForcedJobs ??= new Dictionary<Pawn, ForcedJobs>();
+				allForcedJobs ??= [];
 
 				foreach (var forced in allForcedJobs.Values)
 				{
-					forced.jobs ??= new List<ForcedJob>();
+					forced.jobs ??= [];
 					forced.UpdateCount();
 				}
 

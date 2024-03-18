@@ -15,10 +15,10 @@ namespace BrrainzTools
 		internal ModMetaData metaData;
 	}
 
-	class ExceptionAnalyser
+	class ExceptionAnalyser(Exception exception)
 	{
-		readonly Exception exception;
-		static readonly Dictionary<Assembly, ModMetaData> MetaDataCache = new();
+		readonly Exception exception = exception;
+		static readonly Dictionary<Assembly, ModMetaData> MetaDataCache = [];
 		static readonly string RimworldAssemblyName = typeof(Pawn).Assembly.GetName().Name;
 
 		static readonly AccessTools.FieldRef<StackTrace, StackTrace[]> captured_traces_ref = AccessTools.FieldRefAccess<StackTrace, StackTrace[]>("captured_traces");
@@ -46,13 +46,8 @@ namespace BrrainzTools
 		static readonly GetClassName getClassName = AccessTools.MethodDelegate<GetClassName>(m_GetClassName);
 
 		delegate string ToStringBoolBool(Exception instance, bool needFileLineInfo, bool needMessage);
-		static readonly MethodInfo m_ToString = AccessTools.Method(typeof(Exception), "ToString", new[] { typeof(bool), typeof(bool) });
+		static readonly MethodInfo m_ToString = AccessTools.Method(typeof(Exception), "ToString", [typeof(bool), typeof(bool)]);
 		static readonly ToStringBoolBool ExceptionToString = AccessTools.MethodDelegate<ToStringBoolBool>(m_ToString);
-
-		public ExceptionAnalyser(Exception exception)
-		{
-			this.exception = exception;
-		}
 
 		public IEnumerable<ModInfo> GetInvolvedMods(string[] excludePackageIds)
 		{
@@ -264,7 +259,7 @@ namespace BrrainzTools
 
 		static MethodBase GetExpandedMethod(StackFrame frame, out Patches patches)
 		{
-			patches = new Patches(new Patch[0], new Patch[0], new Patch[0], new Patch[0]);
+			patches = new Patches([], [], [], []);
 			var method = Harmony.GetMethodFromStackframe(frame);
 			if (method != null && method is MethodInfo replacement)
 			{

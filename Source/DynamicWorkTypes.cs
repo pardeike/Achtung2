@@ -10,7 +10,7 @@ namespace Brrainz
 	[StaticConstructorOnStartup]
 	public class DynamicWorkTypes
 	{
-		internal static readonly Dictionary<WorkTypeDef, WorkTypeDef> disabledWorkTypePairs = new();
+		internal static readonly Dictionary<WorkTypeDef, WorkTypeDef> disabledWorkTypePairs = [];
 
 		static DynamicWorkTypes()
 		{
@@ -32,7 +32,7 @@ namespace Brrainz
 		static void Reload<T>() where T : Def
 		{
 			if (typeof(T) == typeof(WorkTypeDef))
-				DefDatabase<WorkTypeDef>.AllDefs.Do(def => def.workGiversByPriority = new List<WorkGiverDef>());
+				DefDatabase<WorkTypeDef>.AllDefs.Do(def => def.workGiversByPriority = []);
 
 			DefDatabase<T>.ClearCachedData();
 			DefDatabase<T>.ResolveAllReferences(false, true);

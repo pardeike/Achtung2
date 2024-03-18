@@ -6,7 +6,29 @@ using Verse;
 
 namespace AchtungMod
 {
-	public class ForcedFloatMenuOption : FloatMenuOption
+	public class ForcedFloatMenuOption(
+		string label,
+		Action action,
+		MenuOptionPriority priority,
+		Action<Rect> mouseoverGuiAction,
+		Thing revalidateClickTarget,
+		float extraPartWidth,
+		Func<Rect, bool> extraPartOnGUI,
+		WorldObject revalidateWorldClickTarget,
+		bool playSelectionSound,
+		int orderInPriority
+		) : FloatMenuOption(
+		label,
+		action,
+		priority,
+		mouseoverGuiAction,
+		revalidateClickTarget,
+		extraPartWidth,
+		extraPartOnGUI,
+		revalidateWorldClickTarget,
+		playSelectionSound,
+		orderInPriority
+		)
 	{
 		public Pawn forcePawn;
 		public IntVec3 forceCell;
@@ -60,31 +82,5 @@ namespace AchtungMod
 				forceWorkgiver = workgiver
 			};
 		}
-
-		public ForcedFloatMenuOption(
-			string label,
-			Action action,
-			MenuOptionPriority priority,
-			Action<Rect> mouseoverGuiAction,
-			Thing revalidateClickTarget,
-			float extraPartWidth,
-			Func<Rect, bool> extraPartOnGUI,
-			WorldObject revalidateWorldClickTarget,
-			bool playSelectionSound,
-			int orderInPriority
-		) : base
-		(
-			label,
-			action,
-			priority,
-			mouseoverGuiAction,
-			revalidateClickTarget,
-			extraPartWidth,
-			extraPartOnGUI,
-			revalidateWorldClickTarget,
-			playSelectionSound,
-			orderInPriority
-		)
-		{ }
 	}
 }

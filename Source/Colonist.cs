@@ -5,24 +5,14 @@ using Verse.AI;
 
 namespace AchtungMod
 {
-	public class Colonist
+	public class Colonist(Pawn pawn)
 	{
-		public Pawn pawn;
-		public IntVec3 designation;
-		public IntVec3 lastOrder;
-		public Vector3 startPosition;
-		public Vector3 offsetFromCenter;
-		public bool originalDraftStatus;
-
-		public Colonist(Pawn pawn)
-		{
-			this.pawn = pawn;
-			startPosition = pawn.DrawPos;
-			lastOrder = IntVec3.Invalid;
-			offsetFromCenter = Vector3.zero;
-			designation = IntVec3.Invalid;
-			originalDraftStatus = Tools.GetDraftingStatus(pawn);
-		}
+		public Pawn pawn = pawn;
+		public IntVec3 designation = IntVec3.Invalid;
+		public IntVec3 lastOrder = IntVec3.Invalid;
+		public Vector3 startPosition = pawn.DrawPos;
+		public Vector3 offsetFromCenter = Vector3.zero;
+		public bool originalDraftStatus = Tools.GetDraftingStatus(pawn);
 
 		public IntVec3 UpdateOrderPos(Vector3 pos)
 		{

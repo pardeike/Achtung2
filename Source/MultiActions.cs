@@ -20,7 +20,7 @@ namespace AchtungMod
 		{
 			this.clickPos = clickPos;
 			allPawns = colonists.Select(colonist => colonist.pawn).ToList();
-			allActions = new List<MultiAction>();
+			allActions = [];
 			totalColonistsInvolved = colonists.Count();
 			colonists.Do(AddColonist);
 			if (gotoActionCount == totalColonistsInvolved)

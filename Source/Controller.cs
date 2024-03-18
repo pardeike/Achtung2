@@ -37,7 +37,7 @@ namespace AchtungMod
 
 		public Controller()
 		{
-			colonists = new List<Colonist>();
+			colonists = [];
 			lineStart = Vector3.zero;
 			lineEnd = Vector3.zero;
 			isDragging = false;

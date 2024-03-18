@@ -11,11 +11,11 @@ namespace AchtungMod
 	[StaticConstructorOnStartup]
 	public class ForcedMultiFloatMenuOption : FloatMenuOption
 	{
-		public static readonly Texture2D[] Forcing = new[]
-		{
+		public static readonly Texture2D[] Forcing =
+		[
 			ContentFinder<Texture2D>.Get("Forcing0", true),
 			ContentFinder<Texture2D>.Get("Forcing1", true)
-		};
+		];
 
 		public readonly List<Pawn> forcedPawns;
 		public readonly List<FloatMenuOption> options;

@@ -119,7 +119,7 @@ namespace AchtungMod
 			}
 		}
 
-		static readonly HashSet<string> knownExceptions = new();
+		static readonly HashSet<string> knownExceptions = [];
 		public static void Log(Exception exception)
 		{
 			if (enabled == false)

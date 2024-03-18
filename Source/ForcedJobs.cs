@@ -5,12 +5,12 @@ namespace AchtungMod
 {
 	public class ForcedJobs : IExposable
 	{
-		public List<ForcedJob> jobs = new();
+		public List<ForcedJob> jobs = [];
 		public int count; // optimization
 
 		public ForcedJobs()
 		{
-			jobs = new List<ForcedJob>();
+			jobs = [];
 			count = 0;
 		}
 
@@ -21,7 +21,7 @@ namespace AchtungMod
 
 		public void ExposeData()
 		{
-			jobs ??= new List<ForcedJob>();
+			jobs ??= [];
 			if (Scribe.mode == LoadSaveMode.Saving)
 				_ = jobs.RemoveAll(job => job == null || job.IsEmpty());
 

@@ -20,8 +20,8 @@ namespace AchtungMod
 		public IntVec3 center;
 		public Vector2 start;
 		public int lastDelta = -1;
-		public Dictionary<Pawn, Action<int>> mouseMovedActions = new();
-		public Dictionary<Pawn, Action> mouseUpActions = new();
+		public Dictionary<Pawn, Action<int>> mouseMovedActions = [];
+		public Dictionary<Pawn, Action> mouseUpActions = [];
 
 		public static MouseTracker GetInstance()
 		{
