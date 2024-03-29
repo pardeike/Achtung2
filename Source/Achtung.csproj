@@ -44,10 +44,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Brrainz.RimWorld.CrossPromotion" Version="1.1.1" />
-		<PackageReference Include="Brrainz.RimWorld.ModFeatures" Version="1.2.5" />
-		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.5.4038-beta" GeneratePathProperty="true" />
-		<PackageReference Include="Lib.Harmony" Version="2.3.1.1" ExcludeAssets="runtime" />
+		<PackageReference Include="Brrainz.RimWorld.CrossPromotion" Version="1.1.2" />
+		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.5.4046-beta" GeneratePathProperty="true" />
+		<PackageReference Include="Lib.Harmony" Version="2.3.3" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
 		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net472" Version="1.0.3">
 			<PrivateAssets>all</PrivateAssets>
@@ -57,8 +56,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="0MultiplayerAPI">
-		  <HintPath>..\1.5\Assemblies\0MultiplayerAPI.dll</HintPath>
+		<Reference Include="ModFeatures">
+			<HintPath>..\1.5\Assemblies\ModFeatures.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 

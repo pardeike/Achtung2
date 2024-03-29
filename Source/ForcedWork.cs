@@ -215,7 +215,7 @@ namespace AchtungMod
 		public IEnumerable<ForcedJob> ForcedJobsForMap(Map map)
 		{
 			if (hasForcedJobs == false)
-				return new List<ForcedJob>();
+				return [];
 			return allForcedJobs
 				.Where(pair => pair.Key.Map == map)
 				.SelectMany(pair => pair.Value.jobs ?? []);

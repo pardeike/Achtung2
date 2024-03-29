@@ -1,5 +1,4 @@
-﻿using Multiplayer.API;
-using RimWorld;
+﻿using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -387,7 +386,7 @@ namespace AchtungMod
 			colonists.DoIf(colonist => colonist.pawn.Drafted == false,
 				colonist =>
 				{
-					var oldStatus = SetDraftStatus(colonist.pawn, draftStatus, false);
+					var oldStatus = SetDraftStatus(colonist.pawn, draftStatus);
 					if (oldStatus != draftStatus)
 					{
 						if (draftStatus)
@@ -402,14 +401,13 @@ namespace AchtungMod
 				SoundDefOf.DraftOff.PlayOneShotOnCamera(null);
 		}
 
-		[SyncMethod] // multiplayer
 		public static void CancelDrafting(List<Colonist> colonists)
 		{
 			var gotDrafted = false;
 			var gotUndrafted = false;
 			colonists.Do(colonist =>
 			{
-				var newDraftStatus = SetDraftStatus(colonist.pawn, colonist.originalDraftStatus, false);
+				var newDraftStatus = SetDraftStatus(colonist.pawn, colonist.originalDraftStatus);
 				if (colonist.originalDraftStatus && !newDraftStatus)
 					gotDrafted = true;
 				if (colonist.originalDraftStatus == false && newDraftStatus)
@@ -432,29 +430,15 @@ namespace AchtungMod
 			return pawn.drafter.Drafted;
 		}
 
-		[SyncMethod] // multiplayer
-		private static void SetDraftStatusSynced(Pawn pawn, bool drafted)
-		{
-			// we don't use the indirect method because it has lots of side effects
-			//
-			pawn.drafter.draftedInt = drafted;
-		}
-
-		public static bool SetDraftStatus(Pawn pawn, bool drafted, bool fakeIt)
+		public static bool SetDraftStatus(Pawn pawn, bool drafted)
 		{
 			var previousStatus = GetDraftingStatus(pawn);
 			if (previousStatus != drafted)
-			{
-				if (fakeIt)
-					pawn.drafter.draftedInt = drafted;
-				else
-					SetDraftStatusSynced(pawn, drafted);
-			}
+				pawn.drafter.draftedInt = drafted;
 			return previousStatus;
 		}
 
-		[SyncMethod] // multiplayer
-		public static void OrderToSynced(Pawn pawn, int x, int z)
+		public static void OrderTo(Pawn pawn, int x, int z)
 		{
 			var bestCell = new IntVec3(x, 0, z);
 			var job = JobMaker.MakeJob(JobDefOf.Goto, bestCell);
@@ -467,7 +451,6 @@ namespace AchtungMod
 				_ = pawn.jobs.TryTakeOrderedJob(job);
 		}
 
-		[SyncMethod] // multiplayer
 		public static void CancelWorkOn(Pawn newWorker, LocalTargetInfo workItem)
 		{
 			var forcedWork = ForcedWork.Instance;

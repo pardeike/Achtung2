@@ -1,5 +1,4 @@
-﻿using Multiplayer.API;
-using RimWorld;
+﻿using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,7 +48,7 @@ namespace AchtungMod
 		{
 			new List<JobDef>
 			{
-				new JobDriver_CleanRoom().MakeDef(),
+				// new JobDriver_CleanRoom().MakeDef(),
 				new JobDriver_FightFire().MakeDef(),
 			}
 			.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
@@ -84,7 +83,7 @@ namespace AchtungMod
 				EndDragging();
 			if (optionTaken == false && menuAdded == false && actions.EveryoneHasGoto && gotoAction != null)
 			{
-				actions.allPawns.Do(pawn => Tools.SetDraftStatus(pawn, true, false));
+				actions.allPawns.Do(pawn => Tools.SetDraftStatus(pawn, true));
 				gotoAction();
 				return true;
 			}
@@ -297,8 +296,7 @@ namespace AchtungMod
 			}
 		}
 
-		[SyncMethod] // multiplayer
-		static void StartWorkSynced(Type driverType, Pawn pawn, LocalTargetInfo target, LocalTargetInfo clickCell)
+		static void StartWork(Type driverType, Pawn pawn, LocalTargetInfo target, LocalTargetInfo clickCell)
 		{
 			var driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
 			driver.StartJob(pawn, target, clickCell);
@@ -315,7 +313,7 @@ namespace AchtungMod
 				foreach (var target in targets)
 				{
 					var suffix = existingJobs.Count > 0 ? " " + "AlreadyDoing".Translate("" + (existingJobs.Count + 1)) : new TaggedString("");
-					options.Add(new FloatMenuOption(driver.GetLabel() + suffix, () => StartWorkSynced(driverType, pawn, target, clickCell), MenuOptionPriority.Low));
+					options.Add(new FloatMenuOption(driver.GetLabel() + suffix, () => StartWork(driverType, pawn, target, clickCell), MenuOptionPriority.Low));
 				}
 			}
 		}
@@ -323,7 +321,7 @@ namespace AchtungMod
 		public static IEnumerable<FloatMenuOption> AchtungChoicesAtFor(Vector3 clickPos, Pawn pawn)
 		{
 			var options = new List<FloatMenuOption>();
-			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_CleanRoom));
+			//AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_CleanRoom));
 			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_FightFire));
 			return options;
 		}

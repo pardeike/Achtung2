@@ -1,5 +1,4 @@
-﻿using Multiplayer.API;
-using RimWorld;
+﻿using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,7 +61,7 @@ namespace AchtungMod
 				var success = options.Any(option =>
 				{
 					if (option is ForcedFloatMenuOption forceOption)
-						return ForceAction(forceOption);
+						return ForceAction(forcedPawns, forceOption.forceWorkgiver, forceOption.forceCell.x, forceOption.forceCell.z);
 					if (option.extraPartOnGUI != null)
 						return option.extraPartOnGUI(drawRect);
 					return false;
@@ -74,10 +73,7 @@ namespace AchtungMod
 			return false;
 		}
 
-		public bool ForceAction(ForcedFloatMenuOption option) => ForceActionSynced(forcedPawns, option.forceWorkgiver, option.forceCell.x, option.forceCell.z);
-
-		[SyncMethod] // multiplayer
-		public static bool ForceActionSynced(List<Pawn> forcedPawns, WorkGiver_Scanner forceWorkgiver, int x, int z)
+		public static bool ForceAction(List<Pawn> forcedPawns, WorkGiver_Scanner forceWorkgiver, int x, int z)
 		{
 			var forcedCell = new IntVec3(x, 0, z);
 			return forcedPawns.Select(forcePawn =>

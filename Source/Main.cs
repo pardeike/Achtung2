@@ -1,7 +1,5 @@
 ﻿using Brrainz;
-using BrrainzTools;
 using HarmonyLib;
-using Multiplayer.API;
 using RimWorld;
 using RimWorld.Planet;
 using System;
@@ -32,11 +30,6 @@ namespace AchtungMod
 			const string sameSpotId = "net.pardeike.rimworld.mod.samespot";
 			IsSameSpotInstalled = Achtung.harmony.GetPatchedMethods()
 				.Any(method => Harmony.GetPatchInfo(method)?.Transpilers.Any(transpiler => transpiler.owner == sameSpotId) ?? false);
-
-			// multiplayer
-			//
-			if (MP.enabled)
-				MP.RegisterAll();
 
 			CrossPromotion.Install(76561197973010050);
 			ModFeatures.Install<Achtung>();
@@ -828,15 +821,15 @@ namespace AchtungMod
 	{
 		public static bool Prefix(WorkGiver_Scanner scanner, Thing t, ref bool __result)
 		{
-			if (Achtung.Settings.ignoreForbidden 
+			if (Achtung.Settings.ignoreForbidden
 				&& scanner is WorkGiver_Haul
-				&& t?.def != null 
-				&& t.def.alwaysHaulable 
+				&& t?.def != null
+				&& t.def.alwaysHaulable
 				&& t.def.EverHaulable)
-				{
-					__result = false;
-					return false;
-				}
+			{
+				__result = false;
+				return false;
+			}
 
 			return true;
 		}
@@ -901,13 +894,13 @@ namespace AchtungMod
 						new CodeInstruction(OpCodes.Ldloc, workgiverScanner)
 					)
 					.Set(OpCodes.Call, SymbolExtensions.GetMethodInfo(() => ForcedFloatMenuOption.CreateForcedMenuItem(default, default, default, default, default, default, default, default, default, default, default, default, default)));
-				
+
 				count++;
 			}
-			
+
 			if (count == 0)
 				Log.Error("Achtung could not add any patches to FloatMenuMakerMap.AddJobGiverWorkOrders, forcing will not work");
-			
+
 			return matcher.InstructionEnumeration();
 		}
 	}
@@ -1034,14 +1027,6 @@ namespace AchtungMod
 		public static readonly Texture2D BuildingSmart = ContentFinder<Texture2D>.Get("BuildingSmart", true);
 		public static readonly Texture2D BuildingSmartOff = ContentFinder<Texture2D>.Get("BuildingSmartOff", true);
 
-		[SyncMethod] // multiplayer
-		public static void ToggleSmartBuildingSynced(Pawn pawn)
-		{
-			var forcedWork = ForcedWork.Instance;
-			var forcedJob = forcedWork.GetForcedJob(pawn);
-			forcedJob.ToggleSmartBuilding();
-		}
-
 		public static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> gizmos, Pawn ___pawn)
 		{
 			var gizmoList = gizmos.ToList();
@@ -1060,7 +1045,12 @@ namespace AchtungMod
 				defaultDesc = "BuildingSmartDesc".Translate(),
 				icon = smart ? BuildingSmart : BuildingSmartOff,
 				activateSound = smart ? SoundDefOf.Designate_PlanRemove : SoundDefOf.Designate_PlanAdd,
-				action = delegate { ToggleSmartBuildingSynced(___pawn); }
+				action = () =>
+				{
+					var forcedWork = ForcedWork.Instance;
+					var forcedJob = forcedWork.GetForcedJob(___pawn);
+					forcedJob.ToggleSmartBuilding();
+				}
 			};
 		}
 	}
@@ -1186,7 +1176,8 @@ namespace AchtungMod
 					__result.AddRange(Controller.AchtungChoicesAtFor(clickPos, pawn));
 		}
 	}
-	//
+
+	/*
 	[HarmonyPatch(typeof(FloatMenuMakerMap))]
 	[HarmonyPatch(nameof(FloatMenuMakerMap.ChoicesAtFor))]
 	[StaticConstructorOnStartup]
@@ -1222,4 +1213,5 @@ namespace AchtungMod
 			return null;
 		}
 	}
+	*/
 }

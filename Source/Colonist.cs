@@ -63,7 +63,7 @@ namespace AchtungMod
 			if (bestCell.IsValid && lastOrder.IsValid == false || lastOrder != bestCell)
 			{
 				lastOrder = bestCell;
-				Tools.OrderToSynced(pawn, bestCell.x, bestCell.z);
+				Tools.OrderTo(pawn, bestCell.x, bestCell.z);
 			}
 		}
 	}

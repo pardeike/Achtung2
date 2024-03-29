@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿/*
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -60,10 +61,12 @@ namespace BrrainzTools
 			var sb = new StringBuilder();
 			_ = sb.Append("Exception");
 			var trace = new StackTrace(exception);
+
 			if (trace != null && trace.FrameCount > 0)
 			{
 				var method = GetExpandedMethod(trace.GetFrame(trace.FrameCount - 1), out _);
-				_ = sb.Append($" in {method.DeclaringType.FullName}.{method.Name}");
+				if (method != null)
+					_ = sb.Append($" in {method.DeclaringType.FullName}.{method.Name}");
 			}
 			_ = sb.Append($": {getClassName(exception)}");
 
@@ -94,7 +97,7 @@ namespace BrrainzTools
 			var trace = new StackTrace(ex, 0, true);
 			foreach (var frame in trace.GetFrames())
 			{
-				var method = Harmony.GetMethodFromStackframe(frame);
+				var method = Harmony.GetOriginalMethodFromStackframe(frame);
 				var patches = FindPatches(method);
 				modInfos.AddRange(GetPostfixes(patches));
 				modInfos.AddRange(GetPrefixes(patches));
@@ -232,12 +235,12 @@ namespace BrrainzTools
 							_ = sb.AppendFormat("\n     - {0} {1}: {2} {3}:{4}({5})", name, owner, patch.ReturnType.Name, patch.DeclaringType.FullName, patch.Name, parameters);
 						}
 					}
-					AppendPatch(patches.Transpilers, "transpiler");
-					AppendPatch(patches.Prefixes, "prefix");
-					AppendPatch(patches.Postfixes, "postfix");
-					AppendPatch(patches.Finalizers, "finalizer");
+						AppendPatch(patches.Transpilers, "transpiler");
+						AppendPatch(patches.Prefixes, "prefix");
+						AppendPatch(patches.Postfixes, "postfix");
+						AppendPatch(patches.Finalizers, "finalizer");
+					}
 				}
-			}
 			return true;
 		}
 
@@ -260,17 +263,15 @@ namespace BrrainzTools
 		static MethodBase GetExpandedMethod(StackFrame frame, out Patches patches)
 		{
 			patches = new Patches([], [], [], []);
-			var method = Harmony.GetMethodFromStackframe(frame);
-			if (method != null && method is MethodInfo replacement)
+			var method = Harmony.GetOriginalMethodFromStackframe(frame);
+			if (method != null)
 			{
-				var original = Harmony.GetOriginalMethod(replacement);
-				if (original != null)
-				{
-					method = original;
-					patches = Harmony.GetPatchInfo(method);
-				}
+				var info = Harmony.GetPatchInfo(method);
+				if (info != null)
+					patches = info;
 			}
 			return method;
 		}
 	}
 }
+*/

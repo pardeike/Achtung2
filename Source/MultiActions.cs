@@ -40,13 +40,13 @@ namespace AchtungMod
 			});
 
 			var draftState = colonist.pawn.Drafted;
-			_ = Tools.SetDraftStatus(colonist.pawn, !draftState, true);
+			_ = Tools.SetDraftStatus(colonist.pawn, !draftState);
 			FloatMenuMakerMap.ChoicesAtFor(clickPos, colonist.pawn).Do(option =>
 			{
 				if (existingLabels.Contains(option.Label) == false)
 					AddMultiAction(colonist, !draftState, option);
 			});
-			_ = Tools.SetDraftStatus(colonist.pawn, draftState, true);
+			_ = Tools.SetDraftStatus(colonist.pawn, draftState);
 		}
 
 		public void AddMultiAction(Colonist colonist, bool draftMode, FloatMenuOption option)
