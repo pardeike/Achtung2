@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.AI;
 
 namespace AchtungMod
 {
@@ -23,6 +24,9 @@ namespace AchtungMod
 		public int groupRotation;
 		public bool groupRotationWas45;
 		public bool isDragging;
+		public Pawn isAiming;
+		public IAttackTarget aimAttackTarget, lastAimAttackTarget;
+		public Colonist isMoving;
 		public bool suppressMenu;
 		public bool drawColonistPreviews;
 
@@ -40,6 +44,7 @@ namespace AchtungMod
 			lineStart = Vector3.zero;
 			lineEnd = Vector3.zero;
 			isDragging = false;
+			isAiming = null;
 			suppressMenu = false;
 			drawColonistPreviews = true;
 		}
@@ -113,6 +118,12 @@ namespace AchtungMod
 				return true;
 			}
 
+			if (isAiming != null && button == (int)Button.left)
+			{
+				isAiming = null;
+				return true;
+			}
+
 			if (button != (int)Button.right)
 				return true;
 
@@ -166,6 +177,9 @@ namespace AchtungMod
 
 		private void StartDragging(Vector3 pos, bool asGroup)
 		{
+			if (isAiming != null)
+				return;
+
 			var draftedColonists = colonists.Where(colonist => colonist.pawn.Drafted).ToList();
 
 			groupMovement = asGroup;
@@ -177,27 +191,13 @@ namespace AchtungMod
 				groupRotationWas45 = Tools.Has45DegreeOffset(draftedColonists);
 			}
 			else
-			{
-				lineStart = pos;
-				lineStart.y = Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays);
-			}
+				lineStart = pos.ToIntVec3().ToVector3Shifted();
 
 			draftedColonists
 				.Do(colonist => colonist.offsetFromCenter = colonist.startPosition - groupCenter);
 
 			isDragging = true;
 			Event.current.Use();
-		}
-
-		private void EndDragging()
-		{
-			groupMovement = false;
-			if (isDragging)
-			{
-				colonists.Clear();
-				Event.current.Use();
-			}
-			isDragging = false;
 		}
 
 		public void MouseDrag(Vector3 pos)
@@ -217,8 +217,7 @@ namespace AchtungMod
 				return;
 			}
 
-			lineEnd = pos;
-			lineEnd.y = Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays);
+			lineEnd = pos.ToIntVec3().ToVector3Shifted();
 			var count = draftedColonists.Count;
 			var dragVector = lineEnd - lineStart;
 			suppressMenu |= dragVector.MagnitudeHorizontalSquared() > 0.5f;
@@ -234,12 +233,143 @@ namespace AchtungMod
 			Event.current.Use();
 		}
 
-		public void MouseUp()
+		public bool StartAiming(Vector3 pos)
 		{
-			if (Event.current.button != (int)Button.right)
+			if (isAiming != null)
+				return false;
+
+			var draggedDraftedColonist = Find.CurrentMap.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer)
+				.FirstOrDefault(pawn =>
+					pawn.Drafted && pawn.IsPlayerControlled && pawn.Downed == false &&
+					pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) &&
+					pawn.CurrentEffectiveVerb != null && pawn.CurrentEffectiveVerb.ApparelPreventsShooting() == false &&
+					(pos - pawn.DrawPos).MagnitudeHorizontalSquared() < 1f
+				);
+			if (draggedDraftedColonist == null)
+				return false;
+
+			isAiming = draggedDraftedColonist;
+			if (isAiming != null)
+			{
+				lastAimAttackTarget = null;
+				Find.Selector.Select(isAiming);
+				Tools.SetCursor(AchtungCursor.Attack);
+				Event.current.Use();
+				return true;
+			}
+			return false;
+		}
+
+		public void AimDrag(Vector3 pos)
+		{
+			if (isAiming == null)
+				return;
+			var verb = isAiming.CurrentEffectiveVerb;
+			if (verb == null)
 				return;
 
-			EndDragging();
+			isAiming.rotationTracker.Face(pos);
+
+			var map = isAiming.Map;
+			if (verb.IsMeleeAttack)
+			{
+				aimAttackTarget = AttackTargetFinder.FindBestReachableMeleeTarget(target => target.NotPlayer() && (pos - target.Thing.DrawPos).MagnitudeHorizontalSquared() < 1f, isAiming, 9999f, true, true);
+				if (lastAimAttackTarget != aimAttackTarget)
+				{
+					lastAimAttackTarget = aimAttackTarget;
+					if (lastAimAttackTarget is Thing thing)
+					{
+						isAiming.jobs.EndCurrentJob(JobCondition.InterruptForced);
+						var job = JobMaker.MakeJob(JobDefOf.AttackMelee, thing);
+						job.playerForced = true;
+						isAiming.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.DraftedOrder), false);
+						FleckMaker.Static(thing.DrawPos, map, FleckDefOf.FeedbackMelee, 1f);
+					}
+				}
+			}
+			else
+			{
+				var targets = map.attackTargetsCache.GetPotentialTargetsFor(isAiming)
+					.Where(target => target.NotPlayer() && (pos - target.Thing.DrawPos).MagnitudeHorizontalSquared() < 1f)
+					.ToList();
+				aimAttackTarget = AttackTargetFinder.GetRandomShootingTargetByScore(targets, isAiming, verb);
+				if (lastAimAttackTarget != aimAttackTarget)
+				{
+					lastAimAttackTarget = aimAttackTarget;
+					if (lastAimAttackTarget is Thing thing)
+					{
+						isAiming.jobs.EndCurrentJob(JobCondition.InterruptForced);
+						var job = JobMaker.MakeJob(JobDefOf.AttackStatic, thing);
+						job.playerForced = true;
+						isAiming.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.DraftedOrder), false);
+						FleckMaker.Static(thing.DrawPos, map, FleckDefOf.FeedbackShoot, 1f);
+					}
+				}
+			}
+		}
+
+		public bool StartMoving(Vector3 pos)
+		{
+			var draggedDraftedColonist = Find.CurrentMap.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer)
+				.FirstOrDefault(pawn =>
+					pawn.Drafted && pawn.IsPlayerControlled && pawn.Downed == false &&
+					(pos - pawn.DrawPos).MagnitudeHorizontalSquared() < 1f
+				);
+			if (draggedDraftedColonist == null)
+				return false;
+
+			if (draggedDraftedColonist != null)
+			{
+				isMoving = new Colonist(draggedDraftedColonist);
+				Find.Selector.Select(draggedDraftedColonist);
+				Tools.SetCursor(AchtungCursor.Position);
+				Event.current.Use();
+				return true;
+			}
+			return false;
+		}
+
+		public void MoveDrag(Vector3 pos)
+		{
+			if (isMoving == null)
+				return;
+
+			isMoving.OrderTo(pos);
+			if (isMoving.designation.IsValid)
+				isMoving.pawn.rotationTracker.Face(isMoving.designation.ToVector3Shifted());
+		}
+
+		private void EndDragging()
+		{
+			groupMovement = false;
+			if (isDragging)
+			{
+				colonists.Clear();
+				Event.current.Use();
+			}
+			isDragging = false;
+		}
+
+		public void MouseUp()
+		{
+			Tools.SetCursor(AchtungCursor.Default);
+
+			if (isMoving != null)
+			{
+				isMoving = null;
+				Event.current.Use();
+				return;
+			}
+
+			if (isAiming != null)
+			{
+				isAiming = null;
+				Event.current.Use();
+				return;
+			}
+
+			if (Event.current.button == (int)Button.right)
+				EndDragging();
 		}
 
 		public void KeyDown(KeyCode key)
@@ -363,10 +493,50 @@ namespace AchtungMod
 			// for debugging reservations
 			// DebugDrawReservations();
 
+			if (isAiming != null)
+			{
+				var verb = isAiming.CurrentEffectiveVerb;
+				if (verb != null)
+				{
+					if (verb.IsMeleeAttack)
+					{
+						var pos = aimAttackTarget?.Thing?.DrawPos ?? UI.MouseMapPosition();
+						GenDraw.DrawLineBetween(isAiming.DrawPos, pos, AltitudeLayer.Item.AltitudeFor(), GenDraw.LineMatRed, 0.2f);
+					}
+					else
+					{
+						var thing = aimAttackTarget?.Thing;
+						if (thing != null)
+							GenDraw.DrawLineBetween(isAiming.DrawPos, thing.DrawPos, AltitudeLayer.Item.AltitudeFor(), GenDraw.LineMatRed, 0.2f);
+						else
+						{
+							var cell = UI.MouseCell();
+							if (GenSight.LineOfSight(isAiming.Position, cell, isAiming.Map))
+								GenDraw.DrawLineBetween(isAiming.DrawPos, UI.MouseMapPosition(), AltitudeLayer.Item.AltitudeFor(), GenDraw.LineMatRed, 0.2f);
+						}
+					}
+				}
+			}
+
+			if (isMoving != null)
+			{
+				var pos = isMoving.designation;
+				if (pos == IntVec3.Invalid)
+					return;
+
+				var vec = pos.ToVector3Shifted();
+				Tools.DrawMarker(vec);
+				if (drawColonistPreviews)
+				{
+					isMoving.pawn.Drawer.renderer.RenderPawnAt(vec);
+					isMoving.pawn.DrawExtraSelectionOverlays();
+				}
+			}
+
 			if (isDragging)
 			{
 				if (colonists.Count > 1 && groupMovement == false)
-					Tools.DrawLineBetween(lineStart, lineEnd);
+					GenDraw.DrawLineBetween(lineStart, lineEnd, AltitudeLayer.Item.AltitudeFor(), GenDraw.LineMatRed, 0.5f);
 
 				colonists.Do(c =>
 				{
@@ -387,6 +557,12 @@ namespace AchtungMod
 
 		public void HandleDrawingOnGUI()
 		{
+			if (isMoving != null && isMoving.designation.IsValid)
+			{
+				var labelPos = Tools.LabelDrawPosFor(isMoving.designation, -0.6f);
+				GenMapUI.DrawPawnLabel(isMoving.pawn, labelPos, 1f, 9999f, null);
+			}
+
 			colonists.DoIf(c => c.designation.IsValid, c =>
 			{
 				var labelPos = Tools.LabelDrawPosFor(c.designation, -0.6f);
@@ -414,17 +590,32 @@ namespace AchtungMod
 				longPressThreshold = -1;
 				return MouseDown(pos, (int)Button.right, true);
 			}
+
+			var button = Event.current.button;
 			switch (Event.current.rawType)
 			{
 				case EventType.MouseDown:
-					if (Event.current.button == (int)Button.right)
+					if (button == (int)Button.right)
+					{
+						if (StartAiming(pos))
+							break;
 						suppressMenu = false;
-					longPressThreshold = Event.current.button == (int)Button.right ? Tools.EnvTicks() + Achtung.Settings.menuDelay : -1;
-					runOriginal = MouseDown(pos, Event.current.button, false);
+					}
+					else
+					{
+						if (StartMoving(pos))
+							break;
+					}
+					longPressThreshold = button == (int)Button.right ? Tools.EnvTicks() + Achtung.Settings.menuDelay : -1;
+					runOriginal = MouseDown(pos, button, false);
+					MoveDrag(pos);
+					AimDrag(pos);
 					MouseDrag(pos);
 					break;
 
 				case EventType.MouseDrag:
+					MoveDrag(pos);
+					AimDrag(pos);
 					MouseDrag(pos);
 					break;
 

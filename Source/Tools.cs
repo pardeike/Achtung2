@@ -1,6 +1,7 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -11,14 +12,23 @@ using static HarmonyLib.AccessTools;
 
 namespace AchtungMod
 {
+	enum AchtungCursor
+	{
+		Default,
+		Attack,
+		Position
+	}
+
 	[StaticConstructorOnStartup]
 	static class Tools
 	{
-		public static Material forceIconMaterial;
-		public static Material markerMaterial;
-		public static Material lineMaterial;
-		public static Material forceRadiusMaterial = SolidColorMaterials.SimpleSolidColorMaterial(Color.white.ToTransparent(0.5f));
-		public static string goHereLabel;
+		public static readonly Material forceIconMaterial = MaterialPool.MatFrom("ForceIcon", ShaderDatabase.Cutout);
+		public static readonly Material markerMaterial = MaterialPool.MatFrom("AchtungMarker", ShaderDatabase.Transparent);
+		public static readonly Material lineMaterial = MaterialPool.MatFrom(GenDraw.LineTexPath, ShaderDatabase.Transparent, new Color(1f, 0.5f, 0.5f));
+		public static readonly Material forceRadiusMaterial = SolidColorMaterials.SimpleSolidColorMaterial(Color.white.ToTransparent(0.5f));
+		public static readonly Texture2D dragAttack = LoadTexture("DragAttack");
+		public static readonly Texture2D dragPosition = LoadTexture("DragPosition");
+		public static readonly string goHereLabel = "GoHere".Translate();
 		public static WorkTypeDef savedWorkTypeDef = null;
 
 		public static WorkTypeDef RescuingWorkTypeDef => new()
@@ -52,12 +62,45 @@ namespace AchtungMod
 			}
 		}
 
-		static Tools()
+		static Texture2D LoadTexture(string path)
 		{
-			forceIconMaterial = MaterialPool.MatFrom("ForceIcon", ShaderDatabase.Cutout);
-			markerMaterial = MaterialPool.MatFrom("AchtungMarker", ShaderDatabase.Transparent);
-			lineMaterial = MaterialPool.MatFrom(GenDraw.LineTexPath, ShaderDatabase.Transparent, new Color(1f, 0.5f, 0.5f));
-			goHereLabel = "GoHere".Translate();
+			var modRootDir = LoadedModManager.GetMod<Achtung>().Content.RootDir;
+			var fullPath = Path.Combine(modRootDir, "Textures", $"{path}.png");
+			var data = File.ReadAllBytes(fullPath);
+			if (data == null || data.Length == 0)
+				throw new Exception($"Cannot read texture {fullPath}");
+			var tex = new Texture2D(2, 2, TextureFormat.ARGB32, false, true);
+			if (tex.LoadImage(data, false) == false)
+				throw new Exception($"Cannot create texture {fullPath}");
+			tex.Apply(false, false);
+			return tex;
+		}
+
+		public static void SetCursor(AchtungCursor mode)
+		{
+			if (Prefs.data.customCursorEnabled == false)
+				return;
+
+			switch (mode)
+			{
+				case AchtungCursor.Default:
+					CustomCursor.Activate();
+					break;
+				case AchtungCursor.Attack:
+					Cursor.SetCursor(dragAttack, CustomCursor.CursorHotspot, CursorMode.Auto);
+					break;
+				case AchtungCursor.Position:
+					Cursor.SetCursor(dragPosition, CustomCursor.CursorHotspot, CursorMode.Auto);
+					break;
+			}
+		}
+
+		public static bool NotPlayer(this IAttackTarget target)
+		{
+			var thing = target.Thing;
+			if (thing == null)
+				return false;
+			return thing.Faction != Faction.OfPlayer;
 		}
 
 		public static string PawnOverBreakLevel(Pawn pawn)
@@ -505,25 +548,6 @@ namespace AchtungMod
 			var matrix = new Matrix4x4();
 			matrix.SetTRS(pos, q, s);
 			Graphics.DrawMesh(mesh, matrix, mat, 0);
-		}
-
-		public static void DrawLineBetween(Vector3 A, Vector3 B)
-		{
-			if (Mathf.Abs(A.x - B.x) >= 0.01f || Mathf.Abs(A.z - B.z) >= 0.01f)
-			{
-				var pos = (A + B) / 2f;
-				if (A != B)
-				{
-					A.y = B.y;
-					var z = (A - B).MagnitudeHorizontal();
-					var q1 = Quaternion.LookRotation(A - B);
-					var q2 = Quaternion.LookRotation(B - A);
-					var w = 0.5f;
-					DrawScaledMesh(MeshPool.plane10, lineMaterial, pos, q1, w, z);
-					DrawScaledMesh(MeshPool.pies[180], lineMaterial, A, q1, w, w);
-					DrawScaledMesh(MeshPool.pies[180], lineMaterial, B, q2, w, w);
-				}
-			}
 		}
 
 		public static IEnumerable<Colonist> OrderColonistsAlongLine(IEnumerable<Colonist> colonists, Vector3 lineStart, Vector3 lineEnd)

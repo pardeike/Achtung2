@@ -95,12 +95,12 @@
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} ist in schlechter Verfassung</JobInterruptedBadHealth>
 
-	<CleanRoomLabel>Reinige diesen Raum</CleanRoomLabel>
+	<CleanRoomLabel>Gründlich reinigen!</CleanRoomLabel>
 	<CleanRoomInfoText>Raum gründlich reinigen</CleanRoomInfoText>
 	<CleanRoomDescription>Reinige einen Raum, bis er komplett sauber ist.</CleanRoomDescription>
 	<CleanRoomReport>Reinigt{0}: {1}</CleanRoomReport>
 
-	<FireFightLabel>Lösche Feuer</FireFightLabel>
+	<FireFightLabel>Feuer bekämpfen!</FireFightLabel>
 	<FireFightInfoText>Feuer löschen</FireFightInfoText>
 	<FireFightDescription>Lösche ein Feuer (auch außerhalb des Heimatgebiets).</FireFightDescription>
 	<FireFightReport>Löscht Feuer: {0}</FireFightReport>

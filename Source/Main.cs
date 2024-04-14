@@ -1084,12 +1084,16 @@ namespace AchtungMod
 
 	// handle events early
 	//
-	[HarmonyPatch(typeof(Selector))]
-	[HarmonyPatch(nameof(Selector.HandleMapClicks))]
-	static class Selector_HandleMapClicks_Patch
+	[HarmonyPatch(typeof(UIRoot_Play))]
+	[HarmonyPatch(nameof(UIRoot_Play.UIRootOnGUI))]
+	// [HarmonyPatch(typeof(MapInterface))]
+	// [HarmonyPatch(nameof(MapInterface.HandleMapClicks))]
+	static class MapInterface_HandleMapClicks_Patch
 	{
 		public static bool Prefix()
 		{
+			if (WorldRendererUtility.WorldRenderedNow)
+				return true;
 			return Controller.GetInstance().HandleEvents();
 		}
 	}
