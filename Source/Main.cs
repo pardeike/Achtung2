@@ -539,7 +539,7 @@ namespace AchtungMod
 	// allow multiple colonists by reserving the exit path from a build place
 	/*
 	 * ### ENABLE AGAIN FOR SMART BUILDING
-	 * 
+	 *
 	[HarmonyPatch(typeof(JobDriver_ConstructFinishFrame))]
 	[HarmonyPatch(nameof(JobDriver_ConstructFinishFrame.TryMakePreToilReservations))]
 	static class JobDriver_ConstructFinishFrame_TryMakePreToilReservations_Patch
@@ -839,17 +839,20 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(FloatMenuMakerMap.AddJobGiverWorkOrders))]
 	static class FloatMenuMakerMap_AddJobGiverWorkOrders_Patch
 	{
+		[HarmonyPriority(1000000)]
 		public static void Prefix(Pawn pawn, out ForcedWork __state)
 		{
-			__state = ForcedWork.Instance;
+			__state = null;
 			if (pawn?.Map != null)
+			{
+				__state = ForcedWork.Instance;
 				__state.Prepare(pawn);
+			}
 		}
 
 		public static void Postfix(Pawn pawn, ForcedWork __state)
 		{
-			if (pawn?.Map != null)
-				__state.Unprepare(pawn);
+			__state?.Unprepare(pawn);
 		}
 
 		public static int GetPriority(Pawn_WorkSettings workSettings, WorkTypeDef w, Pawn pawn)
