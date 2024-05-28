@@ -8,8 +8,8 @@
 	<Feature_Achtung_Cooperation>Zusammenarbeit</Feature_Achtung_Cooperation>
 	<Feature_Achtung_FourModes>Vier Modi</Feature_Achtung_FourModes>
 	<Feature_Achtung_Settings>Einstellungen</Feature_Achtung_Settings>
-	<Feature_Achtung_Draftstatus>Kampfstatus</Feature_Achtung_Draftstatus>
-	<Feature_Achtung_Rescue>Rettung</Feature_Achtung_Rescue>
+	<Feature_Achtung_Draftstatus>Kampfmodus</Feature_Achtung_Draftstatus>
+	<Feature_Achtung_Rescue>Retten</Feature_Achtung_Rescue>
 
 	<PositioningEnabledTitle>Benutzerdef. Positionierung via Maus</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Aktiviert die Kampfpositionierung beim Klicken/Ziehen der Maus (siehe Einstellungen unten).</PositioningEnabledExplained>
@@ -17,23 +17,23 @@
 	<AchtungModifierTitle>Achtung!-Taste</AchtungModifierTitle>
 	<AchtungModifierExplained>Wenn du diese Taste gedrückt hältst und deine Kolonisten via Rechtsklick bewegst, werden sie automatisch in den Kampfmodus versetzt. Beim Halten können die ausgewählten Kolonisten in ihrer aktuellen Formation an deinem Mauszeiger bewegt werden. Die Formation kann mittels Q und E rotiert werden.</AchtungModifierExplained>
 
-	<ForceCommandMenuModeTitle>Rechtsklick-Modus</ForceCommandMenuModeTitle>
-	<ForceCommandMenuKeyTitle>Rechtsklick-Überschreibungstaste</ForceCommandMenuKeyTitle>
+	<ForceCommandMenuModeTitle>Rechtsklickmodus</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Taste zum Überschreiben des Rechtsklicks</ForceCommandMenuKeyTitle>
 
 	<CommandMenuModeOptionAuto>Kampfmodusabhängig</CommandMenuModeOptionAuto>
-	<CommandMenuModeOptionAutoExplained>Der Kampfmodus des Kolonisten entscheidet, ob das Kontextmenü angezeigt wird oder zur angeklickten Position bewegt wird</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionAutoExplained>Der Kampfmodus des Kolonisten entscheidet, ob das Kontextmenü angezeigt wird oder zur angeklickten Position bewegt wird.</CommandMenuModeOptionAutoExplained>
 	<CommandMenuModeOptionPressForMenu>Taste für Menü</CommandMenuModeOptionPressForMenu>
-	<CommandMenuModeOptionPressForMenuExplained>Halten Sie die Taste gedrückt, um die Standardaktion zu überschreiben und stattdessen das Kontextmenü anzuzeigen</CommandMenuModeOptionPressForMenuExplained>
-	<CommandMenuModeOptionPressForPosition>Taste für Positionierung</CommandMenuModeOptionPressForPosition>
-	<CommandMenuModeOptionPressForPositionExplained>Halten Sie die Taste gedrückt, um das Kontextmenü zu überschreiben und einen Positions-Befehl auszugeben</CommandMenuModeOptionPressForPositionExplained>
-	<CommandMenuModeOptionDelayed>Halte-Umschaltung</CommandMenuModeOptionDelayed>
-	<CommandMenuModeOptionDelayedExplained>Halten Sie die rechte Maustaste gedrückt; die Aktion wechselt nach der definierten Verzögerung von Positionierung zum Anzeigen des Kontextmenüs</CommandMenuModeOptionDelayedExplained>
+	<CommandMenuModeOptionPressForMenuExplained>Halte die Taste gedrückt, um die Standardaktion zu überschreiben und stattdessen das Kontextmenü anzuzeigen.</CommandMenuModeOptionPressForMenuExplained>
+	<CommandMenuModeOptionPressForPosition>Taste für Position</CommandMenuModeOptionPressForPosition>
+	<CommandMenuModeOptionPressForPositionExplained>Halte die Taste gedrückt, um das Kontextmenü zu überschreiben und einen Positionierbefehl zu erteilen.</CommandMenuModeOptionPressForPositionExplained>
+	<CommandMenuModeOptionDelayed>Halten zum Wechseln</CommandMenuModeOptionDelayed>
+	<CommandMenuModeOptionDelayedExplained>Halte die rechte Maustaste gedrückt; die Aktion wechselt nach einer bestimmten Verzögerung von der Positionierung zur Kontextmenüanzeige.</CommandMenuModeOptionDelayedExplained>
 
-	<DelayTitle>Halte-Dauer</DelayTitle>
-	<DelayExplained>Zeitspanne in Millisekunden, die die rechte Maustaste gedrückt gehalten werden muss, bevor das Kontextmenü erscheint und die Positionierung überschreitet</DelayExplained>
+	<DelayTitle>Verzögerungsdauer</DelayTitle>
+	<DelayExplained>Wie lange (in Millisekunden) die rechte Maustaste gedrückt gehalten werden muss, bevor das Kontextmenü angezeigt und die Positionierung überschrieben wird.</DelayExplained>
 
-	<RescueEnabledTitle>'Rettung' Arbeitsprioritätsspalte</RescueEnabledTitle>
-	<RescueEnabledExplained>Aktiviert die automatische Rettung von Kolonisten und fügt eine Spalte in der Arbeitsansicht hinzu</RescueEnabledExplained>
+	<RescueEnabledTitle>Arbeitstyp 'Retten' hinzufügen</RescueEnabledTitle>
+	<RescueEnabledExplained>Aktiviert die automatische Rettung von Kolonisten und fügt eine Spalte im Tab 'Arbeit' hinzu.</RescueEnabledExplained>
 
 	<ForcedCommandState>Gezwungen zu arbeiten, bis alles erledigt ist.</ForcedCommandState>
 
@@ -71,12 +71,12 @@
 	<HealthLevelOptionNeedsMedicalRest>Benötigt Bettruhe</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>Schockzustand</HealthLevelOptionInPainShock>
 
-	<IgnoreForbiddenTitle>Verbotene Markierungen ignorieren</IgnoreForbiddenTitle>
-	<IgnoreForbiddenExplained>Erlaube erzwungene Arbeit an verbotenen Objekten</IgnoreForbiddenExplained>
+	<IgnoreForbiddenTitle>Verbotsmarkierungen ignorieren</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Erlaubt erzwungene Arbeit an verbotenen Objekten.</IgnoreForbiddenExplained>
 	<IgnoreRestrictionsTitle>Zonenbeschränkungen ignorieren</IgnoreRestrictionsTitle>
-	<IgnoreRestrictionsExplained>Erlaube erzwungene Arbeit in eingeschränkten Bereichen</IgnoreRestrictionsExplained>
+	<IgnoreRestrictionsExplained>Erlaubt erzwungene Arbeit in eingeschränkten Bereichen.</IgnoreRestrictionsExplained>
 	<IgnoreAssignmentsTitle>Arbeitszuweisungen ignorieren</IgnoreAssignmentsTitle>
-	<IgnoreAssignmentsExplained>Erlaube erzwungene Arbeit trotz fehlender Arbeitsprioritäten</IgnoreAssignmentsExplained>
+	<IgnoreAssignmentsExplained>Erlaubt erzwungene Arbeit trotz fehlender Arbeitsprioritäten.</IgnoreAssignmentsExplained>
 
 	<BuildingSmartDefaultTitle>Cleveres Bauen für neue erzw. Arbeiten aktivieren</BuildingSmartDefaultTitle>
 	<BuildingSmartDefaultExplained>Ändert die Standardbauweise bei erzw. Arbeiten.</BuildingSmartDefaultExplained>
@@ -95,12 +95,12 @@
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} ist in schlechter Verfassung</JobInterruptedBadHealth>
 
-	<CleanRoomLabel>Gründlich reinigen!</CleanRoomLabel>
+	<CleanRoomLabel>Reinige gründlich!</CleanRoomLabel>
 	<CleanRoomInfoText>Raum gründlich reinigen</CleanRoomInfoText>
 	<CleanRoomDescription>Reinige einen Raum, bis er komplett sauber ist.</CleanRoomDescription>
 	<CleanRoomReport>Reinigt{0}: {1}</CleanRoomReport>
 
-	<FireFightLabel>Feuer bekämpfen!</FireFightLabel>
+	<FireFightLabel>Lösche Feuer!</FireFightLabel>
 	<FireFightInfoText>Feuer löschen</FireFightInfoText>
 	<FireFightDescription>Lösche ein Feuer (auch außerhalb des Heimatgebiets).</FireFightDescription>
 	<FireFightReport>Löscht Feuer: {0}</FireFightReport>
@@ -112,13 +112,13 @@
 
 	<AlreadyDoing>(Arbeit #{0})</AlreadyDoing>
 
-	<CouldNotFindMoreForcedWork>{0} konnte keine erzw. Arbeit finden. Die verbleibende Arbeit ist wahrscheinlich reserviert oder nicht zugänglich.</CouldNotFindMoreForcedWork>
-	<NoForcedWork>Keine erzw. Arbeit.</NoForcedWork>
-	<ForcedWorkWasInterrupted>Erzw. Arbeit von {0} wurde unterbrochen.</ForcedWorkWasInterrupted>
+	<CouldNotFindMoreForcedWork>{0} konnte keine erzwungene Arbeit finden. Die verbleibende Arbeit ist wahrscheinlich reserviert oder nicht zugänglich.</CouldNotFindMoreForcedWork>
+	<NoForcedWork>Keine erzwungene Arbeit</NoForcedWork>
+	<ForcedWorkWasInterrupted>Erzwungene Arbeit von {0} wurde unterbrochen.</ForcedWorkWasInterrupted>
 
-	<WorkType_Rescue_Label>rettung</WorkType_Rescue_Label>
-	<WorkType_Rescue_PawnLabel>Rettung </WorkType_Rescue_PawnLabel>
+	<WorkType_Rescue_Label>Retten</WorkType_Rescue_Label>
+	<WorkType_Rescue_PawnLabel>Retter</WorkType_Rescue_PawnLabel>
 	<WorkType_Rescue_GerundLabel>Kolonistenrettung</WorkType_Rescue_GerundLabel>
-	<WorkType_Rescue_Description>Verwundete Kolonisten werden zu Betten gebracht wo sie behandelt werden können</WorkType_Rescue_Description>
+	<WorkType_Rescue_Description>Verwundete Kolonisten werden in Betten gebracht, wo sie behandelt werden können.</WorkType_Rescue_Description>
 
 </LanguageData>
