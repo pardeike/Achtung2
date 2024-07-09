@@ -68,12 +68,37 @@ namespace Brrainz
 				moveWorkTypeLabelDown = !moveWorkTypeLabelDown;
 				workTable.columns[i].moveWorkTypeLabelDown = moveWorkTypeLabelDown;
 			}
+			
+			/*  Fluffy.WorkTab compatible */
 
 			var controller = AccessTools.TypeByName("WorkTab.Controller");
-			if (controller != null)
+			var workTabType = AccessTools.TypeByName("WorkTab.MainTabWindow_WorkTab");
+			var workTypeExtensionsType = AccessTools.TypeByName("WorkTab.WorkType_Extensions");
+			var workGiverType = AccessTools.TypeByName("PawnColumnDef_WorkGiver");
+			if (controller == null || workTabType == null) 
+				return;
+			
+			var columns = new List<PawnColumnDef>(workTable.columns);
+			// clear column header tip cache
+			foreach (var pawnColumnDefWorker in columns.Select(c => c.Worker).Where(w => w != null))
 			{
-				var columns = new List<PawnColumnDef>(workTable.columns);
-				Traverse.Create(controller).Field("allColumns").SetValue(columns);
+				Traverse.Create(pawnColumnDefWorker).Field("_headerTip").SetValue(null);
+			}
+			Traverse.Create(workTypeExtensionsType).Field("workListCache").SetValue(new Dictionary<WorkTypeDef, string>());
+			Traverse.Create(workTypeExtensionsType).Field("_workgiversByType").SetValue(new Dictionary<WorkTypeDef, List<WorkGiverDef>>());
+			
+			// remove all expanded columns(By ctrl+click), this is added by Fluffy.WorkTab
+			columns.RemoveAll(col => workGiverType.IsInstanceOfType(col));
+			
+			// update work tab cached columns
+			Traverse.Create(controller).Field("allColumns").SetValue(columns);
+			
+			// work tab rebuild
+			var workTabInstance = AccessTools.Property(workTabType, "Instance").GetValue(null);
+			if (workTabInstance != null)
+			{
+				// AccessTools.Method(workTabType, "RebuildTable").Invoke(workTabInstance, null);
+				AccessTools.Method(workTabType, "Notify_ColumnsChanged").Invoke(workTabInstance, null);
 			}
 		}
 
@@ -89,9 +114,8 @@ namespace Brrainz
 			Reload<WorkGiverDef>();
 
 			var workerClass = AccessTools.TypeByName("WorkTab.PawnColumnWorker_WorkType") ?? typeof(PawnColumnWorker_WorkPriority);
-			var pawnColumnDefType = AccessTools.TypeByName("WorkTab.PawnColumnDef_WorkGiver") ?? typeof(PawnColumnDef);
 
-			var columnDef = (PawnColumnDef)Activator.CreateInstance(pawnColumnDefType);
+			var columnDef = (PawnColumnDef)Activator.CreateInstance(typeof(PawnColumnDef));
 			Traverse.Create(columnDef).Field("workgiver").SetValue(workgiver);
 			columnDef.defName = $"WorkPriority_{def.defName}";
 			columnDef.workType = def;
