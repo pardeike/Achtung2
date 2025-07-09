@@ -28,7 +28,7 @@
 	<CommandMenuModeOptionPressForPositionExplained>Hold the key to override the context menu and issue a positioning command</CommandMenuModeOptionPressForPositionExplained>
 	<CommandMenuModeOptionDelayed>Hold-Switch</CommandMenuModeOptionDelayed>
 	<CommandMenuModeOptionDelayedExplained>Hold down the right-click button; the action will switch from positioning to displaying the context menu after the defined delay</CommandMenuModeOptionDelayedExplained>
-	
+
 	<DelayTitle>Hold Duration</DelayTitle>
 	<DelayExplained>Duration in milliseconds to hold right-click before the context menu appears, overriding positioning</DelayExplained>
 
@@ -95,7 +95,7 @@
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} is in bad shape</JobInterruptedBadHealth>
 
-	<CleanRoomLabel>Clean this room</CleanRoomLabel>
+	<CleanRoomLabel>Clean room (Achtung)</CleanRoomLabel>
 	<CleanRoomInfoText>Cleaning room thoroughly</CleanRoomInfoText>
 	<CleanRoomDescription>Clean a room until it is completely clean</CleanRoomDescription>
 	<CleanRoomReport>Cleaning{0}: {1}</CleanRoomReport>

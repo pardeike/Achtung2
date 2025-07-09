@@ -296,36 +296,6 @@ namespace AchtungMod
 			}
 		}
 
-		static void StartWork(Type driverType, Pawn pawn, LocalTargetInfo target, LocalTargetInfo clickCell)
-		{
-			var driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
-			driver.StartJob(pawn, target, clickCell);
-		}
-
-		private static void AddDoThoroughly(List<FloatMenuOption> options, Vector3 clickPos, Pawn pawn, Type driverType)
-		{
-			var driver = (JobDriver_Thoroughly)Activator.CreateInstance(driverType);
-			var clickCell = new LocalTargetInfo(IntVec3.FromVector3(clickPos));
-			var targets = driver.CanStart(pawn, clickCell);
-			if (targets != null)
-			{
-				var existingJobs = driver.SameJobTypesOngoing();
-				foreach (var target in targets)
-				{
-					var suffix = existingJobs.Count > 0 ? " " + "AlreadyDoing".Translate("" + (existingJobs.Count + 1)) : new TaggedString("");
-					options.Add(new FloatMenuOption(driver.GetLabel() + suffix, () => StartWork(driverType, pawn, target, clickCell), MenuOptionPriority.Low));
-				}
-			}
-		}
-
-		public static IEnumerable<FloatMenuOption> AchtungChoicesAtFor(Vector3 clickPos, Pawn pawn)
-		{
-			var options = new List<FloatMenuOption>();
-			//AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_CleanRoom));
-			AddDoThoroughly(options, clickPos, pawn, typeof(JobDriver_FightFire));
-			return options;
-		}
-
 		private static void DrawForcedJobs()
 		{
 			var forcedWork = ForcedWork.Instance;

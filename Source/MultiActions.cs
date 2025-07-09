@@ -32,8 +32,10 @@ namespace AchtungMod
 
 		public void AddColonist(Colonist colonist)
 		{
+			var selectedPawns = Find.MapUI.selector.SelectedPawns;
+
 			var existingLabels = new HashSet<string>();
-			FloatMenuMakerMap.ChoicesAtFor(clickPos, colonist.pawn).Do(option =>
+			FloatMenuMakerMap.GetOptions([colonist.pawn], clickPos, out _).Do(option =>
 			{
 				AddMultiAction(colonist, colonist.pawn.Drafted, option);
 				_ = existingLabels.Add(option.Label);
@@ -41,7 +43,7 @@ namespace AchtungMod
 
 			var draftState = colonist.pawn.Drafted;
 			_ = Tools.SetDraftStatus(colonist.pawn, !draftState);
-			FloatMenuMakerMap.ChoicesAtFor(clickPos, colonist.pawn).Do(option =>
+			FloatMenuMakerMap.GetOptions([colonist.pawn], clickPos, out _).Do(option =>
 			{
 				if (existingLabels.Contains(option.Label) == false)
 					AddMultiAction(colonist, !draftState, option);
@@ -163,7 +165,8 @@ namespace AchtungMod
 			var playSelectionSound = AllEqual(options, o => o.playSelectionSound);
 			var shownItem = AllEqual(options, (o1, o2) => o1.shownItem == o2.shownItem, o => o.shownItem);
 			var iconThing = AllEqual(options, (o1, o2) => o1.iconThing == o2.iconThing, o => o.iconThing);
-			var itemIcon = AllEqual(options, (o1, o2) => o1.itemIcon == o2.itemIcon, o => o.itemIcon);
+			var iconTex = AllEqual(options, (o1, o2) => o1.iconTex == o2.iconTex, o => o.iconTex);
+			var iconTexCoords = AllEqual(options, (o1, o2) => o1.iconTexCoords == o2.iconTexCoords, o => o.iconTexCoords);
 			var iconJustification = AllEqual(options, o => o.iconJustification);
 			var iconColor = AllEqual(options, (o1, o2) => o1.iconColor == o2.iconColor, o => o.iconColor);
 			var forceThingColor = AllEqual(options, (o1, o2) => o1.forceThingColor == o2.forceThingColor, o => o.forceThingColor);
@@ -193,7 +196,8 @@ namespace AchtungMod
 				graphicIndexOverride = graphicIndexOverride,
 				drawPlaceHolderIcon = drawPlaceHolderIcon,
 				shownItem = shownItem,
-				itemIcon = itemIcon,
+				iconTex = iconTex,
+				iconTexCoords = iconTexCoords,
 				iconJustification = iconJustification,
 				forceThingColor = forceThingColor
 			};

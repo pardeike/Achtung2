@@ -1,5 +1,4 @@
-﻿/*
-using RimWorld;
+﻿using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +24,7 @@ namespace AchtungMod
 				return null;
 
 			if (AllFilth(clickCell.Cell).Any())
-				return new List<LocalTargetInfo> { clickCell };
+				return [clickCell];
 			return null;
 		}
 
@@ -71,11 +70,11 @@ namespace AchtungMod
 			room = ValidateRoom(room ?? RoomAt(useCell ?? TargetLocA));
 			room ??= ValidateRoom(RoomAt(useCell ?? TargetLocA));
 			if (room == null)
-				return new List<Filth>();
+				return [];
 
 			var pathGrid = pawn.Map.pathing.For(pawn).pathGrid;
 			if (pathGrid == null)
-				return new List<Filth>();
+				return [];
 
 			return room
 				.ContainedAndAdjacentThings.OfType<Filth>()
@@ -121,4 +120,3 @@ namespace AchtungMod
 		}
 	}
 }
-*/

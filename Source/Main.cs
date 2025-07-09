@@ -13,6 +13,8 @@ using Verse;
 using Verse.AI;
 using Verse.Profile;
 
+using static HarmonyLib.Code;
+
 namespace AchtungMod
 {
 	[StaticConstructorOnStartup]
@@ -329,7 +331,7 @@ namespace AchtungMod
 			__result = ___pawn.workSettings.GetPriority(w) == 0;
 		}
 	}
-	//
+	/* DISABLED IN 1.6
 	[HarmonyPatch(typeof(Alert_HunterLacksRangedWeapon))]
 	[HarmonyPatch(nameof(Alert_HunterLacksRangedWeapon.HuntersWithoutRangedWeapon), MethodType.Getter)]
 	static class Alert_HunterLacksRangedWeapon_HuntersWithoutRangedWeapon_Patch
@@ -346,6 +348,7 @@ namespace AchtungMod
 			return instructions.MethodReplacer(fromMethod, toMethod);
 		}
 	}
+	*/
 
 	// forced hauling outside of allowed area
 	//
@@ -496,8 +499,8 @@ namespace AchtungMod
 					}
 				if (label != null)
 				{
-					instr.Insert(i++, new CodeInstruction(OpCodes.Ldarg_3));
-					instr.Insert(i++, new CodeInstruction(OpCodes.Brtrue, label));
+					instr.Insert(i++, Ldarg_3);
+					instr.Insert(i++, Brtrue[label]);
 				}
 				else
 					Log.Error("Cannot find Brfalse before NotInHomeAreaTrans");
@@ -607,6 +610,7 @@ namespace AchtungMod
 
 	[HarmonyPatch(typeof(ReservationManager))]
 	[HarmonyPatch(nameof(ReservationManager.RespectsReservationsOf))]
+	[HarmonyPatch([typeof(Pawn), typeof(Pawn)])]
 	static class ReservationManager_RespectsReservationsOf_Patch
 	{
 		public static bool Prefix(Pawn newClaimant, Pawn oldClaimant, ref bool __result)
@@ -676,13 +680,13 @@ namespace AchtungMod
 
 			matcher
 				.InsertAndAdvance(
-					new CodeInstruction(OpCodes.Ldloc_0),
-					new CodeInstruction(OpCodes.Ldloc_2),
-					new CodeInstruction(OpCodes.Ldloc, matcher.NamedMatch("thingVar").operand),
+					Ldloc_0,
+					Ldloc_2,
+					Ldloc[matcher.NamedMatch("thingVar").operand],
 					CodeInstruction.Call(() => EnqueueWhenForced(default, default, default))
 				)
 				.MatchStartForward(new CodeMatch(code => code.operand is MethodInfo method && method.Name == "Reserve"))
-				.MatchStartBackwards(new CodeMatch(name: "branch"), new CodeMatch(opcode: OpCodes.Ldloc_0));
+				.MatchStartBackwards(new CodeMatch(name: "branch"), Ldloc_0);
 
 			var branch = matcher.NamedMatch("branch");
 			if (branch.Branches(out _) == false)
@@ -692,9 +696,9 @@ namespace AchtungMod
 			}
 
 			return matcher.Advance(1).InsertAndAdvance(
-				new CodeInstruction(OpCodes.Ldloc_0),
+				Ldloc_0,
 				CodeInstruction.Call(() => IsForced(default)),
-				new CodeInstruction(OpCodes.Brtrue, branch.operand)
+				Brtrue[branch.operand]
 			).InstructionEnumeration();
 		}
 	}
@@ -703,7 +707,7 @@ namespace AchtungMod
 	//
 	[HarmonyPatch(typeof(ForbidUtility))]
 	[HarmonyPatch(nameof(ForbidUtility.IsForbidden))]
-	[HarmonyPatch(new Type[] { typeof(Thing), typeof(Pawn) })]
+	[HarmonyPatch([typeof(Thing), typeof(Pawn)])]
 	static class ForbidUtility_IsForbidden_Patch
 	{
 		public static bool Prepare() => Achtung.Settings.ignoreForbidden;
@@ -798,7 +802,7 @@ namespace AchtungMod
 					list[idx].operand = m_RadialDistinctThingsAround_Patch;
 
 					// add extra 'pawn' before CALL (extra last argument on our method)
-					list.Insert(idx, new CodeInstruction(OpCodes.Ldarg_1));
+					list.Insert(idx, Ldarg_1);
 					idx++;
 					count++;
 					found++;
@@ -815,9 +819,9 @@ namespace AchtungMod
 
 	// patch in our menu options
 	//
-	[HarmonyPatch(typeof(FloatMenuMakerMap))]
-	[HarmonyPatch(nameof(FloatMenuMakerMap.ScannerShouldSkip))]
-	static class FloatMenuMakerMap_ScannerShouldSkip_Patch
+	[HarmonyPatch(typeof(FloatMenuOptionProvider_WorkGivers))]
+	[HarmonyPatch(nameof(FloatMenuOptionProvider_WorkGivers.ScannerShouldSkip))]
+	static class FloatMenuOptionProvider_WorkGivers_ScannerShouldSkip_Patch
 	{
 		public static bool Prefix(WorkGiver_Scanner scanner, Thing t, ref bool __result)
 		{
@@ -835,9 +839,9 @@ namespace AchtungMod
 		}
 	}
 	//
-	[HarmonyPatch(typeof(FloatMenuMakerMap))]
-	[HarmonyPatch(nameof(FloatMenuMakerMap.AddJobGiverWorkOrders))]
-	static class FloatMenuMakerMap_AddJobGiverWorkOrders_Patch
+	[HarmonyPatch(typeof(FloatMenuOptionProvider_WorkGivers))]
+	[HarmonyPatch(nameof(FloatMenuOptionProvider_WorkGivers.GetWorkGiverOption))]
+	static class FloatMenuOptionProvider_WorkGivers_GetWorkGiverOption_Patch
 	{
 		[HarmonyPriority(1000000)]
 		public static void Prefix(Pawn pawn, out ForcedWork __state)
@@ -855,56 +859,40 @@ namespace AchtungMod
 			__state?.Unprepare(pawn);
 		}
 
-		public static int GetPriority(Pawn_WorkSettings workSettings, WorkTypeDef w, Pawn pawn)
+		public static int AchtungGetPriority(Pawn_WorkSettings workSettings, WorkTypeDef w)
 		{
 			if (Achtung.Settings.ignoreAssignments == false)
 				return workSettings.GetPriority(w);
-			return pawn.WorkTypeIsDisabled(w) ? 0 : 1;
+			return workSettings.pawn.WorkTypeIsDisabled(w) ? 0 : 1;
 		}
 
-		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+		public static FloatMenuOption DecorateForcedTask(FloatMenuOption option, Pawn pawn, LocalTargetInfo target, string reservedText, ReservationLayerDef layer, WorkGiver_Scanner workgiver)
 		{
-			var m_GetPriority = AccessTools.Method(typeof(Pawn_WorkSettings), nameof(Pawn_WorkSettings.GetPriority));
-			var floatMenuOptionConstructorArgs = new[] { typeof(string), typeof(Action), typeof(MenuOptionPriority), typeof(Action<Rect>), typeof(Thing), typeof(float), typeof(Func<Rect, bool>), typeof(WorldObject), typeof(bool), typeof(int) };
-			var c_FloatMenuOption = AccessTools.Constructor(typeof(FloatMenuOption), floatMenuOptionConstructorArgs);
+			var forcedOption = ForcedFloatMenuOption.CreateForcedMenuItem(option, pawn, target, workgiver);
+			return FloatMenuUtility.DecoratePrioritizedTask(forcedOption, pawn, target, reservedText, layer);
+		}
 
-			var matcher = new CodeMatcher(instructions, generator);
-			var count = 0;
-			while (true)
+		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+		{
+			var m_GetPriority = SymbolExtensions.GetMethodInfo((Pawn_WorkSettings pws, WorkTypeDef wtd) => pws.GetPriority(wtd));
+			var m_AchtungGetPriority = SymbolExtensions.GetMethodInfo(() => AchtungGetPriority(default, default));
+
+			var m_DecoratePrioritizedTask = SymbolExtensions.GetMethodInfo(() => FloatMenuUtility.DecoratePrioritizedTask(default, default, default, default, default));
+			var m_DecorateForcedTask = SymbolExtensions.GetMethodInfo(() => DecorateForcedTask(default, default, default, default, default, default));
+
+			var list = Transpilers.MethodReplacer(instructions, m_GetPriority, m_AchtungGetPriority).ToList();
+			for (var i = 0; i < list.Count(); i++)
 			{
-				matcher.MatchEndForward(
-					new CodeMatch(OpCodes.Isinst, typeof(WorkGiver_Scanner)),
-					CodeMatch.WithOpcodes([OpCodes.Stloc, OpCodes.Stloc_S], name: "workgiver-scanner")
-				);
-				if (matcher.IsInvalid)
-					break;
-
-				var workgiverScanner = matcher.NamedMatch("workgiver-scanner").operand;
-
-				matcher
-					.MatchStartForward(CodeMatch.Calls(m_GetPriority))
-					.ThrowIfInvalid("Cannot find call to Pawn_WorkSettings.GetPriority")
-					.RemoveInstruction()
-					.Insert(
-						new CodeInstruction(OpCodes.Ldarg_1),
-						new CodeInstruction(OpCodes.Call, SymbolExtensions.GetMethodInfo((int _) => GetPriority(default, default, default)))
-					)
-					.MatchStartForward(new CodeMatch(OpCodes.Newobj, c_FloatMenuOption))
-					.ThrowIfInvalid("Cannot find new FloatMenuOption")
-					.InsertAndAdvance(
-						new CodeInstruction(OpCodes.Ldarg_1),
-						new CodeInstruction(OpCodes.Ldarg_0),
-						new CodeInstruction(OpCodes.Ldloc, workgiverScanner)
-					)
-					.Set(OpCodes.Call, SymbolExtensions.GetMethodInfo(() => ForcedFloatMenuOption.CreateForcedMenuItem(default, default, default, default, default, default, default, default, default, default, default, default, default)));
-
-				count++;
+				var instruction = list[i];
+				if (instruction.Calls(m_GetPriority))
+					instruction.operand = m_AchtungGetPriority;
+				else if (instruction.Calls(m_DecoratePrioritizedTask))
+				{
+					list.Insert(i, Ldloc_1);
+					instruction.operand = m_DecorateForcedTask;
+				}
 			}
-
-			if (count == 0)
-				Log.Error("Achtung could not add any patches to FloatMenuMakerMap.AddJobGiverWorkOrders, forcing will not work");
-
-			return matcher.InstructionEnumeration();
+			return list;
 		}
 	}
 	//
@@ -975,15 +963,15 @@ namespace AchtungMod
 				for (var j = i; j < jump; j++)
 					yield return instrList[++i];
 
-				yield return new CodeInstruction(OpCodes.Ldarg_0);
-				yield return new CodeInstruction(OpCodes.Ldarg_0);
-				yield return new CodeInstruction(OpCodes.Ldfld, f_curJob);
-				yield return new CodeInstruction(OpCodes.Ldarg_0);
-				yield return new CodeInstruction(OpCodes.Ldfld, f_pawn);
-				yield return new CodeInstruction(OpCodes.Ldarg_1);
-				yield return new CodeInstruction(OpCodes.Call, m_ContinueJob);
+				yield return Ldarg_0;
+				yield return Ldarg_0;
+				yield return Ldfld[f_curJob];
+				yield return Ldarg_0;
+				yield return Ldfld[f_pawn];
+				yield return Ldarg_1;
+				yield return Call[m_ContinueJob];
 
-				yield return new CodeInstruction(OpCodes.Brtrue, endLabel);
+				yield return Brtrue[endLabel];
 			}
 		}
 	}
@@ -1087,12 +1075,14 @@ namespace AchtungMod
 
 	// handle events early
 	//
-	[HarmonyPatch(typeof(Selector))]
-	[HarmonyPatch(nameof(Selector.HandleMapClicks))]
+	[HarmonyPatch(typeof(UIRoot_Play))]
+	[HarmonyPatch(nameof(UIRoot_Play.UIRootOnGUI))]
 	static class Selector_HandleMapClicks_Patch
 	{
 		public static bool Prefix()
 		{
+			if (WorldRendererUtility.WorldRendered)
+				return true;
 			return Controller.GetInstance().HandleEvents();
 		}
 	}
@@ -1105,7 +1095,7 @@ namespace AchtungMod
 	{
 		public static void Postfix()
 		{
-			if (WorldRendererUtility.WorldRenderedNow == false)
+			if (WorldRendererUtility.WorldRendered == false)
 				Controller.GetInstance().HandleDrawing();
 		}
 	}
@@ -1118,7 +1108,7 @@ namespace AchtungMod
 	{
 		public static void Postfix()
 		{
-			if (WorldRendererUtility.WorldRenderedNow == false)
+			if (WorldRendererUtility.WorldRendered == false)
 				Controller.GetInstance().HandleDrawingOnGUI();
 		}
 	}
@@ -1164,57 +1154,4 @@ namespace AchtungMod
 			cache[__instance] = __result;
 		}
 	}
-
-	// custom context menu
-	//
-	[HarmonyPatch(typeof(FloatMenuMakerMap))]
-	[HarmonyPatch(nameof(FloatMenuMakerMap.ChoicesAtFor))]
-	[StaticConstructorOnStartup]
-	static class FloatMenuMakerMap_ChoicesAtFor_Postfix
-	{
-		public static void Postfix(List<FloatMenuOption> __result, Vector3 clickPos, Pawn pawn)
-		{
-			if (pawn?.Map != null && pawn.Drafted == false)
-				if (WorldRendererUtility.WorldRenderedNow == false)
-					__result.AddRange(Controller.AchtungChoicesAtFor(clickPos, pawn));
-		}
-	}
-
-	/*
-	[HarmonyPatch(typeof(FloatMenuMakerMap))]
-	[HarmonyPatch(nameof(FloatMenuMakerMap.ChoicesAtFor))]
-	[StaticConstructorOnStartup]
-	static class FloatMenuMakerMap_ChoicesAtFor_Finalizer
-	{
-		static readonly Texture2D AttentionIcon = ContentFinder<Texture2D>.Get("AttentionIcon", true);
-
-		public static bool Prepare(MethodBase _)
-		{
-			return AccessTools.TypeByName("VisualExceptions.HarmonyMain") == null;
-		}
-
-		public static Exception Finalizer(Exception __exception, ref List<FloatMenuOption> __result)
-		{
-			if (__exception != null)
-			{
-				var handler = new ExceptionAnalyser(__exception);
-
-				var mods = handler.GetInvolvedMods(["brrainz.achtung"]).Select(info => info.metaData.GetWorkshopName() ?? info.metaData.Name).Distinct();
-				var errorStr = "There was an error while generating the menu.";
-				if (mods.Count() == 1)
-					errorStr = $"{mods.First()} caused an error while producing this menu.";
-				else
-					errorStr = $"One of the following mods caused an error while producing this menu: {mods.Join()}.";
-				__result ??= [];
-				__result.Add(new FloatMenuOption($"{errorStr}. Select to copy enhanced stacktrace to the clipboard and report it in the RimWorld discord.", () =>
-				{
-					var te = new TextEditor { text = handler.GetStacktrace() };
-					te.SelectAll();
-					te.Copy();
-				}, AttentionIcon, Color.yellow, MenuOptionPriority.VeryLow));
-			}
-			return null;
-		}
-	}
-	*/
 }

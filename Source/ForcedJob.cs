@@ -443,7 +443,7 @@ namespace AchtungMod
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				targets = new HashSet<ForcedTarget>(targets_temp_list);
+				targets = [.. targets_temp_list];
 				targets_temp_list.Clear();
 			}
 		}

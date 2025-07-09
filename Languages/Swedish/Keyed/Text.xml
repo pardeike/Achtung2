@@ -95,10 +95,10 @@
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} har låg hälsa</JobInterruptedBadHealth>
 
-	<CleanRoomLabel>Städa rummet</CleanRoomLabel>
-	<CleanRoomInfoText>Städar rummet</CleanRoomInfoText>
-	<CleanRoomDescription>Städar ett rum tills det är rent</CleanRoomDescription>
-	<CleanRoomReport>Städa{0}: {1}</CleanRoomReport>
+	<CleanRoomLabel>Städa rum (Achtung)</CleanRoomLabel>
+	<CleanRoomInfoText>Städar rummet noggrant</CleanRoomInfoText>
+	<CleanRoomDescription>Städa ett rum tills det är helt rent</CleanRoomDescription>
+	<CleanRoomReport>Städar{0}: {1}</CleanRoomReport>
 
 	<FireFightLabel>Släck brand</FireFightLabel>
 	<FireFightInfoText>Släcker en brand</FireFightInfoText>

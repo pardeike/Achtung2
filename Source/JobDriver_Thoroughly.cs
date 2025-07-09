@@ -87,17 +87,14 @@ namespace AchtungMod
 		public List<Job> SameJobTypesOngoing()
 		{
 			var jobs = new List<Job>();
-			if (pawn.jobs == null)
-				return jobs;
-			var queue = pawn.jobs.jobQueue;
-			if (queue == null)
-				return jobs;
-			for (var i = -1; i < queue.Count; i++)
-			{
-				var aJob = i == -1 ? pawn.CurJob : queue[i].job;
-				if (aJob?.def.driverClass.IsInstanceOfType(this) ?? false)
-					jobs.Add(aJob);
-			}
+			var queue = pawn?.jobs?.jobQueue;
+			if (queue != null)
+				for (var i = -1; i < queue.Count; i++)
+				{
+					var aJob = i == -1 ? pawn.CurJob : queue[i].job;
+					if (aJob?.def?.driverClass.IsInstanceOfType(this) ?? false)
+						jobs.Add(aJob);
+				}
 			return jobs;
 		}
 

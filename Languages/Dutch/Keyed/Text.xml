@@ -95,10 +95,10 @@
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} verkeert in slechte staat</JobInterruptedBadHealth>
 
-	<CleanRoomLabel>Deze ruimte schoonmaken</CleanRoomLabel>
-	<CleanRoomInfoText>De ruimte grondig aan het schoonmaken</CleanRoomInfoText>
+	<CleanRoomLabel>Ruimte schoonmaken (Achtung)</CleanRoomLabel>
+	<CleanRoomInfoText>Ruimte grondig schoonmaken</CleanRoomInfoText>
 	<CleanRoomDescription>Maak een ruimte volledig schoon</CleanRoomDescription>
-	<CleanRoomReport>{0} aan het schoonmaken: {1}</CleanRoomReport>
+	<CleanRoomReport>Schoonmaken{0}: {1}</CleanRoomReport>
 
 	<FireFightLabel>Brand blussen</FireFightLabel>
 	<FireFightInfoText>Brand aan het blussen</FireFightInfoText>

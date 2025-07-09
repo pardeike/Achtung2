@@ -95,9 +95,9 @@
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
 	<JobInterruptedBadHealth>{0} se encuentra mal</JobInterruptedBadHealth>
 
-	<CleanRoomLabel>Limpiar esta habitación</CleanRoomLabel>
-	<CleanRoomInfoText>Limpiando a fondo la habitación</CleanRoomInfoText>
-	<CleanRoomDescription>Limpiar la habitación hasta que quede impoluta</CleanRoomDescription>
+	<CleanRoomLabel>Limpiar habitación (Achtung)</CleanRoomLabel>
+	<CleanRoomInfoText>Limpiando habitación a fondo</CleanRoomInfoText>
+	<CleanRoomDescription>Limpiar una habitación hasta que esté completamente limpia</CleanRoomDescription>
 	<CleanRoomReport>Limpiando{0}: {1}</CleanRoomReport>
 
 	<FireFightLabel>Apagar fuego</FireFightLabel>
