@@ -3,7 +3,7 @@
         <ModName>Achtung</ModName>
         <ModFileName>Achtung</ModFileName>
         <Repository>https://github.com/pardeike/Achtung2</Repository>
-        <ModVersion>3.10.0.0</ModVersion>
+        <ModVersion>3.10.1.0</ModVersion>
         <ProjectGuid>{8BD5A28F-96C4-43B4-907F-600AA0162F84}</ProjectGuid>
     </PropertyGroup>
 </Project>
