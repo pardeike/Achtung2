@@ -50,11 +50,7 @@ namespace AchtungMod
 			Settings = GetSettings<AchtungSettings>();
 		}
 
-		public override void DoSettingsWindowContents(Rect inRect)
-		{
-			AchtungSettings.DoWindowContents(inRect);
-		}
-
+		public override void DoSettingsWindowContents(Rect inRect) => AchtungSettings.DoWindowContents(inRect);
 		public override string SettingsCategory() => "Achtung!";
 	}
 
@@ -63,16 +59,8 @@ namespace AchtungMod
 	static class Root_Play_Update_Patch
 	{
 		public static bool isDragging = false;
-
-		public static void Prefix(Vector3 ___rootPos, out Vector3 __state)
-		{
-			__state = ___rootPos;
-		}
-
-		public static void Postfix(Vector3 ___rootPos, Vector3 __state)
-		{
-			isDragging = ___rootPos != __state;
-		}
+		public static void Prefix(Vector3 ___rootPos, out Vector3 __state) => __state = ___rootPos;
+		public static void Postfix(Vector3 ___rootPos, Vector3 __state) => isDragging = ___rootPos != __state;
 	}
 
 	[HarmonyPatch(typeof(LetterStack))]
@@ -81,8 +69,7 @@ namespace AchtungMod
 	{
 		static void Prefix(ref float baseY)
 		{
-			if (DebugViewSettings.drawPawnDebug == false || Prefs.DevMode == false)
-				return;
+			if (DebugViewSettings.drawPawnDebug == false || Prefs.DevMode == false) return;
 
 			const float rowHeight = 26f;
 			const float spacing = 4f;
@@ -164,19 +151,16 @@ namespace AchtungMod
 
 		public static void Postfix()
 		{
-			if (Current.ProgramState != ProgramState.Playing)
-				return;
+			if (Current.ProgramState != ProgramState.Playing) return;
 			var camera = Find.CameraDriver;
-			if (Root_Play_Update_Patch.isDragging)
-				return;
+			if (Root_Play_Update_Patch.isDragging) return;
 			var s1 = (int)(camera.rootSize * 1000);
 			var s2 = (int)(camera.desiredSize * 1000);
-			if (Math.Abs(s1 - s2) > 1) // can be 59999/60000 when completely zoomed out
-				return;
+			if (Math.Abs(s1 - s2) > 1) return; // can be 59999/60000 when completely zoomed out
 
 			if (ForcedWork.Instance.hasForcedJobs)
 			{
-				var n = (Tools.EnvTicks() / 100) % 10;
+				var n = Tools.EnvTicks() / 100 % 10;
 				prevFrames++;
 				if (previousN != n)
 				{
@@ -197,7 +181,7 @@ namespace AchtungMod
 
 			if (Scribe.mode == LoadSaveMode.Inactive)
 				for (var i = 0; i < iterations; i++)
-					it.MoveNext();
+					_ = it.MoveNext();
 		}
 	}
 
@@ -213,7 +197,6 @@ namespace AchtungMod
 			var doctorRescueWorkGiver = DefDatabase<WorkGiverDef>.GetNamed("DoctorRescue");
 			if (rescuing == null && Achtung.Settings.rescueEnabled)
 				Tools.savedWorkTypeDef = DynamicWorkTypes.AddWorkTypeDef(Tools.RescuingWorkTypeDef, WorkTypeDefOf.Doctor, doctorRescueWorkGiver);
-
 			Log.Message($"Achtung v{Performance.GetModVersionString()} Info: To make Achtung log some performance info, create an empty 'AchtungPerformance.txt' file in same directory as Player.log");
 		}
 	}
@@ -222,41 +205,23 @@ namespace AchtungMod
 	static class HugsLib_Quickstart_InitateSaveLoading_Patch
 	{
 		const string name = "HugsLib.Quickstart.QuickstartController:InitateSaveLoading";
-
-		public static bool Prepare(MethodBase _)
-		{
-			return TargetMethod() != null;
-		}
-
-		public static MethodBase TargetMethod()
-		{
-			return AccessTools.Method(name);
-		}
-
-		public static void Prefix()
-		{
-			Find.Maps?.ForEach(map => ForcedWork.Instance?.Cleanup(map));
-		}
+		public static bool Prepare(MethodBase _) => TargetMethod() != null;
+		public static MethodBase TargetMethod() => AccessTools.Method(name);
+		public static void Prefix() => Find.Maps?.ForEach(map => ForcedWork.Instance?.Cleanup(map));
 	}
 
 	[HarmonyPatch(typeof(MemoryUtility))]
 	[HarmonyPatch(nameof(MemoryUtility.ClearAllMapsAndWorld))]
 	static class MemoryUtility_ClearAllMapsAndWorld_Patch
 	{
-		public static void Prefix()
-		{
-			Find.Maps?.ForEach(map => ForcedWork.Instance?.Cleanup(map));
-		}
+		public static void Prefix() => Find.Maps?.ForEach(map => ForcedWork.Instance?.Cleanup(map));
 	}
 
 	[HarmonyPatch(typeof(Game))]
 	[HarmonyPatch(nameof(Game.DeinitAndRemoveMap))]
 	static class Game_DeinitAndRemoveMap_Patch
 	{
-		public static void Prefix(Map map)
-		{
-			ForcedWork.Instance?.Cleanup(map);
-		}
+		public static void Prefix(Map map) => ForcedWork.Instance?.Cleanup(map);
 	}
 
 	// a way to store an extra property on a pawn
@@ -269,8 +234,7 @@ namespace AchtungMod
 		[HarmonyPriority(int.MinValue)]
 		public static void Postfix(Pawn pawn)
 		{
-			if (pawn.IsColonist == false)
-				return;
+			if (pawn.IsColonist == false) return;
 
 			var t = pawn.thinker.GetType();
 			while (true)
@@ -283,7 +247,10 @@ namespace AchtungMod
 			if (t != typeof(Pawn_Thinker))
 				Log.Error($"Achtung identified a potential mod conflict: The instance for pawn.thinker is of type {t} but should be {typeof(Pawn_Thinker)}. As a result Achtung performance is degraded");
 
-			pawn.thinker = new Pawn_AchtungThinker(pawn) { forcedJobs = ForcedWork.Instance.GetForcedJobsInstance(pawn) };
+			pawn.thinker = new Pawn_AchtungThinker(pawn)
+			{
+				forcedJobs = ForcedWork.Instance.GetForcedJobsInstance(pawn)
+			};
 		}
 	}
 
@@ -308,10 +275,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(DesignatorManager.DesignatorManagerUpdate))]
 	static class DesignatorManager_DesignatorManagerUpdate_Patch
 	{
-		public static void Postfix()
-		{
-			MouseTracker.GetInstance().OnGUI();
-		}
+		public static void Postfix() => MouseTracker.GetInstance().OnGUI();
 	}
 
 	// allow for disabled work types when option is on and we have a forced job
@@ -322,12 +286,9 @@ namespace AchtungMod
 	{
 		public static void Postfix(Pawn ___pawn, WorkTypeDef w, ref bool __result)
 		{
-			if (__result == true)
-				return;
-			if (Achtung.Settings.ignoreAssignments == false)
-				return;
-			if (ForcedWork.Instance.HasForcedJob(___pawn) == false)
-				return;
+			if (__result == true) return;
+			if (Achtung.Settings.ignoreAssignments == false) return;
+			if (ForcedWork.Instance.HasForcedJob(___pawn) == false) return;
 			__result = ___pawn.workSettings.GetPriority(w) == 0;
 		}
 	}
@@ -385,8 +346,7 @@ namespace AchtungMod
 		public static void Prefix(Toil __instance, ref Func<JobCondition> newEndCondition)
 		{
 			var method = newEndCondition?.Method;
-			if (method == null)
-				return;
+			if (method == null) return;
 
 			if (hasForbiddenState.TryGetValue(method, out var hasForbidden) == false)
 			{
@@ -417,8 +377,7 @@ namespace AchtungMod
 		public static void Prefix(Toil __instance, ref Func<bool> newFailCondition)
 		{
 			var method = newFailCondition?.Method;
-			if (method == null)
-				return;
+			if (method == null) return;
 
 			if (Toil_AddEndCondition_Patch.hasForbiddenState.TryGetValue(method, out var hasForbidden) == false)
 			{
@@ -428,7 +387,7 @@ namespace AchtungMod
 			}
 			if (hasForbidden)
 			{
-				Func<bool> condition = newFailCondition;
+				var condition = newFailCondition;
 				newFailCondition = delegate
 				{
 					if (__instance.actor?.IsHashIntervalTick(60) ?? true)
@@ -448,12 +407,10 @@ namespace AchtungMod
 		public static void Postfix(/*IntVec3 c,*/ Pawn forPawn, ref bool __result)
 		{
 			var map = forPawn?.Map;
-			if (map == null || __result || forPawn.RaceProps.Humanlike == false)
-				return;
+			if (map == null || __result || forPawn.RaceProps.Humanlike == false) return;
 
 			var forcedWork = ForcedWork.Instance;
-			if (forcedWork.hasForcedJobs == false && forcedWork.IsPreparing(forPawn) == false)
-				return;
+			if (forcedWork.hasForcedJobs == false && forcedWork.IsPreparing(forPawn) == false) return;
 
 			if (forcedWork.HasForcedJob(forPawn))
 			{
@@ -519,8 +476,7 @@ namespace AchtungMod
 	{
 		public static void Postfix(ref bool __result)
 		{
-			if (__result == false)
-				return;
+			if (__result == false) return;
 			if (Find.Selector.SelectedPawns.Count(pawn => pawn.IsColonist && pawn.Drafted) > 1)
 				__result = false;
 		}
@@ -532,8 +488,7 @@ namespace AchtungMod
 	{
 		public static void Postfix(ref bool __result)
 		{
-			if (__result == false)
-				return;
+			if (__result == false) return;
 			if (Find.Selector.SelectedPawns.Count(pawn => pawn.IsColonist && pawn.Drafted) > 1)
 				__result = false;
 		}
@@ -549,13 +504,11 @@ namespace AchtungMod
 	{
 		static void Postfix(JobDriver_ConstructFinishFrame __instance, ref bool __result)
 		{
-			if (__result == false)
-				return;
+			if (__result == false) return;
 
 			var pawn = __instance.pawn;
 			var forcedWork = ForcedWork.Instance;
-			if (forcedWork.HasForcedJob(pawn) == false)
-				return;
+			if (forcedWork.HasForcedJob(pawn) == false) return;
 
 			var job = __instance.job;
 			var buildCell = job.targetA;
@@ -587,9 +540,7 @@ namespace AchtungMod
 		static void Postfix(Pawn claimant)
 		{
 			var forcedWork = ForcedWork.Instance;
-			if (forcedWork.HasForcedJob(claimant) == false)
-				return;
-
+			if (forcedWork.HasForcedJob(claimant) == false) return;
 			forcedWork.RemoveForbiddenLocations(claimant);
 		}
 	}
@@ -601,9 +552,7 @@ namespace AchtungMod
 		static void Postfix(Pawn claimant)
 		{
 			var forcedWork = ForcedWork.Instance;
-			if (forcedWork.HasForcedJob(claimant) == false)
-				return;
-
+			if (forcedWork.HasForcedJob(claimant) == false) return;
 			forcedWork.RemoveForbiddenLocations(claimant);
 		}
 	}*/
@@ -635,7 +584,7 @@ namespace AchtungMod
 			{
 				var forcedWork = ForcedWork.Instance;
 				if (forcedWork.HasForcedJob(claimant))
-					return false;
+					 return false;
 			}
 			return reservationManager.CanReserve(claimant, target, maxPawns, stackCount, layer, ignoreOtherReservations);
 		}
@@ -678,7 +627,7 @@ namespace AchtungMod
 					new CodeMatch()
 				);
 
-			matcher
+			_ = matcher
 				.InsertAndAdvance(
 					Ldloc_0,
 					Ldloc_2,
@@ -750,10 +699,7 @@ namespace AchtungMod
 	[HarmonyPatch(nameof(Pawn_PathFollower.TryRecoverFromUnwalkablePosition))]
 	static class Pawn_PathFollower_TryRecoverFromUnwalkablePosition_Patch
 	{
-		public static void My_Notify_Teleported(Pawn pawn, bool _1, bool _2)
-		{
-			pawn.Drawer.tweener.ResetTweenedPosToRoot();
-		}
+		public static void My_Notify_Teleported(Pawn pawn, bool _1, bool _2) => pawn.Drawer.tweener.ResetTweenedPosToRoot();
 
 		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
@@ -854,10 +800,7 @@ namespace AchtungMod
 			}
 		}
 
-		public static void Postfix(Pawn pawn, ForcedWork __state)
-		{
-			__state?.Unprepare(pawn);
-		}
+		public static void Postfix(Pawn pawn, ForcedWork __state) => __state?.Unprepare(pawn);
 
 		public static int AchtungGetPriority(Pawn_WorkSettings workSettings, WorkTypeDef w)
 		{
@@ -901,16 +844,10 @@ namespace AchtungMod
 	static class Pawn_JobTracker_EndCurrentJob_Patch
 	{
 		[HarmonyPriority(int.MaxValue)]
-		static void Prefix()
-		{
-			Performance.EndCurrentJob_Start();
-		}
+		static void Prefix() => Performance.EndCurrentJob_Start();
 
 		[HarmonyPriority(int.MinValue)]
-		static void Postfix()
-		{
-			Performance.EndCurrentJob_Stop();
-		}
+		static void Postfix() => Performance.EndCurrentJob_Stop();
 
 		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
@@ -1054,20 +991,16 @@ namespace AchtungMod
 	{
 		public static void Postfix(Pawn ___pawn, ref bool __result)
 		{
-			if (__result == false || ___pawn?.Map == null)
-				return;
+			if (__result == false || ___pawn?.Map == null) return;
 
 			var forcedWork = ForcedWork.Instance;
-			if (forcedWork.HasForcedJob(___pawn) == false)
-				return;
+			if (forcedWork.HasForcedJob(___pawn) == false) return;
 
 			var forcedJob = forcedWork.GetForcedJob(___pawn);
-			if (forcedJob == null)
-				return;
+			if (forcedJob == null) return;
 
 			var workGiver = ___pawn.CurJob?.workGiverDef;
-			if (workGiver == null)
-				return;
+			if (workGiver == null) return;
 
 			__result = forcedJob.workgiverDefs.Contains(workGiver) == false;
 		}
