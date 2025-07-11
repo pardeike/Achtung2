@@ -9,7 +9,7 @@ public class Colonist(Pawn pawn)
 {
 	public Pawn pawn = pawn;
 	public IntVec3 designation = IntVec3.Invalid;
-	public IntVec3 lastOrder = IntVec3.Invalid;
+	public IntVec3 lastOrder = pawn.Position;
 	public Vector3 startPosition = pawn.DrawPos;
 	public Vector3 offsetFromCenter = Vector3.zero;
 	public bool originalDraftStatus = Tools.GetDraftingStatus(pawn);
@@ -66,4 +66,13 @@ public class Colonist(Pawn pawn)
 			Tools.OrderTo(pawn, bestCell.x, bestCell.z);
 		}
 	}
+
+	// implement equals based on pawn
+	public override bool Equals(object obj)
+	{
+		if (obj is Colonist other)
+			return pawn == other.pawn;
+		return false;
+	}
+	public override int GetHashCode() => pawn.GetHashCode();
 }

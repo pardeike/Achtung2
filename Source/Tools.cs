@@ -378,7 +378,7 @@ static class Tools
 	 => [.. Find.Selector.SelectedObjects.OfType<Pawn>()
 			.Where(pawn =>
 				pawn.drafter != null
-				&& (pawn.IsPlayerControlled)
+				&& pawn.IsPlayerControlled
 				&& pawn.Downed == false
 				&& (pawn.jobs?.IsCurrentJobPlayerInterruptible() ?? false))
 			.Select(pawn => new Colonist(pawn))];

@@ -32,6 +32,16 @@
 				"kind": "build",
 				"isDefault": true
 			}
+		},
+		{
+			"label": "restart rimworld",
+			"presentation": {
+				"reveal": "silent",
+				"close": true
+			},
+			"command": "./restart.sh",
+			"type": "process",
+			"problemMatcher": []
 		}
 	]
 }

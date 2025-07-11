@@ -1003,7 +1003,24 @@ static class Pawn_JobTracker_ShouldStartJobFromThinkTree_Patch
 	}
 }
 
-// handle events early
+// handle early events
+//
+[HarmonyPatch(typeof(Selector))]
+[HarmonyPatch(nameof(Selector.SelectorOnGUI_BeforeMainTabs))]
+static class Selector_SelectorOnGUI_BeforeMainTabs_Patch
+{
+	public static void Prefix()
+	{
+		var evt = Event.current;
+		if (evt.type != EventType.MouseDown) return;
+		if (evt.button != 1) return;
+		if (evt.shift) return;
+
+		Controller.GetInstance().HandleEarlyRightClicks();
+	}
+}
+
+// handle map events
 //
 [HarmonyPatch(typeof(Selector))]
 [HarmonyPatch(nameof(Selector.SelectorOnGUI))]

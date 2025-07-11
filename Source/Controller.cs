@@ -9,16 +9,11 @@ namespace AchtungMod;
 
 public class Controller
 {
-	private enum Button
-	{
-		left = 0,
-		right = 1
-	}
-
 	public List<Colonist> colonists;
 	public Vector3 lineStart;
 	public Vector3 lineEnd;
 	public bool groupMovement;
+	public bool groupedMoved;
 	public Vector3 groupCenter;
 	public int groupRotation;
 	public bool groupRotationWas45;
@@ -54,7 +49,7 @@ public class Controller
 		.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
 	}
 
-	bool ShowMenu(MultiActions actions, bool forceMenu, Map map, IntVec3 cell, Action gotoAction)
+	bool ShowMenu(MultiActions actions, bool forceMenu, Action gotoAction)
 	{
 		if (actions == null)
 			return true;
@@ -62,7 +57,7 @@ public class Controller
 		var optionTaken = false;
 		if (actions.Count(false) > 0)
 		{
-			if (cell.InBounds(map) && forceMenu == false)
+			if (forceMenu == false)
 			{
 				var autoTakableOptions = actions.GetAutoTakeableActions();
 				var first = autoTakableOptions.FirstOrDefault();
@@ -80,7 +75,10 @@ public class Controller
 			}
 		}
 		if (menuAdded)
+		{
+			Tools.SetCursor(AchtungCursor.Default);
 			EndDragging();
+		}
 		if (optionTaken == false && menuAdded == false && actions.EveryoneHasGoto && gotoAction != null)
 		{
 			actions.allPawns.Do(pawn => Tools.SetDraftStatus(pawn, true));
@@ -99,21 +97,22 @@ public class Controller
 		var doForceMenu = Achtung.Settings.maxForcedItems > 0;
 		if (doPositioning == false && doForceMenu == false)
 			return true;
+		var selector = Find.Selector;
 
 		if (longPress == false)
 			colonists = Tools.GetSelectedColonists();
 
 		if (colonists.Count == 0)
-			return true;
+				return true;
 
-		if (isDragging && button == (int)Button.left && groupMovement == false)
+		if (isDragging && button == 0 && groupMovement == false)
 		{
 			Tools.DraftWithSound(colonists, true);
 			EndDragging();
 			return true;
 		}
 
-		if (button != (int)Button.right)
+		if (button != 1)
 			return true;
 
 		var actions = doForceMenu ? new MultiActions(colonists, UI.MouseMapPosition()) : null;
@@ -132,9 +131,12 @@ public class Controller
 
 		var map = Find.CurrentMap;
 		var cell = IntVec3.FromVector3(pos);
+		if (cell.InBounds(map) == false)
+			return true;
 
-		var thingsClicked = map.thingGrid.ThingsListAt(cell);
-		var subjectClicked = thingsClicked.OfType<Pawn>().Where(pawn => (pawn.IsColonist == false && pawn.IsColonyMech == false) || pawn.Drafted == false).Any();
+		var pawnsUnderMouse = selector.SelectableObjectsUnderMouse().OfType<Pawn>().ToList();
+
+		var subjectClicked = pawnsUnderMouse.Where(pawn => (pawn.IsColonist == false && pawn.IsColonyMech == false) || pawn.Drafted == false).Any();
 		var standableClicked = cell.Standable(map);
 
 		if (subjectClicked && colonists.Count > 1 && achtungPressed == false && forceMenu == false)
@@ -148,31 +150,63 @@ public class Controller
 		{
 			if (actions == null)
 				return true;
-			return ShowMenu(actions, forceMenu, map, cell, null);
+			return ShowMenu(actions, forceMenu, null);
+		}
+
+		var draggableColonistClicked = pawnsUnderMouse.Where(pawn =>
+			pawn.drafter != null
+			&& pawn.IsPlayerControlled
+			&& pawn.Downed == false
+			&& (pawn.jobs?.IsCurrentJobPlayerInterruptible() ?? false)
+		)
+		.OrderBy(pawn => pawn.Drafted ? 0 : 1)
+		.Select(pawn => new Colonist(pawn))
+		.FirstOrDefault();
+
+		if (draggableColonistClicked != null && selector.IsSelected(draggableColonistClicked.pawn) == false)
+		{
+			if (Event.current.shift == false)
+			{
+				selector.ClearSelection();
+				colonists = [];
+			}
+			selector.Select(draggableColonistClicked.pawn);
+			if (colonists.Contains(draggableColonistClicked) == false)
+				colonists.Add(draggableColonistClicked);
 		}
 
 		if (achtungPressed)
 			Tools.DraftWithSound(colonists, true);
 
+		var useFormation = doPositioning && (draggableColonistClicked != null || achtungPressed);
+		void DoDrag() => StartDragging(pos, useFormation, draggableColonistClicked);
+
 		// in multiplayer, drafting will update pawn.Drafted in the same tick, so we fake it
 		if (allDrafted && doPositioning && longPress == false)
 		{
-			StartDragging(pos, achtungPressed);
+			DoDrag();
 			return true;
 		}
 
-		return ShowMenu(actions, forceMenu, map, cell, () => StartDragging(pos, achtungPressed));
+		return ShowMenu(actions, forceMenu, DoDrag);
 	}
 
-	private void StartDragging(Vector3 pos, bool asGroup)
+	private void StartDragging(Vector3 pos, bool asGroup, Colonist centerOnColonist = null)
 	{
 		var draftedColonists = colonists.Where(colonist => colonist.pawn.Drafted).ToList();
 
 		groupMovement = asGroup;
 		if (groupMovement)
 		{
-			groupCenter.x = draftedColonists.Sum(colonist => colonist.startPosition.x) / draftedColonists.Count;
-			groupCenter.z = draftedColonists.Sum(colonist => colonist.startPosition.z) / draftedColonists.Count;
+			if (centerOnColonist != null)
+			{
+				groupCenter = centerOnColonist.pawn.Position.ToVector3Shifted();
+			}
+			else
+			{
+				groupCenter.x = draftedColonists.Sum(colonist => colonist.startPosition.x) / draftedColonists.Count;
+				groupCenter.z = draftedColonists.Sum(colonist => colonist.startPosition.z) / draftedColonists.Count;
+			}
 			groupRotation = 0;
 			groupRotationWas45 = Tools.Has45DegreeOffset(draftedColonists);
 		}
@@ -187,11 +221,13 @@ public class Controller
 
 		isDragging = true;
 		Event.current.Use();
+		Tools.SetCursor(AchtungCursor.Position);
 	}
 
 	private void EndDragging()
 	{
 		groupMovement = false;
+		groupedMoved = false;
 		if (isDragging)
 		{
 			colonists.Clear();
@@ -204,7 +240,7 @@ public class Controller
 	{
 		var draftedColonists = colonists.Where(colonist => colonist.pawn.Drafted).ToList();
 
-		if (Event.current.button != (int)Button.right)
+		if (Event.current.button != 1)
 			return;
 
 		if (isDragging == false)
@@ -213,6 +249,7 @@ public class Controller
 		if (groupMovement)
 		{
 			draftedColonists.Do(colonist => colonist.OrderTo(pos + Tools.RotateBy(colonist.offsetFromCenter, groupRotation, groupRotationWas45)));
+			groupedMoved = true;
 			Event.current.Use();
 			return;
 		}
@@ -236,7 +273,9 @@ public class Controller
 
 	public void MouseUp()
 	{
-		if (Event.current.button != (int)Button.right)
+		Tools.SetCursor(AchtungCursor.Default);
+
+		if (Event.current.button != 1)
 			return;
 
 		EndDragging();
@@ -364,6 +403,34 @@ public class Controller
 		});
 	}
 
+	public void HandleEarlyRightClicks()
+	{
+		var selector = Find.Selector;
+		var achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
+
+		var hasSelectedColonists = selector.SelectedObjects.OfType<Pawn>()
+			.Where(pawn =>
+				pawn.drafter != null
+				&& pawn.IsPlayerControlled
+				&& pawn.Downed == false
+				&& (pawn.jobs?.IsCurrentJobPlayerInterruptible() ?? false)
+			)
+			.Any();
+		if (hasSelectedColonists && achtungPressed == false)
+			return;
+
+		var colonistClicked = GenUI
+				.ThingsUnderMouse(UI.MouseMapPosition(), 0.8f, TargetingParameters.ForColonist(), null)
+				.OfType<Pawn>()
+				.ToList();
+		if (colonistClicked.Count == 1)
+		{
+			var colonist = colonistClicked[0];
+			if (colonist.Drafted || achtungPressed)
+				selector.Select(colonist);
+		}
+	}
+
 	static int longPressThreshold = -1;
 	public bool HandleEvents()
 	{
@@ -376,20 +443,21 @@ public class Controller
 		var pos = UI.MouseMapPosition();
 		var runOriginal = true;
 		if (Achtung.Settings.forceCommandMenuMode == CommandMenuMode.Delayed
+			&& groupedMoved == false
 			&& longPressThreshold > -1
 			&& Event.current.rawType == EventType.Layout
 			&& Tools.EnvTicks() > longPressThreshold
 			&& suppressMenu == false)
 		{
 			longPressThreshold = -1;
-			return MouseDown(pos, (int)Button.right, true);
+			return MouseDown(pos, 1, true);
 		}
 		switch (Event.current.rawType)
 		{
 			case EventType.MouseDown:
-				if (Event.current.button == (int)Button.right)
+				if (Event.current.button == 1)
 					suppressMenu = false;
-				longPressThreshold = Event.current.button == (int)Button.right ? Tools.EnvTicks() + Achtung.Settings.menuDelay : -1;
+				longPressThreshold = Event.current.button == 1 ? Tools.EnvTicks() + Achtung.Settings.menuDelay : -1;
 				runOriginal = MouseDown(pos, Event.current.button, false);
 				MouseDrag(pos);
 				break;
