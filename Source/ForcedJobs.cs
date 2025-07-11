@@ -1,33 +1,29 @@
 ﻿using System.Collections.Generic;
 using Verse;
 
-namespace AchtungMod
+namespace AchtungMod;
+
+public class ForcedJobs : IExposable
 {
-	public class ForcedJobs : IExposable
+	public List<ForcedJob> jobs = [];
+	public int count; // optimization
+
+	public ForcedJobs()
 	{
-		public List<ForcedJob> jobs = [];
-		public int count; // optimization
+		jobs = [];
+		count = 0;
+	}
 
-		public ForcedJobs()
-		{
-			jobs = [];
-			count = 0;
-		}
+	public void UpdateCount() => count = jobs.Count;
 
-		public void UpdateCount()
-		{
-			count = jobs.Count;
-		}
+	public void ExposeData()
+	{
+		jobs ??= [];
+		if (Scribe.mode == LoadSaveMode.Saving)
+			_ = jobs.RemoveAll(job => job == null || job.IsEmpty());
 
-		public void ExposeData()
-		{
-			jobs ??= [];
-			if (Scribe.mode == LoadSaveMode.Saving)
-				_ = jobs.RemoveAll(job => job == null || job.IsEmpty());
-
-			Scribe_Collections.Look(ref jobs, "jobs", LookMode.Deep);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-				UpdateCount();
-		}
+		Scribe_Collections.Look(ref jobs, "jobs", LookMode.Deep);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			UpdateCount();
 	}
 }
