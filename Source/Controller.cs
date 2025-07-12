@@ -134,7 +134,7 @@ public class Controller
 		if (cell.InBounds(map) == false)
 			return true;
 
-		var pawnsUnderMouse = selector.SelectableObjectsUnderMouse().OfType<Pawn>().ToList();
+		var pawnsUnderMouse = map.thingGrid.ThingsListAt(cell).OfType<Pawn>().ToList();
 
 		var subjectClicked = pawnsUnderMouse.Where(pawn => (pawn.IsColonist == false && pawn.IsColonyMech == false) || pawn.Drafted == false).Any();
 		var standableClicked = cell.Standable(map);
