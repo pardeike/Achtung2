@@ -45,7 +45,7 @@ public class Controller
 		new List<JobDef>
 			{
 				new JobDriver_CleanRoom().MakeDef(),
-				new JobDriver_FightFire().MakeDef(),
+				new JobDriver_FightFire().MakeDef()
 			}
 		.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
 	}

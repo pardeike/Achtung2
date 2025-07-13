@@ -43,6 +43,7 @@ public class Achtung : Mod
 	public static Harmony harmony = null;
 	public static AchtungSettings Settings;
 	public static string rootDir;
+	public static AutoTasks autoTasks = new();
 
 	public Achtung(ModContentPack content) : base(content)
 	{
@@ -1027,6 +1028,15 @@ static class Selector_SelectorOnGUI_BeforeMainTabs_Patch
 static class Selector_SelectorOnGUI_Patch
 {
 	public static bool Prefix() => Controller.GetInstance().HandleEvents();
+}
+
+// drive auto tasks
+//
+[HarmonyPatch(typeof(Selector))]
+[HarmonyPatch(nameof(Selector.HandleMapClicks))]
+static class Selector_HandleMapClicks_Patch
+{
+	public static void Postfix() => Achtung.autoTasks.Tick();
 }
 
 // handle drawing
