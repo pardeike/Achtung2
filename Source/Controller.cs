@@ -15,6 +15,7 @@ public class Controller
 	public bool groupMovement;
 	public bool groupedMoved;
 	public Vector3 groupCenter;
+	public Colonist centerOnColonist;
 	public int groupRotation;
 	public bool groupRotationWas45;
 	public bool isDragging;
@@ -103,7 +104,7 @@ public class Controller
 			colonists = Tools.GetSelectedColonists();
 
 		if (colonists.Count == 0)
-				return true;
+			return true;
 
 		if (isDragging && button == 0 && groupMovement == false)
 		{
@@ -136,7 +137,12 @@ public class Controller
 
 		var pawnsUnderMouse = map.thingGrid.ThingsListAt(cell).OfType<Pawn>().ToList();
 
-		var subjectClicked = pawnsUnderMouse.Where(pawn => (pawn.IsColonist == false && pawn.IsColonyMech == false) || pawn.Drafted == false).Any();
+		var subjectClicked = pawnsUnderMouse
+			.Where(pawn =>
+				(pawn.IsColonist == false && pawn.IsColonyMech == false)
+				|| (pawn.Drafted == false && longPress == false)
+				|| (pawn.Drafted == true && longPress == true)
+			).Any();
 		var standableClicked = cell.Standable(map);
 
 		if (subjectClicked && colonists.Count > 1 && achtungPressed == false && forceMenu == false)
@@ -153,7 +159,7 @@ public class Controller
 			return ShowMenu(actions, forceMenu, null);
 		}
 
-		var draggableColonistClicked = pawnsUnderMouse.Where(pawn =>
+		centerOnColonist = pawnsUnderMouse.Where(pawn =>
 			pawn.drafter != null
 			&& pawn.IsPlayerControlled
 			&& pawn.Downed == false
@@ -163,35 +169,31 @@ public class Controller
 		.Select(pawn => new Colonist(pawn))
 		.FirstOrDefault();
 
-		if (draggableColonistClicked != null && selector.IsSelected(draggableColonistClicked.pawn) == false)
+		if (centerOnColonist != null && (centerOnColonist.pawn.Drafted || achtungPressed))
 		{
-			if (Event.current.shift == false)
-			{
-				selector.ClearSelection();
-				colonists = [];
-			}
-			selector.Select(draggableColonistClicked.pawn);
-			if (colonists.Contains(draggableColonistClicked) == false)
-				colonists.Add(draggableColonistClicked);
+			if (colonists.Contains(centerOnColonist) == false)
+				colonists.Add(centerOnColonist);
 		}
 
 		if (achtungPressed)
 			Tools.DraftWithSound(colonists, true);
 
-		var useFormation = doPositioning && (draggableColonistClicked != null || achtungPressed);
-		void DoDrag() => StartDragging(pos, useFormation, draggableColonistClicked);
+		var useFormation = doPositioning && (centerOnColonist != null || achtungPressed);
+		void DoDrag() => StartDragging(pos, useFormation);
 
 		// in multiplayer, drafting will update pawn.Drafted in the same tick, so we fake it
 		if (allDrafted && doPositioning && longPress == false)
 		{
 			DoDrag();
+			if (centerOnColonist == null)
+				MouseDrag(pos, -1);
 			return true;
 		}
 
 		return ShowMenu(actions, forceMenu, DoDrag);
 	}
 
-	private void StartDragging(Vector3 pos, bool asGroup, Colonist centerOnColonist = null)
+	private void StartDragging(Vector3 pos, bool asGroup)
 	{
 		var draftedColonists = colonists.Where(colonist => colonist.pawn.Drafted).ToList();
 
@@ -228,6 +230,7 @@ public class Controller
 	{
 		groupMovement = false;
 		groupedMoved = false;
+		centerOnColonist = null;
 		if (isDragging)
 		{
 			colonists.Clear();
@@ -236,8 +239,24 @@ public class Controller
 		isDragging = false;
 	}
 
-	public void MouseDrag(Vector3 pos)
+	public void MouseDrag(Vector3 pos, int dragCount)
 	{
+		if (dragCount == 0 && centerOnColonist != null)
+		{
+			var selector = Find.Selector;
+			if (selector.IsSelected(centerOnColonist.pawn) == false)
+			{
+				if (Event.current.shift == false)
+				{
+					selector.ClearSelection();
+					colonists = [];
+				}
+				selector.Select(centerOnColonist.pawn);
+				if (colonists.Contains(centerOnColonist) == false)
+					colonists.Add(centerOnColonist);
+			}
+		}
+
 		var draftedColonists = colonists.Where(colonist => colonist.pawn.Drafted).ToList();
 
 		if (Event.current.button != 1)
@@ -432,6 +451,7 @@ public class Controller
 	}
 
 	static int longPressThreshold = -1;
+	static int dragCount = 0;
 	public bool HandleEvents()
 	{
 		if (Find.WindowStack.IsOpen<FloatMenu>())
@@ -459,11 +479,11 @@ public class Controller
 					suppressMenu = false;
 				longPressThreshold = Event.current.button == 1 ? Tools.EnvTicks() + Achtung.Settings.menuDelay : -1;
 				runOriginal = MouseDown(pos, Event.current.button, false);
-				MouseDrag(pos);
+				dragCount = 0;
 				break;
 
 			case EventType.MouseDrag:
-				MouseDrag(pos);
+				MouseDrag(pos, dragCount++);
 				break;
 
 			case EventType.MouseUp:
