@@ -801,7 +801,7 @@ static class FloatMenuOptionProvider_WorkGivers_GetWorkGiverOption_Patch
 
 	public static int AchtungGetPriority(Pawn_WorkSettings workSettings, WorkTypeDef w)
 	{
-		if (Achtung.Settings.ignoreAssignments == false)
+		if (Achtung.Settings.ignoreAssignments == false || workSettings.pawn == null)
 			return workSettings.GetPriority(w);
 		return workSettings.pawn.WorkTypeIsDisabled(w) ? 0 : 1;
 	}
