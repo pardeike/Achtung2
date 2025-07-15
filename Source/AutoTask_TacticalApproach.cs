@@ -1,6 +1,7 @@
 using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using UnityEngine;
 using Verse;
@@ -108,7 +109,7 @@ public class AutoTask_TacticalApproach(Pawn pawn, Pawn enemy) : IAutoTask
 		else
 		{
 			attackPos = CanFindAttackPosition(pawn, enemy);
-			Log($"could not attack {enemy}, going to {attackPos}");
+			Log($"could not attack {enemy}, going to attack pos = {attackPos}");
 			Goto(attackPos, State.Positioning);
 		}
 	}
@@ -154,6 +155,7 @@ public class AutoTask_TacticalApproach(Pawn pawn, Pawn enemy) : IAutoTask
 		if (TooFar() && state != State.Positioning)
 		{
 			attackPos = CanFindAttackPosition(pawn, enemy);
+			Log($"--> advancing to attack pos = {attackPos}");
 			Goto(attackPos, State.Positioning);
 			return true;
 		}
@@ -170,18 +172,45 @@ public class AutoTask_TacticalApproach(Pawn pawn, Pawn enemy) : IAutoTask
 
 	bool NeedsSafePosition(out IntVec3 coverPos)
 	{
-		var enemyPos = enemy.Position;
-
 		if (enemy.equipment.PrimaryEq.PrimaryVerb.CanHitTarget(pawn) == false)
 		{
 			coverPos = IntVec3.Invalid;
 			return false;
 		}
 
+		var verb = pawn.TryGetAttackVerb(pawn, false, false);
+		var finder = new AchtungCastPositionFinder();
+		if (finder.TryFindCastPosition(new CastPositionRequest
+		{
+			caster = pawn,
+			target = enemy,
+			verb = verb,
+			maxRangeFromCaster = verb.EffectiveRange / 3,
+			maxRangeFromTarget = verb.EffectiveRange,
+			wantCoverFromTarget = true
+		}, out var pos))
+		{
+			if (pos == pawn.Position)
+			{
+				Log($"--> no cover needed, already at {pos}");
+				coverPos = IntVec3.Invalid;
+				return false;
+			}
+
+			Log($"--> safe pos = {pos}");
+			coverPos = pos;
+			return true;
+		}
+
+		coverPos = IntVec3.Invalid;
+		return false;
+		/*
+		var enemyPos = enemy.Position;
 		var safeDistance = GetSafeDistanceToEnemy();
 		var distanceSquared = (int)(safeDistance * safeDistance) + 1;
 		var maxRadius = (int)safeDistance + 10;
 		return RCellFinder.TryFindRandomCellNearWith(pawn.Position, cell => cell.DistanceToSquared(enemyPos) > distanceSquared, pawn.Map, out coverPos, 5, maxRadius);
+		*/
 	}
 
 	bool TooClose()
@@ -219,7 +248,8 @@ public class AutoTask_TacticalApproach(Pawn pawn, Pawn enemy) : IAutoTask
 		castPositionRequest.maxRangeFromTarget = target.Downed
 			? Mathf.Min(castPositionRequest.verb.EffectiveRange, target.RaceProps.executionRange)
 			: Mathf.Max(castPositionRequest.verb.EffectiveRange, 1.42f);
-		if (CastPositionFinder.TryFindCastPosition(castPositionRequest, out var result))
+		var finder = new AchtungCastPositionFinder();
+		if (finder.TryFindCastPosition(castPositionRequest, out var result))
 			return result;
 		return IntVec3.Invalid;
 	}
