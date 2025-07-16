@@ -1,6 +1,7 @@
 using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
@@ -133,6 +134,17 @@ public class AutoTask_TacticalApproach(Pawn pawn, Pawn enemy) : IAutoTask
 	{
 		if (Find.TickManager.Paused || nextCommand != null)
 			return true;
+
+		//var sw = Stopwatch.StartNew();
+		var map = pawn.Map;
+		//float Score(IntVec3 cell) => 0.25f + 0.75f * Mathf.Clamp01(CoverUtility.CalculateOverallBlockChance(cell, enemy.Position, pawn.Map));
+		bool canBeSeenOver(IntVec3 cell) => cell.CanBeSeenOver(map);
+		var distance = GetSafeDistanceToEnemy();
+		var cells = RadialSlice.RadialCellsInSlice(pawn, enemy, distance, true, false, canBeSeenOver).ToArray();
+		DebugGrid.Run(() => cells.Do(cell => DebugGrid.Mark(cell, 0.25f /*Score(cell)*/)));
+		//sw.Stop();
+		//var milliseconds = sw.ElapsedTicks * 1000.0 / Stopwatch.Frequency;   // ticks → ms
+		//Log($"{cells.Length} radial cells around {enemy.Position} in {milliseconds:F3} ms");
 
 		if (EnemyFinished())
 		{

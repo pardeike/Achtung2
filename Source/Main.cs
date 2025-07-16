@@ -1049,6 +1049,8 @@ static class SelectionDrawer_DrawSelectionOverlays_Patch
 	{
 		if (WorldRendererUtility.WorldRendered == false)
 			Controller.GetInstance().HandleDrawing();
+
+		DebugGrid.OnGUI();
 	}
 }
 

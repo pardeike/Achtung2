@@ -55,7 +55,9 @@ public class AchtungCastPositionFinder
 		targetLoc = req.target.Position;
 		verb = req.verb;
 		AvoidGrid avoidGrid;
-		this.avoidGrid = newReq.caster.TryGetAvoidGrid(out avoidGrid, false) ? avoidGrid.Grid : emptyByteArray.AsReadOnly();
+		this.avoidGrid = newReq.caster.TryGetAvoidGrid(out avoidGrid, false)
+			? avoidGrid.Grid
+			: emptyByteArray.AsReadOnly();
 		if (verb == null)
 		{
 			var caster = req.caster;
