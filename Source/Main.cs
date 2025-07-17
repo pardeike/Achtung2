@@ -43,6 +43,7 @@ public class Achtung : Mod
 	public static Harmony harmony = null;
 	public static AchtungSettings Settings;
 	public static string rootDir;
+	public static HashSet<Thing> usedThingsPerTick = [];
 
 	public Achtung(ModContentPack content) : base(content)
 	{
@@ -195,7 +196,6 @@ static class World_FinalizeInit_Patch
 		var doctorRescueWorkGiver = DefDatabase<WorkGiverDef>.GetNamed("DoctorRescue");
 		if (rescuing == null && Achtung.Settings.rescueEnabled)
 			Tools.savedWorkTypeDef = DynamicWorkTypes.AddWorkTypeDef(Tools.RescuingWorkTypeDef, WorkTypeDefOf.Doctor, doctorRescueWorkGiver);
-		Log.Message($"Achtung v{Performance.GetModVersionString()} Info: To make Achtung log some performance info, create an empty 'AchtungPerformance.txt' file in same directory as Player.log");
 	}
 }
 
@@ -290,15 +290,13 @@ static class Pawn_WorkSettings_WorkIsActive_Patch
 		__result = ___pawn.workSettings.GetPriority(w) == 0;
 	}
 }
-/* DISABLED IN 1.6
-[HarmonyPatch(typeof(Alert_HunterLacksRangedWeapon))]
-[HarmonyPatch(nameof(Alert_HunterLacksRangedWeapon.HuntersWithoutRangedWeapon), MethodType.Getter)]
+//
+[HarmonyPatch(typeof(Alert_HunterHasShieldAndRangedWeapon))]
+[HarmonyPatch(nameof(Alert_HunterHasShieldAndRangedWeapon.BadHunters), MethodType.Getter)]
 static class Alert_HunterLacksRangedWeapon_HuntersWithoutRangedWeapon_Patch
 {
 	static bool WorkIsActive(Pawn_WorkSettings instance, WorkTypeDef w)
-	{
-		return instance.GetPriority(w) > 0; // "unpatch" it
-	}
+		=> instance.GetPriority(w) > 0; // "unpatch" it
 
 	public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 	{
@@ -306,7 +304,7 @@ static class Alert_HunterLacksRangedWeapon_HuntersWithoutRangedWeapon_Patch
 		var toMethod = SymbolExtensions.GetMethodInfo(() => WorkIsActive(null, null));
 		return instructions.MethodReplacer(fromMethod, toMethod);
 	}
-}*/
+}
 
 // forced hauling outside of allowed area
 //
@@ -397,38 +395,22 @@ static class Toil_AddFailCondition_Patch
 
 // allow for jobs outside allowed area
 //
-[HarmonyPatch(typeof(ForbidUtility))]
-[HarmonyPatch(nameof(ForbidUtility.InAllowedArea))]
-static class ForbidUtility_InAllowedArea_Patch
+[HarmonyPatch(typeof(Pawn_PlayerSettings))]
+[HarmonyPatch(nameof(Pawn_PlayerSettings.RespectsAllowedArea), MethodType.Getter)]
+static class Pawn_PlayerSettings_RespectsAllowedArea_Patch
 {
-	public static void Postfix(/*IntVec3 c,*/ Pawn forPawn, ref bool __result)
+	public static void Postfix(Pawn ___pawn, ref bool __result)
 	{
-		var map = forPawn?.Map;
-		if (map == null || __result || forPawn.RaceProps.Humanlike == false) return;
-
+		if (__result == false) return;
+		if (Achtung.Settings.ignoreRestrictions == false) return;
 		var forcedWork = ForcedWork.Instance;
-		if (forcedWork.hasForcedJobs == false && forcedWork.IsPreparing(forPawn) == false) return;
-
-		if (forcedWork.HasForcedJob(forPawn))
-		{
-			if (Achtung.Settings.ignoreRestrictions)
-				__result = true;
-			return;
-		}
-
-		// for now, this takes way too much cpu so we disable it and hope for the best
-		/*
-		if (__result == true)
-		{
-			// ignore any forced work cells if colonist is not forced
-			if (forcedWork.NonForcedShouldIgnore(map, c))
-				__result = false;
-		}
-		*/
+		if (forcedWork.hasForcedJobs == false && forcedWork.IsPreparing(___pawn) == false) return;
+		if (forcedWork.HasForcedJob(___pawn) == false) return;
+		__result = false;
 	}
 }
 
-// forced repair outside of allowed area
+// forced repair as a scanner and outside of allowed area
 //
 [HarmonyPatch(typeof(WorkGiver_Repair))]
 [HarmonyPatch(nameof(WorkGiver_Repair.HasJobOnThing))]
@@ -554,46 +536,6 @@ static class ReservationManager_ReleaseAllClaimedBy_Patch
 	}
 }*/
 
-[HarmonyPatch(typeof(ReservationManager))]
-[HarmonyPatch(nameof(ReservationManager.RespectsReservationsOf))]
-[HarmonyPatch([typeof(Pawn), typeof(Pawn)])]
-static class ReservationManager_RespectsReservationsOf_Patch
-{
-	public static bool Prefix(Pawn newClaimant, Pawn oldClaimant, ref bool __result)
-	{
-		var forcedWork = ForcedWork.Instance;
-		if (forcedWork.HasForcedJob(newClaimant) && forcedWork.HasForcedJob(oldClaimant))
-		{
-			__result = false;
-			return false;
-		}
-		return true;
-	}
-}
-
-[HarmonyPatch(typeof(ReservationManager))]
-[HarmonyPatch(nameof(ReservationManager.Reserve))]
-static class ReservationManager_Reserve_Patch
-{
-	public static bool CanReserve(ReservationManager reservationManager, Pawn claimant, LocalTargetInfo target, int maxPawns, int stackCount, ReservationLayerDef layer, bool ignoreOtherReservations)
-	{
-		if (ignoreOtherReservations)
-		{
-			var forcedWork = ForcedWork.Instance;
-			if (forcedWork.HasForcedJob(claimant))
-					return false;
-		}
-		return reservationManager.CanReserve(claimant, target, maxPawns, stackCount, layer, ignoreOtherReservations);
-	}
-
-	public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-	{
-		var fromMethod = AccessTools.Method(typeof(ReservationManager), nameof(ReservationManager.CanReserve));
-		var toMethod = AccessTools.Method(typeof(ReservationManager_Reserve_Patch), nameof(CanReserve));
-		return instructions.MethodReplacer(fromMethod, toMethod);
-	}
-}
-
 [HarmonyPatch]
 static class Toils_Construct_MakeSolidThingFromBlueprintIfNecessary_Patch
 {
@@ -706,58 +648,14 @@ static class Pawn_PathFollower_TryRecoverFromUnwalkablePosition_Patch
 	}
 }
 
-// for forced jobs, do not find work "on the way" to the work cell
+// for each tick, clear used things so that we don't reuse them for new jobs
 //
-[HarmonyPatch(typeof(WorkGiver_ConstructDeliverResources))]
-[HarmonyPatch(nameof(WorkGiver_ConstructDeliverResources.FindNearbyNeeders))]
-static class WorkGiver_ConstructDeliverResources_FindNearbyNeeders_Patch
+[HarmonyPatch(typeof(TickManager))]
+[HarmonyPatch(nameof(TickManager.DoSingleTick))]
+static class TickManager_DoSingleTick_Patch
 {
-	public static IEnumerable<Thing> RadialDistinctThingsAround_Patch(IntVec3 center, Map map, float radius, bool useCenter, Pawn pawn)
-	{
-		var forcedWork = ForcedWork.Instance;
-		var forcedJob = forcedWork.GetForcedJob(pawn);
-		if (forcedJob != null && forcedJob.isThingJob)
-		{
-			foreach (var thing1 in forcedJob.GetUnsortedTargets())
-				yield return thing1;
-		}
-		else
-		{
-			foreach (var thing2 in GenRadial.RadialDistinctThingsAround(center, map, radius, useCenter))
-				yield return thing2;
-		}
-	}
-
-	public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-	{
-		var m_RadialDistinctThingsAround = AccessTools.Method(typeof(GenRadial), nameof(GenRadial.RadialDistinctThingsAround));
-		var m_RadialDistinctThingsAround_Patch = SymbolExtensions.GetMethodInfo(() => RadialDistinctThingsAround_Patch(default, default, default, default, default));
-
-		var found = 0;
-		var list = instructions.ToList();
-		var count = list.Count;
-		var idx = 0;
-		while (idx < count)
-		{
-			if (list[idx].Calls(m_RadialDistinctThingsAround))
-			{
-				list[idx].opcode = OpCodes.Call;
-				list[idx].operand = m_RadialDistinctThingsAround_Patch;
-
-				// add extra 'pawn' before CALL (extra last argument on our method)
-				list.Insert(idx, Ldarg_1);
-				idx++;
-				count++;
-				found++;
-			}
-			idx++;
-		}
-		if (found != 2)
-			Log.Error("Cannot find both calls to RadialDistinctThingsAround in WorkGiver_ConstructDeliverResources.FindNearbyNeeders");
-
-		foreach (var instruction in list)
-			yield return instruction;
-	}
+	public static void Prefix()
+		=> Achtung.usedThingsPerTick = [];
 }
 
 // patch in our menu options
@@ -840,12 +738,6 @@ static class FloatMenuOptionProvider_WorkGivers_GetWorkGiverOption_Patch
 [HarmonyPatch(nameof(Pawn_JobTracker.EndCurrentJob))]
 static class Pawn_JobTracker_EndCurrentJob_Patch
 {
-	[HarmonyPriority(int.MaxValue)]
-	static void Prefix() => Performance.EndCurrentJob_Start();
-
-	[HarmonyPriority(int.MinValue)]
-	static void Postfix() => Performance.EndCurrentJob_Stop();
-
 	public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 	{
 		var m_CleanupCurrentJob = AccessTools.Method(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.CleanupCurrentJob));
@@ -1052,25 +944,6 @@ static class ThingOverlays_ThingOverlaysOnGUI_Patch
 	{
 		if (WorldRendererUtility.WorldRendered == false)
 			Controller.GetInstance().HandleDrawingOnGUI();
-	}
-}
-
-// turn some errors into warnings
-//
-[HarmonyPatch]
-static class Errors_To_Warnings_Patch
-{
-	public static IEnumerable<MethodBase> TargetMethods()
-	{
-		yield return AccessTools.Method(typeof(ReservationManager), nameof(ReservationManager.LogCouldNotReserveError));
-		yield return AccessTools.Method(typeof(JobUtility), nameof(JobUtility.TryStartErrorRecoverJob));
-	}
-
-	public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-	{
-		var fromMethod = SymbolExtensions.GetMethodInfo(() => Log.Error(default));
-		var toMethod = SymbolExtensions.GetMethodInfo(() => Log.Warning(default));
-		return instructions.MethodReplacer(fromMethod, toMethod);
 	}
 }
 

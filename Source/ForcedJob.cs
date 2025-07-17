@@ -18,9 +18,7 @@ public class ForcedJob : IExposable
 	public readonly QuotaCache<Thing, bool> getThingJobCache = new(10);
 	public readonly QuotaCache<IntVec3, bool> getCellJobCache = new(10);
 	public bool isThingJob = false;
-	public bool reentranceFlag = false;
-	public XY lastLocation = XY.Invalid;
-	public Thing lastThing = null;
+	//public bool reentranceFlag = false;
 	public bool initialized = false;
 	public int cellRadius = 0;
 	public bool buildSmart = Achtung.Settings.buildingSmartDefault;
@@ -62,7 +60,6 @@ public class ForcedJob : IExposable
 		workgiverScanners = [];
 		targets = [];
 		buildSmart = Achtung.Settings.buildingSmartDefault;
-		lastLocation = XY.Invalid;
 	}
 
 	// called from AddForcedJob during gameplay
@@ -73,9 +70,6 @@ public class ForcedJob : IExposable
 		workgiverScanners = [.. workgiverDefs.Select(wgd => wgd.Worker).OfType<WorkGiver_Scanner>()];
 		targets = [new ForcedTarget(item, MaterialScore(item))];
 		buildSmart = Achtung.Settings.buildingSmartDefault;
-
-		lastThing = item.thingInt;
-		lastLocation = item.Cell;
 
 		isThingJob = item.HasThing;
 	}
@@ -130,16 +124,6 @@ public class ForcedJob : IExposable
 			_ = targets.RemoveWhere(target => target.item.thingInt == thing);
 			_ = targets.Add(new ForcedTarget(replacement, MaterialScore(replacement)));
 		}
-	}
-
-	public IEnumerable<Thing> GetUnsortedTargets()
-	{
-		var mapWidth = pawn.Map.Size.x;
-		return targets
-			.Where(target => target.IsValidTarget() && Tools.IsFreeTarget(pawn, target))
-			.OrderByDescending(target => target.materialScore)
-			.Select(target => target.item.thingInt)
-			.OfType<Thing>();
 	}
 
 	public IEnumerable<LocalTargetInfo> GetSortedTargets(HashSet<int> planned)
@@ -212,6 +196,9 @@ public class ForcedJob : IExposable
 
 				if (isThingJob)
 				{
+					if (Achtung.usedThingsPerTick.Contains(target.thingInt))
+						continue;
+
 					job = target.thingInt.GetThingJob(pawn, workgiver);
 					job ??= target.Cell.GetCellJob(pawn, workgiver);
 				}
@@ -224,12 +211,7 @@ public class ForcedJob : IExposable
 				if (job != null)
 				{
 					if (isThingJob)
-					{
-						lastThing = target.thingInt;
-						lastLocation = target.thingInt.Position;
-					}
-					else
-						lastLocation = target.Cell;
+						_ = Achtung.usedThingsPerTick.Add(target.thingInt);
 					return true;
 				}
 			}
@@ -242,8 +224,6 @@ public class ForcedJob : IExposable
 
 	public static bool ContinueJob(Pawn_JobTracker tracker, Job lastJob, Pawn pawn, JobCondition condition)
 	{
-		Performance.ContinueJob_Start();
-
 		_ = tracker;
 		_ = lastJob;
 
@@ -252,37 +232,30 @@ public class ForcedJob : IExposable
 		var forcedWork = ForcedWork.Instance;
 
 		var forcedJob = forcedWork.GetForcedJob(pawn);
-		Performance.Report(forcedJob, pawn);
-		if (forcedJob == null)
-			return Performance.ContinueJob_Stop(null, false);
-		if (forcedJob.reentranceFlag)
-			return Performance.ContinueJob_Stop(forcedJob, false);
-		forcedJob.reentranceFlag = true;
+		if (forcedJob == null) return false;
+		//if (forcedJob.reentranceFlag) return false;
+		//forcedJob.reentranceFlag = true;
 		if (forcedJob.initialized == false)
 		{
 			forcedJob.initialized = true;
-			return Performance.ContinueJob_Stop(forcedJob, false);
+			return false;
 		}
 
 		if (condition == JobCondition.InterruptForced)
 		{
-			Messages.Message("ForcedWorkWasInterrupted".Translate(pawn.Name.ToStringShort), MessageTypeDefOf.RejectInput);
 			forcedWork.Remove(pawn);
-			return Performance.ContinueJob_Stop(forcedJob, false);
+			return false;
 		}
 
-		Performance.GetNextJob_Start();
 		while (true)
 		{
-			Performance.GetNextJob_Count();
 			if (forcedJob.GetNextJob(out var job))
 			{
 				job.expiryInterval = 0;
 				job.ignoreJoyTimeAssignment = true;
 				job.playerForced = true;
 				ForcedWork.QueueJob(pawn, job);
-				Performance.GetNextJob_Stop();
-				return Performance.ContinueJob_Stop(forcedJob, true);
+				return true;
 			}
 
 			forcedWork.RemoveForcedJob(pawn);
@@ -291,10 +264,9 @@ public class ForcedJob : IExposable
 				break; // exit loop
 			forcedJob.initialized = true;
 		}
-		Performance.GetNextJob_Stop();
 
 		forcedWork.Remove(pawn);
-		return Performance.ContinueJob_Stop(forcedJob, false);
+		return false;
 	}
 
 	public void ToggleSmartBuilding() => buildSmart = !buildSmart;
@@ -439,8 +411,6 @@ public class ForcedJob : IExposable
 		Scribe_Values.Look(ref initialized, "inited", false, true);
 		Scribe_Values.Look(ref cellRadius, "radius", 0, true);
 		Scribe_Values.Look(ref buildSmart, "buildSmart", true, true);
-		Scribe_References.Look(ref lastThing, "lastThing");
-		Scribe_Values.Look(ref lastLocation, "lastLocation", XY.Invalid, true);
 
 		if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			workgiverScanners = [.. workgiverDefs.Select(wgd => wgd.Worker).OfType<WorkGiver_Scanner>()];
