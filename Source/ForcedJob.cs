@@ -18,7 +18,6 @@ public class ForcedJob : IExposable
 	public readonly QuotaCache<Thing, bool> getThingJobCache = new(10);
 	public readonly QuotaCache<IntVec3, bool> getCellJobCache = new(10);
 	public bool isThingJob = false;
-	//public bool reentranceFlag = false;
 	public bool initialized = false;
 	public int cellRadius = 0;
 	public bool buildSmart = Achtung.Settings.buildingSmartDefault;
@@ -126,7 +125,7 @@ public class ForcedJob : IExposable
 		}
 	}
 
-	public IEnumerable<LocalTargetInfo> GetSortedTargets(HashSet<int> planned)
+	public IEnumerable<LocalTargetInfo> GetSortedTargets(HashSet<int> planned, bool checkExtendedForbidden)
 	{
 		const int maxSquaredDistance = 200 * 200;
 
@@ -139,7 +138,7 @@ public class ForcedJob : IExposable
 			? map.reservationManager.reservations
 				.Where(reservation => reservation.claimant != pawn)
 				.Select(reservation => reservation.target.Cell)
-				.SelectMany(cell => GenRadial.RadialCellsAround(cell, 1, true).ToXY())
+				.SelectMany(cell => checkExtendedForbidden ? GenRadial.RadialCellsAround(cell, 1, true).ToXY() : [cell])
 				.Distinct().ToHashSet()
 			: [];
 
@@ -190,7 +189,7 @@ public class ForcedJob : IExposable
 
 		var exist = false;
 		foreach (var workgiver in workGiversByPrio)
-			foreach (var target in GetSortedTargets([]))
+			foreach (var target in GetSortedTargets([], true))
 			{
 				exist = true;
 
@@ -233,8 +232,6 @@ public class ForcedJob : IExposable
 
 		var forcedJob = forcedWork.GetForcedJob(pawn);
 		if (forcedJob == null) return false;
-		//if (forcedJob.reentranceFlag) return false;
-		//forcedJob.reentranceFlag = true;
 		if (forcedJob.initialized == false)
 		{
 			forcedJob.initialized = true;

@@ -152,7 +152,7 @@ public class ForcedWork(World world) : WorldComponent(world)
 		UpdatePawnForcedJobs(pawn, new ForcedJobs());
 	}
 
-	public bool AddForcedJob(Pawn pawn, List<WorkGiverDef> workgiverDefs, LocalTargetInfo item)
+	public bool AddForcedJob(Pawn pawn, List<WorkGiverDef> workgiverDefs, LocalTargetInfo item, out ForcedJob forcedJob)
 	{
 		if (allForcedJobs.ContainsKey(pawn) == false)
 			allForcedJobs[pawn] = new ForcedJobs();
@@ -163,9 +163,20 @@ public class ForcedWork(World world) : WorldComponent(world)
 		else
 			Unprepare(pawn);
 
-		var forcedJob = new ForcedJob(pawn, item, workgiverDefs);
+		forcedJob = new ForcedJob(pawn, item, workgiverDefs);
 		allForcedJobs[pawn].jobs.Add(forcedJob);
 		allForcedJobs[pawn].UpdateCount();
+
+		// preselect up to 16 cells
+		var n = Math.Min(16, Achtung.Settings.maxForcedItems);
+		var map = pawn.Map;
+		for (var i = 1; i < n; i++)
+		{
+			var it1 = forcedJob.ExpandThingTargets(map);
+			while (it1.MoveNext()) ;
+			var it2 = forcedJob.ExpandCellTargets(map);
+			while (it2.MoveNext()) ;
+		}
 
 		hasForcedJobs = allForcedJobs.Count > 0;
 		UpdatePawnForcedJobs(pawn, allForcedJobs[pawn]);

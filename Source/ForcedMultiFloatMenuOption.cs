@@ -95,17 +95,21 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 
 					Tools.CancelWorkOn(forcePawn, item);
 
-					if (forcedWork.AddForcedJob(forcePawn, workgiverDefs, item))
+					if (forcedWork.AddForcedJob(forcePawn, workgiverDefs, item, out var forcedJob))
 					{
-						var job = ForcedWork.GetJobItem(forcePawn, workgiver, item);
-						var success = job != null && forcePawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, forcedCell);
+						var success = false;
+						var firstAvailableTarget = forcedJob.GetSortedTargets([], false).FirstOrDefault();
+						if (firstAvailableTarget != null)
+						{
+							var job = ForcedWork.GetJobItem(forcePawn, workgiver, firstAvailableTarget);
+							success = job != null && forcePawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, firstAvailableTarget.Cell);
+						}
 						if (success == false)
 							continue;
-						else
-							ForcedWork.Instance.Unprepare(forcePawn);
+						ForcedWork.Instance.Unprepare(forcePawn);
 					}
 
-					var forcedJob = ForcedWork.Instance.GetForcedJob(forcePawn);
+					forcedJob = ForcedWork.Instance.GetForcedJob(forcePawn);
 					MouseTracker.StartDragging(
 						forcePawn,
 						forcedCell,

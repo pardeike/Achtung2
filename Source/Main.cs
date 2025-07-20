@@ -556,7 +556,9 @@ static class Toils_Construct_MakeSolidThingFromBlueprintIfNecessary_Patch
 
 	public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 	{
-		var m_TryReplaceWithSolidThing = AccessTools.Method(typeof(Blueprint), nameof(Blueprint.TryReplaceWithSolidThing));
+		var fakeThing = (Thing)null;
+		var fakeBool = false;
+		var m_TryReplaceWithSolidThing = SymbolExtensions.GetMethodInfo((Blueprint bp) => bp.TryReplaceWithSolidThing(default, out fakeThing, out fakeBool));
 		var matcher = new CodeMatcher(instructions)
 			.MatchEndForward(
 				new CodeMatch(code => code.opcode == OpCodes.Ldloca || code.opcode == OpCodes.Ldloca_S, name: "thingVar"),
@@ -642,7 +644,7 @@ static class Pawn_PathFollower_TryRecoverFromUnwalkablePosition_Patch
 
 	public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 	{
-		var from = AccessTools.Method(typeof(Pawn), nameof(Pawn.Notify_Teleported));
+		var from = SymbolExtensions.GetMethodInfo((Pawn pawn) => pawn.Notify_Teleported(default, default));
 		var to = SymbolExtensions.GetMethodInfo(() => My_Notify_Teleported(default, default, default));
 		return Transpilers.MethodReplacer(instructions, from, to);
 	}
@@ -740,8 +742,8 @@ static class Pawn_JobTracker_EndCurrentJob_Patch
 {
 	public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 	{
-		var m_CleanupCurrentJob = AccessTools.Method(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.CleanupCurrentJob));
-		var m_ContinueJob = AccessTools.Method(typeof(ForcedJob), nameof(ForcedJob.ContinueJob));
+		var m_CleanupCurrentJob = SymbolExtensions.GetMethodInfo((Pawn_JobTracker pjt) => pjt.CleanupCurrentJob(default, default, default, default, default));
+		var m_ContinueJob = SymbolExtensions.GetMethodInfo(() => ForcedJob.ContinueJob(default, default, default, default));
 		var f_pawn = AccessTools.Field(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.pawn));
 		var f_curJob = AccessTools.Field(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.curJob));
 
