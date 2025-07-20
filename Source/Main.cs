@@ -930,10 +930,7 @@ static class Selector_SelectorOnGUI_Patch
 static class SelectionDrawer_DrawSelectionOverlays_Patch
 {
 	public static void Postfix()
-	{
-		if (WorldRendererUtility.WorldRendered == false)
-			Controller.GetInstance().HandleDrawing();
-	}
+		=> Controller.GetInstance().HandleDrawing();
 }
 
 // handle gui
@@ -943,10 +940,7 @@ static class SelectionDrawer_DrawSelectionOverlays_Patch
 static class ThingOverlays_ThingOverlaysOnGUI_Patch
 {
 	public static void Postfix()
-	{
-		if (WorldRendererUtility.WorldRendered == false)
-			Controller.GetInstance().HandleDrawingOnGUI();
-	}
+		=> Controller.GetInstance().HandleDrawingOnGUI();
 }
 
 // pawn inspector panel
