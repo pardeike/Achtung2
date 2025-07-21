@@ -171,6 +171,22 @@ static class Tools
 		}));
 	}
 
+	public static IEnumerable<IntVec3> TargetCells(this Job job)
+	{
+		if (job == null) yield break;
+		if (job.targetA.cellInt.IsValid) yield return job.targetA.cellInt;
+		if (job.targetB.cellInt.IsValid) yield return job.targetB.cellInt;
+		if (job.targetC.cellInt.IsValid) yield return job.targetC.cellInt;
+	}
+
+	public static IEnumerable<Thing> TargetThings(this Job job)
+	{
+		if (job == null) yield break;
+		if (job.targetA.thingInt != null) yield return job.targetA.thingInt;
+		if (job.targetB.thingInt != null) yield return job.targetB.thingInt;
+		if (job.targetC.thingInt != null) yield return job.targetC.thingInt;
+	}
+
 	public static bool IsFreeTarget(Pawn pawn, ForcedTarget target)
 	{
 		var otherRervations = pawn.Map.reservationManager.reservations

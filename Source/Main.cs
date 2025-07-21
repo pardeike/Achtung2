@@ -44,6 +44,8 @@ public class Achtung : Mod
 	public static AchtungSettings Settings;
 	public static string rootDir;
 	public static HashSet<Thing> usedThingsPerTick = [];
+	public static HashSet<IntVec3> cellsForInterruptForcedNewJob = [];
+	public static HashSet<Thing> thingsForInterruptForcedNewJob = [];
 
 	public Achtung(ModContentPack content) : base(content)
 	{
@@ -449,35 +451,6 @@ static class WorkGiver_Repair_HasJobOnThing_Patch
 	}
 }
 
-[HarmonyPatch(typeof(JobDriver_HaulToContainer))]
-[HarmonyPatch(nameof(JobDriver_HaulToContainer.TryMakePreToilReservations))]
-static class JobDriver_HaulToContainer_TryMakePreToilReservations_Patch
-{
-	public static void Prefix(JobDriver_HaulToContainer __instance)
-	{
-		if (__instance.job == null)
-			Log.Error($"Achtung: TryMakePreToilReservations called with null job");
-	}
-
-	static Thing SafeContainer(JobDriver_HaulToContainer me)
-	{
-		if (me.job == null)
-		{
-			Log.Error($"Achtung: SafeContainer called with null job");
-			return null;
-		}
-		return (Thing)me.job.GetTarget(TargetIndex.B);
-	}
-
-	public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-	{
-		return instructions.MethodReplacer(
-			AccessTools.PropertyGetter(typeof(JobDriver_HaulToContainer), nameof(JobDriver_HaulToContainer.Container)),
-			SymbolExtensions.GetMethodInfo(() => SafeContainer(null))
-		);
-	}
-}
-
 [HarmonyPatch(typeof(BeautyDrawer))]
 [HarmonyPatch(nameof(BeautyDrawer.ShouldShow))]
 static class BeautyDrawer_ShouldShow_Patch
@@ -686,7 +659,11 @@ static class Pawn_PathFollower_TryRecoverFromUnwalkablePosition_Patch
 static class TickManager_DoSingleTick_Patch
 {
 	public static void Prefix()
-		=> Achtung.usedThingsPerTick = [];
+	{
+		Achtung.usedThingsPerTick = [];
+		Achtung.cellsForInterruptForcedNewJob = [];
+		Achtung.thingsForInterruptForcedNewJob = [];
+	}
 }
 
 // patch in our menu options
@@ -830,6 +807,31 @@ static class Pawn_JobTracker_EndCurrentJob_Patch
 
 			yield return Brtrue[endLabel];
 		}
+	}
+}
+
+// when botching a construction, add the frame to the forced job
+[HarmonyPatch(typeof(Frame))]
+[HarmonyPatch(nameof(Frame.FailConstruction))]
+static class Frame_FailConstruction_Patch
+{
+	static Thing SpawnAndForce(Thing newThing, IntVec3 loc, Map map, Rot4 rot, WipeMode wipeMode, bool respawningAfterLoad, bool forbidLeavings, Pawn pawn)
+	{
+		var blueprint = GenSpawn.Spawn(newThing, loc, map, rot, wipeMode, respawningAfterLoad, forbidLeavings);
+		var forcedJob = ForcedWork.Instance.GetForcedJob(pawn);
+		_ = forcedJob?.targets.Add(new ForcedTarget(blueprint, ForcedJob.MaterialScore(blueprint)));
+		return blueprint;
+	}
+
+	public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+	{
+		var m_Spawn = SymbolExtensions.GetMethodInfo(() => GenSpawn.Spawn(null, default, null, Rot4.Invalid, default, false, false));
+		var m_SpawnAndForce = SymbolExtensions.GetMethodInfo(() => SpawnAndForce(default, default, default, default, default, default, default, default));
+		return new CodeMatcher(instructions).MatchStartForward(Call[m_Spawn])
+			.ThrowIfNotMatch("Cannot find GenSpawn.Spawn in Frame.FailConstruction")
+			.InsertAndAdvance(Ldarg_1)
+			.SetInstruction(Call[m_SpawnAndForce])
+			.InstructionEnumeration();
 	}
 }
 

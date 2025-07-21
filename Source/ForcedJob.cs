@@ -169,7 +169,62 @@ public class ForcedJob : IExposable
 			.Select(target => target.item);
 	}
 
+	public void ExpandJob(int count)
+	{
+		var n = Math.Min(count, Achtung.Settings.maxForcedItems);
+		var map = pawn.Map;
+		for(var i = 1; i <= n; i++)
+		{
+			var it1 = ExpandThingTargets(map);
+			while (it1.MoveNext() && it1.Current) ;
+			var it2 = ExpandCellTargets(map);
+			while (it2.MoveNext() && it2.Current) ;
+		}
+	}
+
 	public bool NonForcedShouldIgnore(IntVec3 cell) => targets.Any(target => target.XY == cell && target.IsBuilding());
+
+	public bool GetNextNonConflictingJob(ForcedWork forcedWork)
+	{
+		forcedWork.AllForcedJobs().Do(fj =>
+		{
+			var job = fj.pawn.jobs.curJob;
+			Achtung.cellsForInterruptForcedNewJob.AddRange(job.TargetCells());
+			Achtung.thingsForInterruptForcedNewJob.AddRange(job.TargetThings());
+		});
+
+		foreach (var workgiverDef in workgiverDefs)
+		{
+			var workgiver = workgiverDef.giverClass == null ? null : workgiverDef.Worker as WorkGiver_Scanner;
+			if (workgiver == null)
+				continue;
+
+			var success = false;
+			foreach (var target in GetSortedTargets())
+			{
+				var job = ForcedWork.GetJobItem(pawn, workgiver, target);
+				if (job != null)
+				{
+					var targetCells = job.TargetCells();
+					var targetThings = job.TargetThings();
+					if (Achtung.cellsForInterruptForcedNewJob.Intersect(targetCells).Any())
+						continue;
+					if (Achtung.thingsForInterruptForcedNewJob.Intersect(targetThings).Any())
+						continue;
+
+					Achtung.cellsForInterruptForcedNewJob.AddRange(targetCells);
+					Achtung.thingsForInterruptForcedNewJob.AddRange(targetThings);
+
+					success = pawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, target.Cell);
+					if (success) break;
+				}
+			}
+			if (success) return true;
+		}
+
+		forcedWork.Remove(pawn);
+		return false;
+	}
 
 	public bool GetNextJob(out Job job)
 	{
@@ -228,8 +283,8 @@ public class ForcedJob : IExposable
 
 		if (pawn == null || (pawn.IsColonist == false && pawn.IsColonyMech == false))
 			return false;
-		var forcedWork = ForcedWork.Instance;
 
+		var forcedWork = ForcedWork.Instance;
 		var forcedJob = forcedWork.GetForcedJob(pawn);
 		if (forcedJob == null) return false;
 		if (forcedJob.initialized == false)
@@ -240,21 +295,17 @@ public class ForcedJob : IExposable
 
 		if (condition == JobCondition.InterruptForced)
 		{
-			//forcedWork.Remove(pawn);
-			//return false;
-			Log.Warning($"{pawn.LabelShortCap} InterruptForced");
+			forcedJob.ExpandJob(4);
+			return forcedJob.GetNextNonConflictingJob(forcedWork);
 		}
 
 		while (true)
 		{
-			Log.Warning($"{pawn.LabelShortCap} has {forcedJob.targets.Join(t => $"{t}")}");
-
 			if (forcedJob.GetNextJob(out var job))
 			{
 				job.expiryInterval = 0;
 				job.ignoreJoyTimeAssignment = true;
 				job.playerForced = true;
-				Log.Warning($"{pawn.LabelShortCap} job {job.def.defName} with A={job.targetA} and B={job.targetB} added to C={job.targetC}");
 				ForcedWork.QueueJob(pawn, job);
 				return true;
 			}
@@ -263,6 +314,7 @@ public class ForcedJob : IExposable
 			forcedJob = forcedWork.GetForcedJob(pawn);
 			if (forcedJob == null)
 				break; // exit loop
+			forcedJob.ExpandJob(4);
 			forcedJob.initialized = true;
 		}
 
@@ -302,64 +354,65 @@ public class ForcedJob : IExposable
 		}
 	}
 
-	public IEnumerator ExpandThingTargets(Map map)
+	public IEnumerator<bool> ExpandThingTargets(Map map)
 	{
 		var thingGrid = map.thingGrid;
-		if (thingGrid == null)
-			yield break;
-
-		var maxCountVerifier = Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems
-			? (Func<bool>)(() => targets.Count < Achtung.Settings.maxForcedItems)
-			: () => true;
-
-		if (maxCountVerifier() == false)
-			yield break;
-
-		var things = targets.Select(target => target.item.thingInt).Where(thing => thing != null && thing.Spawned).ToHashSet();
-		var newThings = things
-			.SelectMany(thing => thing.AllCells()).Union(targets.Select(target => target.XY)).Distinct()
-			.Expand(map, cellRadius + 1)
-			.SelectMany(cell => thingGrid.ThingsListAtFast(cell)).Distinct()
-			.ToArray();
-		yield return null;
-
-		for (var i = 0; i < newThings.Length && cancelled == false && maxCountVerifier(); i++)
+		if (thingGrid != null)
 		{
-			var newThing = newThings[i];
-			if (things.Contains(newThing) == false && ThingHasJob(newThing))
+			var maxCountVerifier = Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems
+				? (Func<bool>)(() => targets.Count < Achtung.Settings.maxForcedItems)
+				: () => true;
+
+			if (maxCountVerifier())
 			{
-				LocalTargetInfo item = newThing;
-				_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
+				var things = targets.Select(target => target.item.thingInt).Where(thing => thing != null && thing.Spawned).ToHashSet();
+				var newThings = things
+					.SelectMany(thing => thing.AllCells()).Union(targets.Select(target => target.XY)).Distinct()
+					.Expand(map, cellRadius + 1)
+					.SelectMany(cell => thingGrid.ThingsListAtFast(cell)).Distinct()
+					.ToArray();
+				yield return true;
+
+				for (var i = 0; i < newThings.Length && cancelled == false && maxCountVerifier(); i++)
+				{
+					var newThing = newThings[i];
+					if (things.Contains(newThing) == false && ThingHasJob(newThing))
+					{
+						LocalTargetInfo item = newThing;
+						_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
+					}
+					yield return true;
+				}
 			}
-			yield return null;
 		}
+		yield return false;
 	}
 
-	public IEnumerator ExpandCellTargets(Map map)
+	public IEnumerator<bool> ExpandCellTargets(Map map)
 	{
 		var maxCountVerifier = Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems
 						? (Func<bool>)(() => targets.Count < Achtung.Settings.maxForcedItems)
 						: () => true;
-
-		if (maxCountVerifier() == false)
-			yield break;
-
-		var newCells = targets
-			.Select(target => target.XY)
-			.Expand(map, cellRadius + 1)
-			.ToArray();
-		yield return null;
-
-		for (var i = 0; i < newCells.Length && cancelled == false && maxCountVerifier(); i++)
+		if (maxCountVerifier())
 		{
-			var cell = newCells[i];
-			if (CellHasJob(cell))
+			var newCells = targets
+				.Select(target => target.XY)
+				.Expand(map, cellRadius + 1)
+				.ToArray();
+			yield return true;
+
+			for (var i = 0; i < newCells.Length && cancelled == false && maxCountVerifier(); i++)
 			{
-				LocalTargetInfo item = cell;
-				_ = targets.Add(new ForcedTarget(item, 0));
+				var cell = newCells[i];
+				if (CellHasJob(cell))
+				{
+					LocalTargetInfo item = cell;
+					_ = targets.Add(new ForcedTarget(item, 0));
+				}
+				yield return true;
 			}
-			yield return null;
 		}
+		yield return false;
 	}
 
 	public IEnumerator ContractTargets(Map map)

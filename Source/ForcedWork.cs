@@ -145,7 +145,6 @@ public class ForcedWork(World world) : WorldComponent(world)
 
 	public void Remove(Pawn pawn)
 	{
-		Log.Warning($"### Remove {pawn.LabelShortCap}");
 		if (allForcedJobs.TryGetValue(pawn, out var forcedJobs))
 			forcedJobs.jobs.Do(job => job?.Cleanup());
 		_ = allForcedJobs.Remove(pawn);
@@ -167,17 +166,7 @@ public class ForcedWork(World world) : WorldComponent(world)
 		forcedJob = new ForcedJob(pawn, item, workgiverDefs);
 		allForcedJobs[pawn].jobs.Add(forcedJob);
 		allForcedJobs[pawn].UpdateCount();
-
-		// preselect up to 16 cells
-		var n = Math.Min(16, Achtung.Settings.maxForcedItems);
-		var map = pawn.Map;
-		for (var i = 1; i < n; i++)
-		{
-			var it1 = forcedJob.ExpandThingTargets(map);
-			while (it1.MoveNext()) ;
-			var it2 = forcedJob.ExpandCellTargets(map);
-			while (it2.MoveNext()) ;
-		}
+		forcedJob.ExpandJob(1 + Find.Selector.SelectedPawns.Count * 2);
 
 		hasForcedJobs = allForcedJobs.Count > 0;
 		UpdatePawnForcedJobs(pawn, allForcedJobs[pawn]);
@@ -245,34 +234,6 @@ public class ForcedWork(World world) : WorldComponent(world)
 				return forcedJobs.jobs.Any(job => job.NonForcedShouldIgnore(cell));
 			});
 	}
-
-	/*public void AddForbiddenLocation(Pawn pawn, IntVec3 cell)
-	{
-		if (forbiddenLocations.TryGetValue(pawn, out var cells) == false)
-		{
-			cells = new HashSet<IntVec3>();
-			forbiddenLocations.Add(pawn, cells);
-		}
-		_ = cells.Add(cell);
-	}*/
-
-	/*public void RemoveForbiddenLocations(Pawn pawn)
-	{
-		_ = forbiddenLocations.Remove(pawn);
-	}*/
-
-	/*public HashSet<IntVec3> GetForbiddenLocations()
-	{
-		var result = new HashSet<IntVec3>();
-		forbiddenLocations.Do(pair => result.UnionWith(pair.Value));
-		return result;
-	}*/
-
-	/*public bool IsForbiddenLocation(IntVec3 cell)
-	{
-		return forbiddenLocations
-			.Any(pair => pair.Value.Contains(cell));
-	}*/
 
 	public override void WorldComponentTick()
 	{
