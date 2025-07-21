@@ -449,6 +449,35 @@ static class WorkGiver_Repair_HasJobOnThing_Patch
 	}
 }
 
+[HarmonyPatch(typeof(JobDriver_HaulToContainer))]
+[HarmonyPatch(nameof(JobDriver_HaulToContainer.TryMakePreToilReservations))]
+static class JobDriver_HaulToContainer_TryMakePreToilReservations_Patch
+{
+	public static void Prefix(JobDriver_HaulToContainer __instance)
+	{
+		if (__instance.job == null)
+			Log.Error($"Achtung: TryMakePreToilReservations called with null job");
+	}
+
+	static Thing SafeContainer(JobDriver_HaulToContainer me)
+	{
+		if (me.job == null)
+		{
+			Log.Error($"Achtung: SafeContainer called with null job");
+			return null;
+		}
+		return (Thing)me.job.GetTarget(TargetIndex.B);
+	}
+
+	public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+	{
+		return instructions.MethodReplacer(
+			AccessTools.PropertyGetter(typeof(JobDriver_HaulToContainer), nameof(JobDriver_HaulToContainer.Container)),
+			SymbolExtensions.GetMethodInfo(() => SafeContainer(null))
+		);
+	}
+}
+
 [HarmonyPatch(typeof(BeautyDrawer))]
 [HarmonyPatch(nameof(BeautyDrawer.ShouldShow))]
 static class BeautyDrawer_ShouldShow_Patch

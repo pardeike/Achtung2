@@ -145,6 +145,7 @@ public class ForcedWork(World world) : WorldComponent(world)
 
 	public void Remove(Pawn pawn)
 	{
+		Log.Warning($"### Remove {pawn.LabelShortCap}");
 		if (allForcedJobs.TryGetValue(pawn, out var forcedJobs))
 			forcedJobs.jobs.Do(job => job?.Cleanup());
 		_ = allForcedJobs.Remove(pawn);

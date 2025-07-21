@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using HarmonyLib;
+using RimWorld;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -125,7 +126,7 @@ public class ForcedJob : IExposable
 		}
 	}
 
-	public IEnumerable<LocalTargetInfo> GetSortedTargets(HashSet<int> planned, bool checkExtendedForbidden)
+	public IEnumerable<LocalTargetInfo> GetSortedTargets()
 	{
 		const int maxSquaredDistance = 200 * 200;
 
@@ -134,26 +135,25 @@ public class ForcedJob : IExposable
 		var pathGrid = map.pathing.For(pawn).pathGrid;
 		var mapWidth = map.Size.x;
 
-		var forbiddenCells = buildSmart
+		/*var forbiddenCells = buildSmart
 			? map.reservationManager.reservations
 				.Where(reservation => reservation.claimant != pawn)
 				.Select(reservation => reservation.target.Cell)
-				.SelectMany(cell => checkExtendedForbidden ? GenRadial.RadialCellsAround(cell, 1, true).ToXY() : [cell])
 				.Distinct().ToHashSet()
-			: [];
+			: [];*/
 
 		return targets
 			.Where(target =>
 			{
 				var vec = target.XY;
 				var idx = CellIndicesUtility.CellToIndex(vec.x, vec.y, mapWidth);
-				return planned.Contains(idx) == false && target.IsValidTarget() && Tools.IsFreeTarget(pawn, target);
+				return target.IsValidTarget() && Tools.IsFreeTarget(pawn, target);
 			})
 			.OrderByDescending(target =>
 			{
 				var cell = target.XY;
-				if (forbiddenCells.Contains(cell))
-					return -1;
+				//if (forbiddenCells.Contains(cell))
+				//	return -1;
 
 				var reverseDistance = maxSquaredDistance - pos.DistanceToSquared(cell);
 				if (reverseDistance < 0)
@@ -161,7 +161,7 @@ public class ForcedJob : IExposable
 				if (buildSmart && isThingJob)
 				{
 					var willBlock = target.item.WillBlock();
-					var neighbourScore = willBlock ? Tools.NeighbourScore(cell, pathGrid, map.reservationManager.ReservationsReadOnly, mapWidth, planned) : 100;
+					var neighbourScore = willBlock ? Tools.NeighbourScore(cell, pathGrid, map.reservationManager.ReservationsReadOnly, mapWidth) : 100;
 					return target.materialScore + reverseDistance * 10000 + neighbourScore * 100000000;
 				}
 				return target.materialScore + reverseDistance * 10000;
@@ -189,7 +189,7 @@ public class ForcedJob : IExposable
 
 		var exist = false;
 		foreach (var workgiver in workGiversByPrio)
-			foreach (var target in GetSortedTargets([], true))
+			foreach (var target in GetSortedTargets())
 			{
 				exist = true;
 
@@ -240,17 +240,21 @@ public class ForcedJob : IExposable
 
 		if (condition == JobCondition.InterruptForced)
 		{
-			forcedWork.Remove(pawn);
-			return false;
+			//forcedWork.Remove(pawn);
+			//return false;
+			Log.Warning($"{pawn.LabelShortCap} InterruptForced");
 		}
 
 		while (true)
 		{
+			Log.Warning($"{pawn.LabelShortCap} has {forcedJob.targets.Join(t => $"{t}")}");
+
 			if (forcedJob.GetNextJob(out var job))
 			{
 				job.expiryInterval = 0;
 				job.ignoreJoyTimeAssignment = true;
 				job.playerForced = true;
+				Log.Warning($"{pawn.LabelShortCap} job {job.def.defName} with A={job.targetA} and B={job.targetB} added to C={job.targetC}");
 				ForcedWork.QueueJob(pawn, job);
 				return true;
 			}

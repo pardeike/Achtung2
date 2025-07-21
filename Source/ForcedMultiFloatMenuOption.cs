@@ -98,7 +98,7 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 					if (forcedWork.AddForcedJob(forcePawn, workgiverDefs, item, out var forcedJob))
 					{
 						var success = false;
-						var firstAvailableTarget = forcedJob.GetSortedTargets([], false).FirstOrDefault();
+						var firstAvailableTarget = forcedJob.GetSortedTargets().FirstOrDefault();
 						if (firstAvailableTarget != null)
 						{
 							var job = ForcedWork.GetJobItem(forcePawn, workgiver, firstAvailableTarget);
