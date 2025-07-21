@@ -44,8 +44,6 @@ public class Achtung : Mod
 	public static AchtungSettings Settings;
 	public static string rootDir;
 	public static HashSet<Thing> usedThingsPerTick = [];
-	public static HashSet<IntVec3> cellsForInterruptForcedNewJob = [];
-	public static HashSet<Thing> thingsForInterruptForcedNewJob = [];
 
 	public Achtung(ModContentPack content) : base(content)
 	{
@@ -314,9 +312,10 @@ static class Alert_HunterLacksRangedWeapon_HuntersWithoutRangedWeapon_Patch
 [HarmonyPatch(nameof(HaulAIUtility.PawnCanAutomaticallyHaulFast))]
 static class HaulAIUtility_PawnCanAutomaticallyHaulFast_Patch
 {
-	public static bool Prefix(Pawn p, bool forced, ref bool __result)
+	public static bool Prefix(Pawn p, Thing t, bool forced, ref bool __result)
 	{
-		if (p?.Map != null && p.RaceProps.Humanlike && Achtung.Settings.ignoreRestrictions)
+		var map = p?.Map;
+		if (map != null && map.reservationManager.IsReserved(t) == false && p.RaceProps.Humanlike && Achtung.Settings.ignoreRestrictions)
 		{
 			var forcedWork = ForcedWork.Instance;
 			if (forced || forcedWork.HasForcedJob(p))
@@ -475,69 +474,6 @@ static class CellInspectorDrawer_ShouldShow_Patch
 	}
 }
 
-// allow multiple colonists by reserving the exit path from a build place
-/*
-	* ### ENABLE AGAIN FOR SMART BUILDING
-	*
-[HarmonyPatch(typeof(JobDriver_ConstructFinishFrame))]
-[HarmonyPatch(nameof(JobDriver_ConstructFinishFrame.TryMakePreToilReservations))]
-static class JobDriver_ConstructFinishFrame_TryMakePreToilReservations_Patch
-{
-	static void Postfix(JobDriver_ConstructFinishFrame __instance, ref bool __result)
-	{
-		if (__result == false) return;
-
-		var pawn = __instance.pawn;
-		var forcedWork = ForcedWork.Instance;
-		if (forcedWork.HasForcedJob(pawn) == false) return;
-
-		var job = __instance.job;
-		var buildCell = job.targetA;
-		var map = __instance.pawn.Map;
-		var pathGrid = map.pathGrid;
-		// var reserationManager = map.reservationManager;
-
-		void FloodFillReserve(IntVec3 pos, IntVec3 prev, int depth)
-		{
-			//var success = reserationManager.Reserve(pawn, job, pos, 1, -1, null, false);
-			forcedWork.AddForbiddenLocation(pawn, pos);
-			var cells = GenAdj.CardinalDirections
-				.Select(v => v + pos)
-				.Where(cell => cell != prev && pathGrid.Walkable(cell));
-			if (cells.Count() == 1)
-			{
-				var cell = cells.First();
-				FloodFillReserve(cell, pos, depth + 1);
-			}
-		}
-		FloodFillReserve(buildCell.Cell, IntVec3.Invalid, 0);
-	}
-}
-
-[HarmonyPatch(typeof(ReservationManager))]
-[HarmonyPatch(nameof(ReservationManager.ReleaseClaimedBy))]
-static class ReservationManager_ReleaseClaimedBy_Patch
-{
-	static void Postfix(Pawn claimant)
-	{
-		var forcedWork = ForcedWork.Instance;
-		if (forcedWork.HasForcedJob(claimant) == false) return;
-		forcedWork.RemoveForbiddenLocations(claimant);
-	}
-}
-
-[HarmonyPatch(typeof(ReservationManager))]
-[HarmonyPatch(nameof(ReservationManager.ReleaseAllClaimedBy))]
-static class ReservationManager_ReleaseAllClaimedBy_Patch
-{
-	static void Postfix(Pawn claimant)
-	{
-		var forcedWork = ForcedWork.Instance;
-		if (forcedWork.HasForcedJob(claimant) == false) return;
-		forcedWork.RemoveForbiddenLocations(claimant);
-	}
-}*/
-
 [HarmonyPatch]
 static class Toils_Construct_MakeSolidThingFromBlueprintIfNecessary_Patch
 {
@@ -658,12 +594,7 @@ static class Pawn_PathFollower_TryRecoverFromUnwalkablePosition_Patch
 [HarmonyPatch(nameof(TickManager.DoSingleTick))]
 static class TickManager_DoSingleTick_Patch
 {
-	public static void Prefix()
-	{
-		Achtung.usedThingsPerTick = [];
-		Achtung.cellsForInterruptForcedNewJob = [];
-		Achtung.thingsForInterruptForcedNewJob = [];
-	}
+	public static void Prefix() => Achtung.usedThingsPerTick = [];
 }
 
 // patch in our menu options
@@ -678,7 +609,8 @@ static class FloatMenuOptionProvider_WorkGivers_ScannerShouldSkip_Patch
 			&& scanner is WorkGiver_Haul
 			&& t?.def != null
 			&& t.def.alwaysHaulable
-			&& t.def.EverHaulable)
+			&& t.def.EverHaulable
+			&& t.Map.reservationManager.IsReserved(t) == false)
 		{
 			__result = false;
 			return false;
@@ -742,6 +674,14 @@ static class FloatMenuOptionProvider_WorkGivers_GetWorkGiverOption_Patch
 	}
 }
 //
+[HarmonyPatch(typeof(PriorityWork))]
+[HarmonyPatch(nameof(PriorityWork.ClearPrioritizedWorkAndJobQueue))]
+static class PriorityWork_ClearPrioritizedWorkAndJobQueue_Patch
+{
+	public static void Postfix(Pawn ___pawn)
+		=> ForcedWork.Instance.RemoveForcedJob(___pawn);
+}
+//
 [HarmonyPatch(typeof(Pawn_JobTracker))]
 [HarmonyPatch(nameof(Pawn_JobTracker.EndCurrentJob))]
 static class Pawn_JobTracker_EndCurrentJob_Patch
@@ -749,7 +689,7 @@ static class Pawn_JobTracker_EndCurrentJob_Patch
 	public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 	{
 		var m_CleanupCurrentJob = SymbolExtensions.GetMethodInfo((Pawn_JobTracker pjt) => pjt.CleanupCurrentJob(default, default, default, default, default));
-		var m_ContinueJob = SymbolExtensions.GetMethodInfo(() => ForcedJob.ContinueJob(default, default, default, default));
+		var m_ContinueJob = SymbolExtensions.GetMethodInfo(() => ForcedJob.ContinueJob(default, default));
 		var f_pawn = AccessTools.Field(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.pawn));
 		var f_curJob = AccessTools.Field(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.curJob));
 
@@ -797,9 +737,6 @@ static class Pawn_JobTracker_EndCurrentJob_Patch
 			for (var j = i; j < jump; j++)
 				yield return instrList[++i];
 
-			yield return Ldarg_0;
-			yield return Ldarg_0;
-			yield return Ldfld[f_curJob];
 			yield return Ldarg_0;
 			yield return Ldfld[f_pawn];
 			yield return Ldarg_1;
@@ -858,10 +795,7 @@ static class Pawn_DraftController_Drafted_Patch
 static class Pawn_DeSpawn_Patch
 {
 	public static void Postfix(Pawn __instance)
-	{
-		var forcedWork = ForcedWork.Instance;
-		forcedWork.Remove(__instance);
-	}
+		=> ForcedWork.Instance.RemoveForcedJob(__instance);
 }
 
 // add colonist widget buttons
@@ -871,9 +805,6 @@ static class Pawn_DeSpawn_Patch
 [StaticConstructorOnStartup]
 static class PriorityWork_GetGizmos_Patch
 {
-	public static readonly Texture2D ForceRadiusExpand = ContentFinder<Texture2D>.Get("ForceRadiusExpand", true);
-	public static readonly Texture2D ForceRadiusShrink = ContentFinder<Texture2D>.Get("ForceRadiusShrink", true);
-	public static readonly Texture2D ForceRadiusShrinkOff = ContentFinder<Texture2D>.Get("ForceRadiusShrinkOff", true);
 	public static readonly Texture2D BuildingSmart = ContentFinder<Texture2D>.Get("BuildingSmart", true);
 	public static readonly Texture2D BuildingSmartOff = ContentFinder<Texture2D>.Get("BuildingSmartOff", true);
 

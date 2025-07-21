@@ -8,7 +8,6 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
-using static HarmonyLib.AccessTools;
 
 namespace AchtungMod;
 
@@ -23,8 +22,6 @@ static class Tools
 {
 	public static readonly Material forceIconMaterial = MaterialPool.MatFrom("ForceIcon", ShaderDatabase.Cutout);
 	public static readonly Material markerMaterial = MaterialPool.MatFrom("AchtungMarker", ShaderDatabase.Transparent);
-	public static readonly Material lineMaterial = MaterialPool.MatFrom(GenDraw.LineTexPath, ShaderDatabase.Transparent, new Color(1f, 0.5f, 0.5f));
-	public static readonly Material forceRadiusMaterial = SolidColorMaterials.SimpleSolidColorMaterial(Color.white.ToTransparent(0.5f));
 	public static readonly Texture2D dragPosition = LoadTexture("DragPosition");
 	public static readonly string goHereLabel = "GoHere".Translate();
 	public static WorkTypeDef savedWorkTypeDef = null;
@@ -152,15 +149,7 @@ static class Tools
 		};
 	}
 
-	public static bool IsForcedJob() => IsModKeyPressed(AchtungModKey.Alt);
-
 	public static bool IsOfType<T>(this WorkGiver workgiver) where T : class => ((workgiver as T) != null);
-
-	public static bool IsOfType<T>(this WorkGiverDef def) where T : class
-	{
-		if (def.giverClass == null) return false;
-		return (def.Worker as T) != null;
-	}
 
 	public static bool Has45DegreeOffset(List<Colonist> colonists)
 	{
@@ -476,10 +465,7 @@ static class Tools
 	public static void CancelWorkOn(Pawn newWorker, LocalTargetInfo workItem)
 	{
 		var forcedWork = ForcedWork.Instance;
-		if (forcedWork == null || newWorker.Map == null)
-			return;
-
-		newWorker.Map.mapPawns
+		newWorker.Map?.mapPawns
 			.PawnsInFaction(Faction.OfPlayer)
 			.DoIf(pawn => pawn.jobs?.curJob != null && forcedWork.HasForcedJob(pawn) == false, pawn =>
 			 {
@@ -696,19 +682,6 @@ static class Tools
 		}
 
 		listing.Gap(6);
-	}
-
-	public static IEnumerable<MethodBase> GetLatestMethod(Type type, params string[] names)
-	{
-		foreach (var name in names)
-		{
-			var method = Method(type, name);
-			if (method != null)
-			{
-				yield return method;
-				yield break;
-			}
-		}
 	}
 
 	public static int EnvTicks()

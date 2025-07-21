@@ -60,13 +60,6 @@ public class ForcedWork(World world) : WorldComponent(world)
 		tracker?.StartJob(job, JobCondition.Succeeded, null, false, false, null, null, true);
 	}
 
-	public List<ForcedJob> GetForcedJobs(Pawn pawn)
-	{
-		if (pawn == null || allForcedJobs.TryGetValue(pawn, out var forced) == false)
-			return [];
-		return forced.jobs ?? [];
-	}
-
 	public void UpdatePawnForcedJobs(Pawn pawn, ForcedJobs jobs)
 	{
 		if (pawn.thinker == null)
@@ -166,7 +159,6 @@ public class ForcedWork(World world) : WorldComponent(world)
 		forcedJob = new ForcedJob(pawn, item, workgiverDefs);
 		allForcedJobs[pawn].jobs.Add(forcedJob);
 		allForcedJobs[pawn].UpdateCount();
-		forcedJob.ExpandJob(1 + Find.Selector.SelectedPawns.Count * 2);
 
 		hasForcedJobs = allForcedJobs.Count > 0;
 		UpdatePawnForcedJobs(pawn, allForcedJobs[pawn]);
@@ -220,19 +212,6 @@ public class ForcedWork(World world) : WorldComponent(world)
 			.SelectMany(forcedJobs => forcedJobs.jobs)
 			.OfType<ForcedJob>()
 			.Where(job => job.cancelled == false)];
-	}
-
-	public bool NonForcedShouldIgnore(Map map, IntVec3 cell)
-	{
-		return allForcedJobs
-			.Where(pair => pair.Key.Map == map)
-			.Any(pair =>
-			{
-				var forcedJobs = pair.Value;
-				if (forcedJobs == null)
-					return false;
-				return forcedJobs.jobs.Any(job => job.NonForcedShouldIgnore(cell));
-			});
 	}
 
 	public override void WorldComponentTick()

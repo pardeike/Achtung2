@@ -135,13 +135,6 @@ public class ForcedJob : IExposable
 		var pathGrid = map.pathing.For(pawn).pathGrid;
 		var mapWidth = map.Size.x;
 
-		/*var forbiddenCells = buildSmart
-			? map.reservationManager.reservations
-				.Where(reservation => reservation.claimant != pawn)
-				.Select(reservation => reservation.target.Cell)
-				.Distinct().ToHashSet()
-			: [];*/
-
 		return targets
 			.Where(target =>
 			{
@@ -152,9 +145,6 @@ public class ForcedJob : IExposable
 			.OrderByDescending(target =>
 			{
 				var cell = target.XY;
-				//if (forbiddenCells.Contains(cell))
-				//	return -1;
-
 				var reverseDistance = maxSquaredDistance - pos.DistanceToSquared(cell);
 				if (reverseDistance < 0)
 					reverseDistance = 0;
@@ -173,7 +163,7 @@ public class ForcedJob : IExposable
 	{
 		var n = Math.Min(count, Achtung.Settings.maxForcedItems);
 		var map = pawn.Map;
-		for(var i = 1; i <= n; i++)
+		for (var i = 1; i <= n; i++)
 		{
 			var it1 = ExpandThingTargets(map);
 			while (it1.MoveNext() && it1.Current) ;
@@ -186,13 +176,6 @@ public class ForcedJob : IExposable
 
 	public bool GetNextNonConflictingJob(ForcedWork forcedWork)
 	{
-		forcedWork.AllForcedJobs().Do(fj =>
-		{
-			var job = fj.pawn.jobs.curJob;
-			Achtung.cellsForInterruptForcedNewJob.AddRange(job.TargetCells());
-			Achtung.thingsForInterruptForcedNewJob.AddRange(job.TargetThings());
-		});
-
 		foreach (var workgiverDef in workgiverDefs)
 		{
 			var workgiver = workgiverDef.giverClass == null ? null : workgiverDef.Worker as WorkGiver_Scanner;
@@ -205,15 +188,8 @@ public class ForcedJob : IExposable
 				var job = ForcedWork.GetJobItem(pawn, workgiver, target);
 				if (job != null)
 				{
-					var targetCells = job.TargetCells();
-					var targetThings = job.TargetThings();
-					if (Achtung.cellsForInterruptForcedNewJob.Intersect(targetCells).Any())
-						continue;
-					if (Achtung.thingsForInterruptForcedNewJob.Intersect(targetThings).Any())
-						continue;
-
-					Achtung.cellsForInterruptForcedNewJob.AddRange(targetCells);
-					Achtung.thingsForInterruptForcedNewJob.AddRange(targetThings);
+					if (job.TargetCells().Any(c => pawn.Map.reservationManager.IsReserved(c))) continue;
+					if (job.TargetThings().Any(t => pawn.Map.reservationManager.IsReserved(t))) continue;
 
 					success = pawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, target.Cell);
 					if (success) break;
@@ -276,11 +252,8 @@ public class ForcedJob : IExposable
 		return false;
 	}
 
-	public static bool ContinueJob(Pawn_JobTracker tracker, Job lastJob, Pawn pawn, JobCondition condition)
+	public static bool ContinueJob(Pawn pawn, JobCondition condition)
 	{
-		_ = tracker;
-		_ = lastJob;
-
 		if (pawn == null || (pawn.IsColonist == false && pawn.IsColonyMech == false))
 			return false;
 
