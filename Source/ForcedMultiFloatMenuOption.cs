@@ -105,8 +105,8 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 
 				forcedJob.ExpandJob(1 + Find.Selector.SelectedPawns.Count * 2);
 
-				if (forcedJob.GetNextNonConflictingJob(forcedWork))
-					return true;
+				if (forcedJob.GetNextNonConflictingJob(forcedWork) == false)
+					continue;
 
 				forcedWork.Unprepare(pawn);
 
