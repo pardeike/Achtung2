@@ -13,7 +13,7 @@ public class ForcedJob : IExposable
 {
 	public HashSet<ForcedTarget> targets = [];
 	public List<ForcedTarget> targets_temp_list = [];
-	public List<LocalTargetInfo> sortedSmartTargetsCached = null;
+	public List<LocalTargetInfo> smartTargetsCached = null;
 	public Pawn pawn = null;
 	public IntVec3 startCell = IntVec3.Invalid;
 	public List<WorkGiverDef> workgiverDefs = [];
@@ -60,7 +60,7 @@ public class ForcedJob : IExposable
 		workgiverDefs = [];
 		workgiverScanners = [];
 		targets = [];
-		sortedSmartTargetsCached = null;
+		smartTargetsCached = null;
 	}
 
 	// called from AddForcedJob during gameplay
@@ -71,7 +71,7 @@ public class ForcedJob : IExposable
 		this.workgiverDefs = [.. workgiverDefs.Where(wgd => wgd?.giverClass != null)];
 		workgiverScanners = [.. workgiverDefs.Select(wgd => wgd.Worker).OfType<WorkGiver_Scanner>()];
 		targets = [new ForcedTarget(item, MaterialScore(item))];
-		sortedSmartTargetsCached = null;
+		smartTargetsCached = null;
 		isThingJob = item.HasThing;
 	}
 
@@ -121,7 +121,7 @@ public class ForcedJob : IExposable
 	public void Add(LocalTargetInfo item)
 	{
 		_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
-		sortedSmartTargetsCached = null;
+		smartTargetsCached = null;
 	}
 
 	public void Replace(Thing thing, Thing replacement)
@@ -130,7 +130,7 @@ public class ForcedJob : IExposable
 		{
 			_ = targets.RemoveWhere(target => target.item.thingInt == thing);
 			_ = targets.Add(new ForcedTarget(replacement, MaterialScore(replacement)));
-			sortedSmartTargetsCached = null;
+			smartTargetsCached = null;
 		}
 	}
 
@@ -143,42 +143,53 @@ public class ForcedJob : IExposable
 
 		var result = targets.Where(target => target.IsValidTarget() && Tools.IsFreeTarget(pawn, target));
 
-		if (Achtung.Settings.BuildingSmart && startCell.IsValid)
+		if (Achtung.Settings.BuildingSmart && isThingJob && startCell.IsValid && result.Any())
 		{
-			if (sortedSmartTargetsCached == null)
+			if (smartTargetsCached == null)
 			{
-				var first = result.OrderBy(target => target.item.Cell.DistanceTo(startCell)).FirstOrDefault();
-				if (first != null)
+				var someTarget = result.OrderByDescending(target => target.item.Cell.DistanceTo(startCell)).FirstOrDefault();
+				if (someTarget != null)
 				{
-					var path = map.pathFinder.FindPathNow(startCell, first.item.Cell, TraverseParms.For(pawn, Danger.Deadly));
+					var path = map.pathFinder.FindPathNow(startCell, someTarget.item.Cell, TraverseParms.For(pawn, Danger.Deadly));
 					if (path != PawnPath.NotFound)
 					{
-						var existing = new HashSet<IntVec3>(result.Select(t => t.item.Cell));
-						var entry = IntVec3.Invalid;
-						foreach (var node in path.NodesReversed)
-						{
-							if (existing.Contains(node))
+						var itemsByCell = new Dictionary<IntVec3, LocalTargetInfo>(result.Select(t => new KeyValuePair<IntVec3, LocalTargetInfo>(t.item.Cell, t.item)));
+						LocalTargetInfo? entry = null;
+						var nodes = path.NodesReversed;
+						for (var i = nodes.Count - 1; i >= 0; i--)
+							if (itemsByCell.TryGetValue(nodes[i], out var item))
 							{
-								entry = node;
+								entry = item;
 								break;
 							}
-						}
-						if (entry.IsValid)
+						if (entry != null)
 						{
-							// TODO: create a breath first search in targets starting from entry and
-							// set sortedSmartTargetsCached to the result
-							//
-							// sortedSmartTargetsCached = ...
+							var visited = new HashSet<LocalTargetInfo> { entry.Value };
+							var queue = new Queue<LocalTargetInfo>();
+							queue.Enqueue(entry.Value);
+							smartTargetsCached = [];
+							var offsets = new[] { new IntVec3(1, 0, 0), new IntVec3(-1, 0, 0), new IntVec3(0, 0, 1), new IntVec3(0, 0, -1) };
+							while (queue.Count > 0)
+							{
+								var item = queue.Dequeue();
+								smartTargetsCached.Insert(0, item);
+								foreach (var off in offsets)
+								{
+									var cell = item.Cell + off;
+									if (itemsByCell.TryGetValue(cell, out var neighbourItem) && visited.Add(neighbourItem))
+										queue.Enqueue(neighbourItem);
+								}
+							}
 						}
 					}
+					path.ReleaseToPool();
 				}
 			}
-			if (sortedSmartTargetsCached != null)
-				return sortedSmartTargetsCached.Intersect(targets.Select(t => t.item));
+			if (smartTargetsCached != null)
+				return smartTargetsCached.Intersect(result.Select(t => t.item));
 		}
 
-		return targets
-			.Where(target => target.IsValidTarget() && Tools.IsFreeTarget(pawn, target))
+		return result
 			.OrderByDescending(target =>
 			{
 				var distanceFromStart = startCell.IsValid ? target.item.cellInt.DistanceToSquared(startCell) : 0;
@@ -369,7 +380,7 @@ public class ForcedJob : IExposable
 					{
 						LocalTargetInfo item = newThing;
 						_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
-						sortedSmartTargetsCached = null;
+						smartTargetsCached = null;
 						totalAdded++;
 					}
 					yield return -1;
@@ -400,7 +411,7 @@ public class ForcedJob : IExposable
 				{
 					LocalTargetInfo item = cell;
 					_ = targets.Add(new ForcedTarget(item, 0));
-					sortedSmartTargetsCached = null;
+					smartTargetsCached = null;
 					totalAdded++;
 				}
 				yield return -1;
@@ -446,7 +457,7 @@ public class ForcedJob : IExposable
 		if (Scribe.mode == LoadSaveMode.PostLoadInit)
 		{
 			targets = [.. targets_temp_list];
-			sortedSmartTargetsCached = null;
+			smartTargetsCached = null;
 			targets_temp_list.Clear();
 		}
 	}
