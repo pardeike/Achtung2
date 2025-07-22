@@ -78,8 +78,8 @@
 	<IgnoreAssignmentsTitle>Ignorar asignaciones de tipo de trabajo</IgnoreAssignmentsTitle>
 	<IgnoreAssignmentsExplained>Permite el trabajo forzoso sin prioridades establecidas</IgnoreAssignmentsExplained>
 
-	<BuildingSmartDefaultTitle>Edificio inteligente es la opción predeterminada para nuevos trabajos</BuildingSmartDefaultTitle>
-	<BuildingSmartDefaultExplained>Establece la forma predeterminada de cómo los nuevos trabajos eligen su orden de construcción</BuildingSmartDefaultExplained>
+	<BuildingSmartTitle>Edificio inteligente es la opción predeterminada para nuevos trabajos</BuildingSmartTitle>
+	<BuildingSmartExplained>Establece la forma predeterminada de cómo los nuevos trabajos eligen su orden de construcción</BuildingSmartExplained>
 
 	<WorkMarkersTitle>Posiciones de trabajo forzoso</WorkMarkersTitle>
 	<WorkMarkersExplained>Los puestos de trabajo forzoso se indican con marcadores.</WorkMarkersExplained>

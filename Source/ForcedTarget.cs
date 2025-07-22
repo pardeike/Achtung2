@@ -24,7 +24,7 @@ public class ForcedTarget : IExposable, IEquatable<ForcedTarget>
 
 	public void ExposeData()
 	{
-		if (Scribe.mode != LoadSaveMode.ResolvingCrossRefs || item.cellInt == IntVec3.Invalid)
+		if (Scribe.mode != LoadSaveMode.ResolvingCrossRefs || item.IsValid)
 			Scribe_TargetInfo.Look(ref item, "item");
 		Scribe_Values.Look(ref materialScore, "materialScore", 0, true);
 	}

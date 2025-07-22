@@ -756,7 +756,7 @@ static class Frame_FailConstruction_Patch
 	{
 		var blueprint = GenSpawn.Spawn(newThing, loc, map, rot, wipeMode, respawningAfterLoad, forbidLeavings);
 		var forcedJob = ForcedWork.Instance.GetForcedJob(pawn);
-		_ = forcedJob?.targets.Add(new ForcedTarget(blueprint, ForcedJob.MaterialScore(blueprint)));
+		forcedJob?.Add(blueprint);
 		return blueprint;
 	}
 
@@ -805,9 +805,6 @@ static class Pawn_DeSpawn_Patch
 [StaticConstructorOnStartup]
 static class PriorityWork_GetGizmos_Patch
 {
-	public static readonly Texture2D BuildingSmart = ContentFinder<Texture2D>.Get("BuildingSmart", true);
-	public static readonly Texture2D BuildingSmartOff = ContentFinder<Texture2D>.Get("BuildingSmartOff", true);
-
 	public static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> gizmos, Pawn ___pawn)
 	{
 		var gizmoList = gizmos.ToList();
@@ -818,21 +815,6 @@ static class PriorityWork_GetGizmos_Patch
 		var forcedJob = forcedWork.GetForcedJob(___pawn);
 		if (forcedJob == null)
 			yield break;
-
-		var smart = forcedJob.buildSmart;
-		yield return new Command_Action
-		{
-			defaultLabel = "BuildingSmart".Translate(),
-			defaultDesc = "BuildingSmartDesc".Translate(),
-			icon = smart ? BuildingSmart : BuildingSmartOff,
-			activateSound = smart ? SoundDefOf.Designate_PlanRemove : SoundDefOf.Designate_PlanAdd,
-			action = () =>
-			{
-				var forcedWork = ForcedWork.Instance;
-				var forcedJob = forcedWork.GetForcedJob(___pawn);
-				forcedJob.ToggleSmartBuilding();
-			}
-		};
 	}
 }
 

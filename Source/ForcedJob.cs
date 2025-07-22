@@ -13,7 +13,9 @@ public class ForcedJob : IExposable
 {
 	public HashSet<ForcedTarget> targets = [];
 	public List<ForcedTarget> targets_temp_list = [];
+	public List<LocalTargetInfo> sortedSmartTargetsCached = null;
 	public Pawn pawn = null;
+	public IntVec3 startCell = IntVec3.Invalid;
 	public List<WorkGiverDef> workgiverDefs = [];
 	public List<WorkGiver_Scanner> workgiverScanners = [];
 	public readonly QuotaCache<Thing, bool> getThingJobCache = new(10);
@@ -21,7 +23,6 @@ public class ForcedJob : IExposable
 	public bool isThingJob = false;
 	public bool initialized = false;
 	public int cellRadius = 0;
-	public bool buildSmart = Achtung.Settings.buildingSmartDefault;
 	public bool started = false;
 	public bool cancelled = false;
 	static readonly Dictionary<BuildableDef, int> TypeScores = new()
@@ -59,18 +60,18 @@ public class ForcedJob : IExposable
 		workgiverDefs = [];
 		workgiverScanners = [];
 		targets = [];
-		buildSmart = Achtung.Settings.buildingSmartDefault;
+		sortedSmartTargetsCached = null;
 	}
 
 	// called from AddForcedJob during gameplay
 	public ForcedJob(Pawn pawn, LocalTargetInfo item, List<WorkGiverDef> workgiverDefs)
 	{
 		this.pawn = pawn;
+		startCell = pawn.Position;
 		this.workgiverDefs = [.. workgiverDefs.Where(wgd => wgd?.giverClass != null)];
 		workgiverScanners = [.. workgiverDefs.Select(wgd => wgd.Worker).OfType<WorkGiver_Scanner>()];
 		targets = [new ForcedTarget(item, MaterialScore(item))];
-		buildSmart = Achtung.Settings.buildingSmartDefault;
-
+		sortedSmartTargetsCached = null;
 		isThingJob = item.HasThing;
 	}
 
@@ -117,60 +118,77 @@ public class ForcedJob : IExposable
 		return new[] { scoreThing, scoreBlueprint, scoreFrame }.Max();
 	}
 
+	public void Add(LocalTargetInfo item)
+	{
+		_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
+		sortedSmartTargetsCached = null;
+	}
+
 	public void Replace(Thing thing, Thing replacement)
 	{
 		if (workgiverDefs.Any(def => def.giverClass == typeof(WorkGiver_ConstructDeliverResourcesToBlueprints)))
 		{
 			_ = targets.RemoveWhere(target => target.item.thingInt == thing);
 			_ = targets.Add(new ForcedTarget(replacement, MaterialScore(replacement)));
+			sortedSmartTargetsCached = null;
 		}
 	}
 
 	public IEnumerable<LocalTargetInfo> GetSortedTargets()
 	{
-		const int maxSquaredDistance = 200 * 200;
-
 		var map = pawn.Map;
 		var pos = pawn.Position;
 		var pathGrid = map.pathing.For(pawn).pathGrid;
 		var mapWidth = map.Size.x;
 
-		return targets
-			.Where(target =>
+		var result = targets.Where(target => target.IsValidTarget() && Tools.IsFreeTarget(pawn, target));
+
+		if (Achtung.Settings.BuildingSmart && startCell.IsValid)
+		{
+			if (sortedSmartTargetsCached == null)
 			{
-				var vec = target.XY;
-				var idx = CellIndicesUtility.CellToIndex(vec.x, vec.y, mapWidth);
-				return target.IsValidTarget() && Tools.IsFreeTarget(pawn, target);
-			})
+				var first = result.OrderBy(target => target.item.Cell.DistanceTo(startCell)).FirstOrDefault();
+				if (first != null)
+				{
+					var path = map.pathFinder.FindPathNow(startCell, first.item.Cell, TraverseParms.For(pawn, Danger.Deadly));
+					if (path != PawnPath.NotFound)
+					{
+						var existing = new HashSet<IntVec3>(result.Select(t => t.item.Cell));
+						var entry = IntVec3.Invalid;
+						foreach (var node in path.NodesReversed)
+						{
+							if (existing.Contains(node))
+							{
+								entry = node;
+								break;
+							}
+						}
+						if (entry.IsValid)
+						{
+							// TODO: create a breath first search in targets starting from entry and
+							// set sortedSmartTargetsCached to the result
+							//
+							// sortedSmartTargetsCached = ...
+						}
+					}
+				}
+			}
+			if (sortedSmartTargetsCached != null)
+				return sortedSmartTargetsCached.Intersect(targets.Select(t => t.item));
+		}
+
+		return targets
+			.Where(target => target.IsValidTarget() && Tools.IsFreeTarget(pawn, target))
 			.OrderByDescending(target =>
 			{
-				var cell = target.XY;
-				var reverseDistance = maxSquaredDistance - pos.DistanceToSquared(cell);
-				if (reverseDistance < 0)
-					reverseDistance = 0;
-				if (buildSmart && isThingJob)
-				{
-					var willBlock = target.item.WillBlock();
-					var neighbourScore = willBlock ? Tools.NeighbourScore(cell, pathGrid, map.reservationManager.ReservationsReadOnly, mapWidth) : 100;
-					return target.materialScore + reverseDistance * 10000 + neighbourScore * 100000000;
-				}
-				return target.materialScore + reverseDistance * 10000;
+				var distanceFromStart = startCell.IsValid ? target.item.cellInt.DistanceToSquared(startCell) : 0;
+				return 1000 * target.materialScore - distanceFromStart;
 			})
 			.Select(target => target.item);
 	}
 
 	public void ExpandJob(int count)
-	{
-		var n = Math.Min(count, Achtung.Settings.maxForcedItems);
-		var map = pawn.Map;
-		for (var i = 1; i <= n; i++)
-		{
-			var it1 = ExpandThingTargets(map);
-			while (it1.MoveNext() && it1.Current) ;
-			var it2 = ExpandCellTargets(map);
-			while (it2.MoveNext() && it2.Current) ;
-		}
-	}
+		=> pawn.Map.Expand(isThingJob ? ExpandThingTargets : ExpandCellTargets, count);
 
 	public bool NonForcedShouldIgnore(IntVec3 cell) => targets.Any(target => target.XY == cell && target.IsBuilding());
 
@@ -295,8 +313,6 @@ public class ForcedJob : IExposable
 		return false;
 	}
 
-	public void ToggleSmartBuilding() => buildSmart = !buildSmart;
-
 	public bool ThingHasJob(Thing thing)
 	{
 		try
@@ -327,15 +343,15 @@ public class ForcedJob : IExposable
 		}
 	}
 
-	public IEnumerator<bool> ExpandThingTargets(Map map)
+	public IEnumerator<int> ExpandThingTargets(Map map)
 	{
 		var thingGrid = map.thingGrid;
+		var totalAdded = 0;
 		if (thingGrid != null)
 		{
 			var maxCountVerifier = Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems
 				? (Func<bool>)(() => targets.Count < Achtung.Settings.maxForcedItems)
 				: () => true;
-
 			if (maxCountVerifier())
 			{
 				var things = targets.Select(target => target.item.thingInt).Where(thing => thing != null && thing.Spawned).ToHashSet();
@@ -344,7 +360,7 @@ public class ForcedJob : IExposable
 					.Expand(map, cellRadius + 1)
 					.SelectMany(cell => thingGrid.ThingsListAtFast(cell)).Distinct()
 					.ToArray();
-				yield return true;
+				yield return -1;
 
 				for (var i = 0; i < newThings.Length && cancelled == false && maxCountVerifier(); i++)
 				{
@@ -353,26 +369,29 @@ public class ForcedJob : IExposable
 					{
 						LocalTargetInfo item = newThing;
 						_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
+						sortedSmartTargetsCached = null;
+						totalAdded++;
 					}
-					yield return true;
+					yield return -1;
 				}
 			}
 		}
-		yield return false;
+		yield return totalAdded;
 	}
 
-	public IEnumerator<bool> ExpandCellTargets(Map map)
+	public IEnumerator<int> ExpandCellTargets(Map map)
 	{
 		var maxCountVerifier = Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems
-						? (Func<bool>)(() => targets.Count < Achtung.Settings.maxForcedItems)
-						: () => true;
+			? (Func<bool>)(() => targets.Count < Achtung.Settings.maxForcedItems)
+			: () => true;
+		var totalAdded = 0;
 		if (maxCountVerifier())
 		{
 			var newCells = targets
 				.Select(target => target.XY)
 				.Expand(map, cellRadius + 1)
 				.ToArray();
-			yield return true;
+			yield return -1;
 
 			for (var i = 0; i < newCells.Length && cancelled == false && maxCountVerifier(); i++)
 			{
@@ -381,11 +400,13 @@ public class ForcedJob : IExposable
 				{
 					LocalTargetInfo item = cell;
 					_ = targets.Add(new ForcedTarget(item, 0));
+					sortedSmartTargetsCached = null;
+					totalAdded++;
 				}
-				yield return true;
+				yield return -1;
 			}
 		}
-		yield return false;
+		yield return totalAdded;
 	}
 
 	public IEnumerator ContractTargets(Map map)
@@ -425,6 +446,7 @@ public class ForcedJob : IExposable
 		if (Scribe.mode == LoadSaveMode.PostLoadInit)
 		{
 			targets = [.. targets_temp_list];
+			sortedSmartTargetsCached = null;
 			targets_temp_list.Clear();
 		}
 	}
@@ -432,12 +454,12 @@ public class ForcedJob : IExposable
 	public void ExposeData()
 	{
 		Scribe_References.Look(ref pawn, "pawn");
+		Scribe_Values.Look(ref startCell, "startCell", IntVec3.Invalid, true);
 		Scribe_Collections.Look(ref workgiverDefs, "workgivers", LookMode.Def);
 		ScribeTargets();
 		Scribe_Values.Look(ref isThingJob, "thingJob", false, true);
 		Scribe_Values.Look(ref initialized, "inited", false, true);
 		Scribe_Values.Look(ref cellRadius, "radius", 0, true);
-		Scribe_Values.Look(ref buildSmart, "buildSmart", true, true);
 
 		if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			workgiverScanners = [.. workgiverDefs.Select(wgd => wgd.Worker).OfType<WorkGiver_Scanner>()];

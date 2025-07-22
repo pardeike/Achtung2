@@ -78,8 +78,8 @@
 	<IgnoreAssignmentsTitle>Arbeitszuweisungen ignorieren</IgnoreAssignmentsTitle>
 	<IgnoreAssignmentsExplained>Erlaubt erzwungene Arbeit trotz fehlender Arbeitsprioritäten.</IgnoreAssignmentsExplained>
 
-	<BuildingSmartDefaultTitle>Cleveres Bauen für neue erzw. Arbeiten aktivieren</BuildingSmartDefaultTitle>
-	<BuildingSmartDefaultExplained>Ändert die Standardbauweise bei erzw. Arbeiten.</BuildingSmartDefaultExplained>
+	<BuildingSmartTitle>Cleveres Bauen für neue erzw. Arbeiten aktivieren</BuildingSmartTitle>
+	<BuildingSmartExplained>Ändert die Standardbauweise bei erzw. Arbeiten.</BuildingSmartExplained>
 
 	<WorkMarkersTitle>Symbole für erzw. Arbeiten</WorkMarkersTitle>
 	<WorkMarkersExplained>Erzw. Arbeiten werden mit kleinen Symbolen gekennzeichnet.</WorkMarkersExplained>

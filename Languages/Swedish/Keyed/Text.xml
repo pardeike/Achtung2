@@ -78,8 +78,8 @@
 	<IgnoreAssignmentsTitle>Ignorera arbetstypstilldelningar</IgnoreAssignmentsTitle>
 	<IgnoreAssignmentsExplained>Tillåter påtvingat arbete när arbetsprioriteringar inte är inställda</IgnoreAssignmentsExplained>
 
-	<BuildingSmartDefaultTitle>Smart byggande är på för nya jobs</BuildingSmartDefaultTitle>
-	<BuildingSmartDefaultExplained>Förvalet för nya Achtung! jobs är att de byggs på ett smart sätt</BuildingSmartDefaultExplained>
+	<BuildingSmartTitle>Smart byggande är på för nya jobs</BuildingSmartTitle>
+	<BuildingSmartExplained>Förvalet för nya Achtung! jobs är att de byggs på ett smart sätt</BuildingSmartExplained>
 
 	<WorkMarkersTitle>Tvingade arbetspositioner</WorkMarkersTitle>
 	<WorkMarkersExplained>Platser med påtvingat arbete visas med små markörer</WorkMarkersExplained>

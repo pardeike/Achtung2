@@ -60,7 +60,7 @@ public class AchtungSettings : ModSettings
 	public bool ignoreRestrictions = false;
 	public bool ignoreAssignments = false;
 	public WorkMarkers workMarkers = WorkMarkers.Animated;
-	public bool buildingSmartDefault = false;
+	public bool BuildingSmart = false;
 	public int maxForcedItems = 64;
 	public int menuDelay = 250;
 
@@ -80,7 +80,7 @@ public class AchtungSettings : ModSettings
 		Scribe_Values.Look(ref ignoreRestrictions, "ignoreRestrictions", false, true);
 		Scribe_Values.Look(ref ignoreAssignments, "ignoreAssignments", false, true);
 		Scribe_Values.Look(ref workMarkers, "workMarkers", WorkMarkers.Animated, true);
-		Scribe_Values.Look(ref buildingSmartDefault, "buildingSmartDefault", false, true);
+		Scribe_Values.Look(ref BuildingSmart, "BuildingSmart", false, true);
 		Scribe_Values.Look(ref maxForcedItems, "maxForcedItems", 64, true);
 		Scribe_Values.Look(ref menuDelay, "menuDelay", 250, true);
 
@@ -146,7 +146,7 @@ public class AchtungSettings : ModSettings
 		list.CheckboxEnhanced("IgnoreRestrictions", ref Achtung.Settings.ignoreRestrictions);
 		list.CheckboxEnhanced("IgnoreAssignments", ref Achtung.Settings.ignoreAssignments);
 		list.Gap(10);
-		list.CheckboxEnhanced("BuildingSmartDefault", ref Achtung.Settings.buildingSmartDefault);
+		list.CheckboxEnhanced("BuildingSmart", ref Achtung.Settings.BuildingSmart);
 		list.Gap(10);
 		list.ValueLabeled("WorkMarkers", false, ref Achtung.Settings.workMarkers);
 		list.Gap(10);

@@ -78,8 +78,8 @@
 	<IgnoreAssignmentsTitle>Negeer werktype toewijzingen</IgnoreAssignmentsTitle>
 	<IgnoreAssignmentsExplained>Toestaan bij ontbrekende werkprioriteiten</IgnoreAssignmentsExplained>
 
-	<BuildingSmartDefaultTitle>Slim bouwen is standaard voor nieuwe Achtung! banen</BuildingSmartDefaultTitle>
-	<BuildingSmartDefaultExplained>Stelt de standaard in voor hoe nieuwe jobs hun bouwvolgorde kiezen</BuildingSmartDefaultExplained>
+	<BuildingSmartTitle>Slim bouwen is standaard voor nieuwe Achtung! banen</BuildingSmartTitle>
+	<BuildingSmartExplained>Stelt de standaard in voor hoe nieuwe jobs hun bouwvolgorde kiezen</BuildingSmartExplained>
 
 	<WorkMarkersTitle>Markeringen op gedwongen werk</WorkMarkersTitle>
 	<WorkMarkersExplained>Gedwongen werk wordt weergegeven met kleine markeringen</WorkMarkersExplained>

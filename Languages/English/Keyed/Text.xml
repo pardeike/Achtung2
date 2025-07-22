@@ -78,8 +78,8 @@
 	<IgnoreAssignmentsTitle>Ignore work type assignments</IgnoreAssignmentsTitle>
 	<IgnoreAssignmentsExplained>Allows forced work when work priorities are unset</IgnoreAssignmentsExplained>
 
-	<BuildingSmartDefaultTitle>Smart building is on for new Achtung! jobs</BuildingSmartDefaultTitle>
-	<BuildingSmartDefaultExplained>Sets the default for how new jobs choose their build order</BuildingSmartDefaultExplained>
+	<BuildingSmartTitle>Smart building is on for new Achtung! jobs</BuildingSmartTitle>
+	<BuildingSmartExplained>Sets the default for how new jobs choose their build order</BuildingSmartExplained>
 
 	<WorkMarkersTitle>Force work markers</WorkMarkersTitle>
 	<WorkMarkersExplained>Forced work is displayed with small markers</WorkMarkersExplained>

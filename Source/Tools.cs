@@ -227,7 +227,7 @@ static class Tools
 						continue;
 					if (newCell.InBounds(map) == false)
 						continue;
-					visited.Add(newCell);
+					_ = visited.Add(newCell);
 					added.Enqueue(newCell);
 					yield return newCell;
 				}
@@ -237,117 +237,23 @@ static class Tools
 		}
 	}
 
-	public static void NeighbourCount(IntVec3 pos, PathGrid grid, List<ReservationManager.Reservation> reservations, int mapWidth, out int count, out bool isCorner, out bool isRoomCorner)
+	public static void Expand(this Map map, Func<Map, IEnumerator<int>> func, int count)
 	{
-		var idx = CellIndicesUtility.CellToIndex(pos.x, pos.z, mapWidth);
-		if (grid.Walkable(pos) == false || reservations.Any(rsv => rsv.target.Cell == pos))
+		var total = 0;
+		while (total < count)
 		{
-			count = -1;
-			isCorner = false;
-			isRoomCorner = false;
-			return;
-		}
-		var counts = new int[4];
-		for (var i = 0; i < 4; i++)
-		{
-			var vec = pos + GenAdj.CardinalDirectionsAround[i];
-			idx = CellIndicesUtility.CellToIndex(vec.x, vec.z, mapWidth);
-			counts[i] = grid.Walkable(vec) == false || reservations.Any(rsv => rsv.target.Cell == vec) ? 1 : 0;
-		}
-		count = counts.Sum();
-		isCorner = count == 2 && counts[0] != counts[2];
-		isRoomCorner = false;
-		if (isCorner)
-		{
-			for (var i = 0; i < 4; i++)
+			var added = 0;
+			var i = func(map);
+			while (i.MoveNext())
 			{
-				var j = (i + 1) % 4;
-				if (counts[i] == 0 && counts[j] == 0)
-				{
-					var vec = pos + GenAdj.CardinalDirectionsAround[i] + GenAdj.CardinalDirectionsAround[j];
-					idx = CellIndicesUtility.CellToIndex(vec.x, vec.z, mapWidth);
-					if (grid.Walkable(vec) && reservations.Any(rsv => rsv.target.Cell == vec) == false)
-					{
-						isRoomCorner = true;
-						break;
-					}
-				}
+				var n = i.Current;
+				if (n < 0) continue;
+				added = n;
+				break;
 			}
+			if (added == 0) break;
+			total += added;
 		}
-	}
-
-	private static int NeighbourSubScore(IntVec3 pos, PathGrid pathGrid, List<ReservationManager.Reservation> reservations, int mapWidth)
-	{
-		var result = 0;
-		for (var i = 0; i < 4; i++)
-		{
-			var vec = pos + GenAdj.CardinalDirectionsAround[i];
-			NeighbourCount(vec, pathGrid, reservations, mapWidth, out var count, out var _1, out var _2);
-			if (count != -1)
-				result += 4 - count;
-		}
-		return result;
-	}
-
-	public static int NeighbourScore(IntVec3 pos, PathGrid pathGrid, List<ReservationManager.Reservation> reservations, int mapWidth)
-	{
-		NeighbourCount(pos, pathGrid, reservations, mapWidth, out var blockedCount, out var isCorner, out var isRoomCorner);
-
-		// full enclosed or pos itself unwalkable
-		if (blockedCount == -1 || blockedCount == 4)
-			return -100;
-
-		// end of tunnel
-		if (blockedCount == 3)
-			return 11;
-
-		var neighbourScore = NeighbourSubScore(pos, pathGrid, reservations, mapWidth);
-
-		// special case: end of free standing block
-		if (blockedCount == 1 && neighbourScore == 12)
-			return 12;
-
-		// safe corners (1)
-		if (blockedCount == 2 && isCorner)
-		{
-			if (neighbourScore == 6)
-				return 10;
-			if (neighbourScore == 7)
-				return 9;
-			if (neighbourScore == 5 && isRoomCorner)
-				return 8;
-			if (neighbourScore == 4 && isRoomCorner)
-				return 7;
-		}
-
-		// perimeter
-		if (blockedCount == 1)
-		{
-			if (neighbourScore == 8) // between two corners
-				return 6;
-			if (neighbourScore == 10) // at the wall
-				return 5;
-			if (neighbourScore == 11) // at the wall but close to negative corner
-				return 4;
-			if (neighbourScore == 9) // one corner
-				return 3;
-			if (neighbourScore == 12) // at the end of a free standing block
-				return 2;
-		}
-
-		// safe corners (2)
-		if (blockedCount == 2 && isCorner)
-		{
-			if (neighbourScore == 5)
-				return 1;
-		}
-
-		// center
-		if (blockedCount == 0)
-			return 0;
-
-		// all the unsafe positions - we should never get here if we re-iterate
-		return -neighbourScore;
 	}
 
 	public static IEnumerable<XY> AllCells(this Thing thing)
