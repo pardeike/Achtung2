@@ -807,7 +807,6 @@ static class PriorityWork_GetGizmos_Patch
 {
 	public static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> gizmos, Pawn ___pawn)
 	{
-		var gizmoList = gizmos.ToList();
 		foreach (var gizmo in gizmos)
 			yield return gizmo;
 

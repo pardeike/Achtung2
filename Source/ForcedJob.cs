@@ -143,7 +143,7 @@ public class ForcedJob : IExposable
 
 		var result = targets.Where(target => target.IsValidTarget() && Tools.IsFreeTarget(pawn, target));
 
-		if (Achtung.Settings.BuildingSmart && isThingJob && startCell.IsValid && result.Any())
+		if (Achtung.Settings.buildingSmart && isThingJob && startCell.IsValid && result.Any())
 		{
 			if (smartTargetsCached == null)
 			{
@@ -275,7 +275,7 @@ public class ForcedJob : IExposable
 				}
 			}
 
-		if (exist)
+		if (exist && Achtung.Settings.forcedEndedLetter)
 			Find.LetterStack.ReceiveLetter("NoForcedWork".Translate(), "CouldNotFindMoreForcedWork".Translate(pawn.Name.ToStringShort), LetterDefOf.NeutralEvent, pawn);
 
 		return false;

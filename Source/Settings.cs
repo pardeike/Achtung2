@@ -1,4 +1,4 @@
-﻿using Brrainz;
+using Brrainz;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -60,9 +60,12 @@ public class AchtungSettings : ModSettings
 	public bool ignoreRestrictions = false;
 	public bool ignoreAssignments = false;
 	public WorkMarkers workMarkers = WorkMarkers.Animated;
-	public bool BuildingSmart = false;
+	public bool buildingSmart = true;
 	public int maxForcedItems = 64;
 	public int menuDelay = 250;
+	public bool forcedEndedLetter = true;
+	public bool replaceCleanRoom = true;
+	public bool replaceFightFire = true;
 
 	public static readonly int UnlimitedForcedItems = 2000;
 
@@ -80,9 +83,12 @@ public class AchtungSettings : ModSettings
 		Scribe_Values.Look(ref ignoreRestrictions, "ignoreRestrictions", false, true);
 		Scribe_Values.Look(ref ignoreAssignments, "ignoreAssignments", false, true);
 		Scribe_Values.Look(ref workMarkers, "workMarkers", WorkMarkers.Animated, true);
-		Scribe_Values.Look(ref BuildingSmart, "BuildingSmart", false, true);
+		Scribe_Values.Look(ref buildingSmart, "buildingSmart", false, true);
 		Scribe_Values.Look(ref maxForcedItems, "maxForcedItems", 64, true);
 		Scribe_Values.Look(ref menuDelay, "menuDelay", 250, true);
+		Scribe_Values.Look(ref forcedEndedLetter, "forcedEndedLetter", true, true);
+		Scribe_Values.Look(ref replaceCleanRoom, "replaceCleanRoom", true, true);
+		Scribe_Values.Look(ref replaceFightFire, "replaceFightFire", true, true);
 
 		if (Scribe.mode == LoadSaveMode.PostLoadInit && Achtung.harmony != null)
 			ForbidUtility_IsForbidden_Patch.FixPatch();
@@ -98,22 +104,27 @@ public class AchtungSettings : ModSettings
 		if (Widgets.ButtonText(helpRect, "Tutorial".Translate()))
 			ModFeatures.ShowAgain<Achtung>(true);
 
-		var columnWidth = (canvas.width - 30) / 2 - 2;
+		var columnWidth = (canvas.width - 30) / 2f - 2f;
 		var list = new Listing_Standard { ColumnWidth = columnWidth };
 		list.Begin(canvas);
 
 		list.Gap(4);
-		list.CheckboxEnhanced("PositioningEnabled", ref Achtung.Settings.positioningEnabled);
+
+		list.Note("FeatureSettingsDesc");
+		list.Gap(4);
+		var ftRect = list.GetRect(Text.LineHeight + 8f);
+		if (Widgets.ButtonText(ftRect, "FeatureSettingsButton".Translate()))
+			Find.WindowStack.Add(new SettingsToggles());
+
+		list.Gap(18);
+
 		if (Achtung.Settings.positioningEnabled)
 		{
-			list.Gap(10);
 			list.ValueLabeled("AchtungModifier", false, ref Achtung.Settings.achtungKey);
 			list.Gap(10);
 			list.ValueLabeled("ForceCommandMenuMode", true, ref Achtung.Settings.forceCommandMenuMode);
 			switch (Achtung.Settings.forceCommandMenuMode)
 			{
-				case CommandMenuMode.Auto:
-					break;
 				case CommandMenuMode.PressForMenu:
 				case CommandMenuMode.PressForPosition:
 					list.Gap(-2);
@@ -124,15 +135,8 @@ public class AchtungSettings : ModSettings
 					list.SliderLabeled("Delay", ref Achtung.Settings.menuDelay, 0, 2000, n => $"{n} ms");
 					break;
 			}
+			list.Gap(18);
 		}
-		list.Gap(18);
-		list.CheckboxEnhanced("RescueEnabled", ref Achtung.Settings.rescueEnabled);
-		var rescuing = DefDatabase<WorkTypeDef>.GetNamedSilentFail(Tools.RescuingWorkTypeDef.defName);
-		var doctorRescueWorkGiver = DefDatabase<WorkGiverDef>.GetNamed("DoctorRescue");
-		if (rescuing == null && Achtung.Settings.rescueEnabled)
-			Tools.savedWorkTypeDef = DynamicWorkTypes.AddWorkTypeDef(Tools.RescuingWorkTypeDef, WorkTypeDefOf.Doctor, doctorRescueWorkGiver);
-		else if (rescuing != null && Achtung.Settings.rescueEnabled == false)
-			DynamicWorkTypes.RemoveWorkTypeDef(Tools.RescuingWorkTypeDef, Tools.savedWorkTypeDef, doctorRescueWorkGiver);
 
 		list.NewColumn();
 		list.curX += 30 - Listing.ColumnSpacing;
@@ -142,11 +146,9 @@ public class AchtungSettings : ModSettings
 		list.Gap(10);
 		list.ValueLabeled("HealthLevel", false, ref Achtung.Settings.healthLevel);
 		list.Gap(10);
-		list.CheckboxEnhanced("IgnoreForbidden", ref Achtung.Settings.ignoreForbidden, null, () => ForbidUtility_IsForbidden_Patch.FixPatch());
+		list.CheckboxEnhanced("IgnoreForbidden", ref Achtung.Settings.ignoreForbidden, null, _ => ForbidUtility_IsForbidden_Patch.FixPatch());
 		list.CheckboxEnhanced("IgnoreRestrictions", ref Achtung.Settings.ignoreRestrictions);
 		list.CheckboxEnhanced("IgnoreAssignments", ref Achtung.Settings.ignoreAssignments);
-		list.Gap(10);
-		list.CheckboxEnhanced("BuildingSmart", ref Achtung.Settings.BuildingSmart);
 		list.Gap(10);
 		list.ValueLabeled("WorkMarkers", false, ref Achtung.Settings.workMarkers);
 		list.Gap(10);

@@ -33,7 +33,7 @@
 		<DebugSymbols>true</DebugSymbols>
 		<DefineConstants>RW12;RW13;TRACE;DEBUG</DefineConstants>
 		<Optimize>false</Optimize>
-		<DebugType>portable</DebugType>
+		<DebugType>embedded</DebugType>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 

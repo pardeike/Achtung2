@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
 	<Feature_Achtung_Welcome>Welcome to Achtung!</Feature_Achtung_Welcome>
@@ -34,6 +34,15 @@
 
 	<RescueEnabledTitle>'Rescue' work priority column</RescueEnabledTitle>
 	<RescueEnabledExplained>Enables the automatic rescue of pawns and adds a column on the work tab</RescueEnabledExplained>
+
+	<ShowForceEndLetterTitle>Show when forced work ends</ShowForceEndLetterTitle>
+	<ShowForceEndLetterExplained>When enabled, a letter is shown when a colonist runs out of forced work</ShowForceEndLetterExplained>
+
+	<ReplaceCleanRoomTitle>Replace Clean Room Command</ReplaceCleanRoomTitle>
+	<ReplaceCleanRoomExplained>Replaces the vanilla clean room job with Achtung's clean room</ReplaceCleanRoomExplained>
+
+	<ReplaceFightFireTitle>Replace Fight Fire Command</ReplaceFightFireTitle>
+	<ReplaceFightFireExplained>Replaces the vanilla fight fire job with Achtung's fight fire</ReplaceFightFireExplained>
 
 	<ForcedCommandState>Ordered to work until done.</ForcedCommandState>
 
@@ -90,6 +99,9 @@
 	<MaxForcedItemsTitle>Maximum forced items</MaxForcedItemsTitle>
 	<MaxForcedItemsExplained>Restricts the number of forced items for slower computers</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Unlimited</MaxForcedItemsUnlimited>
+
+	<FeatureSettingsDesc>Toggles for core functionality</FeatureSettingsDesc>
+	<FeatureSettingsButton>Configure features</FeatureSettingsButton>
 
 	<JobInterruptedLabel>Cancelled: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
