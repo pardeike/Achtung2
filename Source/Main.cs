@@ -679,7 +679,7 @@ static class FloatMenuOptionProvider_WorkGivers_GetWorkGiverOption_Patch
 static class PriorityWork_ClearPrioritizedWorkAndJobQueue_Patch
 {
 	public static void Postfix(Pawn ___pawn)
-		=> ForcedWork.Instance.RemoveForcedJob(___pawn);
+		=> ForcedWork.Instance.Remove(___pawn);
 }
 //
 [HarmonyPatch(typeof(Pawn_JobTracker))]
@@ -795,7 +795,7 @@ static class Pawn_DraftController_Drafted_Patch
 static class Pawn_DeSpawn_Patch
 {
 	public static void Postfix(Pawn __instance)
-		=> ForcedWork.Instance.RemoveForcedJob(__instance);
+		=> ForcedWork.Instance.Remove(__instance);
 }
 
 // add colonist widget buttons

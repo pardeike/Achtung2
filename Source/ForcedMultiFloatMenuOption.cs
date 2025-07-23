@@ -100,30 +100,25 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 
 				Tools.CancelWorkOn(pawn, jobItem);
 
-				if (forcedWork.AddForcedJob(pawn, workgiverDefs, jobItem, out var forcedJob) == false)
-					continue;
-
-				forcedJob.ExpandJob(1 + Find.Selector.SelectedPawns.Count * 2);
-
-				if (forcedJob.GetNextNonConflictingJob(forcedWork) == false)
-					continue;
-
-				forcedWork.Unprepare(pawn);
+				if (forcedWork.AddForcedJob(pawn, workgiverDefs, jobItem, out var forcedJob))
+				{
+					forcedJob.ExpandJob(1 + Find.Selector.SelectedPawns.Count * 2);
+					var success = forcedJob.GetNextNonConflictingJob(forcedWork);
+					if (success == false)
+						continue;
+					else
+						forcedWork.Unprepare(pawn);
+				}
 
 				MouseTracker.StartDragging(
 					pawn,
 					clickedCell,
-					cellRadius =>
-					{
-						if (forcedJob != null)
-							forcedJob.cellRadius = cellRadius;
-					},
+					cellRadius => forcedJob?.cellRadius = cellRadius,
 					() => forcedJob.Start()
 				);
+
 				return true;
 			}
-
-		forcedWork.Unprepare(pawn);
 
 		forcedWork.RemoveForcedJob(pawn);
 		Messages.Message("CouldNotFindMoreForcedWork".Translate(pawn.Name.ToStringShort), MessageTypeDefOf.RejectInput);
