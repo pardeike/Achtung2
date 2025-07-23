@@ -35,6 +35,15 @@
 	<RescueEnabledTitle>'Rädda' arbetsprioritetskolumn</RescueEnabledTitle>
 	<RescueEnabledExplained>Aktiverar automatisk räddning av kolonister och lägger till en kolumn på arbetsfliken</RescueEnabledExplained>
 
+	<ShowForceEndLetterTitle>Visa meddelande när påtvingat arbete slutar</ShowForceEndLetterTitle>
+	<ShowForceEndLetterExplained>När aktiverat visas ett meddelande när en kolonisatör avslutar påtvingat arbete</ShowForceEndLetterExplained>
+
+	<ReplaceCleanRoomTitle>Ersätt kommando ”Städa rum”</ReplaceCleanRoomTitle>
+	<ReplaceCleanRoomExplained>Ersätter spelets standardkommando för att städa rum med Achtungs version</ReplaceCleanRoomExplained>
+
+	<ReplaceFightFireTitle>Ersätt kommando ”Släck eld”</ReplaceFightFireTitle>
+	<ReplaceFightFireExplained>Ersätter spelets standardkommando för att släcka eld med Achtungs version</ReplaceFightFireExplained>
+
 	<ForcedCommandState>Kommenderad att slutföra sitt arbete.</ForcedCommandState>
 
 	<ForceMenuButtonText>Tvinga</ForceMenuButtonText>

@@ -19,6 +19,7 @@ public class FloatMenuOptionProvider_CleanRoom : FloatMenuOptionProvider
 
 	public override FloatMenuOption GetSingleOption(FloatMenuContext context)
 	{
+		if (Achtung.Settings.replaceCleanRoom == false) return null;
 		var driver = Activator.CreateInstance<JobDriver_CleanRoom>();
 		var existingJobs = driver.SameJobTypesOngoing();
 		var suffix = existingJobs.Count > 0 ? " " + "AlreadyDoing".Translate("" + (existingJobs.Count + 1)) : new TaggedString("");

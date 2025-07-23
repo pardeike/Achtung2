@@ -112,7 +112,7 @@
 	<CleanRoomDescription>Clean a room until it is completely clean</CleanRoomDescription>
 	<CleanRoomReport>Cleaning{0}: {1}</CleanRoomReport>
 
-	<FireFightLabel>Fight fire</FireFightLabel>
+	<FireFightLabel>Fight fire (Achtung)</FireFightLabel>
 	<FireFightInfoText>Fighting a fire</FireFightInfoText>
 	<FireFightDescription>Fights a fire (even outside home zone)</FireFightDescription>
 	<FireFightReport>Fighting fire: {0}</FireFightReport>

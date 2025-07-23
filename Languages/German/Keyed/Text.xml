@@ -35,6 +35,15 @@
 	<RescueEnabledTitle>Arbeitstyp 'Retten' hinzufügen</RescueEnabledTitle>
 	<RescueEnabledExplained>Aktiviert die automatische Rettung von Kolonisten und fügt eine Spalte im Tab 'Arbeit' hinzu.</RescueEnabledExplained>
 
+	<ShowForceEndLetterTitle>Meldung zeigen, wenn erzwungene Arbeit endet</ShowForceEndLetterTitle>
+	<ShowForceEndLetterExplained>Wenn aktiviert, erscheint eine Meldung, sobald ein Kolonist keine erzwungene Arbeit mehr hat</ShowForceEndLetterExplained>
+
+	<ReplaceCleanRoomTitle>Befehl „Raum säubern“ ersetzen</ReplaceCleanRoomTitle>
+	<ReplaceCleanRoomExplained>Ersetzt den Vanilla-Befehl zum Raum säubern durch Achtungs Version</ReplaceCleanRoomExplained>
+
+	<ReplaceFightFireTitle>Befehl „Feuer löschen“ ersetzen</ReplaceFightFireTitle>
+	<ReplaceFightFireExplained>Ersetzt den Vanilla-Befehl zum Feuer löschen durch Achtungs Version</ReplaceFightFireExplained>
+
 	<ForcedCommandState>Gezwungen zu arbeiten, bis alles erledigt ist.</ForcedCommandState>
 
 	<ForceMenuButtonText>Erzw.</ForceMenuButtonText>

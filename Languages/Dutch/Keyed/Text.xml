@@ -35,6 +35,15 @@
 	<RescueEnabledTitle>'Redden' werkprioriteit kolom</RescueEnabledTitle>
 	<RescueEnabledExplained>Maakt het automatisch redden van pionnen mogelijk en voegt een kolom toe aan het werk-tabblad</RescueEnabledExplained>
 
+	<ShowForceEndLetterTitle>Toon melding wanneer geforceerd werk eindigt</ShowForceEndLetterTitle>
+	<ShowForceEndLetterExplained>Wanneer ingeschakeld, verschijnt er een melding zodra een kolonist geen geforceerd werk meer heeft</ShowForceEndLetterExplained>
+
+	<ReplaceCleanRoomTitle>Vervang opdracht 'Kamer schoonmaken'</ReplaceCleanRoomTitle>
+	<ReplaceCleanRoomExplained>Vervangt de standaard schoonmaakopdracht door Achtungs versie van kamer schoonmaken</ReplaceCleanRoomExplained>
+
+	<ReplaceFightFireTitle>Vervang opdracht 'Brand blussen'</ReplaceFightFireTitle>
+	<ReplaceFightFireExplained>Vervangt de standaard brandblusopdracht door Achtungs versie van brand blussen</ReplaceFightFireExplained>
+
 	<ForcedCommandState>Bevolen te werken tot het klaar is.</ForcedCommandState>
 
 	<ForceMenuButtonText>Dwingen</ForceMenuButtonText>

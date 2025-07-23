@@ -64,6 +64,32 @@ static class Root_Play_Update_Patch
 	public static void Postfix(Vector3 ___rootPos, Vector3 __state) => isDragging = ___rootPos != __state;
 }
 
+[HarmonyPatch]
+static class FloatMenuOptionProviders_Patch
+{
+	public static IEnumerable<MethodBase> TargetMethods()
+	{
+		yield return AccessTools.PropertyGetter(typeof(FloatMenuOptionProvider_CleanRoom), nameof(FloatMenuOptionProvider_CleanRoom.Undrafted));
+		yield return AccessTools.PropertyGetter(typeof(FloatMenuOptionProvider_ExtinguishFires), nameof(FloatMenuOptionProvider_ExtinguishFires.Drafted));
+		yield return AccessTools.PropertyGetter(typeof(FloatMenuOptionProvider_ExtinguishFires), nameof(FloatMenuOptionProvider_ExtinguishFires.Undrafted));
+	}
+
+	public static bool Prefix(MethodBase __originalMethod, ref bool __result)
+	{
+		if (Achtung.Settings.replaceCleanRoom && __originalMethod.DeclaringType == typeof(FloatMenuOptionProvider_CleanRoom))
+		{
+			__result = false;
+			return false;
+		}
+		if (Achtung.Settings.replaceFightFire && __originalMethod.DeclaringType == typeof(FloatMenuOptionProvider_ExtinguishFires))
+		{
+			__result = false;
+			return false;
+		}
+		return true;
+	}
+}
+
 [HarmonyPatch(typeof(LetterStack))]
 [HarmonyPatch(nameof(LetterStack.LettersOnGUI))]
 static class LetterStack_LettersOnGUI_Patch

@@ -19,6 +19,7 @@ public class FloatMenuOptionProvider_FightFire : FloatMenuOptionProvider
 
 	public override FloatMenuOption GetSingleOption(FloatMenuContext context)
 	{
+		if (Achtung.Settings.replaceFightFire == false) return null;
 		var driver = (JobDriver_Thoroughly)Activator.CreateInstance(typeof(JobDriver_FightFire));
 		var existingJobs = driver.SameJobTypesOngoing();
 		var suffix = existingJobs.Count > 0 ? " " + "AlreadyDoing".Translate("" + (existingJobs.Count + 1)) : new TaggedString("");

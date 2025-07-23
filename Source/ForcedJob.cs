@@ -54,6 +54,12 @@ public class ForcedJob : IExposable
 		{ ThingDefOf.Grave, 1 },
 	};
 
+	static readonly HashSet<Type> buildingSmartWorkgiverDefs = [
+		typeof(WorkGiver_ConstructDeliverResourcesToFrames),
+		typeof(WorkGiver_ConstructDeliverResourcesToBlueprints),
+		typeof(WorkGiver_ConstructFinishFrames)
+	];
+
 	// default constructor for deserialization
 	public ForcedJob()
 	{
@@ -142,8 +148,10 @@ public class ForcedJob : IExposable
 		var mapWidth = map.Size.x;
 
 		var result = targets.Where(target => target.IsValidTarget() && Tools.IsFreeTarget(pawn, target));
+		var shouldBeDoneSmart = Achtung.Settings.buildingSmart;
+		shouldBeDoneSmart &= workgiverDefs.Any(def => buildingSmartWorkgiverDefs.Contains(def.giverClass));
 
-		if (Achtung.Settings.buildingSmart && isThingJob && startCell.IsValid && result.Any())
+		if (shouldBeDoneSmart && isThingJob && startCell.IsValid && result.Any())
 		{
 			if (smartTargetsCached == null)
 			{
@@ -192,7 +200,7 @@ public class ForcedJob : IExposable
 		return result
 			.OrderByDescending(target =>
 			{
-				var distanceFromStart = startCell.IsValid ? target.item.cellInt.DistanceToSquared(startCell) : 0;
+				var distanceFromStart = target.item.Cell.DistanceToSquared(pawn.Position);
 				return 1000 * target.materialScore - distanceFromStart;
 			})
 			.Select(target => target.item);

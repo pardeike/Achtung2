@@ -35,6 +35,15 @@
 	<RescueEnabledTitle>Columna de prioridad de trabajo 'Rescate'</RescueEnabledTitle>
 	<RescueEnabledExplained>Habilita el rescate automático de peones y añade una columna en la pestaña de trabajo</RescueEnabledExplained>
 
+	<ShowForceEndLetterTitle>Mostrar mensaje al finalizar tarea forzada</ShowForceEndLetterTitle>
+	<ShowForceEndLetterExplained>Si está activado, se mostrará un mensaje cuando un colono termine su tarea forzada</ShowForceEndLetterExplained>
+
+	<ReplaceCleanRoomTitle>Reemplazar orden "Limpiar habitación"</ReplaceCleanRoomTitle>
+	<ReplaceCleanRoomExplained>Reemplaza la orden estándar de limpiar habitación por la versión de Achtung</ReplaceCleanRoomExplained>
+
+	<ReplaceFightFireTitle>Reemplazar orden "Apagar fuego"</ReplaceFightFireTitle>
+	<ReplaceFightFireExplained>Reemplaza la orden estándar de apagar fuego por la versión de Achtung</ReplaceFightFireExplained>
+
 	<ForcedCommandState>Tiene la orden de trabajar hasta terminar la tarea.</ForcedCommandState>
 
 	<ForceMenuButtonText>Forzar</ForceMenuButtonText>
