@@ -118,7 +118,7 @@ public class Controller
 
 		var actions = doForceMenu ? new MultiActions(colonists, UI.MouseMapPosition()) : null;
 		var achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
-		var allDrafted = colonists.All(colonist => colonist.pawn.Drafted || colonist.pawn.IsColonyMechPlayerControlled || achtungPressed);
+		var allDrafted = colonists.All(colonist => colonist.pawn.Drafted || achtungPressed);
 		var mixedDrafted = !allDrafted && colonists.Any(colonist => colonist.pawn.Drafted);
 
 		var forceMenu = Achtung.Settings.forceCommandMenuMode switch
@@ -139,7 +139,7 @@ public class Controller
 
 		var subjectClicked = pawnsUnderMouse
 			.Where(pawn =>
-				(pawn.IsColonist == false && pawn.IsColonyMech == false)
+				(PawnAttackGizmoUtility.CanOrderPlayerPawn(pawn) == false)
 				|| (pawn.Drafted == false && longPress == false)
 				|| (pawn.Drafted == true && longPress == true)
 			).Any();
@@ -438,13 +438,13 @@ public class Controller
 		if (hasSelectedColonists && achtungPressed == false)
 			return;
 
-		var colonistClicked = GenUI
-				.ThingsUnderMouse(UI.MouseMapPosition(), 0.8f, TargetingParameters.ForColonist(), null)
-				.OfType<Pawn>()
-				.ToList();
-		if (colonistClicked.Count == 1)
+		var colonistsClicked = GenUI.ThingsUnderMouse(UI.MouseMapPosition(), 0.8f, TargetingParameters.ForPawns(), null)
+			.OfType<Pawn>()
+			.Where(pawn => PawnAttackGizmoUtility.CanOrderPlayerPawn(pawn))
+			.ToList();
+		if (colonistsClicked.Count == 1)
 		{
-			var colonist = colonistClicked[0];
+			var colonist = colonistsClicked[0];
 			if (colonist.Drafted || achtungPressed)
 				selector.Select(colonist);
 		}

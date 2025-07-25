@@ -258,7 +258,7 @@ static class PawnComponentsUtility_AddComponentsForSpawn_Patch
 	[HarmonyPriority(int.MinValue)]
 	public static void Postfix(Pawn pawn)
 	{
-		if (pawn.IsColonist == false) return;
+		if (PawnAttackGizmoUtility.CanOrderPlayerPawn(pawn) == false) return;
 
 		var t = pawn.thinker.GetType();
 		while (true)
@@ -483,7 +483,7 @@ static class BeautyDrawer_ShouldShow_Patch
 	public static void Postfix(ref bool __result)
 	{
 		if (__result == false) return;
-		if (Find.Selector.SelectedPawns.Count(pawn => pawn.IsColonist && pawn.Drafted) > 1)
+		if (Find.Selector.SelectedPawns.Count(pawn => PawnAttackGizmoUtility.CanOrderPlayerPawn(pawn) && pawn.Drafted) > 1)
 			__result = false;
 	}
 }
@@ -495,7 +495,7 @@ static class CellInspectorDrawer_ShouldShow_Patch
 	public static void Postfix(ref bool __result)
 	{
 		if (__result == false) return;
-		if (Find.Selector.SelectedPawns.Count(pawn => pawn.IsColonist && pawn.Drafted) > 1)
+		if (Find.Selector.SelectedPawns.Count(pawn => PawnAttackGizmoUtility.CanOrderPlayerPawn(pawn) && pawn.Drafted) > 1)
 			__result = false;
 	}
 }

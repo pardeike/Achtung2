@@ -291,7 +291,7 @@ public class ForcedJob : IExposable
 
 	public static bool ContinueJob(Pawn pawn, JobCondition condition)
 	{
-		if (pawn == null || (pawn.IsColonist == false && pawn.IsColonyMech == false))
+		if (pawn == null || PawnAttackGizmoUtility.CanOrderPlayerPawn(pawn) == false)
 			return false;
 
 		var forcedWork = ForcedWork.Instance;
