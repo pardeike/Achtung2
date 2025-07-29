@@ -18,6 +18,18 @@ public static class Visibility
 		{ 1, 0, 0,-1 }
 	};
 
+	public static HashSet<IntVec3> GetShootingCells(Pawn colonist, Pawn enemy)
+	{
+		var map = colonist.Map;
+		var radius = enemy.CurrentEffectiveVerb.EffectiveRange;
+		var cells = new HashSet<IntVec3>();
+		var positions = new List<IntVec3>();
+		ShootLeanUtility.LeanShootingSourcesFromTo(enemy.Position, colonist.Position, map, positions);
+		foreach (var enemyPos in positions)
+			cells.AddRange(GetVisibleCellsAround(map, enemyPos, (int)(radius + 0.5f), cell => cell.CanBeSeenOver(map) == false, null));
+		return cells;
+	}
+
 	public static HashSet<IntVec3> GetVisibleCellsAround(Map map, IntVec3 start, int radius, Func<IntVec3, bool> isBlocking, IntVec3? target = null)
 	{
 		var visible = new HashSet<IntVec3>();

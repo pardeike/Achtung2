@@ -46,6 +46,7 @@ public class JobDriver_TacticalApproach : JobDriver
 	public IntVec3 lastPosition = IntVec3.Invalid;
 	public IntVec3 lastEnemyPosition = IntVec3.Invalid;
 	public HashSet<IntVec3> cachedCells = [];
+	public HashSet<IntVec3> usedAttackPositions = [];
 
 	public override void ExposeData()
 	{
@@ -56,6 +57,8 @@ public class JobDriver_TacticalApproach : JobDriver
 			movingDirection = 0;
 			cachedCells ??= [];
 			cachedCells.Clear();
+			usedAttackPositions ??= [];
+			usedAttackPositions.Clear();
 			lastPosition = IntVec3.Invalid;
 			lastEnemyPosition = IntVec3.Invalid;
 		}
@@ -88,18 +91,13 @@ public class JobDriver_TacticalApproach : JobDriver
 		var pos = pawn.Position;
 		var aim = Enemy.Position;
 		if (lastPosition == pos && lastEnemyPosition == aim) return cachedCells;
+		if (lastEnemyPosition != aim) usedAttackPositions.Clear();
+		lastPosition = pos;
+		lastEnemyPosition = aim;
 		var radius = Enemy.CurrentEffectiveVerb.EffectiveRange;
 		var optimalRangeSquared = pawn.CurrentEffectiveVerb.EffectiveRange * 0.8f * (pawn.CurrentEffectiveVerb.verbProps.range * 0.8f);
 		var map = pawn.Map;
-		// var cells = Visibility.GetVisibleCellsAround(map, aim, (int)(radius + 0.5f), cell => cell.CanBeSeenOver(map) == false, null);
-		var cells = new HashSet<IntVec3>();
-		var positions = new List<IntVec3>();
-		ShootLeanUtility.LeanShootingSourcesFromTo(Enemy.Position, pawn.Position, Map, positions);
-		foreach (var enemyPos in positions)
-		{
-			var posCells = Visibility.GetVisibleCellsAround(map, enemyPos, (int)(radius + 0.5f), cell => cell.CanBeSeenOver(map) == false, null);
-			cells.AddRange(posCells);
-		}
+		var cells = Visibility.GetShootingCells(pawn, Enemy);
 		var interestingCells = cells.Where(cell =>
 			neighborOffsets.Count(o => cells.Contains(cell + o)) < 3
 			&& cell.CanBeSeenOver(map)
@@ -123,21 +121,13 @@ public class JobDriver_TacticalApproach : JobDriver
 	{
 		var radius = Enemy.CurrentEffectiveVerb.EffectiveRange;
 		var optimalRangeSquared = pawn.CurrentEffectiveVerb.EffectiveRange * 0.8f * (pawn.CurrentEffectiveVerb.verbProps.range * 0.8f);
-		var map = pawn.Map;
 		var pos = pawn.Position;
-		var cells = new HashSet<IntVec3>();
-		var positions = new List<IntVec3>();
-		ShootLeanUtility.LeanShootingSourcesFromTo(Enemy.Position, pos, Map, positions);
-		foreach (var enemyPos in positions)
-		{
-			var posCells = Visibility.GetVisibleCellsAround(map, enemyPos, (int)(radius + 0.5f), cell => cell.CanBeSeenOver(map) == false, null);
-			cells.AddRange(posCells);
-		}
+		var map = pawn.Map;
+		var cells = Visibility.GetShootingCells(pawn, Enemy);
 		var traverseParms = TraverseParms.For(pawn);
 		var coverPos = GenRadial.RadialCellsAround(pos, radius, false)
-			.First(cell => cells.Contains(cell) == false && map.reachability.CanReach(pos, cell, PathEndMode.OnCell, traverseParms));
+			.First(cell => cells.Contains(cell) == false && usedAttackPositions.Contains(cell) == false && map.reachability.CanReach(pos, cell, PathEndMode.OnCell, traverseParms));
 
-		//var coverPos = CanFindAttackPosition();
 		if (coverPos.IsValid == false)
 		{
 			Log.Warning($"-> {pawn} cannot find cover to retreat to, staying put");
@@ -145,24 +135,7 @@ public class JobDriver_TacticalApproach : JobDriver
 			return;
 		}
 
-		//var enemyPos = Enemy.Position;
-		//var safeDistance = GetSafeDistanceToEnemy();
-		//var distanceSquared = (int)(safeDistance * safeDistance) + 1;
-		//var maxRadius = (int)safeDistance + 5;
-		//if (RCellFinder.TryFindRandomCellNearWith
-		//(
-		//	pawn.Position,
-		//	cell => cell.DistanceToSquared(enemyPos) >= distanceSquared && cell.WalkableBy(pawn.Map, pawn) && IsInDanger(cell) == false,
-		//	pawn.Map,
-		//	out var coverPos,
-		//	5,
-		//	maxRadius) == false
-		//)
-		//{
-		//	Log.Warning($"-> {pawn} cannot find cover to retreat to, staying put");
-		//	movingDirection = 0;
-		//	return;
-		//}
+		_ = usedAttackPositions.Add(coverPos);
 
 		StopShooting();
 		pawn.pather.StopDead();
@@ -202,6 +175,7 @@ public class JobDriver_TacticalApproach : JobDriver
 				lastPosition = IntVec3.Invalid;
 				lastEnemyPosition = IntVec3.Invalid;
 				cachedCells = [];
+				usedAttackPositions = [];
 				Log.Warning($"### {pawn} tactical attack started");
 			},
 			finishActions = [
