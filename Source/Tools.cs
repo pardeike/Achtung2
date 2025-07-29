@@ -406,11 +406,12 @@ static class Tools
 		DrawScaledMesh(MeshPool.plane10, forceIconMaterial, pos, rot, 0.5f, 0.5f);
 	}
 
-	public static void DebugPosition(Vector3 pos, Color color)
+	public static void DebugPosition(IntVec3 cell, Color color)
 	{
+		var pos = cell.ToVector3Shifted();
 		pos.y = Altitudes.AltitudeFor(AltitudeLayer.Pawn - 1);
 		var material = SolidColorMaterials.SimpleSolidColorMaterial(color);
-		DrawScaledMesh(MeshPool.plane10, material, pos + new Vector3(0.5f, 0f, 0.5f), Quaternion.identity, 1.0f, 1.0f);
+		DrawScaledMesh(MeshPool.plane10, material, pos, Quaternion.identity, 1.0f, 1.0f);
 	}
 
 	public static void DrawScaledMesh(Mesh mesh, Material mat, Vector3 pos, Quaternion q, float mx, float mz, float my = 1f)

@@ -1,9 +1,11 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 using Verse;
+using Verse.AI;
 
 namespace AchtungMod;
 
@@ -46,6 +48,7 @@ public class Controller
 			{
 				new JobDriver_CleanRoom().MakeDef(),
 				new JobDriver_FightFire().MakeDef(),
+				JobDriver_TacticalApproach.MakeDef()
 			}
 		.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
 	}
@@ -377,11 +380,63 @@ public class Controller
 	// 	var reservationManager = Find.CurrentMap?.reservationManager;
 	// 	if (reservationManager == null)
 	// 		return;
-//
+	//
 	// 	var selector = Find.Selector;
 	// 	reservationManager.ReservationsReadOnly
 	// 		.DoIf(res => selector.IsSelected(res.Claimant), res => Tools.DebugPosition(res.Target.Cell.ToVector3(), res.Target.HasThing ? thingColor : cellColor));
 	// }
+
+	static readonly IntVec3[] neighborOffsets =
+	[
+		new IntVec3(0, 0, 1),
+		new IntVec3(1, 0, 0),
+		new IntVec3(0, 0, -1),
+		new IntVec3(-1, 0, 0)
+	];
+
+	static void DebugAttack()
+	{
+
+
+		static void Debug(Pawn pawn, Color color)
+		{
+			var range = pawn.CurrentEffectiveVerb?.EffectiveRange;
+			if (range == null)
+				return;
+			var intRange = (int)(range.Value + 0.5f);
+			var map = pawn.Map;
+			var sw = Stopwatch.StartNew();
+			var cells = Visibility.GetVisibleCellsAround(map, pawn.Position, intRange, cell => cell.CanBeSeenOver(map) == false, null);
+			var timestamp1 = sw.ElapsedTicks;
+			//color = color.ToTransparent(0.25f);
+			//cells.Do(cell => Tools.DebugPosition(cell, color));
+			var edgeCells = cells.Where(cell =>
+				neighborOffsets.Count(o => cells.Contains(cell + o)) < 3
+				&& cell.CanBeSeenOver(map)
+				&& GenSight.LineOfSight(pawn.Position, cell, map, true) == false
+			).ToHashSet();
+			var timestamp2 = sw.ElapsedTicks;
+			//edgeCells.Do(cell => Tools.DebugPosition(cell, color));
+
+			// write microseconds to Log.Warning
+			var microseconds1 = timestamp1 * 1000000 / Stopwatch.Frequency;
+			var microseconds2 = (timestamp2 - timestamp1) * 1000000 / Stopwatch.Frequency;
+			var totalMicroseconds = timestamp2 * 1000000 / Stopwatch.Frequency;
+			Log.Warning($"{pawn.LabelShortCap}: total {cells.Count} cells ({microseconds1}μs), {edgeCells.Count} edge cells ({microseconds2}μs) => {totalMicroseconds}μs");
+
+			/* error case debugging, we don't emit enough cells
+			//
+			GenRadial.RadialCellsAround(pawn.Position, range.Value, false)
+				.DoIf(
+					cell => !cells.Contains(cell) && cell.CanBeSeenOver(map) && GenSight.LineOfSight(pawn.Position, cell, map, true),
+					cell => Tools.DebugPosition(cell, err2)
+				);
+			*/
+		}
+
+		Find.CurrentMap.mapPawns.AllHumanlikeSpawned.DoIf(p => p.HostileTo(Faction.OfPlayer), p => Debug(p, Color.green));
+		Find.CurrentMap.mapPawns.AllHumanlikeSpawned.DoIf(p => p.IsColonist, p => Debug(p, Color.blue));
+	}
 
 	public void HandleDrawing()
 	{
@@ -390,6 +445,7 @@ public class Controller
 
 		// for debugging reservations
 		// DebugDrawReservations();
+		DebugAttack();
 
 		if (isDragging)
 		{
