@@ -121,24 +121,48 @@ public class JobDriver_TacticalApproach : JobDriver
 
 	private void MoveAway()
 	{
-		var enemyPos = Enemy.Position;
-		var safeDistance = GetSafeDistanceToEnemy();
-		var distanceSquared = (int)(safeDistance * safeDistance) + 1;
-		var maxRadius = (int)safeDistance + 5;
-		if (RCellFinder.TryFindRandomCellNearWith
-		(
-			pawn.Position,
-			cell => cell.DistanceToSquared(enemyPos) >= distanceSquared && cell.WalkableBy(pawn.Map, pawn) && IsInDanger(cell) == false,
-			pawn.Map,
-			out var coverPos,
-			5,
-			maxRadius) == false
-		)
+		var radius = Enemy.CurrentEffectiveVerb.EffectiveRange;
+		var optimalRangeSquared = pawn.CurrentEffectiveVerb.EffectiveRange * 0.8f * (pawn.CurrentEffectiveVerb.verbProps.range * 0.8f);
+		var map = pawn.Map;
+		var pos = pawn.Position;
+		var cells = new HashSet<IntVec3>();
+		var positions = new List<IntVec3>();
+		ShootLeanUtility.LeanShootingSourcesFromTo(Enemy.Position, pos, Map, positions);
+		foreach (var enemyPos in positions)
+		{
+			var posCells = Visibility.GetVisibleCellsAround(map, enemyPos, (int)(radius + 0.5f), cell => cell.CanBeSeenOver(map) == false, null);
+			cells.AddRange(posCells);
+		}
+		var traverseParms = TraverseParms.For(pawn);
+		var coverPos = GenRadial.RadialCellsAround(pos, radius, false)
+			.First(cell => cells.Contains(cell) == false && map.reachability.CanReach(pos, cell, PathEndMode.OnCell, traverseParms));
+
+		//var coverPos = CanFindAttackPosition();
+		if (coverPos.IsValid == false)
 		{
 			Log.Warning($"-> {pawn} cannot find cover to retreat to, staying put");
 			movingDirection = 0;
 			return;
 		}
+
+		//var enemyPos = Enemy.Position;
+		//var safeDistance = GetSafeDistanceToEnemy();
+		//var distanceSquared = (int)(safeDistance * safeDistance) + 1;
+		//var maxRadius = (int)safeDistance + 5;
+		//if (RCellFinder.TryFindRandomCellNearWith
+		//(
+		//	pawn.Position,
+		//	cell => cell.DistanceToSquared(enemyPos) >= distanceSquared && cell.WalkableBy(pawn.Map, pawn) && IsInDanger(cell) == false,
+		//	pawn.Map,
+		//	out var coverPos,
+		//	5,
+		//	maxRadius) == false
+		//)
+		//{
+		//	Log.Warning($"-> {pawn} cannot find cover to retreat to, staying put");
+		//	movingDirection = 0;
+		//	return;
+		//}
 
 		StopShooting();
 		pawn.pather.StopDead();
@@ -214,12 +238,12 @@ public class JobDriver_TacticalApproach : JobDriver
 				var isAttacking = busyStance != null && busyStance.focusTarg == TargetA;
 
 				var inDanger = UnderAttack() || TooClose();
-				if (movingDirection != -1 && inDanger)
+				if ((movingDirection != -1 || isMoving == false) && inDanger)
 				{
 					MoveAway();
 					return;
 				}
-				else if (movingDirection != 1 && TooFar())
+				else if ((movingDirection != 1 || isMoving == false) && TooFar())
 				{
 					MoveCloser();
 					return;
@@ -269,19 +293,11 @@ public class JobDriver_TacticalApproach : JobDriver
 
 	private bool UnderAttack()
 	{
-		var stance = Enemy.stances.curStance as Stance_Busy;
+		var stance = Enemy.stances.curStance as Stance_Warmup;
 		return stance != null && stance.focusTarg == pawn;
 	}
 
-	public bool TooClose()
-	{
-		//var enemy = Enemy;
-		//var enemyPos = enemy.Position;
-		//var distance = pawn.Position.DistanceTo(enemyPos);
-		//var safeDistance = enemy.TryGetAttackVerb(pawn, false, false).EffectiveRange * 0.95f;
-		//if (distance < safeDistance) return true;
-		return IsInDanger(pawn.Position);
-	}
+	public bool TooClose() => IsInDanger(pawn.Position);
 
 	public bool TooFar()
 	{
