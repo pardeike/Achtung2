@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -394,132 +393,131 @@ public class Controller
 		new IntVec3(0, 0, -1),
 		new IntVec3(-1, 0, 0)
 	];
-	static readonly Dictionary<Pawn, HashSet<IntVec3>> dangerGrids = [];
-
-	static IntVec3 lastEnemyPosition = IntVec3.Invalid;
+	public static readonly Dictionary<Pawn, HashSet<IntVec3>> dangerGrids = [];
 
 	static void DebugAttack()
 	{
+		foreach (var grid in dangerGrids.Values)
+			foreach (var cell in grid)
+				Tools.DebugPosition(cell, Color.white.ToTransparent(0.2f));
+
+		/*
 		static void Debug(Pawn pawn, Pawn target, Color color)
 		{
-			/* 4800μs average
-			var sw = Stopwatch.StartNew();
-			var castPositionRequest = default(CastPositionRequest);
-			castPositionRequest.caster = pawn;
-			castPositionRequest.target = target;
-			castPositionRequest.verb = pawn.CurrentEffectiveVerb;
-			castPositionRequest.maxRangeFromTarget = pawn.CurrentEffectiveVerb.verbProps.range;
-			castPositionRequest.wantCoverFromTarget = true;
-			IntVec3 intVec;
-			if (CastPositionFinder.TryFindCastPosition(castPositionRequest, out intVec))
-			{
-				var microseconds = sw.ElapsedTicks * (double)1000000 / Stopwatch.Frequency;
-				var avg = avgTotal.Add(microseconds);
-				Log.Warning($"{avg}μs = {intVec}");
-				Tools.DebugPosition(intVec, color);
-			}
-			*/
+			// 4800μs average
+			//var sw = Stopwatch.StartNew();
+			//var castPositionRequest = default(CastPositionRequest);
+			//castPositionRequest.caster = pawn;
+			//castPositionRequest.target = target;
+			//castPositionRequest.verb = pawn.CurrentEffectiveVerb;
+			//castPositionRequest.maxRangeFromTarget = pawn.CurrentEffectiveVerb.verbProps.range;
+			//castPositionRequest.wantCoverFromTarget = true;
+			//IntVec3 intVec;
+			//if (CastPositionFinder.TryFindCastPosition(castPositionRequest, out intVec))
+			//{
+			//	var microseconds = sw.ElapsedTicks * (double)1000000 / Stopwatch.Frequency;
+			//	var avg = avgTotal.Add(microseconds);
+			//	Log.Warning($"{avg}μs = {intVec}");
+			//	Tools.DebugPosition(intVec, color);
+			//}
 
-			var sw = Stopwatch.StartNew();
+			//var sw = Stopwatch.StartNew();
 
-			var map = pawn.Map;
-			var pos = pawn.Position;
-			var aim = target.Position;
-			var range = pawn.CurrentEffectiveVerb.EffectiveRange;
-			var radius = target.CurrentEffectiveVerb.EffectiveRange;
-			var optimalRangeSquared = range * 0.8f * (pawn.CurrentEffectiveVerb.verbProps.range * 0.8f);
-			var cells = Visibility.GetVisibleCellsAround(map, aim, (int)(radius + 0.5f), cell => cell.CanBeSeenOver(map) == false, null);
-			var interestingCells = cells.Where(cell =>
-				neighborOffsets.Count(o => cells.Contains(cell + o)) < 3
-				&& cell.CanBeSeenOver(map)
-				&& GenSight.LineOfSight(aim, cell, map, true) == false
-			);
-			var dangerCells = cells.Except(interestingCells).ToHashSet();
-			dangerGrids[pawn] = dangerCells;
+			//var map = pawn.Map;
+			//var pos = pawn.Position;
+			//var aim = target.Position;
+			//var range = pawn.CurrentEffectiveVerb.EffectiveRange;
+			//var radius = target.CurrentEffectiveVerb.EffectiveRange;
+			//var optimalRangeSquared = range * 0.8f * (pawn.CurrentEffectiveVerb.verbProps.range * 0.8f);
+			//var cells = Visibility.GetVisibleCellsAround(map, aim, (int)(radius + 0.5f), cell => cell.CanBeSeenOver(map) == false, null);
+			//var interestingCells = cells.Where(cell =>
+			//	neighborOffsets.Count(o => cells.Contains(cell + o)) < 3
+			//	&& cell.CanBeSeenOver(map)
+			//	&& GenSight.LineOfSight(aim, cell, map, true) == false
+			//);
+			//var dangerCells = cells.Except(interestingCells).ToHashSet();
+			//dangerGrids[pawn] = dangerCells;
 
-			var traverseParms = TraverseParms.For(pawn);
-			var sortedCells = (interestingCells.Any() ? interestingCells : cells)
-				.Where(cell =>
-				{
-					if (cell.WalkableBy(map, pawn) == false) return false;
-					if (pos != cell && cell.InAllowedArea(pawn) == false) return false;
-					if (map.reachability.CanReach(pos, cell, PathEndMode.OnCell, traverseParms) == false) return false;
-					//if (pawn.CurrentEffectiveVerb.CanHitTargetFrom(cell, aim) == false) return false;
-					return true;
-				})
-				.OrderByDescending(cell =>
-				{
-					var num = 0.3f;
-					num += CoverUtility.CalculateOverallBlockChance(cell, aim, map) * 0.55f;
-					var num2 = (pos - cell).LengthHorizontal;
-					num *= Mathf.Pow(0.967f, num2);
-					var num3 = 1f;
-					var rangeFromTargetToCellSquared = (cell - aim).LengthHorizontalSquared;
-					var num4 = Mathf.Abs(rangeFromTargetToCellSquared - optimalRangeSquared) / optimalRangeSquared;
-					num4 = 1f - num4;
-					num4 = 0.7f + 0.3f * num4;
-					num3 *= num4;
-					if (rangeFromTargetToCellSquared < 25f) num3 *= 0.5f;
-					return num * num3;
-				})
-				.ToList();
-			if (sortedCells.Count > 0)
-			{
-				var bestSpot = sortedCells.First();
-				var microseconds = sw.ElapsedTicks * (double)1000000 / Stopwatch.Frequency;
-				Log.Warning($"{microseconds}μs = {bestSpot}");
-				Tools.DebugPosition(bestSpot, color);
-			}
-
-			/* 0.286081085467588μs (63 cells), 5.74074074074074μs (9 edge cells)
-					var range = pawn.CurrentEffectiveVerb?.EffectiveRange;
-					if (range == null)
-						return;
-					var intRange = (int)(range.Value + 0.5f);
-					var map = pawn.Map;
-					var sw = Stopwatch.StartNew();
-					var cells = Visibility.GetVisibleCellsAround(map, pawn.Position, intRange, cell => cell.CanBeSeenOver(map) == false, null);
-					var timestamp1 = sw.ElapsedTicks;
-					//color = color.ToTransparent(0.25f);
-					//cells.Do(cell => Tools.DebugPosition(cell, color));
-					var edgeCells = cells.Where(cell =>
-						neighborOffsets.Count(o => cells.Contains(cell + o)) < 3
-						&& cell.CanBeSeenOver(map)
-						&& GenSight.LineOfSight(pawn.Position, cell, map, true) == false
-					).ToHashSet();
-					var timestamp2 = sw.ElapsedTicks;
-					//edgeCells.Do(cell => Tools.DebugPosition(cell, color));
-
-					var microseconds1 = timestamp1 * 1000000 / Stopwatch.Frequency;
-					var microseconds2 = (timestamp2 - timestamp1) * 1000000 / Stopwatch.Frequency;
-					var avg1 = avgMicro1.Add((double)microseconds1 / cells.Count);
-					var avg2 = avgMicro2.Add((double)microseconds2 / edgeCells.Count);
-					Log.Warning($"{avg1}μs ({cells.Count} cells), {avg2}μs ({edgeCells.Count} edge cells)");
-					*/
-
-			/* error case debugging, we don't emit enough cells
+			//var traverseParms = TraverseParms.For(pawn);
+			//var sortedCells = (interestingCells.Any() ? interestingCells : cells)
+			//	.Where(cell =>
+			//	{
+			//		if (cell.WalkableBy(map, pawn) == false) return false;
+			//		if (pos != cell && cell.InAllowedArea(pawn) == false) return false;
+			//		if (map.reachability.CanReach(pos, cell, PathEndMode.OnCell, traverseParms) == false) return false;
+			//		//if (pawn.CurrentEffectiveVerb.CanHitTargetFrom(cell, aim) == false) return false;
+			//		return true;
+			//	})
+			//	.OrderByDescending(cell =>
+			//	{
+			//		const float BaseWeight = 0.3f;
+			//		const float CoverWeightFactor = 0.55f;
+			//		const float DecayFactor = 0.967f;
 			//
-			GenRadial.RadialCellsAround(pawn.Position, range.Value, false)
-				.DoIf(
-					cell => !cells.Contains(cell) && cell.CanBeSeenOver(map) && GenSight.LineOfSight(pawn.Position, cell, map, true),
-					cell => Tools.DebugPosition(cell, err2)
-				);
-			*/
-		}
+			//		var weight = BaseWeight + CoverUtility.CalculateOverallBlockChance(cell, aim, map) * CoverWeightFactor;
+			//
+			//		var distance = (pos - cell).LengthHorizontal;
+			//		weight *= Mathf.Pow(DecayFactor, distance);
+			//
+			//		float cellDistSq = (cell - aim).LengthHorizontalSquared;
+			//		var rangeRatio = Mathf.Abs(cellDistSq - optimalRangeSquared) / optimalRangeSquared;
+			//		var rangeFactor = 0.7f + 0.3f * (1f - rangeRatio);
+			//		if (cellDistSq < 25f)
+			//			rangeFactor *= 0.5f;
+			//
+			//		return weight * rangeFactor;
+			//	})
+			//	.ToList();
+			//if (sortedCells.Count > 0)
+			//{
+			//	var bestSpot = sortedCells.First();
+			//	var microseconds = sw.ElapsedTicks * (double)1000000 / Stopwatch.Frequency;
+			//	Log.Warning($"{microseconds}μs = {bestSpot}");
+			//	Tools.DebugPosition(bestSpot, color);
+			//}
 
-		var colonist = Find.CurrentMap.mapPawns.AllHumanlikeSpawned.FirstOrDefault(p => p.IsColonist);
-		var enemy = Find.CurrentMap.mapPawns.AllHumanlikeSpawned.FirstOrDefault(p => p.HostileTo(Faction.OfPlayer));
-		if (colonist != null && enemy != null)
-		{
-			//Debug(enemy, colonist, Color.green);
-			Debug(colonist, enemy, Color.blue);
+			// 0.286081085467588μs (63 cells), 5.74074074074074μs (9 edge cells)
+			//var range = pawn.CurrentEffectiveVerb?.EffectiveRange;
+			//if (range == null)
+			//	return;
+			//var intRange = (int)(range.Value + 0.5f);
+			//var map = pawn.Map;
+			//var sw = Stopwatch.StartNew();
+			//var cells = Visibility.GetVisibleCellsAround(map, pawn.Position, intRange, cell => cell.CanBeSeenOver(map) == false, null);
+			//var timestamp1 = sw.ElapsedTicks;
+			////color = color.ToTransparent(0.25f);
+			////cells.Do(cell => Tools.DebugPosition(cell, color));
+			//var edgeCells = cells.Where(cell =>
+			//	neighborOffsets.Count(o => cells.Contains(cell + o)) < 3
+			//	&& cell.CanBeSeenOver(map)
+			//	&& GenSight.LineOfSight(pawn.Position, cell, map, true) == false
+			//).ToHashSet();
+			//var timestamp2 = sw.ElapsedTicks;
+			////edgeCells.Do(cell => Tools.DebugPosition(cell, color));
+			//
+			//var microseconds1 = timestamp1 * 1000000 / Stopwatch.Frequency;
+			//var microseconds2 = (timestamp2 - timestamp1) * 1000000 / Stopwatch.Frequency;
+			//var avg1 = avgMicro1.Add((double)microseconds1 / cells.Count);
+			//var avg2 = avgMicro2.Add((double)microseconds2 / edgeCells.Count);
+			//Log.Warning($"{avg1}μs ({cells.Count} cells), {avg2}μs ({edgeCells.Count} edge cells)");
 
-			foreach (var grid in dangerGrids.Values)
-			{
-				foreach(var cell in grid)
-					Tools.DebugPosition(cell, Color.white.ToTransparent(0.2f));
-			}
+			// error case debugging, we don't emit enough cells
+			//
+			//GenRadial.RadialCellsAround(pawn.Position, range.Value, false)
+			//	.DoIf(
+			//		cell => !cells.Contains(cell) && cell.CanBeSeenOver(map) && GenSight.LineOfSight(pawn.Position, cell, map, true),
+			//		cell => Tools.DebugPosition(cell, err2)
+			//	);
 		}
+		*/
+
+		//var colonist = Find.CurrentMap.mapPawns.AllHumanlikeSpawned.FirstOrDefault(p => p.IsColonist);
+		//var enemy = Find.CurrentMap.mapPawns.AllHumanlikeSpawned.FirstOrDefault(p => p.HostileTo(Faction.OfPlayer));
+		//if (colonist != null && enemy != null)
+		//{
+		//	Debug(enemy, colonist, Color.green);
+		//	Debug(colonist, enemy, Color.blue);
+		//}
 	}
 
 	public void HandleDrawing()

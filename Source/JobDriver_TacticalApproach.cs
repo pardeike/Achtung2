@@ -1,6 +1,7 @@
 using RimWorld;
-using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -33,24 +34,34 @@ public class JobDriver_TacticalApproach : JobDriver
 		return jobDef;
 	}
 
-	public enum State
-	{
-		Undefined = 0,
-		TooFar = 1,
-		TooClose = 2,
-		Moving = 3,
-		Attack = 4
-	}
+	static readonly IntVec3[] neighborOffsets =
+	[
+		new IntVec3(0, 0, 1),
+		new IntVec3(1, 0, 0),
+		new IntVec3(0, 0, -1),
+		new IntVec3(-1, 0, 0)
+	];
 
-	public State state = State.Undefined;
+	public int movingDirection = 0;
+	public IntVec3 lastPosition = IntVec3.Invalid;
+	public IntVec3 lastEnemyPosition = IntVec3.Invalid;
+	public HashSet<IntVec3> cachedCells = [];
 
 	public override void ExposeData()
 	{
 		base.ExposeData();
-		Scribe_Values.Look(ref state, "state", State.Undefined);
+		Scribe_Values.Look(ref movingDirection, "movingDirection", 0);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			movingDirection = 0;
+			cachedCells ??= [];
+			cachedCells.Clear();
+			lastPosition = IntVec3.Invalid;
+			lastEnemyPosition = IntVec3.Invalid;
+		}
 	}
 
-	public Pawn Enemy => (Pawn)job.GetTarget(TargetIndex.A).Thing;
+	public Pawn Enemy => TargetThingA as Pawn;
 
 	public override string GetReport()
 	{
@@ -62,12 +73,6 @@ public class JobDriver_TacticalApproach : JobDriver
 	public override bool TryMakePreToilReservations(bool errorOnFailed)
 		=> pawn.Reserve(Enemy, job, 1, -1, null, errorOnFailed, false);
 
-	private void SetState(State newState)
-	{
-		Log.Warning($"{pawn} state changed from {state} to {newState}");
-		state = newState;
-	}
-
 	private bool EnemyFinished()
 	{
 		var enemy = Enemy;
@@ -78,100 +83,204 @@ public class JobDriver_TacticalApproach : JobDriver
 		return false;
 	}
 
+	public HashSet<IntVec3> UpdateCells()
+	{
+		var pos = pawn.Position;
+		var aim = Enemy.Position;
+		if (lastPosition == pos && lastEnemyPosition == aim) return cachedCells;
+		var radius = Enemy.CurrentEffectiveVerb.EffectiveRange;
+		var optimalRangeSquared = pawn.CurrentEffectiveVerb.EffectiveRange * 0.8f * (pawn.CurrentEffectiveVerb.verbProps.range * 0.8f);
+		var map = pawn.Map;
+		// var cells = Visibility.GetVisibleCellsAround(map, aim, (int)(radius + 0.5f), cell => cell.CanBeSeenOver(map) == false, null);
+		var cells = new HashSet<IntVec3>();
+		var positions = new List<IntVec3>();
+		ShootLeanUtility.LeanShootingSourcesFromTo(Enemy.Position, pawn.Position, Map, positions);
+		foreach (var enemyPos in positions)
+		{
+			var posCells = Visibility.GetVisibleCellsAround(map, enemyPos, (int)(radius + 0.5f), cell => cell.CanBeSeenOver(map) == false, null);
+			cells.AddRange(posCells);
+		}
+		var interestingCells = cells.Where(cell =>
+			neighborOffsets.Count(o => cells.Contains(cell + o)) < 3
+			&& cell.CanBeSeenOver(map)
+			&& GenSight.LineOfSight(aim, cell, map, true) == false
+		);
+		Controller.dangerGrids[pawn] = [.. cells.Except(interestingCells)];
+		cachedCells = interestingCells.Any() ? [.. interestingCells] : cells;
+		return cachedCells;
+	}
+
+	private void StopShooting()
+	{
+		var stance_Warmup = pawn.stances.curStance as Stance_Warmup;
+		if (stance_Warmup != null)
+			pawn.stances.CancelBusyStanceSoft();
+		if (pawn.CurJob != null && pawn.CurJob.def == JobDefOf.AttackStatic)
+			pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true, true);
+	}
+
+	private void MoveAway()
+	{
+		var enemyPos = Enemy.Position;
+		var safeDistance = GetSafeDistanceToEnemy();
+		var distanceSquared = (int)(safeDistance * safeDistance) + 1;
+		var maxRadius = (int)safeDistance + 5;
+		if (RCellFinder.TryFindRandomCellNearWith
+		(
+			pawn.Position,
+			cell => cell.DistanceToSquared(enemyPos) >= distanceSquared && cell.WalkableBy(pawn.Map, pawn) && IsInDanger(cell) == false,
+			pawn.Map,
+			out var coverPos,
+			5,
+			maxRadius) == false
+		)
+		{
+			Log.Warning($"-> {pawn} cannot find cover to retreat to, staying put");
+			movingDirection = 0;
+			return;
+		}
+
+		StopShooting();
+		pawn.pather.StopDead();
+
+		Log.Warning($"-> {pawn} is retreating to {coverPos}");
+		job.SetTarget(TargetIndex.B, coverPos);
+		movingDirection = -1;
+		pawn.pather.StartPath(coverPos, PathEndMode.OnCell);
+	}
+
+	private void MoveCloser()
+	{
+		var attackPos = CanFindAttackPosition();
+		if (attackPos.IsValid == false)
+		{
+			Log.Warning($"-> {pawn} cannot find an attack position");
+			movingDirection = 0;
+			return;
+		}
+
+		StopShooting();
+		pawn.pather.StopDead();
+
+		Log.Warning($"-> {pawn} is moving to attack position {attackPos}");
+		job.SetTarget(TargetIndex.B, attackPos);
+		movingDirection = 1;
+		pawn.pather.StartPath(attackPos, PathEndMode.OnCell);
+	}
+
 	public override IEnumerable<Toil> MakeNewToils()
 	{
-		_ = this.FailOn(delegate
+		yield return new Toil()
 		{
-			var done = EnemyFinished();
-			if (done)
-				Log.Warning($"### {pawn} tactical attack done");
-			return done;
-		});
-
-		yield return Toils_Combat.TrySetJobToUseAttackVerb(TargetIndex.A);
-
-		var checkAttackPos = Toils_General
-			.Do(delegate
+			initAction = () =>
 			{
-				Log.Warning($"### {pawn} checking position");
-
-				if (TooClose() && state != State.TooClose)
+				movingDirection = 0;
+				lastPosition = IntVec3.Invalid;
+				lastEnemyPosition = IntVec3.Invalid;
+				cachedCells = [];
+				Log.Warning($"### {pawn} tactical attack started");
+			},
+			finishActions = [
+				() =>
 				{
-					var enemyPos = Enemy.Position;
-					var safeDistance = GetSafeDistanceToEnemy();
-					var distanceSquared = (int)(safeDistance * safeDistance) + 1;
-					var maxRadius = (int)safeDistance + 5;
-					if (RCellFinder.TryFindRandomCellNearWith(pawn.Position, cell => cell.DistanceToSquared(enemyPos) >= distanceSquared, pawn.Map, out var coverPos, 5, maxRadius))
+					Log.Warning($"### {pawn} tactical attack done");
+					Controller.dangerGrids[pawn]?.Clear();
+					_ = Controller.dangerGrids.Remove(pawn);
+				}
+			],
+			tickAction = () =>
+			{
+				//var sw = Stopwatch.StartNew();
+				//try
+				//{
+				if (EnemyFinished())
+				{
+					Log.Warning($"-> {pawn} enemy finished, ending job");
+					EndJobWith(JobCondition.Succeeded);
+					return;
+				}
+
+				var verb = pawn.CurrentEffectiveVerb;
+				if (verb == null || verb.IsStillUsableBy(pawn) == false)
+				{
+					Log.Warning($"-> {pawn} attack verb is not usable, ending job");
+					EndJobWith(JobCondition.Incompletable);
+					return;
+				}
+
+				_ = UpdateCells();
+				var isMoving = pawn.pather.Moving;
+				var busyStance = pawn.stances.curStance as Stance_Busy;
+				var isAttacking = busyStance != null && busyStance.focusTarg == TargetA;
+
+				var inDanger = UnderAttack() || TooClose();
+				if (movingDirection != -1 && inDanger)
+				{
+					MoveAway();
+					return;
+				}
+				else if (movingDirection != 1 && TooFar())
+				{
+					MoveCloser();
+					return;
+				}
+
+				var canHit = verb.CanHitTarget(Enemy);
+				var s = $"move={isMoving} attack={isAttacking} danger={inDanger} stance={pawn.stances.curStance} hit={canHit} dir={movingDirection}";
+				if (jobDef.reportString != s)
+					jobDef.reportString = s;
+
+				if (inDanger) // safety
+					return;
+
+				if (canHit && isAttacking == false)
+				{
+					if (isMoving)
 					{
-						Log.Warning($"-> {pawn} is retreating to {coverPos}");
-						job.SetTarget(TargetIndex.B, coverPos);
-						SetState(State.TooClose);
+						pawn.pather.StopDead();
+						movingDirection = 0;
 					}
+
+					if (verb.TryStartCastOn(Enemy))
+						Log.Warning($"-> {pawn} start attack {Enemy} at {Enemy.Position}");
 					else
-						Log.Warning($"-> {pawn} cannot find cover to retreat to, staying put");
+						Log.Warning($"-> {pawn} cannot hit target, waiting");
 				}
-				if (TooFar() && state != State.TooFar)
+				else if (canHit == false)
 				{
-					var attackPos = CanFindAttackPosition(pawn, Enemy);
-					Log.Warning($"-> {pawn} is moving to attack position {attackPos}");
-					job.SetTarget(TargetIndex.B, attackPos);
-					SetState(State.TooFar);
+					if (isMoving == false)
+						MoveCloser();
 				}
-			});
-		yield return checkAttackPos;
-
-		/*yield return Toils_Combat
-			.GotoCastPosition(TargetIndex.A, TargetIndex.B, true)
-			.AddInitAction(() => Log.Warning($"-> {pawn} going to cast positon {TargetB.Cell}"))
-			.JumpIf(() => TooClose() && state != State.TooClose, checkAttackPos)
-			.JumpIf(() => TooFar() && state != State.TooFar, checkAttackPos);*/
-
-		yield return Toils_Goto
-			.Goto(TargetIndex.B, PathEndMode.OnCell)
-			.AddInitAction(delegate
-			{
-				Log.Warning($"-> {pawn} going to cast positon {TargetB.Cell}");
-				SetState(State.Moving);
-			})
-			.JumpIf(delegate
-			{
-				if (TooClose() && state != State.TooClose) return true;
-				if (TooFar() && state != State.TooFar) return true;
-				Log.Message("...");
-				return false;
-			}, checkAttackPos);
-
-		var checkTargetToil = Toils_Jump.JumpIfTargetNotHittable(TargetIndex.A, checkAttackPos);
-		yield return checkTargetToil;
-
-		yield return Toils_Combat
-			.CastVerb(TargetIndex.A, TargetIndex.B, true)
-			.AddInitAction(delegate
-			{
-				Log.Warning($"-> {pawn} is attacking enemy {Enemy} at {Enemy.Position}");
-				SetState(State.Attack);
-			})
-			.JumpIf(delegate
-			{
-				if (TooClose() && state != State.TooClose) return true;
-				if (TooFar() && state != State.TooFar) return true;
-				Log.Message("...");
-				return false;
-			}, checkAttackPos);
-
-		yield return Toils_Jump
-			.Jump(checkTargetToil)
-			.AddInitAction(() => Log.Warning($"{pawn} finished attacking {Enemy} at {Enemy.Position}"));
+				//}
+				//finally
+				//{
+				//	var microseconds = sw.ElapsedTicks * 1000000f / Stopwatch.Frequency;
+				//	sw.Stop();
+				//	if (microseconds > 1000)
+				//		Log.Warning($"### {pawn} tactical attack tick took {microseconds / 1000f} ms");
+				//}
+			},
+			defaultCompleteMode = ToilCompleteMode.Never
+		};
 	}
 
 	public float GetSafeDistanceToEnemy()
 		=> Enemy?.TryGetAttackVerb(pawn, false, false).EffectiveRange * 0.95f ?? 5f;
 
+	private bool UnderAttack()
+	{
+		var stance = Enemy.stances.curStance as Stance_Busy;
+		return stance != null && stance.focusTarg == pawn;
+	}
+
 	public bool TooClose()
 	{
-		var distance = pawn.Position.DistanceTo(Enemy.Position);
-		var safeDistance = GetSafeDistanceToEnemy();
-		return distance < safeDistance;
+		//var enemy = Enemy;
+		//var enemyPos = enemy.Position;
+		//var distance = pawn.Position.DistanceTo(enemyPos);
+		//var safeDistance = enemy.TryGetAttackVerb(pawn, false, false).EffectiveRange * 0.95f;
+		//if (distance < safeDistance) return true;
+		return IsInDanger(pawn.Position);
 	}
 
 	public bool TooFar()
@@ -192,20 +301,56 @@ public class JobDriver_TacticalApproach : JobDriver
 		return false;
 	}
 
-	public static IntVec3 CanFindAttackPosition(Pawn pawn, Pawn target)
+	public bool IsInDanger(IntVec3 cell)
 	{
-		var castPositionRequest = new CastPositionRequest
-		{
-			caster = pawn,
-			target = target,
-			verb = pawn.TryGetAttackVerb(target, false, false),
-			wantCoverFromTarget = true
-		};
-		castPositionRequest.maxRangeFromTarget = target.Downed
-			? Mathf.Min(castPositionRequest.verb.EffectiveRange, target.RaceProps.executionRange)
-			: Mathf.Max(castPositionRequest.verb.EffectiveRange * 0.95f, 1.42f);
-		if (CastPositionFinder.TryFindCastPosition(castPositionRequest, out var result))
-			return result;
-		return IntVec3.Invalid;
+		if (Controller.dangerGrids.TryGetValue(pawn, out var dangerCells) == false)
+			return false;
+		return dangerCells.Contains(cell);
+	}
+
+	public IntVec3 CanFindAttackPosition()
+	{
+		var traverseParms = TraverseParms.For(pawn);
+		var bestCell = IntVec3.Invalid;
+		var bestScore = float.MinValue;
+		var map = Map;
+		var pos = pawn.Position;
+		var aim = Enemy.Position;
+		var optimalRangeSquared = pawn.CurrentEffectiveVerb.EffectiveRange * 0.8f * (pawn.CurrentEffectiveVerb.verbProps.range * 0.8f);
+		UpdateCells()
+			.DoIf(
+				cell =>
+				{
+					if (cell.WalkableBy(map, pawn) == false) return false;
+					if (pos != cell && cell.InAllowedArea(pawn) == false) return false;
+					if (map.reachability.CanReach(pos, cell, PathEndMode.OnCell, traverseParms) == false) return false;
+					return true;
+				},
+				cell =>
+				{
+					const float BaseWeight = 0.3f;
+					const float CoverWeightFactor = 0.55f;
+					const float DecayFactor = 0.967f;
+
+					var weight = BaseWeight + CoverUtility.CalculateOverallBlockChance(cell, aim, map) * CoverWeightFactor;
+
+					var distance = (pos - cell).LengthHorizontal;
+					weight *= Mathf.Pow(DecayFactor, distance);
+
+					float cellDistSq = (cell - aim).LengthHorizontalSquared;
+					var rangeRatio = Mathf.Abs(cellDistSq - optimalRangeSquared) / optimalRangeSquared;
+					var rangeFactor = 0.7f + 0.3f * (1f - rangeRatio);
+					if (cellDistSq < 25f)
+						rangeFactor *= 0.5f;
+
+					var score = weight * rangeFactor;
+					if (score > bestScore)
+					{
+						bestScore = score;
+						bestCell = cell;
+					}
+				}
+			);
+		return bestCell;
 	}
 }
