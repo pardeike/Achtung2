@@ -7,6 +7,7 @@ namespace AchtungMod;
 
 public class TiledCellBoolDrawer(
 	Material material,
+	float altitude,
 	Func<int, bool> cellBoolGetter,
 	int mapSizeX,
 	int mapSizeZ,
@@ -22,7 +23,6 @@ public class TiledCellBoolDrawer(
 	private readonly int mapSizeZ = mapSizeZ;
 	private readonly float fadeWidth = Mathf.Max(0f, fadeWidth);
 
-	private readonly float altitude = AltitudeLayer.SmallWire.AltitudeFor() - 0.1f;
 	private readonly Func<int, bool> cellBoolGetter = cellBoolGetter ?? throw new ArgumentNullException(nameof(cellBoolGetter));
 
 	private static readonly List<Vector3> s_verts = [];
@@ -82,12 +82,11 @@ public class TiledCellBoolDrawer(
 				{
 					var fadeInner = white;
 					var fadeOuter = new Color(1f, 1f, 1f, 0f);
-					// vertices: inner bottom, outer bottom, outer top, inner top
 					AddQuad(new Vector3(j + 1, baseY, k),
-							new Vector3(j + 1 + fadeWidth, baseY, k),
-							new Vector3(j + 1 + fadeWidth, baseY, k + 1),
 							new Vector3(j + 1, baseY, k + 1),
-							fadeInner, fadeOuter, fadeOuter, fadeInner,
+							new Vector3(j + 1 + fadeWidth, baseY, k + 1),
+							new Vector3(j + 1 + fadeWidth, baseY, k),
+							fadeInner, fadeInner, fadeOuter, fadeOuter,
 							ref quadCount, ref currentMesh, ref meshIndex);
 				}
 
@@ -125,10 +124,10 @@ public class TiledCellBoolDrawer(
 				{
 					var fadeInner = white;
 					var fadeOuter = new Color(1f, 1f, 1f, 0f);
-					AddQuad(new Vector3(j, baseY, k),
-							new Vector3(j, baseY, k - fadeWidth),
+					AddQuad(new Vector3(j + 1, baseY, k),
 							new Vector3(j + 1, baseY, k - fadeWidth),
-							new Vector3(j + 1, baseY, k),
+							new Vector3(j, baseY, k - fadeWidth),
+							new Vector3(j, baseY, k),
 							fadeInner, fadeOuter, fadeOuter, fadeInner,
 							ref quadCount, ref currentMesh, ref meshIndex);
 				}

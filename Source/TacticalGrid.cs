@@ -18,7 +18,7 @@ public class TacticalGrid
 		var texture = ContentFinder<Texture2D>.Get("Striped");
 		texture.wrapMode = TextureWrapMode.Repeat;
 		texture.filterMode = FilterMode.Point;
-		var req = new MaterialRequest(texture, ShaderDatabase.Transparent, Color.white.ToTransparent(0.33f));
+		var req = new MaterialRequest(texture, ShaderDatabase.Transparent, Color.white.ToTransparent(0.25f));
 		stripedMaterial = MaterialPool.MatFrom(req);
 		stripedMaterial.renderQueue = 3600;
 	}
@@ -32,6 +32,7 @@ public class TacticalGrid
 		var offset = AltitudeLayer.SmallWire.AltitudeFor() - AltitudeLayer.MapDataOverlay.AltitudeFor() - 0.1f;
 		drawer = new TiledCellBoolDrawer(
 			stripedMaterial,
+			AltitudeLayer.SmallWire.AltitudeFor() - 0.1f,
 			index => cells.Contains(CellIndicesUtility.IndexToCell(index, mapSizeX)),
 			map.Size.x, map.Size.z
 		);
