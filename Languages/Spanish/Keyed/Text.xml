@@ -119,6 +119,11 @@
 	<SowZoneDescription>Siembra una zona de cultivos o una habitación por completo.</SowZoneDescription>
 	<SowZoneReport>Sembrando{0}: {1}</SowZoneReport>
 
+	<TacticalApproachLabel>Acercamiento táctico</TacticalApproachLabel>
+	<TacticalApproachInfoText>Acercándose tácticamente al enemigo</TacticalApproachInfoText>
+	<TacticalApproachDescription>Enfrenta al enemigo de forma táctica para eliminarlo</TacticalApproachDescription>
+	<TacticalApproachReport>Acercándose{0}: {1}</TacticalApproachReport>
+
 	<AlreadyDoing>(Job #{0})</AlreadyDoing>
 
 	<CouldNotFindMoreForcedWork>{0} No se pudo encontrar más trabajo forzado.El trabajo restante es muy probablemente reservado o no accesible.</CouldNotFindMoreForcedWork>

@@ -130,7 +130,7 @@ public class JobDriver_TacticalApproach : JobDriver
 
 		if (coverPos.IsValid == false)
 		{
-			Log.Warning($"-> {pawn} cannot find cover to retreat to, staying put");
+			Log.Message($"-> {pawn} cannot find cover to retreat to, staying put");
 			movingDirection = 0;
 			return;
 		}
@@ -140,7 +140,7 @@ public class JobDriver_TacticalApproach : JobDriver
 		StopShooting();
 		pawn.pather.StopDead();
 
-		Log.Warning($"-> {pawn} is retreating to {coverPos}");
+		Log.Message($"-> {pawn} is retreating to {coverPos}");
 		job.SetTarget(TargetIndex.B, coverPos);
 		movingDirection = -1;
 		pawn.pather.StartPath(coverPos, PathEndMode.OnCell);
@@ -151,7 +151,7 @@ public class JobDriver_TacticalApproach : JobDriver
 		var attackPos = CanFindAttackPosition();
 		if (attackPos.IsValid == false)
 		{
-			Log.Warning($"-> {pawn} cannot find an attack position");
+			Log.Message($"-> {pawn} cannot find an attack position");
 			movingDirection = 0;
 			return;
 		}
@@ -159,7 +159,7 @@ public class JobDriver_TacticalApproach : JobDriver
 		StopShooting();
 		pawn.pather.StopDead();
 
-		Log.Warning($"-> {pawn} is moving to attack position {attackPos}");
+		Log.Message($"-> {pawn} is moving to attack position {attackPos}");
 		job.SetTarget(TargetIndex.B, attackPos);
 		movingDirection = 1;
 		pawn.pather.StartPath(attackPos, PathEndMode.OnCell);
@@ -176,12 +176,12 @@ public class JobDriver_TacticalApproach : JobDriver
 				lastEnemyPosition = IntVec3.Invalid;
 				cachedCells = [];
 				usedAttackPositions = [];
-				Log.Warning($"### {pawn} tactical attack started");
+				Log.Message($"### {pawn} tactical attack started");
 			},
 			finishActions = [
 				() =>
 				{
-					Log.Warning($"### {pawn} tactical attack done");
+					Log.Message($"### {pawn} tactical attack done");
 					TacticalApproach.Remove(pawn);
 				}
 			],
@@ -194,7 +194,7 @@ public class JobDriver_TacticalApproach : JobDriver
 				//{
 				if (EnemyFinished())
 				{
-					Log.Warning($"-> {pawn} enemy finished, ending job");
+					Log.Message($"-> {pawn} enemy finished, ending job");
 					EndJobWith(JobCondition.Succeeded);
 					return;
 				}
@@ -202,7 +202,7 @@ public class JobDriver_TacticalApproach : JobDriver
 				var verb = pawn.CurrentEffectiveVerb;
 				if (verb == null || verb.IsStillUsableBy(pawn) == false)
 				{
-					Log.Warning($"-> {pawn} attack verb is not usable, ending job");
+					Log.Message($"-> {pawn} attack verb is not usable, ending job");
 					EndJobWith(JobCondition.Incompletable);
 					return;
 				}
@@ -225,11 +225,12 @@ public class JobDriver_TacticalApproach : JobDriver
 				}
 
 				var canHit = verb.CanHitTarget(Enemy);
-				var s = $"move={isMoving} attack={isAttacking} danger={inDanger} stance={pawn.stances.curStance} hit={canHit} dir={movingDirection}";
-				if (jobDef.reportString != s)
-					jobDef.reportString = s;
 
-				if (inDanger) // safety
+				//var s = $"move={isMoving} attack={isAttacking} danger={inDanger} stance={pawn.stances.curStance} hit={canHit} dir={movingDirection}";
+				//if (jobDef.reportString != s)
+				//	jobDef.reportString = s;
+
+				if (inDanger)
 					return;
 
 				if (canHit && isAttacking == false)
@@ -241,9 +242,9 @@ public class JobDriver_TacticalApproach : JobDriver
 					}
 
 					if (verb.TryStartCastOn(Enemy))
-						Log.Warning($"-> {pawn} start attack {Enemy} at {Enemy.Position}");
+						Log.Message($"-> {pawn} start attack {Enemy} at {Enemy.Position}");
 					else
-						Log.Warning($"-> {pawn} cannot hit target, waiting");
+						Log.Message($"-> {pawn} cannot hit target, waiting");
 				}
 				else if (canHit == false)
 				{
@@ -256,7 +257,7 @@ public class JobDriver_TacticalApproach : JobDriver
 				//	var microseconds = sw.ElapsedTicks * 1000000f / Stopwatch.Frequency;
 				//	sw.Stop();
 				//	if (microseconds > 1000)
-				//		Log.Warning($"### {pawn} tactical attack tick took {microseconds / 1000f} ms");
+				//		Log.Message($"### {pawn} tactical attack tick took {microseconds / 1000f} ms");
 				//}
 			},
 			defaultCompleteMode = ToilCompleteMode.Never

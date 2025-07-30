@@ -119,6 +119,11 @@
 	<SowZoneDescription>Baue Pflanzen in einer Zone oder einem Raum an.</SowZoneDescription>
 	<SowZoneReport>Baut{0} an: {1}</SowZoneReport>
 
+	<TacticalApproachLabel>Taktischer Angriff</TacticalApproachLabel>
+	<TacticalApproachInfoText>Taktisches Annähern an den Feind</TacticalApproachInfoText>
+	<TacticalApproachDescription>Greift den Feind taktisch an, mit dem Ziel ihn zu töten</TacticalApproachDescription>
+	<TacticalApproachReport>Annäherung{0}: {1}</TacticalApproachReport>
+
 	<AlreadyDoing>(Arbeit #{0})</AlreadyDoing>
 
 	<CouldNotFindMoreForcedWork>{0} konnte keine erzwungene Arbeit finden. Die verbleibende Arbeit ist wahrscheinlich reserviert oder nicht zugänglich.</CouldNotFindMoreForcedWork>

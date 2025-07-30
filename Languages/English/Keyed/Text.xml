@@ -122,6 +122,11 @@
 	<SowZoneDescription>Sow a growing zone or room until it is completely sowed</SowZoneDescription>
 	<SowZoneReport>Sowing{0}: {1}</SowZoneReport>
 
+	<TacticalApproachLabel>Tactical approach</TacticalApproachLabel>
+	<TacticalApproachInfoText>Tactical approaching the enemy</TacticalApproachInfoText>
+	<TacticalApproachDescription>Engages the enemy tactically in order to kill them</TacticalApproachDescription>
+	<TacticalApproachReport>Approaching{0}: {1}</TacticalApproachReport>
+
 	<AlreadyDoing>(Job #{0})</AlreadyDoing>
 
 	<CouldNotFindMoreForcedWork>{0} could not find more forced work. The remaining work is most likely reserved or not accessible.</CouldNotFindMoreForcedWork>

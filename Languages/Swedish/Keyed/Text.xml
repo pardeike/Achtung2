@@ -119,6 +119,11 @@
 	<SowZoneDescription>Så en hel zon eller rum</SowZoneDescription>
 	<SowZoneReport>Så{0}: {1}</SowZoneReport>
 
+	<TacticalApproachLabel>Taktisk närmande</TacticalApproachLabel>
+	<TacticalApproachInfoText>Taktiskt närmande mot fienden</TacticalApproachInfoText>
+	<TacticalApproachDescription>Går taktiskt mot fienden för att eliminera dem</TacticalApproachDescription>
+	<TacticalApproachReport>Närmar sig{0}: {1}</TacticalApproachReport>
+
 	<AlreadyDoing>(Job #{0})</AlreadyDoing>
 
 	<CouldNotFindMoreForcedWork>{0} kunde inte hitta mer påtvingat arbete. Det återstående arbetet är troligen reserverat eller inte tillgängligt.</CouldNotFindMoreForcedWork>
