@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using Unity.Burst;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -911,6 +912,13 @@ static class ThingOverlays_ThingOverlaysOnGUI_Patch
 {
 	public static void Postfix()
 		=> Controller.GetInstance().HandleDrawingOnGUI();
+}
+//
+[HarmonyPatch(typeof(MapDrawer))]
+[HarmonyPatch(nameof(MapDrawer.MapMeshDrawerUpdate_First))]
+static class MapDrawer_MapMeshDrawerUpdate_First_Patch
+{
+	public static void Postfix() => TacticalApproach.Update();
 }
 
 // pawn inspector panel

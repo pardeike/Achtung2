@@ -4,3 +4,4 @@
 [assembly: SuppressMessage("Style", "IDE0270:Use coalesce expression")]
 [assembly: SuppressMessage("Style", "IDE0130:Namespace does not match folder structure")]
 [assembly: SuppressMessage("Style", "IDE0021:Use expression body for constructor")]
+[assembly: SuppressMessage("Style", "IDE0017:Simplify object initialization")]

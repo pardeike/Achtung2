@@ -1,6 +1,5 @@
 using RimWorld;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 using Verse;
@@ -61,6 +60,7 @@ public class JobDriver_TacticalApproach : JobDriver
 			usedAttackPositions.Clear();
 			lastPosition = IntVec3.Invalid;
 			lastEnemyPosition = IntVec3.Invalid;
+			// TacticalApproach.Add(pawn); can't do it, because pawn has null Map at this point
 		}
 	}
 
@@ -97,13 +97,13 @@ public class JobDriver_TacticalApproach : JobDriver
 		var radius = Enemy.CurrentEffectiveVerb.EffectiveRange;
 		var optimalRangeSquared = pawn.CurrentEffectiveVerb.EffectiveRange * 0.8f * (pawn.CurrentEffectiveVerb.verbProps.range * 0.8f);
 		var map = pawn.Map;
-		var cells = Visibility.GetShootingCells(pawn, Enemy);
+		var cells = TacticalApproach.GetShootingCells(pawn, Enemy);
 		var interestingCells = cells.Where(cell =>
 			neighborOffsets.Count(o => cells.Contains(cell + o)) < 3
 			&& cell.CanBeSeenOver(map)
 			&& GenSight.LineOfSight(aim, cell, map, true) == false
 		);
-		Controller.dangerGrids[pawn] = [.. cells.Except(interestingCells)];
+		TacticalApproach.Grid(pawn).SetCells([.. cells.Except(interestingCells)]);
 		cachedCells = interestingCells.Any() ? [.. interestingCells] : cells;
 		return cachedCells;
 	}
@@ -123,7 +123,7 @@ public class JobDriver_TacticalApproach : JobDriver
 		var optimalRangeSquared = pawn.CurrentEffectiveVerb.EffectiveRange * 0.8f * (pawn.CurrentEffectiveVerb.verbProps.range * 0.8f);
 		var pos = pawn.Position;
 		var map = pawn.Map;
-		var cells = Visibility.GetShootingCells(pawn, Enemy);
+		var cells = TacticalApproach.GetShootingCells(pawn, Enemy);
 		var traverseParms = TraverseParms.For(pawn);
 		var coverPos = GenRadial.RadialCellsAround(pos, radius, false)
 			.First(cell => cells.Contains(cell) == false && usedAttackPositions.Contains(cell) == false && map.reachability.CanReach(pos, cell, PathEndMode.OnCell, traverseParms));
@@ -182,12 +182,13 @@ public class JobDriver_TacticalApproach : JobDriver
 				() =>
 				{
 					Log.Warning($"### {pawn} tactical attack done");
-					Controller.dangerGrids[pawn]?.Clear();
-					_ = Controller.dangerGrids.Remove(pawn);
+					TacticalApproach.Remove(pawn);
 				}
 			],
 			tickAction = () =>
 			{
+				TacticalApproach.AddIfMissing(pawn);
+
 				//var sw = Stopwatch.StartNew();
 				//try
 				//{
@@ -271,7 +272,7 @@ public class JobDriver_TacticalApproach : JobDriver
 		return stance != null && stance.focusTarg == pawn;
 	}
 
-	public bool TooClose() => IsInDanger(pawn.Position);
+	public bool TooClose() => TacticalApproach.IsInDanger(pawn);
 
 	public bool TooFar()
 	{
@@ -289,13 +290,6 @@ public class JobDriver_TacticalApproach : JobDriver
 				return true;
 		}
 		return false;
-	}
-
-	public bool IsInDanger(IntVec3 cell)
-	{
-		if (Controller.dangerGrids.TryGetValue(pawn, out var dangerCells) == false)
-			return false;
-		return dangerCells.Contains(cell);
 	}
 
 	public IntVec3 CanFindAttackPosition()

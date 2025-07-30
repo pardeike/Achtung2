@@ -4,8 +4,10 @@ using Verse;
 
 namespace AchtungMod;
 
-public static class Visibility
+public static class TacticalApproach
 {
+	public static readonly Dictionary<Pawn, TacticalGrid> tacticalGrids = [];
+
 	static readonly int[,] oct = new int[,]
 	{
 		{ 1, 0, 0, 1 },
@@ -18,6 +20,40 @@ public static class Visibility
 		{ 1, 0, 0,-1 }
 	};
 
+	public static TacticalGrid Grid(Pawn pawn)
+	{
+		if (tacticalGrids.TryGetValue(pawn, out var tacticalGrid))
+			return tacticalGrid;
+		return null;
+	}
+
+	public static bool IsInDanger(Pawn pawn)
+	{
+		if (tacticalGrids.TryGetValue(pawn, out var tacticalGrid) == false)
+			return false;
+		return tacticalGrid.Contains(pawn.Position);
+	}
+
+	public static void Add(Pawn pawn) => tacticalGrids[pawn] = new TacticalGrid(pawn);
+	public static void AddIfMissing(Pawn pawn)
+	{
+		if (!tacticalGrids.ContainsKey(pawn))
+			tacticalGrids[pawn] = new TacticalGrid(pawn);
+	}
+
+	public static void Remove(Pawn pawn)
+	{
+		Grid(pawn)?.SetCells([]);
+		_ = tacticalGrids.Remove(pawn);
+	}
+
+	public static void Update()
+	{
+		var map = Find.CurrentMap;
+		foreach (var pair in tacticalGrids)
+			if (pair.Key.Map == map) pair.Value.Update();
+	}
+
 	public static HashSet<IntVec3> GetShootingCells(Pawn colonist, Pawn enemy)
 	{
 		var map = colonist.Map;
@@ -26,7 +62,10 @@ public static class Visibility
 		var positions = new List<IntVec3>();
 		ShootLeanUtility.LeanShootingSourcesFromTo(enemy.Position, colonist.Position, map, positions);
 		foreach (var enemyPos in positions)
+		{
+			_ = cells.Add(enemyPos);
 			cells.AddRange(GetVisibleCellsAround(map, enemyPos, (int)(radius + 0.5f), cell => cell.CanBeSeenOver(map) == false, null));
+		}
 		return cells;
 	}
 
