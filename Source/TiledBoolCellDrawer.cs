@@ -5,39 +5,32 @@ using Verse;
 
 namespace AchtungMod;
 
-/// <summary>
-/// A custom cell drawer for striped overlays.  It generates UVs, applies an
-/// altitude offset at draw time, and optionally fades out the outer edges
-/// by adding quads with alpha gradients.
-/// </summary>
-public class StripedCellBoolDrawer(
+public class TiledCellBoolDrawer(
+	Material material,
 	Func<int, bool> cellBoolGetter,
-	Func<int, Color> extraColorGetter,
 	int mapSizeX,
 	int mapSizeZ,
-	float fadeWidth = 0.25f,
-	float altitudeOffset = 0f)
+	float fadeWidth = 0.25f)
 {
 	private bool wantDraw;
-	public Material material;
 	private bool dirty = true;
 
-	// Meshes; each holds up to 16383 quads.
 	internal readonly List<Mesh> meshes = [];
 
+	private readonly Material material = material ?? throw new ArgumentNullException(nameof(material));
 	private readonly int mapSizeX = mapSizeX;
 	private readonly int mapSizeZ = mapSizeZ;
 	private readonly float fadeWidth = Mathf.Max(0f, fadeWidth);
-	private readonly float altitudeOffset = altitudeOffset;
-	private readonly Func<int, bool> cellBoolGetter = cellBoolGetter ?? throw new ArgumentNullException(nameof(cellBoolGetter));
-	private readonly Func<int, Color> extraColorGetter = extraColorGetter ?? throw new ArgumentNullException(nameof(extraColorGetter));
 
-	// Working lists reused to reduce allocations.
+	private readonly float altitude = AltitudeLayer.SmallWire.AltitudeFor() - 0.1f;
+	private readonly Func<int, bool> cellBoolGetter = cellBoolGetter ?? throw new ArgumentNullException(nameof(cellBoolGetter));
+
 	private static readonly List<Vector3> s_verts = [];
 	private static readonly List<int> s_tris = [];
 	private static readonly List<Color> s_colors = [];
 	private static readonly List<Vector2> s_uvs = [];
 	private const int MaxQuadsPerMesh = 16383;
+	private static readonly Color white = Color.white;
 
 	public void MarkForDraw() => wantDraw = true;
 	public void SetDirty() => dirty = true;
@@ -45,28 +38,26 @@ public class StripedCellBoolDrawer(
 	public void Update()
 	{
 		if (!wantDraw) return;
-		if (dirty) { RegenerateMesh(); dirty = false; }
+		if (dirty)
+		{
+			RegenerateMesh();
+			dirty = false;
+		}
 		if (material == null) return;
-		// Apply altitude offset via a translation matrix.  The `matrix` parameter
-		// combines translation, rotation and scale into a single transform:contentReference[oaicite:1]{index=1}.
-		var translate = Matrix4x4.TRS(new Vector3(0f, altitudeOffset, 0f),
-											Quaternion.identity,
-											Vector3.one);
 		for (var i = 0; i < meshes.Count; i++)
-			Graphics.DrawMesh(meshes[i], translate, material, 0);
+			Graphics.DrawMesh(meshes[i], Matrix4x4.identity, material, 0);
 		wantDraw = false;
 	}
 
 	public void RegenerateMesh()
 	{
-		// clear old data
 		foreach (var m in meshes) m.Clear();
 		var meshIndex = 0;
 		var quadCount = 0;
-		if (meshes.Count == 0) meshes.Add(new Mesh { name = "StripedCellBoolDrawer" });
+		if (meshes.Count == 0) meshes.Add(new Mesh { name = "TiledCellBoolDrawer" });
 		var currentMesh = meshes[meshIndex];
 
-		var baseY = AltitudeLayer.MapDataOverlay.AltitudeFor(); // base altitude
+		var baseY = altitude;
 		var maxX = mapSizeX;
 		var maxZ = mapSizeZ;
 
@@ -76,68 +67,69 @@ public class StripedCellBoolDrawer(
 			{
 				var idx = CellIndicesUtility.CellToIndex(j, k, maxX);
 				if (!cellBoolGetter(idx)) continue;
-				// colour for the interior
-				var c = extraColorGetter(idx);
-				c.a = 1f; // full opacity inside
 
-				// interior quad
+				// Interior quad
 				AddQuad(new Vector3(j, baseY, k),
 						new Vector3(j, baseY, k + 1),
 						new Vector3(j + 1, baseY, k + 1),
 						new Vector3(j + 1, baseY, k),
-						c, c, c, c,
+						white, white, white, white,
 						ref quadCount, ref currentMesh, ref meshIndex);
 
-				// east neighbour
+				// Right edge (east)
 				if (j + 1 >= maxX ||
 					!cellBoolGetter(CellIndicesUtility.CellToIndex(j + 1, k, maxX)))
 				{
-					var fade0 = c;
-					var fade1 = c; fade1.a = 0f;
+					var fadeInner = white;
+					var fadeOuter = new Color(1f, 1f, 1f, 0f);
+					// vertices: inner bottom, outer bottom, outer top, inner top
 					AddQuad(new Vector3(j + 1, baseY, k),
-							new Vector3(j + 1, baseY, k + 1),
-							new Vector3(j + 1 + fadeWidth, baseY, k + 1),
 							new Vector3(j + 1 + fadeWidth, baseY, k),
-							fade0, fade0, fade1, fade1,
+							new Vector3(j + 1 + fadeWidth, baseY, k + 1),
+							new Vector3(j + 1, baseY, k + 1),
+							fadeInner, fadeOuter, fadeOuter, fadeInner,
 							ref quadCount, ref currentMesh, ref meshIndex);
 				}
-				// west neighbour
+
+				// Left edge (west)
 				if (j - 1 < 0 ||
 					!cellBoolGetter(CellIndicesUtility.CellToIndex(j - 1, k, maxX)))
 				{
-					var fade0 = c;
-					var fade1 = c; fade1.a = 0f;
+					var fadeInner = white;
+					var fadeOuter = new Color(1f, 1f, 1f, 0f);
 					AddQuad(new Vector3(j, baseY, k),
-							new Vector3(j, baseY, k + 1),
-							new Vector3(j - fadeWidth, baseY, k + 1),
 							new Vector3(j - fadeWidth, baseY, k),
-							fade0, fade0, fade1, fade1,
+							new Vector3(j - fadeWidth, baseY, k + 1),
+							new Vector3(j, baseY, k + 1),
+							fadeInner, fadeOuter, fadeOuter, fadeInner,
 							ref quadCount, ref currentMesh, ref meshIndex);
 				}
-				// north neighbour
+
+				// Top edge (north – k+1)
 				if (k + 1 >= maxZ ||
 					!cellBoolGetter(CellIndicesUtility.CellToIndex(j, k + 1, maxX)))
 				{
-					var fade0 = c;
-					var fade1 = c; fade1.a = 0f;
+					var fadeInner = white;
+					var fadeOuter = new Color(1f, 1f, 1f, 0f);
 					AddQuad(new Vector3(j, baseY, k + 1),
-							new Vector3(j + 1, baseY, k + 1),
-							new Vector3(j + 1, baseY, k + 1 + fadeWidth),
 							new Vector3(j, baseY, k + 1 + fadeWidth),
-							fade0, fade0, fade1, fade1,
+							new Vector3(j + 1, baseY, k + 1 + fadeWidth),
+							new Vector3(j + 1, baseY, k + 1),
+							fadeInner, fadeOuter, fadeOuter, fadeInner,
 							ref quadCount, ref currentMesh, ref meshIndex);
 				}
-				// south neighbour
+
+				// Bottom edge (south – k-1)
 				if (k - 1 < 0 ||
 					!cellBoolGetter(CellIndicesUtility.CellToIndex(j, k - 1, maxX)))
 				{
-					var fade0 = c;
-					var fade1 = c; fade1.a = 0f;
+					var fadeInner = white;
+					var fadeOuter = new Color(1f, 1f, 1f, 0f);
 					AddQuad(new Vector3(j, baseY, k),
-							new Vector3(j + 1, baseY, k),
-							new Vector3(j + 1, baseY, k - fadeWidth),
 							new Vector3(j, baseY, k - fadeWidth),
-							fade0, fade0, fade1, fade1,
+							new Vector3(j + 1, baseY, k - fadeWidth),
+							new Vector3(j + 1, baseY, k),
+							fadeInner, fadeOuter, fadeOuter, fadeInner,
 							ref quadCount, ref currentMesh, ref meshIndex);
 				}
 			}
@@ -145,11 +137,10 @@ public class StripedCellBoolDrawer(
 		FinalizeWorkingDataIntoMesh(currentMesh);
 	}
 
-	// Helper to add a quad; it handles vertex, colour, UV and triangle lists
-	// and splits meshes once the 16383‑quad limit is reached.
-	private void AddQuad(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3,
-						 Color c0, Color c1, Color c2, Color c3,
-						 ref int quadCount, ref Mesh mesh, ref int meshIndex)
+	private void AddQuad(
+		Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3,
+		Color c0, Color c1, Color c2, Color c3,
+		ref int quadCount, ref Mesh mesh, ref int meshIndex)
 	{
 		var baseIndex = s_verts.Count;
 		s_verts.Add(v0); s_verts.Add(v1); s_verts.Add(v2); s_verts.Add(v3);
@@ -166,7 +157,7 @@ public class StripedCellBoolDrawer(
 			FinalizeWorkingDataIntoMesh(mesh);
 			meshIndex++;
 			if (meshes.Count <= meshIndex)
-				meshes.Add(new Mesh { name = "StripedCellBoolDrawer" });
+				meshes.Add(new Mesh { name = "TiledCellBoolDrawer" });
 			mesh = meshes[meshIndex];
 			quadCount = 0;
 		}
