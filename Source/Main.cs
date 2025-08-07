@@ -1,4 +1,4 @@
-﻿using Brrainz;
+using Brrainz;
 using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
@@ -770,6 +770,52 @@ static class Pawn_JobTracker_EndCurrentJob_Patch
 
 			yield return Brtrue[endLabel];
 		}
+	}
+}
+
+// fix enter portal code so it no longer uses static state
+[HarmonyPatch(typeof(FloatMenuOptionProvider_EnterMapPortal), nameof(FloatMenuOptionProvider_EnterMapPortal.GetSingleOptionFor))]
+static class FloatMenuOptionProvider_EnterMapPortal_GetSingleOptionFor_Patch
+{
+	public static Pawn currentPawn;
+
+	public static bool Prefix(ref FloatMenuOption __result, Thing clickedThing, FloatMenuContext context)
+	{
+		var portal = clickedThing as MapPortal;
+		if (portal == null)
+		{
+			__result = null;
+			return false;
+		}
+		string text;
+		if (!portal.IsEnterable(out text))
+		{
+			__result = new FloatMenuOption("CannotEnterPortal".Translate(portal.Label) + ": " + text, null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+			return false;
+		}
+		if (!context.IsMultiselect)
+		{
+			var acceptanceReport = FloatMenuOptionProvider_EnterMapPortal.CanEnterPortal(context.FirstSelectedPawn, portal);
+			if (!acceptanceReport.Accepted)
+			{
+				__result = new FloatMenuOption("CannotEnterPortal".Translate(portal.Label) + ": " + acceptanceReport.Reason, null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+				return false;
+			}
+		}
+		if (!FloatMenuOptionProvider_EnterMapPortal.CanEnterPortal(FloatMenuMakerMap.makingFor, portal))
+		{
+			__result = null;
+			return false;
+		}
+		var pawn = currentPawn;
+		__result = new FloatMenuOption(portal.EnterString, delegate
+		{
+			var job = JobMaker.MakeJob(JobDefOf.EnterPortal, portal);
+			job.playerForced = true;
+			_ = pawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
+		},
+		MenuOptionPriority.High, null, null, 0f, null, null, true, 0);
+		return false;
 	}
 }
 

@@ -1,4 +1,4 @@
-﻿using RimWorld;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +32,7 @@ public class MultiActions
 
 	public void AddColonist(Colonist colonist)
 	{
-		var selectedPawns = Find.MapUI.selector.SelectedPawns;
+		FloatMenuOptionProvider_EnterMapPortal_GetSingleOptionFor_Patch.currentPawn = colonist.pawn;
 
 		var existingLabels = new HashSet<string>();
 		FloatMenuMakerMap.GetOptions([colonist.pawn], clickPos, out _).Do(option =>
