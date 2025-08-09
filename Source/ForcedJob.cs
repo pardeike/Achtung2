@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using RimWorld;
 using System;
 using System.Collections;
@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using Verse.AI;
+using static UnityEngine.Networking.UnityWebRequest;
 
 namespace AchtungMod;
 
@@ -140,6 +141,32 @@ public class ForcedJob : IExposable
 		}
 	}
 
+	private Dictionary<IntVec3, LocalTargetInfo> GetItemsByCell(IEnumerable<ForcedTarget> result)
+	{
+		var itemsByCell = new Dictionary<IntVec3, LocalTargetInfo>();
+		LocalTargetInfo existing;
+		foreach (var t in result)
+		{
+			var key = t.item.Cell;
+			if (!itemsByCell.TryGetValue(key, out existing))
+			{
+				itemsByCell[key] = t.item;
+				continue;
+			}
+			if (isThingJob)
+			{
+				if (t.item.HasThing && !existing.HasThing)
+					itemsByCell[key] = t.item;
+			}
+			else
+			{
+				if (!t.item.HasThing && existing.HasThing)
+					itemsByCell[key] = t.item;
+			}
+		}
+		return itemsByCell;
+	}
+
 	public IEnumerable<LocalTargetInfo> GetSortedTargets()
 	{
 		var map = pawn.Map;
@@ -161,7 +188,7 @@ public class ForcedJob : IExposable
 					var path = map.pathFinder.FindPathNow(startCell, someTarget.item.Cell, TraverseParms.For(pawn, Danger.Deadly));
 					if (path != PawnPath.NotFound)
 					{
-						var itemsByCell = new Dictionary<IntVec3, LocalTargetInfo>(result.Select(t => new KeyValuePair<IntVec3, LocalTargetInfo>(t.item.Cell, t.item)));
+						var itemsByCell = GetItemsByCell(result);
 						LocalTargetInfo? entry = null;
 						var nodes = path.NodesReversed;
 						for (var i = nodes.Count - 1; i >= 0; i--)
