@@ -161,7 +161,14 @@ public class ForcedJob : IExposable
 					var path = map.pathFinder.FindPathNow(startCell, someTarget.item.Cell, TraverseParms.For(pawn, Danger.Deadly));
 					if (path != PawnPath.NotFound)
 					{
-						var itemsByCell = new Dictionary<IntVec3, LocalTargetInfo>(result.Select(t => new KeyValuePair<IntVec3, LocalTargetInfo>(t.item.Cell, t.item)));
+						var itemsByCell = new Dictionary<IntVec3, LocalTargetInfo>();
+						foreach (var t in result)
+						{
+							var cell = t.item.Cell;
+							// ignore additional entries for the same cell
+							if (!itemsByCell.ContainsKey(cell))
+								itemsByCell[cell] = t.item;
+						}
 						LocalTargetInfo? entry = null;
 						var nodes = path.NodesReversed;
 						for (var i = nodes.Count - 1; i >= 0; i--)
