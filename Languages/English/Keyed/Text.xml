@@ -10,6 +10,7 @@
 	<Feature_Achtung_Settings>Settings</Feature_Achtung_Settings>
 	<Feature_Achtung_Draftstatus>Draft Status</Feature_Achtung_Draftstatus>
 	<Feature_Achtung_Rescue>Rescue</Feature_Achtung_Rescue>
+	<Feature_Achtung_Dragging>Drafted Dragging</Feature_Achtung_Dragging>
 
 	<PositioningEnabledTitle>Custom mouse positioning</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Enables combat positioning for your mouse clicks/drags (see settings below)</PositioningEnabledExplained>

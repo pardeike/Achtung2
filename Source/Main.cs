@@ -49,6 +49,7 @@ public class Achtung : Mod
 	{
 		rootDir = content.RootDir;
 		Settings = GetSettings<AchtungSettings>();
+		DynamicWorkTypes.Initialize();
 	}
 
 	public override void DoSettingsWindowContents(Rect inRect) => AchtungSettings.DoWindowContents(inRect);

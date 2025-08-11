@@ -1,4 +1,5 @@
-﻿using RimWorld;
+using HarmonyLib;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -273,17 +274,6 @@ static class Tools
 			for (var x = rect.minX; x <= rect.maxX; x++)
 				yield return new XY(x, z);
 	}
-
-	public static void Do<T>(this IEnumerable<T> sequence, Action<T> action)
-	{
-		if (sequence == null) return;
-		var enumerator = sequence.GetEnumerator();
-		while (enumerator.MoveNext())
-			action(enumerator.Current);
-	}
-
-	public static void DoIf<T>(this IEnumerable<T> sequence, Func<T, bool> condition, Action<T> action)
-		=> sequence.Where(condition).Do(action);
 
 	public static List<Colonist> GetSelectedColonists()
 	 => [.. Find.Selector.SelectedObjects.OfType<Pawn>()

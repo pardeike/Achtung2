@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -7,17 +7,21 @@ using Verse;
 
 namespace Brrainz;
 
-[StaticConstructorOnStartup]
 public class DynamicWorkTypes
 {
 	internal static readonly Dictionary<WorkTypeDef, WorkTypeDef> disabledWorkTypePairs = [];
 
-	static DynamicWorkTypes()
+	public static void Initialize()
 	{
 		var harmony = new Harmony("brrainz.lib.dynamicworktypes");
-		var method = SymbolExtensions.GetMethodInfo((Pawn pawn) => pawn.GetDisabledWorkTypes(default));
+
+		var method1 = SymbolExtensions.GetMethodInfo((Pawn pawn) => pawn.GetDisabledWorkTypes(default));
 		var postfix = SymbolExtensions.GetMethodInfo(() => Pawn_GetDisabledWorkTypes_Postfix(default));
-		_ = harmony.Patch(method, postfix: new HarmonyMethod(postfix) { priority = Priority.Last });
+		_ = harmony.Patch(method1, postfix: new HarmonyMethod(postfix) { priority = Priority.Last });
+
+		var method2 = SymbolExtensions.GetMethodInfo((Pawn pawn) => pawn.Notify_DisabledWorkTypesChanged());
+		var prefix = SymbolExtensions.GetMethodInfo(() => Pawn_Notify_DisabledWorkTypesChanged_Prefix(default));
+		_ = harmony.Patch(method2, prefix: new HarmonyMethod(prefix) { priority = Priority.First });
 	}
 
 	public static List<WorkTypeDef> Pawn_GetDisabledWorkTypes_Postfix(List<WorkTypeDef> input)
@@ -27,6 +31,15 @@ public class DynamicWorkTypes
 			if (input.Contains(pair.Key))
 				output.Add(pair.Value);
 		return output;
+	}
+
+	static void Pawn_Notify_DisabledWorkTypesChanged_Prefix(Pawn __instance)
+	{
+		if (Scribe.mode != LoadSaveMode.PostLoadInit) return;
+		var allDefsCount = DefDatabase<WorkTypeDef>.AllDefsListForReading.Count;
+		var priorities = __instance.workSettings.priorities.values;
+		while (priorities.Count < allDefsCount)
+			priorities.Add(Pawn_WorkSettings.DefaultPriority);
 	}
 
 	static void Reload<T>() where T : Def

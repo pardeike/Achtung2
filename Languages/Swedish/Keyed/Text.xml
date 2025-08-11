@@ -10,6 +10,7 @@
 	<Feature_Achtung_Settings>Inställningar</Feature_Achtung_Settings>
 	<Feature_Achtung_Draftstatus>Wapenstatus</Feature_Achtung_Draftstatus>
 	<Feature_Achtung_Rescue>Räddning</Feature_Achtung_Rescue>
+	<Feature_Achtung_Dragging>Dra Kolonister</Feature_Achtung_Dragging>
 
 	<PositioningEnabledTitle>Aktivera positioningen för kolonister</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Aktiverar muskommandos för positioneringen av kolonister (se inställningar nere)</PositioningEnabledExplained>

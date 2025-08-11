@@ -10,6 +10,7 @@
 	<Feature_Achtung_Settings>Einstellungen</Feature_Achtung_Settings>
 	<Feature_Achtung_Draftstatus>Kampfmodus</Feature_Achtung_Draftstatus>
 	<Feature_Achtung_Rescue>Retten</Feature_Achtung_Rescue>
+	<Feature_Achtung_Dragging>Kolonisten Ziehen</Feature_Achtung_Dragging>
 
 	<PositioningEnabledTitle>Benutzerdef. Positionierung via Maus</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Aktiviert die Kampfpositionierung beim Klicken/Ziehen der Maus (siehe Einstellungen unten).</PositioningEnabledExplained>

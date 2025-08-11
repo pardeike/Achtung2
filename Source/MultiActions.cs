@@ -1,3 +1,4 @@
+using HarmonyLib;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ public class MultiActions
 	public MultiActions(IEnumerable<Colonist> colonists, Vector3 clickPos)
 	{
 		this.clickPos = clickPos;
-		allPawns = colonists.Select(colonist => colonist.pawn).ToList();
+		allPawns = [.. colonists.Select(colonist => colonist.pawn)];
 		allActions = [];
 		totalColonistsInvolved = colonists.Count();
 		colonists.Do(AddColonist);
@@ -197,7 +198,7 @@ public class MultiActions
 
 		var hasForcedOptions = options.Any(o => o is ForcedFloatMenuOption);
 		if (hasForcedOptions)
-			option = new ForcedMultiFloatMenuOption(pawns, options.ToList(), extraPartOnGUI, title);
+			option = new ForcedMultiFloatMenuOption(pawns, [.. options], extraPartOnGUI, title);
 
 		option.action = () => actions.Do(multiAction => multiAction.GetAction()());
 		option.Disabled = actions.All(a => a.option.Disabled);
