@@ -183,7 +183,7 @@ public class Controller
 		void DoDrag() => StartDragging(pos, useFormation);
 
 		// in multiplayer, drafting will update pawn.Drafted in the same tick, so we fake it
-		if (allDrafted && doPositioning && longPress == false)
+		if (doPositioning && allDrafted && doPositioning && longPress == false)
 		{
 			DoDrag();
 			if (centerOnColonist == null)
@@ -191,7 +191,7 @@ public class Controller
 			return true;
 		}
 
-		return ShowMenu(actions, forceMenu, DoDrag);
+		return ShowMenu(actions, forceMenu, doPositioning ? DoDrag : null);
 	}
 
 	private void StartDragging(Vector3 pos, bool asGroup)
@@ -425,6 +425,9 @@ public class Controller
 
 	public void HandleEarlyRightClicks()
 	{
+		if (Achtung.Settings.positioningEnabled == false)
+			return;
+
 		var selector = Find.Selector;
 		var achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
 
