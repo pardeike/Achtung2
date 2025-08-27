@@ -37,6 +37,7 @@ public class DynamicWorkTypes
 	{
 		if (Scribe.mode != LoadSaveMode.PostLoadInit) return;
 		var allDefsCount = DefDatabase<WorkTypeDef>.AllDefsListForReading.Count;
+		if (__instance.workSettings == null || __instance.workSettings.priorities == null) return;
 		var priorities = __instance.workSettings.priorities.values;
 		while (priorities.Count < allDefsCount)
 			priorities.Add(Pawn_WorkSettings.DefaultPriority);
