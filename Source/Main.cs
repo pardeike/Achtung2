@@ -212,18 +212,24 @@ static class Game_UpdatePlay_Patch
 }
 
 [HarmonyPatch(typeof(World))]
-[HarmonyPatch(nameof(World.FinalizeInit))]
-static class World_FinalizeInit_Patch
+[HarmonyPatch(nameof(World.ExposeData))]
+static class World_ExposeData_Patch
 {
+	[HarmonyPriority(Priority.VeryHigh)]
 	public static void Prefix()
 	{
-		ForcedWork.Instance = null;
-
 		var rescuing = DefDatabase<WorkTypeDef>.GetNamedSilentFail(Tools.RescuingWorkTypeDef.defName);
 		var doctorRescueWorkGiver = DefDatabase<WorkGiverDef>.GetNamed("DoctorRescue");
 		if (rescuing == null && Achtung.Settings.rescueEnabled)
 			Tools.savedWorkTypeDef = DynamicWorkTypes.AddWorkTypeDef(Tools.RescuingWorkTypeDef, WorkTypeDefOf.Doctor, doctorRescueWorkGiver);
 	}
+}
+
+[HarmonyPatch(typeof(World))]
+[HarmonyPatch(nameof(World.FinalizeInit))]
+static class World_FinalizeInit_Patch
+{
+	public static void Prefix() => ForcedWork.Instance = null;
 }
 
 [HarmonyPatch]
