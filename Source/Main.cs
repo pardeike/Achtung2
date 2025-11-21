@@ -128,9 +128,9 @@ static class Game_UpdatePlay_Patch
 	public static int[] fpsSlots = new int[10];
 	static int previousN = -1;
 	const float maxFrameTimeMs = 8.0f; // Maximum time to spend per frame in milliseconds
-	const int maxIterations = 50; // Reduced from 800 to prevent long frame times
-	const int iterationDecrement = 2; // How much to reduce iterations when FPS drops
-	const int fpsSafetyBuffer = 10; // FPS buffer above minFps before increasing iterations
+	const int maxIterations = 400; // Allow enough iterations for selection expansion on slow systems
+	const int iterationDecrement = 10; // How much to reduce iterations when FPS drops
+	const int fpsSafetyBuffer = 5; // FPS buffer above minFps before increasing iterations
 
 	static IEnumerator Looper()
 	{
