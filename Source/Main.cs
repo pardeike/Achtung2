@@ -127,6 +127,8 @@ static class Game_UpdatePlay_Patch
 	public static int fps = 0;
 	public static int[] fpsSlots = new int[10];
 	static int previousN = -1;
+	const float maxFrameTimeMs = 8.0f; // Maximum time to spend per frame in milliseconds
+	const int maxIterations = 50; // Reduced from 800 to prevent long frame times
 
 	static IEnumerator Looper()
 	{
@@ -198,16 +200,27 @@ static class Game_UpdatePlay_Patch
 			}
 
 			if (fps < minFps)
-				iterations = 0;
-			else if (iterations < 800)
-				iterations++;
+				iterations = Math.Max(0, iterations - 2); // Reduce more aggressively when FPS drops
+			else if (fps >= minFps + 10)
+				iterations = Math.Min(maxIterations, iterations + 1); // Slowly increase when FPS is good
+			// When FPS is between minFps and minFps+10, keep iterations stable
 		}
 		else
 			iterations = 0;
 
 		if (Scribe.mode == LoadSaveMode.Inactive)
+		{
+			var startTime = UnityEngine.Time.realtimeSinceStartup;
 			for (var i = 0; i < iterations; i++)
+			{
 				_ = it.MoveNext();
+				
+				// Check if we've exceeded our frame time budget
+				var elapsed = (UnityEngine.Time.realtimeSinceStartup - startTime) * 1000f;
+				if (elapsed > maxFrameTimeMs)
+					break;
+			}
+		}
 	}
 }
 
