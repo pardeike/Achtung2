@@ -91,6 +91,9 @@
 	<BuildingSmartTitle>Smart byggande är på för nya jobs</BuildingSmartTitle>
 	<BuildingSmartExplained>Förvalet för nya Achtung! jobs är att de byggs på ett smart sätt</BuildingSmartExplained>
 
+	<ImmediateExpansionTitle>Omedelbar arbetsutvidgning</ImmediateExpansionTitle>
+	<ImmediateExpansionExplained>Utvidgar påtvingat arbete helt omedelbart istället för gradvis (kan frysa kort men säkerställer att allt arbete hittas)</ImmediateExpansionExplained>
+
 	<WorkMarkersTitle>Tvingade arbetspositioner</WorkMarkersTitle>
 	<WorkMarkersExplained>Platser med påtvingat arbete visas med små markörer</WorkMarkersExplained>
 	<WorkMarkersOptionAnimated>Animaterat</WorkMarkersOptionAnimated>

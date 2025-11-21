@@ -91,6 +91,9 @@
 	<BuildingSmartTitle>Edificio inteligente es la opción predeterminada para nuevos trabajos</BuildingSmartTitle>
 	<BuildingSmartExplained>Establece la forma predeterminada de cómo los nuevos trabajos eligen su orden de construcción</BuildingSmartExplained>
 
+	<ImmediateExpansionTitle>Expansión inmediata de trabajo</ImmediateExpansionTitle>
+	<ImmediateExpansionExplained>Expande el trabajo forzoso completamente de inmediato en lugar de gradualmente (puede congelar brevemente pero garantiza encontrar todo el trabajo)</ImmediateExpansionExplained>
+
 	<WorkMarkersTitle>Posiciones de trabajo forzoso</WorkMarkersTitle>
 	<WorkMarkersExplained>Los puestos de trabajo forzoso se indican con marcadores.</WorkMarkersExplained>
 	<WorkMarkersOptionAnimated>Con animación</WorkMarkersOptionAnimated>

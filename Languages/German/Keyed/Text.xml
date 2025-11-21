@@ -91,6 +91,9 @@
 	<BuildingSmartTitle>Cleveres Bauen für neue erzw. Arbeiten aktivieren</BuildingSmartTitle>
 	<BuildingSmartExplained>Ändert die Standardbauweise bei erzw. Arbeiten.</BuildingSmartExplained>
 
+	<ImmediateExpansionTitle>Sofortige Arbeitserweiterung</ImmediateExpansionTitle>
+	<ImmediateExpansionExplained>Erweitert erzwungene Arbeit sofort vollständig statt schrittweise (kann kurz einfrieren, findet aber alle Arbeit)</ImmediateExpansionExplained>
+
 	<WorkMarkersTitle>Symbole für erzw. Arbeiten</WorkMarkersTitle>
 	<WorkMarkersExplained>Erzw. Arbeiten werden mit kleinen Symbolen gekennzeichnet.</WorkMarkersExplained>
 	<WorkMarkersOptionAnimated>Animiert</WorkMarkersOptionAnimated>

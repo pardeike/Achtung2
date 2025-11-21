@@ -91,6 +91,9 @@
 	<BuildingSmartTitle>Smart building is on for new Achtung! jobs</BuildingSmartTitle>
 	<BuildingSmartExplained>Sets the default for how new jobs choose their build order</BuildingSmartExplained>
 
+	<ImmediateExpansionTitle>Immediate work expansion</ImmediateExpansionTitle>
+	<ImmediateExpansionExplained>Fully expands forced work immediately instead of gradually (may freeze briefly but ensures all work is found)</ImmediateExpansionExplained>
+
 	<WorkMarkersTitle>Force work markers</WorkMarkersTitle>
 	<WorkMarkersExplained>Forced work is displayed with small markers</WorkMarkersExplained>
 	<WorkMarkersOptionAnimated>Animated</WorkMarkersOptionAnimated>

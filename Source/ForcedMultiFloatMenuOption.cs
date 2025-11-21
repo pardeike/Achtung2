@@ -102,7 +102,11 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 
 				if (forcedWork.AddForcedJob(pawn, workgiverDefs, jobItem, out var forcedJob))
 				{
-					forcedJob.ExpandJob(1 + Find.Selector.SelectedPawns.Count * 2);
+					if (Achtung.Settings.immediateExpansion)
+						forcedJob.ExpandJobImmediately();
+					else
+						forcedJob.ExpandJob(1 + Find.Selector.SelectedPawns.Count * 2);
+					
 					var success = forcedJob.GetNextNonConflictingJob(forcedWork);
 					if (success == false)
 						continue;

@@ -66,6 +66,7 @@ public class AchtungSettings : ModSettings
 	public bool forcedEndedLetter = true;
 	public bool replaceCleanRoom = true;
 	public bool replaceFightFire = true;
+	public bool immediateExpansion = false;
 
 	public static readonly int UnlimitedForcedItems = 2000;
 
@@ -89,6 +90,7 @@ public class AchtungSettings : ModSettings
 		Scribe_Values.Look(ref forcedEndedLetter, "forcedEndedLetter", true, true);
 		Scribe_Values.Look(ref replaceCleanRoom, "replaceCleanRoom", true, true);
 		Scribe_Values.Look(ref replaceFightFire, "replaceFightFire", true, true);
+		Scribe_Values.Look(ref immediateExpansion, "immediateExpansion", false, true);
 
 		if (Scribe.mode == LoadSaveMode.PostLoadInit && Achtung.harmony != null)
 			ForbidUtility_IsForbidden_Patch.FixPatch();

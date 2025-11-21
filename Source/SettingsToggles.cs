@@ -38,6 +38,7 @@ public class SettingsToggles : Window
 	readonly Toggle[] toggles = [
 		new Toggle("PositioningEnabled", b => Achtung.Settings.positioningEnabled = b, () => Achtung.Settings.positioningEnabled),
 		new Toggle("BuildingSmart", b => Achtung.Settings.buildingSmart = b, () => Achtung.Settings.buildingSmart),
+		new Toggle("ImmediateExpansion", b => Achtung.Settings.immediateExpansion = b, () => Achtung.Settings.immediateExpansion),
 		new Toggle("RescueEnabled", b => Achtung.Settings.rescueEnabled = b, () => Achtung.Settings.rescueEnabled, ToggleRescue),
 		new Toggle("ShowForceEndLetter", b => Achtung.Settings.forcedEndedLetter = b, () => Achtung.Settings.forcedEndedLetter),
 		new Toggle("ReplaceCleanRoom", b => Achtung.Settings.replaceCleanRoom = b, () => Achtung.Settings.replaceCleanRoom),

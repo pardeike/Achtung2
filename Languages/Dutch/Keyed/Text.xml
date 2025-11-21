@@ -91,6 +91,9 @@
 	<BuildingSmartTitle>Slim bouwen is standaard voor nieuwe Achtung! banen</BuildingSmartTitle>
 	<BuildingSmartExplained>Stelt de standaard in voor hoe nieuwe jobs hun bouwvolgorde kiezen</BuildingSmartExplained>
 
+	<ImmediateExpansionTitle>Onmiddellijke werkuitbreiding</ImmediateExpansionTitle>
+	<ImmediateExpansionExplained>Breidt gedwongen werk direct volledig uit in plaats van geleidelijk (kan kort bevriezen maar zorgt ervoor dat al het werk wordt gevonden)</ImmediateExpansionExplained>
+
 	<WorkMarkersTitle>Markeringen op gedwongen werk</WorkMarkersTitle>
 	<WorkMarkersExplained>Gedwongen werk wordt weergegeven met kleine markeringen</WorkMarkersExplained>
 	<WorkMarkersOptionAnimated>Animatie</WorkMarkersOptionAnimated>

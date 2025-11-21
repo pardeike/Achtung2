@@ -236,6 +236,112 @@ public class ForcedJob : IExposable
 	public void ExpandJob(int count)
 		=> pawn.Map.Expand(isThingJob ? ExpandThingTargets : ExpandCellTargets, count);
 
+	public void ExpandJobImmediately()
+	{
+		if (pawn?.Map == null)
+			return;
+
+		var map = pawn.Map;
+		var maxCountVerifier = Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems
+			? (Func<bool>)(() => targets.Count < Achtung.Settings.maxForcedItems)
+			: () => true;
+
+		// Keep expanding until we can't find any more work or hit the limit
+		var lastCount = 0;
+		while (maxCountVerifier() && cancelled == false)
+		{
+			cellRadius++;
+			var currentCount = targets.Count;
+			
+			if (isThingJob)
+				ExpandThingTargetsImmediate(map, maxCountVerifier);
+			else
+				ExpandCellTargetsImmediate(map, maxCountVerifier);
+			
+			// Contract to remove invalid targets
+			ContractTargetsImmediate(map);
+			
+			// If we didn't find any new targets, we're done
+			if (targets.Count == currentCount || targets.Count == lastCount)
+				break;
+			
+			lastCount = targets.Count;
+		}
+	}
+
+	void ExpandThingTargetsImmediate(Map map, Func<bool> maxCountVerifier)
+	{
+		var thingGrid = map.thingGrid;
+		if (thingGrid == null || !maxCountVerifier())
+			return;
+
+		var things = targets.Select(target => target.item.thingInt).Where(thing => thing != null && thing.Spawned).ToHashSet();
+		var newThings = things
+			.SelectMany(thing => thing.AllCells()).Union(targets.Select(target => target.XY)).Distinct()
+			.Expand(map, cellRadius + 1)
+			.SelectMany(cell => thingGrid.ThingsListAtFast(cell)).Distinct()
+			.ToArray();
+
+		foreach (var newThing in newThings)
+		{
+			if (cancelled || !maxCountVerifier())
+				break;
+
+			if (things.Contains(newThing) == false && ThingHasJob(newThing))
+			{
+				LocalTargetInfo item = newThing;
+				_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
+				smartTargetsCached = null;
+			}
+		}
+	}
+
+	void ExpandCellTargetsImmediate(Map map, Func<bool> maxCountVerifier)
+	{
+		if (!maxCountVerifier())
+			return;
+
+		var newCells = targets
+			.Select(target => target.XY)
+			.Expand(map, cellRadius + 1)
+			.ToArray();
+
+		foreach (var cell in newCells)
+		{
+			if (cancelled || !maxCountVerifier())
+				break;
+
+			if (CellHasJob(cell))
+			{
+				LocalTargetInfo item = cell;
+				_ = targets.Add(new ForcedTarget(item, 0));
+				smartTargetsCached = null;
+			}
+		}
+	}
+
+	void ContractTargetsImmediate(Map map)
+	{
+		_ = targets.RemoveWhere(targets => targets.item.thingInt?.Spawned == false);
+
+		var cells = targets.Select(target => target.item.thingInt)
+			.OfType<Thing>()
+			.SelectMany(thing => thing.AllCells())
+			.Union(targets.Select(target => target.XY))
+			.Distinct()
+			.ToArray();
+
+		foreach (var cell in cells)
+		{
+			if (cancelled)
+				break;
+
+			if (cell.InBounds(map) && CellHasJob(cell) == false)
+				if (map.thingGrid.ThingsListAtFast(cell).All(thing => thing.Spawned == false || ThingHasJob(thing) == false))
+					_ = targets.RemoveWhere(target => target.XY == cell || (target.item.thingInt?.AllCells().Contains(cell) ?? false));
+		}
+	}
+
 	public bool NonForcedShouldIgnore(IntVec3 cell) => targets.Any(target => target.XY == cell && target.IsBuilding());
 
 	public bool GetNextNonConflictingJob(ForcedWork forcedWork)
