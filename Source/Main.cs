@@ -129,6 +129,8 @@ static class Game_UpdatePlay_Patch
 	static int previousN = -1;
 	const float maxFrameTimeMs = 8.0f; // Maximum time to spend per frame in milliseconds
 	const int maxIterations = 50; // Reduced from 800 to prevent long frame times
+	const int iterationDecrement = 2; // How much to reduce iterations when FPS drops
+	const int fpsSafetyBuffer = 10; // FPS buffer above minFps before increasing iterations
 
 	static IEnumerator Looper()
 	{
@@ -200,10 +202,10 @@ static class Game_UpdatePlay_Patch
 			}
 
 			if (fps < minFps)
-				iterations = Math.Max(0, iterations - 2); // Reduce more aggressively when FPS drops
-			else if (fps >= minFps + 10)
+				iterations = Math.Max(0, iterations - iterationDecrement); // Reduce more aggressively when FPS drops
+			else if (fps >= minFps + fpsSafetyBuffer)
 				iterations = Math.Min(maxIterations, iterations + 1); // Slowly increase when FPS is good
-			// When FPS is between minFps and minFps+10, keep iterations stable
+			// When FPS is between minFps and minFps+fpsSafetyBuffer, keep iterations stable
 		}
 		else
 			iterations = 0;
