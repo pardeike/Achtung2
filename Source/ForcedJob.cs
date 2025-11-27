@@ -242,13 +242,11 @@ public class ForcedJob : IExposable
 			return;
 
 		var map = pawn.Map;
-		var maxCountVerifier = Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems
-			? (Func<bool>)(() => targets.Count < Achtung.Settings.maxForcedItems)
-			: () => true;
 
 		// Keep expanding until we can't find any more work or hit the limit
+		// cellRadius is set by the user via dragging, we just use it
 		var lastCount = 0;
-		while (maxCountVerifier() && cancelled == false)
+		while (cancelled == false)
 		{
 			var currentCount = targets.Count;
 			
@@ -265,9 +263,6 @@ public class ForcedJob : IExposable
 				break;
 			
 			lastCount = targets.Count;
-			
-			// Increment radius for next iteration (same as non-immediate mode)
-			cellRadius++;
 		}
 	}
 
