@@ -120,7 +120,14 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 				MouseTracker.StartDragging(
 					pawn,
 					clickedCell,
-					cellRadius => forcedJob?.cellRadius = cellRadius,
+					cellRadius => {
+						if (forcedJob == null) return;
+						var oldRadius = forcedJob.cellRadius;
+						forcedJob.cellRadius = cellRadius;
+						// In immediate mode, expand immediately when radius increases during drag
+						if (Achtung.Settings.immediateExpansion && cellRadius > oldRadius)
+							forcedJob.ExpandJobImmediately();
+					},
 					() => forcedJob.Start()
 				);
 
