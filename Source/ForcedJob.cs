@@ -26,6 +26,7 @@ public class ForcedJob : IExposable
 	public int cellRadius = 0;
 	public bool started = false;
 	public bool cancelled = false;
+	public bool immediateExpanded = false; // True if job was expanded immediately and doesn't need background processing
 	static readonly Dictionary<BuildableDef, int> TypeScores = new()
 	{
 		{ ThingDefOf.PowerConduit, 1000 },
@@ -264,6 +265,9 @@ public class ForcedJob : IExposable
 			
 			lastCount = targets.Count;
 		}
+		
+		// Mark as immediately expanded so the background Looper skips this job
+		immediateExpanded = true;
 	}
 
 	public bool NonForcedShouldIgnore(IntVec3 cell) => targets.Any(target => target.XY == cell && target.IsBuilding());
