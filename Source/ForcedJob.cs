@@ -17,6 +17,7 @@ public class ForcedJob : IExposable
 	public List<LocalTargetInfo> smartTargetsCached = null;
 	public Pawn pawn = null;
 	public IntVec3 startCell = IntVec3.Invalid;
+	public LocalTargetInfo initialTarget; // The original clicked target for immediate mode rebuilding
 	public List<WorkGiverDef> workgiverDefs = [];
 	public List<WorkGiver_Scanner> workgiverScanners = [];
 	public readonly QuotaCache<Thing, bool> getThingJobCache = new(10);
@@ -76,6 +77,7 @@ public class ForcedJob : IExposable
 	{
 		this.pawn = pawn;
 		startCell = pawn.Position;
+		initialTarget = item; // Store for immediate mode rebuilding
 		this.workgiverDefs = [.. workgiverDefs.Where(wgd => wgd?.giverClass != null)];
 		workgiverScanners = [.. workgiverDefs.Select(wgd => wgd.Worker).OfType<WorkGiver_Scanner>()];
 		targets = [new ForcedTarget(item, MaterialScore(item))];
@@ -247,14 +249,21 @@ public class ForcedJob : IExposable
 			? (Func<bool>)(() => targets.Count < Achtung.Settings.maxForcedItems)
 			: () => true;
 
+		// Clear and rebuild from scratch - this allows both expansion AND retraction
+		targets.Clear();
+		smartTargetsCached = null;
+		
+		// Start with the initial target
+		if (initialTarget.IsValid)
+			targets.Add(new ForcedTarget(initialTarget, MaterialScore(initialTarget)));
+		
 		// Keep expanding until we can't find any more work or hit the limit
-		// Use cellRadius + 1 (same as non-immediate mode) - this respects the user-defined radius
 		var lastCount = 0;
 		while (cancelled == false && maxCountVerifier())
 		{
 			var currentCount = targets.Count;
 			
-			// Expand using the user-defined cellRadius (same as non-immediate mode)
+			// Expand using the user-defined cellRadius
 			if (isThingJob)
 				ExpandThingTargetsWithRadius(map, cellRadius + 1, maxCountVerifier);
 			else

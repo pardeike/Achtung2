@@ -122,10 +122,9 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 					clickedCell,
 					cellRadius => {
 						if (forcedJob == null) return;
-						var oldRadius = forcedJob.cellRadius;
 						forcedJob.cellRadius = cellRadius;
-						// In immediate mode, expand immediately when radius increases during drag
-						if (Achtung.Settings.immediateExpansion && cellRadius > oldRadius)
+						// In immediate mode, rebuild targets from scratch on any radius change
+						if (Achtung.Settings.immediateExpansion)
 							forcedJob.ExpandJobImmediately();
 					},
 					() => forcedJob.Start()
