@@ -250,7 +250,6 @@ public class ForcedJob : IExposable
 		var lastCount = 0;
 		while (maxCountVerifier() && cancelled == false)
 		{
-			cellRadius++;
 			var currentCount = targets.Count;
 			
 			if (isThingJob)
@@ -266,6 +265,9 @@ public class ForcedJob : IExposable
 				break;
 			
 			lastCount = targets.Count;
+			
+			// Increment radius for next iteration (same as non-immediate mode)
+			cellRadius++;
 		}
 	}
 
