@@ -40,6 +40,13 @@ static class Tools
 		workTags = WorkTags.Caring | WorkTags.Commoner | WorkTags.AllWork
 	};
 
+	public static bool WorkgiverListsMatch(List<WorkGiverDef> a, List<WorkGiverDef> b)
+	{
+		if (a == null || b == null || a.Count != b.Count)
+			return false;
+		return a.All(b.Contains);
+	}
+
 	private static string _version;
 	public static string Version
 	{

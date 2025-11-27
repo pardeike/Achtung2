@@ -1,4 +1,3 @@
-using HarmonyLib;
 using RimWorld;
 using System;
 using System.Collections;
@@ -6,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using Verse.AI;
-using static UnityEngine.Networking.UnityWebRequest;
 
 namespace AchtungMod;
 
@@ -252,12 +250,15 @@ public class ForcedJob : IExposable
 		// If not adding only, rebuild from scratch (allows retraction during drag)
 		if (!addOnly)
 		{
-			targets.Clear();
 			smartTargetsCached = null;
-			
-			// Start with the initial target
-			if (initialTarget.IsValid)
-				_ = targets.Add(new ForcedTarget(initialTarget, MaterialScore(initialTarget)));
+			if (started == false)
+			{
+				targets.Clear();
+
+				// Start with the initial target
+				if (initialTarget.IsValid)
+					_ = targets.Add(new ForcedTarget(initialTarget, MaterialScore(initialTarget)));
+			}
 		}
 		
 		// Keep expanding until we can't find any more work or hit the limit

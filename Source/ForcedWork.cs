@@ -151,18 +151,29 @@ public class ForcedWork(World world) : WorldComponent(world)
 		if (allForcedJobs.ContainsKey(pawn) == false)
 			allForcedJobs[pawn] = new ForcedJobs();
 
-		var firstJob = allForcedJobs[pawn].count == 0;
+		var forcedJobsForPawn = allForcedJobs[pawn];
+		var firstJob = forcedJobsForPawn.count == 0;
 		if (firstJob)
 			Prepare(pawn);
 		else
 			Unprepare(pawn);
 
+		forcedJob = forcedJobsForPawn.jobs
+			.FirstOrDefault(job => job?.cancelled == false && Tools.WorkgiverListsMatch(job.workgiverDefs, workgiverDefs));
+		if (forcedJob != null)
+		{
+			forcedJob.Add(item);
+			UpdatePawnForcedJobs(pawn, forcedJobsForPawn);
+			hasForcedJobs = allForcedJobs.Count > 0;
+			return firstJob;
+		}
+
 		forcedJob = new ForcedJob(pawn, item, workgiverDefs);
-		allForcedJobs[pawn].jobs.Add(forcedJob);
-		allForcedJobs[pawn].UpdateCount();
+		forcedJobsForPawn.jobs.Add(forcedJob);
+		forcedJobsForPawn.UpdateCount();
 
 		hasForcedJobs = allForcedJobs.Count > 0;
-		UpdatePawnForcedJobs(pawn, allForcedJobs[pawn]);
+		UpdatePawnForcedJobs(pawn, forcedJobsForPawn);
 		return firstJob;
 	}
 
