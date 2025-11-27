@@ -248,24 +248,23 @@ public class ForcedJob : IExposable
 			: () => true;
 
 		// Keep expanding until we can't find any more work or hit the limit
+		// Use cellRadius + 1 (same as non-immediate mode) - this respects the user-defined radius
 		var lastCount = 0;
-		var expandRadius = 0;
 		while (cancelled == false && maxCountVerifier())
 		{
 			var currentCount = targets.Count;
 			
-			// Expand using incrementing radius
+			// Expand using the user-defined cellRadius (same as non-immediate mode)
 			if (isThingJob)
-				ExpandThingTargetsWithRadius(map, expandRadius + 1, maxCountVerifier);
+				ExpandThingTargetsWithRadius(map, cellRadius + 1, maxCountVerifier);
 			else
-				ExpandCellTargetsWithRadius(map, expandRadius + 1, maxCountVerifier);
+				ExpandCellTargetsWithRadius(map, cellRadius + 1, maxCountVerifier);
 			
 			// If we didn't find any new targets, we're done
 			if (targets.Count == currentCount || targets.Count == lastCount)
 				break;
 			
 			lastCount = targets.Count;
-			expandRadius++;
 		}
 		
 		// Mark as immediately expanded so the background Looper skips this job
