@@ -257,7 +257,7 @@ public class ForcedJob : IExposable
 			
 			// Start with the initial target
 			if (initialTarget.IsValid)
-				targets.Add(new ForcedTarget(initialTarget, MaterialScore(initialTarget)));
+				_ = targets.Add(new ForcedTarget(initialTarget, MaterialScore(initialTarget)));
 		}
 		
 		// Keep expanding until we can't find any more work or hit the limit
