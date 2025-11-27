@@ -156,6 +156,7 @@ public class AchtungSettings : ModSettings
 		list.Gap(10);
 		static string forcedItemsString(int n) => n == 0 ? "Disabled".Translate().ToString() : n >= UnlimitedForcedItems ? "MaxForcedItemsUnlimited".Translate().ToString() : $"{n}";
 		list.SliderLabeled("MaxForcedItems", ref Achtung.Settings.maxForcedItems, 0, UnlimitedForcedItems, forcedItemsString);
+		list.CheckboxEnhanced("ImmediateExpansion", ref Achtung.Settings.immediateExpansion);
 
 		list.End();
 
