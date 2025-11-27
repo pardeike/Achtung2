@@ -239,7 +239,7 @@ public class ForcedJob : IExposable
 	public void ExpandJob(int count)
 		=> pawn.Map.Expand(isThingJob ? ExpandThingTargets : ExpandCellTargets, count);
 
-	public void ExpandJobImmediately()
+	public void ExpandJobImmediately(bool addOnly = false)
 	{
 		if (pawn?.Map == null)
 			return;
@@ -249,13 +249,16 @@ public class ForcedJob : IExposable
 			? (Func<bool>)(() => targets.Count < Achtung.Settings.maxForcedItems)
 			: () => true;
 
-		// Clear and rebuild from scratch - this allows both expansion AND retraction
-		targets.Clear();
-		smartTargetsCached = null;
-		
-		// Start with the initial target
-		if (initialTarget.IsValid)
-			targets.Add(new ForcedTarget(initialTarget, MaterialScore(initialTarget)));
+		// If not adding only, rebuild from scratch (allows retraction during drag)
+		if (!addOnly)
+		{
+			targets.Clear();
+			smartTargetsCached = null;
+			
+			// Start with the initial target
+			if (initialTarget.IsValid)
+				targets.Add(new ForcedTarget(initialTarget, MaterialScore(initialTarget)));
+		}
 		
 		// Keep expanding until we can't find any more work or hit the limit
 		var lastCount = 0;

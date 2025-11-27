@@ -101,10 +101,11 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 				Tools.CancelWorkOn(pawn, jobItem);
 
 				var isFirstJob = forcedWork.AddForcedJob(pawn, workgiverDefs, jobItem, out var forcedJob);
+				var isShiftHeld = Tools.IsModKeyPressed(AchtungModKey.Shift);
 				
 				// Expand the job - either immediately or gradually
 				if (Achtung.Settings.immediateExpansion)
-					forcedJob.ExpandJobImmediately();
+					forcedJob.ExpandJobImmediately(addOnly: !isFirstJob || isShiftHeld);
 				else
 					forcedJob.ExpandJob(1 + Find.Selector.SelectedPawns.Count * 2);
 				
@@ -123,9 +124,9 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 					cellRadius => {
 						if (forcedJob == null) return;
 						forcedJob.cellRadius = cellRadius;
-						// In immediate mode, rebuild targets from scratch on any radius change
+						// In immediate mode, rebuild targets on any radius change (but never clear if SHIFT held)
 						if (Achtung.Settings.immediateExpansion)
-							forcedJob.ExpandJobImmediately();
+							forcedJob.ExpandJobImmediately(addOnly: Tools.IsModKeyPressed(AchtungModKey.Shift));
 					},
 					() => forcedJob.Start()
 				);
