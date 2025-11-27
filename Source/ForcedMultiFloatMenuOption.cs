@@ -100,13 +100,16 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 
 				Tools.CancelWorkOn(pawn, jobItem);
 
-				if (forcedWork.AddForcedJob(pawn, workgiverDefs, jobItem, out var forcedJob))
+				var isFirstJob = forcedWork.AddForcedJob(pawn, workgiverDefs, jobItem, out var forcedJob);
+				
+				// Expand the job - either immediately or gradually
+				if (Achtung.Settings.immediateExpansion)
+					forcedJob.ExpandJobImmediately();
+				else
+					forcedJob.ExpandJob(1 + Find.Selector.SelectedPawns.Count * 2);
+				
+				if (isFirstJob)
 				{
-					if (Achtung.Settings.immediateExpansion)
-						forcedJob.ExpandJobImmediately();
-					else
-						forcedJob.ExpandJob(1 + Find.Selector.SelectedPawns.Count * 2);
-					
 					var success = forcedJob.GetNextNonConflictingJob(forcedWork);
 					if (success == false)
 						continue;

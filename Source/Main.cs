@@ -140,6 +140,10 @@ static class Game_UpdatePlay_Patch
 			var didYield = false;
 			foreach (var job in jobs)
 			{
+				// Skip jobs that were immediately expanded - they don't need background processing
+				if (job.immediateExpanded)
+					continue;
+					
 				var map = job?.pawn?.Map;
 				if (map != null)
 				{
