@@ -11,6 +11,7 @@
 	<Feature_Achtung_Draftstatus>Draft Status</Feature_Achtung_Draftstatus>
 	<Feature_Achtung_Rescue>Rescue</Feature_Achtung_Rescue>
 	<Feature_Achtung_Dragging>Drafted Dragging</Feature_Achtung_Dragging>
+	<AchtungTutorialButton>Tutorial</AchtungTutorialButton>
 
 	<PositioningEnabledTitle>Custom mouse positioning</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Enables combat positioning for your mouse clicks/drags (see settings below)</PositioningEnabledExplained>
@@ -38,6 +39,8 @@
 
 	<ShowForceEndLetterTitle>Show when forced work ends</ShowForceEndLetterTitle>
 	<ShowForceEndLetterExplained>When enabled, a letter is shown when a colonist runs out of forced work</ShowForceEndLetterExplained>
+	<KeepDraftedAndUndraftedCommandsSeparateTitle>Keep drafted and undrafted commands separate</KeepDraftedAndUndraftedCommandsSeparateTitle>
+	<KeepDraftedAndUndraftedCommandsSeparateExplained>When enabled, Achtung keeps drafted and undrafted right-click commands separate, like vanilla RimWorld</KeepDraftedAndUndraftedCommandsSeparateExplained>
 
 	<ReplaceCleanRoomTitle>Replace Clean Room Command</ReplaceCleanRoomTitle>
 	<ReplaceCleanRoomExplained>Replaces the vanilla clean room job with Achtung's clean room</ReplaceCleanRoomExplained>
@@ -55,9 +58,6 @@
 	<DecreaseForceRadiusDesc>Decrease the search distance for forced work (current radius is {0})</DecreaseForceRadiusDesc>
 	<BuildingSmart>Building Smart</BuildingSmart>
 	<BuildingSmartDesc>Building smart prevents holes or getting stuck but is slower and always builds around your start location</BuildingSmartDesc>
-
-	<Notes>Notes</Notes>
-	<Note1>When using Achtung the context menu contains both: drafted and undrafted commands</Note1>
 
 	<AchtungModKeyOptionNone>Disabled</AchtungModKeyOptionNone>
 	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>

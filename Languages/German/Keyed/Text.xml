@@ -11,6 +11,7 @@
 	<Feature_Achtung_Draftstatus>Kampfmodus</Feature_Achtung_Draftstatus>
 	<Feature_Achtung_Rescue>Retten</Feature_Achtung_Rescue>
 	<Feature_Achtung_Dragging>Kolonisten Ziehen</Feature_Achtung_Dragging>
+	<AchtungTutorialButton>Anleitung</AchtungTutorialButton>
 
 	<PositioningEnabledTitle>Benutzerdef. Positionierung via Maus</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Aktiviert die Kampfpositionierung beim Klicken/Ziehen der Maus (siehe Einstellungen unten).</PositioningEnabledExplained>
@@ -38,6 +39,8 @@
 
 	<ShowForceEndLetterTitle>Meldung zeigen, wenn erzwungene Arbeit endet</ShowForceEndLetterTitle>
 	<ShowForceEndLetterExplained>Wenn aktiviert, erscheint eine Meldung, sobald ein Kolonist keine erzwungene Arbeit mehr hat</ShowForceEndLetterExplained>
+	<KeepDraftedAndUndraftedCommandsSeparateTitle>Entwurfs- und Nicht-Entwurfsbefehle getrennt halten</KeepDraftedAndUndraftedCommandsSeparateTitle>
+	<KeepDraftedAndUndraftedCommandsSeparateExplained>Wenn aktiviert, hält Achtung Entwurfs- und Nicht-Entwurfsbefehle im Rechtsklickmenü getrennt, wie im Vanilla-RimWorld</KeepDraftedAndUndraftedCommandsSeparateExplained>
 
 	<ReplaceCleanRoomTitle>Befehl „Raum säubern“ ersetzen</ReplaceCleanRoomTitle>
 	<ReplaceCleanRoomExplained>Ersetzt den Vanilla-Befehl zum Raum säubern durch Achtungs Version</ReplaceCleanRoomExplained>
@@ -55,9 +58,6 @@
 	<DecreaseForceRadiusDesc>Verkleinere den Suchbereich für erzw. Arbeit (der aktuelle Radius ist {0}).</DecreaseForceRadiusDesc>
 	<BuildingSmart>Cleveres Bauen</BuildingSmart>
 	<BuildingSmartDesc>Cleveres Bauen verhindert, dass Lücken entstehen oder der Bauarbeiter stecken bleibt, ist aber langsamer und erfolgt immer um den Startpunkt herum.</BuildingSmartDesc>
-
-	<Notes>Hinweise</Notes>
-	<Note1>Wenn du Achtung! verwendest, enthält das Kontextmenü sowohl normale als auch kampfrelevante Befehle.</Note1>
 
 	<AchtungModKeyOptionNone>Keine</AchtungModKeyOptionNone>
 	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
@@ -100,6 +100,9 @@
 	<MaxForcedItemsTitle>Limit erzw. Objekte</MaxForcedItemsTitle>
 	<MaxForcedItemsExplained>Begrenzt die Anzahl erzw. Objekte für langsamere Computer.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Unbegrenzt</MaxForcedItemsUnlimited>
+
+	<FeatureSettingsDesc>Schalter für Kernfunktionen</FeatureSettingsDesc>
+	<FeatureSettingsButton>Funktionen konfigurieren</FeatureSettingsButton>
 
 	<JobInterruptedLabel>Abgebrochen: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>

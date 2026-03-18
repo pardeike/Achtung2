@@ -11,6 +11,7 @@
 	<Feature_Achtung_Draftstatus>Wapenstatus</Feature_Achtung_Draftstatus>
 	<Feature_Achtung_Rescue>Räddning</Feature_Achtung_Rescue>
 	<Feature_Achtung_Dragging>Dra Kolonister</Feature_Achtung_Dragging>
+	<AchtungTutorialButton>Lär dig spela</AchtungTutorialButton>
 
 	<PositioningEnabledTitle>Aktivera positioningen för kolonister</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Aktiverar muskommandos för positioneringen av kolonister (se inställningar nere)</PositioningEnabledExplained>
@@ -38,6 +39,8 @@
 
 	<ShowForceEndLetterTitle>Visa meddelande när påtvingat arbete slutar</ShowForceEndLetterTitle>
 	<ShowForceEndLetterExplained>När aktiverat visas ett meddelande när en kolonisatör avslutar påtvingat arbete</ShowForceEndLetterExplained>
+	<KeepDraftedAndUndraftedCommandsSeparateTitle>Håll draftade och odraftade kommandon åtskilda</KeepDraftedAndUndraftedCommandsSeparateTitle>
+	<KeepDraftedAndUndraftedCommandsSeparateExplained>När aktiverat håller Achtung draftade och odraftade högerklickskommandon åtskilda, som i vanliga RimWorld</KeepDraftedAndUndraftedCommandsSeparateExplained>
 
 	<ReplaceCleanRoomTitle>Ersätt kommando ”Städa rum”</ReplaceCleanRoomTitle>
 	<ReplaceCleanRoomExplained>Ersätter spelets standardkommando för att städa rum med Achtungs version</ReplaceCleanRoomExplained>
@@ -55,9 +58,6 @@
 	<DecreaseForceRadiusDesc>Minska sökavståndet för påtvingat arbete (just nu {0})</DecreaseForceRadiusDesc>
 	<BuildingSmart>Smart byggande</BuildingSmart>
 	<BuildingSmartDesc>Smart byggande förhindrar hål eller att kolonister fastna men tar mer tid och utförs alltid i circlar rund startpunkten</BuildingSmartDesc>
-
-	<Notes>Anmärkningar</Notes>
-	<Note1>Med Achtung innehåller kontextmenyn såväl normala som kampkommandos</Note1>
 
 	<AchtungModKeyOptionNone>Av</AchtungModKeyOptionNone>
 	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
@@ -100,6 +100,9 @@
 	<MaxForcedItemsTitle>Maximalt antal påtvingade saker</MaxForcedItemsTitle>
 	<MaxForcedItemsExplained>Begränsar antalet påtvingade saker för långsammare datorer</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Obegränsat</MaxForcedItemsUnlimited>
+
+	<FeatureSettingsDesc>Växlar för kärnfunktioner</FeatureSettingsDesc>
+	<FeatureSettingsButton>Konfigurera funktioner</FeatureSettingsButton>
 
 	<JobInterruptedLabel>Avbruten: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>

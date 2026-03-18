@@ -43,6 +43,9 @@ public class MultiActions
 		});
 
 		var draftState = colonist.pawn.Drafted;
+		if (Achtung.Settings.keepDraftedAndUndraftedCommandsSeparate)
+			return;
+
 		_ = Tools.SetDraftStatus(colonist.pawn, !draftState);
 		FloatMenuMakerMap.GetOptions([colonist.pawn], clickPos, out _).Do(option =>
 		{

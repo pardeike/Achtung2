@@ -11,6 +11,7 @@
 	<Feature_Achtung_Draftstatus>Ontwerpstatus</Feature_Achtung_Draftstatus>
 	<Feature_Achtung_Rescue>Redding</Feature_Achtung_Rescue>
 	<Feature_Achtung_Dragging>Geselecteerd Slepen</Feature_Achtung_Dragging>
+	<AchtungTutorialButton>Handleiding</AchtungTutorialButton>
 
 	<PositioningEnabledTitle>Aangepaste muispositionering</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Maakt gevechtspositionering mogelijk voor je muisklikken/slepen (zie onderstaande instellingen)</PositioningEnabledExplained>
@@ -38,6 +39,8 @@
 
 	<ShowForceEndLetterTitle>Toon melding wanneer geforceerd werk eindigt</ShowForceEndLetterTitle>
 	<ShowForceEndLetterExplained>Wanneer ingeschakeld, verschijnt er een melding zodra een kolonist geen geforceerd werk meer heeft</ShowForceEndLetterExplained>
+	<KeepDraftedAndUndraftedCommandsSeparateTitle>Houd gedrafte en ongedrafte commando's gescheiden</KeepDraftedAndUndraftedCommandsSeparateTitle>
+	<KeepDraftedAndUndraftedCommandsSeparateExplained>Wanneer ingeschakeld houdt Achtung gedrafte en ongedrafte rechtsklikcommando's gescheiden, zoals in vanilla RimWorld</KeepDraftedAndUndraftedCommandsSeparateExplained>
 
 	<ReplaceCleanRoomTitle>Vervang opdracht 'Kamer schoonmaken'</ReplaceCleanRoomTitle>
 	<ReplaceCleanRoomExplained>Vervangt de standaard schoonmaakopdracht door Achtungs versie van kamer schoonmaken</ReplaceCleanRoomExplained>
@@ -55,9 +58,6 @@
 	<DecreaseForceRadiusDesc>Verklein de zoekafstand voor gedwongen werk (huidige straal is {0})</DecreaseForceRadiusDesc>
 	<BuildingSmart>Slim bouwen</BuildingSmart>
 	<BuildingSmartDesc>Slim bouwen voorkomt gaten of vast komen te zitten, maar is langzamer en bouwt altijd rond je startlocatie</BuildingSmartDesc>
-
-	<Notes>Opmerkingen</Notes>
-	<Note1>Bij gebruik van Achtung bevat het contextmenu commando's voor zowel de gevechtsmodus als de normale modus.</Note1>
 
 	<AchtungModKeyOptionNone>Uitgeschakeld</AchtungModKeyOptionNone>
 	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
@@ -100,6 +100,9 @@
 	<MaxForcedItemsTitle>Maximum gedwongen werk</MaxForcedItemsTitle>
 	<MaxForcedItemsExplained>Beperkt het aantal gedwongen werk voor langzamere computers</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Onbeperkt</MaxForcedItemsUnlimited>
+
+	<FeatureSettingsDesc>Schakelaars voor kernfunctionaliteit</FeatureSettingsDesc>
+	<FeatureSettingsButton>Functies configureren</FeatureSettingsButton>
 
 	<JobInterruptedLabel>Geannuleerd: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>

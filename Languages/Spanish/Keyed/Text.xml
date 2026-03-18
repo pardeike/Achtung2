@@ -11,26 +11,27 @@
 	<Feature_Achtung_Draftstatus>État de mobilisation</Feature_Achtung_Draftstatus>
 	<Feature_Achtung_Rescue>Rescate</Feature_Achtung_Rescue>
 	<Feature_Achtung_Dragging>Arrastrar Reclutados</Feature_Achtung_Dragging>
+	<AchtungTutorialButton>Guía</AchtungTutorialButton>
 
 	<PositioningEnabledTitle>Posicionamiento del ratón personalizado</PositioningEnabledTitle>
 	<PositioningEnabledExplained>Permite el posicionamiento en combate con un click o arrastre de tu ratón (ver preferencias abajo)</PositioningEnabledExplained>
 
-	<AchtungModifierTitle>tecla de Achtung!</AchtungModifierTitle>
+	<AchtungModifierTitle>Tecla de Achtung!</AchtungModifierTitle>
 	<AchtungModifierExplained>Manteniendo pulsada esta tecla se forzará el reclutamiento de los colonos cuando reciban órdenes de movimiento o en formación. Cuando se mantenga pulsada, permitirá mover a los colonos seleccionados sin perder su formación actual, pulsando y arrastrando con el botón derecho del ratón. Una vez que el botón derecho del ratón se mantenga pulsado, la tecla Achtung! puede ser liberada. La formación puede rotar usando las teclas Q y E.</AchtungModifierExplained>
 
-	<ForceCommandMenuModeTitle>Modo de Clic Derecho</ForceCommandMenuModeTitle>
-	<ForceCommandMenuKeyTitle>Tecla de Sustitución para Clic Derecho</ForceCommandMenuKeyTitle>
+	<ForceCommandMenuModeTitle>Modo de clic derecho</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Tecla de sustitución para clic derecho</ForceCommandMenuKeyTitle>
 
 	<CommandMenuModeOptionAuto>Dependiente del Estado</CommandMenuModeOptionAuto>
 	<CommandMenuModeOptionAutoExplained>El estado de alistamiento del colono decide si se muestra el menú contextual o se mueve a la ubicación clickeada</CommandMenuModeOptionAutoExplained>
-	<CommandMenuModeOptionPressForMenu>Tecla para Menú</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForMenu>Tecla para menú</CommandMenuModeOptionPressForMenu>
 	<CommandMenuModeOptionPressForMenuExplained>Mantén presionada la tecla para anular la acción predeterminada y mostrar el menú contextual</CommandMenuModeOptionPressForMenuExplained>
-	<CommandMenuModeOptionPressForPosition>Tecla para Posición</CommandMenuModeOptionPressForPosition>
+	<CommandMenuModeOptionPressForPosition>Tecla para posición</CommandMenuModeOptionPressForPosition>
 	<CommandMenuModeOptionPressForPositionExplained>Mantén presionada la tecla para anular el menú contextual y emitir un comando de posicionamiento</CommandMenuModeOptionPressForPositionExplained>
-	<CommandMenuModeOptionDelayed>Cambio Retenido</CommandMenuModeOptionDelayed>
+	<CommandMenuModeOptionDelayed>Cambio retenido</CommandMenuModeOptionDelayed>
 	<CommandMenuModeOptionDelayedExplained>Mantén pulsado el botón derecho del ratón; la acción cambiará de posicionamiento a mostrar el menú contextual después del retardo definido</CommandMenuModeOptionDelayedExplained>
 
-	<DelayTitle>Duración de Retención</DelayTitle>
+	<DelayTitle>Duración de retención</DelayTitle>
 	<DelayExplained>Duración en milisegundos para mantener presionado el clic derecho antes de que aparezca el menú contextual, anulando el posicionamiento</DelayExplained>
 
 	<RescueEnabledTitle>Columna de prioridad de trabajo 'Rescate'</RescueEnabledTitle>
@@ -38,6 +39,8 @@
 
 	<ShowForceEndLetterTitle>Mostrar mensaje al finalizar tarea forzada</ShowForceEndLetterTitle>
 	<ShowForceEndLetterExplained>Si está activado, se mostrará un mensaje cuando un colono termine su tarea forzada</ShowForceEndLetterExplained>
+	<KeepDraftedAndUndraftedCommandsSeparateTitle>Separar comandos de reclutado y no reclutado</KeepDraftedAndUndraftedCommandsSeparateTitle>
+	<KeepDraftedAndUndraftedCommandsSeparateExplained>Cuando está activado, Achtung mantiene separados los comandos de clic derecho de reclutado y no reclutado, como en RimWorld vanilla</KeepDraftedAndUndraftedCommandsSeparateExplained>
 
 	<ReplaceCleanRoomTitle>Reemplazar orden "Limpiar habitación"</ReplaceCleanRoomTitle>
 	<ReplaceCleanRoomExplained>Reemplaza la orden estándar de limpiar habitación por la versión de Achtung</ReplaceCleanRoomExplained>
@@ -55,9 +58,6 @@
 	<DecreaseForceRadiusDesc>Reduce la distancia de búsqueda para el trabajo forzoso (el radio actual es {0})</DecreaseForceRadiusDesc>
 	<BuildingSmart>Edificio inteligente</BuildingSmart>
 	<BuildingSmartDesc>Evita que se produzcan agujeros o que se atasquen, pero es más lento y siempre se construye alrededor de la ubicación de inicio</BuildingSmartDesc>
-
-	<Notes>Notas</Notes>
-	<Note1>Cuando utilice Achtung! el menú contextual contendrá ambas órdenes: de reclutamiento y libres.</Note1>
 
 	<AchtungModKeyOptionNone>Deshabilitado</AchtungModKeyOptionNone>
 	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
@@ -100,6 +100,9 @@
 	<MaxForcedItemsTitle>Elementos forzados máximos</MaxForcedItemsTitle>
 	<MaxForcedItemsExplained>Restringe la cantidad de elementos forzados para computadoras más lentas.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Ilimitado</MaxForcedItemsUnlimited>
+
+	<FeatureSettingsDesc>Opciones de funcionalidad principal</FeatureSettingsDesc>
+	<FeatureSettingsButton>Configurar funciones</FeatureSettingsButton>
 
 	<JobInterruptedLabel>Cancelado: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>

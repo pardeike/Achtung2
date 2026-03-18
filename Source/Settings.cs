@@ -61,6 +61,7 @@ public class AchtungSettings : ModSettings
 	public bool ignoreAssignments = false;
 	public WorkMarkers workMarkers = WorkMarkers.Animated;
 	public bool buildingSmart = true;
+	public bool keepDraftedAndUndraftedCommandsSeparate = false;
 	public int maxForcedItems = 64;
 	public int menuDelay = 250;
 	public bool forcedEndedLetter = true;
@@ -84,6 +85,7 @@ public class AchtungSettings : ModSettings
 		Scribe_Values.Look(ref ignoreAssignments, "ignoreAssignments", false, true);
 		Scribe_Values.Look(ref workMarkers, "workMarkers", WorkMarkers.Animated, true);
 		Scribe_Values.Look(ref buildingSmart, "buildingSmart", false, true);
+		Scribe_Values.Look(ref keepDraftedAndUndraftedCommandsSeparate, "keepDraftedAndUndraftedCommandsSeparate", false, true);
 		Scribe_Values.Look(ref maxForcedItems, "maxForcedItems", 64, true);
 		Scribe_Values.Look(ref menuDelay, "menuDelay", 250, true);
 		Scribe_Values.Look(ref forcedEndedLetter, "forcedEndedLetter", true, true);
@@ -100,8 +102,8 @@ public class AchtungSettings : ModSettings
 		helpRect.height = Text.LineHeight + 2;
 		helpRect.x -= 17;
 		helpRect.y -= 33 + 4;
-		helpRect.xMin = helpRect.xMax - "Tutorial".Translate().GetWidthCached() - 42;
-		if (Widgets.ButtonText(helpRect, "Tutorial".Translate()))
+		helpRect.xMin = helpRect.xMax - "AchtungTutorialButton".Translate().GetWidthCached() - 42;
+		if (Widgets.ButtonText(helpRect, "AchtungTutorialButton".Translate()))
 			ModFeatures.ShowAgain<Achtung>(true);
 
 		var columnWidth = (canvas.width - 30) / 2f - 2f;
@@ -122,6 +124,7 @@ public class AchtungSettings : ModSettings
 		{
 			list.ValueLabeled("AchtungModifier", false, ref Achtung.Settings.achtungKey);
 			list.Gap(10);
+			list.CheckboxEnhanced("KeepDraftedAndUndraftedCommandsSeparate", ref Achtung.Settings.keepDraftedAndUndraftedCommandsSeparate);
 			list.ValueLabeled("ForceCommandMenuMode", true, ref Achtung.Settings.forceCommandMenuMode);
 			switch (Achtung.Settings.forceCommandMenuMode)
 			{
@@ -155,14 +158,6 @@ public class AchtungSettings : ModSettings
 		static string forcedItemsString(int n) => n == 0 ? "Disabled".Translate().ToString() : n >= UnlimitedForcedItems ? "MaxForcedItemsUnlimited".Translate().ToString() : $"{n}";
 		list.SliderLabeled("MaxForcedItems", ref Achtung.Settings.maxForcedItems, 0, UnlimitedForcedItems, forcedItemsString);
 
-		list.End();
-
-		list = new Listing_Standard { ColumnWidth = canvas.width };
-		canvas.yMin = canvas.yMax - 80;
-		list.Begin(canvas);
-		list.Note("Notes", GameFont.Medium);
-		list.Gap(4);
-		list.Note("Note1");
 		list.End();
 	}
 }
