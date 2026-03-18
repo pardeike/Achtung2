@@ -120,6 +120,12 @@ static class LetterStack_LettersOnGUI_Patch
 static class Game_UpdatePlay_Patch
 {
 	static readonly IEnumerator it = Looper();
+	const float maxForcedWorkFrameTimeMs = 8f;
+	const int maxIterations = 800;
+	const int iterationBackoff = 8;
+	const int fpsRecoveryBuffer = 3;
+	const int contractIntervalTicks = 15;
+	const int slowLaneFrameInterval = 6;
 
 	public static int minFps = 30;
 	public static int iterations = 0;
@@ -127,6 +133,7 @@ static class Game_UpdatePlay_Patch
 	public static int fps = 0;
 	public static int[] fpsSlots = new int[10];
 	static int previousN = -1;
+	static int slowLaneFrames = 0;
 
 	static IEnumerator Looper()
 	{
@@ -161,11 +168,16 @@ static class Game_UpdatePlay_Patch
 
 					if (job.cancelled == false)
 					{
-						var it = job.ContractTargets(map);
-						while (it.MoveNext())
+						var tick = Find.TickManager.TicksGame;
+						var offset = job.pawn.thingIDNumber % contractIntervalTicks;
+						if ((tick + offset) % contractIntervalTicks == 0)
 						{
-							yield return null;
-							didYield = true;
+							var it = job.ContractTargets(map);
+							while (it.MoveNext())
+							{
+								yield return null;
+								didYield = true;
+							}
 						}
 					}
 				}
@@ -198,16 +210,43 @@ static class Game_UpdatePlay_Patch
 			}
 
 			if (fps < minFps)
-				iterations = 0;
-			else if (iterations < 800)
+			{
+				iterations = Math.Max(0, iterations - iterationBackoff);
+				slowLaneFrames = 0;
+			}
+			else if (fps >= minFps + fpsRecoveryBuffer && iterations < maxIterations)
+			{
 				iterations++;
+				slowLaneFrames = 0;
+			}
 		}
 		else
+		{
 			iterations = 0;
+			slowLaneFrames = 0;
+		}
 
 		if (Scribe.mode == LoadSaveMode.Inactive)
-			for (var i = 0; i < iterations; i++)
+		{
+			var frameIterations = iterations;
+			if (ForcedWork.Instance.hasForcedJobs && frameIterations == 0 && fps >= minFps)
+			{
+				// When performance is only barely acceptable, keep progress visible without resuming full-speed expansion.
+				if (++slowLaneFrames >= slowLaneFrameInterval)
+				{
+					frameIterations = 1;
+					slowLaneFrames = 0;
+				}
+			}
+
+			var frameDeadline = Time.realtimeSinceStartup + maxForcedWorkFrameTimeMs / 1000f;
+			for (var i = 0; i < frameIterations; i++)
+			{
 				_ = it.MoveNext();
+				if (Time.realtimeSinceStartup >= frameDeadline)
+					break;
+			}
+		}
 	}
 }
 

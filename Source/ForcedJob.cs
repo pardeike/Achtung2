@@ -24,6 +24,7 @@ public class ForcedJob : IExposable
 	public bool isThingJob = false;
 	public bool initialized = false;
 	public int cellRadius = 0;
+	public IntVec3 lastAssignedCell = IntVec3.Invalid;
 	public bool started = false;
 	public bool cancelled = false;
 	static readonly Dictionary<BuildableDef, int> TypeScores = new()
@@ -80,6 +81,7 @@ public class ForcedJob : IExposable
 		targets = [new ForcedTarget(item, MaterialScore(item))];
 		smartTargetsCached = null;
 		isThingJob = item.HasThing;
+		lastAssignedCell = item.Cell;
 	}
 
 	public void Start() => started = true;
@@ -233,8 +235,22 @@ public class ForcedJob : IExposable
 			.Select(target => target.item);
 	}
 
-	public void ExpandJob(int count)
+	public int ExpandJob(int count)
 		=> pawn.Map.Expand(isThingJob ? ExpandThingTargets : ExpandCellTargets, count);
+
+	IEnumerable<XY> ExpansionSeedCells()
+	{
+		var result = targets.Select(target => target.XY);
+		if (isThingJob)
+			result = targets
+				.Select(target => target.item.thingInt)
+				.OfType<Thing>()
+				.SelectMany(thing => thing.AllCells())
+				.Union(result);
+		if (lastAssignedCell.IsValid)
+			result = result.Append(lastAssignedCell);
+		return result.Distinct();
+	}
 
 	public bool NonForcedShouldIgnore(IntVec3 cell) => targets.Any(target => target.XY == cell && target.IsBuilding());
 
@@ -256,7 +272,11 @@ public class ForcedJob : IExposable
 					if (job.TargetThings().Any(t => pawn.Map.reservationManager.IsReserved(t))) continue;
 
 					success = pawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workgiver, target.Cell);
-					if (success) break;
+					if (success)
+					{
+						lastAssignedCell = target.Cell;
+						break;
+					}
 				}
 			}
 			if (success) return true;
@@ -266,9 +286,10 @@ public class ForcedJob : IExposable
 		return false;
 	}
 
-	public bool GetNextJob(out Job job)
+	public bool GetNextJob(out Job job, out bool hadTargets)
 	{
 		job = null;
+		hadTargets = false;
 
 		var workGiversByPrio = workgiverScanners.OrderBy(worker =>
 		{
@@ -282,11 +303,10 @@ public class ForcedJob : IExposable
 			return 999;
 		});
 
-		var exist = false;
 		foreach (var workgiver in workGiversByPrio)
 			foreach (var target in GetSortedTargets())
 			{
-				exist = true;
+				hadTargets = true;
 
 				if (isThingJob)
 				{
@@ -306,12 +326,10 @@ public class ForcedJob : IExposable
 				{
 					if (isThingJob)
 						_ = Achtung.usedThingsPerTick.Add(target.thingInt);
+					lastAssignedCell = target.Cell;
 					return true;
 				}
 			}
-
-		if (exist && Achtung.Settings.forcedEndedLetter)
-			Find.LetterStack.ReceiveLetter("NoForcedWork".Translate(), "CouldNotFindMoreForcedWork".Translate(pawn.Name.ToStringShort), LetterDefOf.NeutralEvent, pawn);
 
 		return false;
 	}
@@ -338,7 +356,7 @@ public class ForcedJob : IExposable
 
 		while (true)
 		{
-			if (forcedJob.GetNextJob(out var job))
+			if (forcedJob.GetNextJob(out var job, out var hadTargets))
 			{
 				job.expiryInterval = 0;
 				job.ignoreJoyTimeAssignment = true;
@@ -346,6 +364,15 @@ public class ForcedJob : IExposable
 				ForcedWork.QueueJob(pawn, job);
 				return true;
 			}
+
+			if (forcedJob.ExpandJob(4) > 0)
+			{
+				forcedJob.initialized = true;
+				continue;
+			}
+
+			if (hadTargets && Achtung.Settings.forcedEndedLetter)
+				Find.LetterStack.ReceiveLetter("NoForcedWork".Translate(), "CouldNotFindMoreForcedWork".Translate(pawn.Name.ToStringShort), LetterDefOf.NeutralEvent, pawn);
 
 			forcedWork.RemoveForcedJob(pawn);
 			forcedJob = forcedWork.GetForcedJob(pawn);
@@ -392,7 +419,6 @@ public class ForcedJob : IExposable
 	public IEnumerator<int> ExpandThingTargets(Map map)
 	{
 		var thingGrid = map.thingGrid;
-		var totalAdded = 0;
 		if (thingGrid != null)
 		{
 			var maxCountVerifier = Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems
@@ -401,28 +427,42 @@ public class ForcedJob : IExposable
 			if (maxCountVerifier())
 			{
 				var things = targets.Select(target => target.item.thingInt).Where(thing => thing != null && thing.Spawned).ToHashSet();
-				var newThings = things
-					.SelectMany(thing => thing.AllCells()).Union(targets.Select(target => target.XY)).Distinct()
-					.Expand(map, cellRadius + 1)
-					.SelectMany(cell => thingGrid.ThingsListAtFast(cell)).Distinct()
-					.ToArray();
-				yield return -1;
+				var seedCells = ExpansionSeedCells().ToArray();
 
-				for (var i = 0; i < newThings.Length && cancelled == false && maxCountVerifier(); i++)
+				foreach (var cell in seedCells.Expand(map, cellRadius + 1))
 				{
-					var newThing = newThings[i];
-					if (things.Contains(newThing) == false && ThingHasJob(newThing))
+					if (cancelled || maxCountVerifier() == false)
+						break;
+
+					var yielded = false;
+					var thingsInCell = thingGrid.ThingsListAtFast(cell);
+					for (var i = 0; i < thingsInCell.Count; i++)
 					{
-						LocalTargetInfo item = newThing;
-						_ = targets.Add(new ForcedTarget(item, MaterialScore(item)));
-						smartTargetsCached = null;
-						totalAdded++;
+						if (cancelled || maxCountVerifier() == false)
+							break;
+
+						var newThing = thingsInCell[i];
+						if (things.Add(newThing) && ThingHasJob(newThing))
+						{
+							LocalTargetInfo item = newThing;
+							if (targets.Add(new ForcedTarget(item, MaterialScore(item))))
+							{
+								smartTargetsCached = null;
+								yield return 1;
+								yielded = true;
+								continue;
+							}
+						}
+
+						yielded = true;
+						yield return 0;
 					}
-					yield return -1;
+
+					if (yielded == false)
+						yield return 0;
 				}
 			}
 		}
-		yield return totalAdded;
 	}
 
 	public IEnumerator<int> ExpandCellTargets(Map map)
@@ -430,29 +470,28 @@ public class ForcedJob : IExposable
 		var maxCountVerifier = Achtung.Settings.maxForcedItems < AchtungSettings.UnlimitedForcedItems
 			? (Func<bool>)(() => targets.Count < Achtung.Settings.maxForcedItems)
 			: () => true;
-		var totalAdded = 0;
 		if (maxCountVerifier())
 		{
-			var newCells = targets
-				.Select(target => target.XY)
-				.Expand(map, cellRadius + 1)
-				.ToArray();
-			yield return -1;
-
-			for (var i = 0; i < newCells.Length && cancelled == false && maxCountVerifier(); i++)
+			var seedCells = ExpansionSeedCells().ToArray();
+			foreach (var cell in seedCells.Expand(map, cellRadius + 1))
 			{
-				var cell = newCells[i];
+				if (cancelled || maxCountVerifier() == false)
+					break;
+
 				if (CellHasJob(cell))
 				{
 					LocalTargetInfo item = cell;
-					_ = targets.Add(new ForcedTarget(item, 0));
-					smartTargetsCached = null;
-					totalAdded++;
+					if (targets.Add(new ForcedTarget(item, 0)))
+					{
+						smartTargetsCached = null;
+						yield return 1;
+						continue;
+					}
 				}
-				yield return -1;
+
+				yield return 0;
 			}
 		}
-		yield return totalAdded;
 	}
 
 	public IEnumerator ContractTargets(Map map)
@@ -506,6 +545,7 @@ public class ForcedJob : IExposable
 		Scribe_Values.Look(ref isThingJob, "thingJob", false, true);
 		Scribe_Values.Look(ref initialized, "inited", false, true);
 		Scribe_Values.Look(ref cellRadius, "radius", 0, true);
+		Scribe_Values.Look(ref lastAssignedCell, "lastAssignedCell", IntVec3.Invalid, true);
 
 		if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			workgiverScanners = [.. workgiverDefs.Select(wgd => wgd.Worker).OfType<WorkGiver_Scanner>()];

@@ -52,6 +52,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="RimBridgeServer.Annotations" Version="1.0.0" />
 		<PackageReference Include="TaskPubliciser" Version="1.0.3" />
 	</ItemGroup>
 

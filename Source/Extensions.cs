@@ -17,7 +17,15 @@ public static class Extensions
 	public static bool InBounds(this XY xy, Map map)
 	{
 		if (xy.x < 0 || xy.y < 0) return false;
-		var size = map.Size;
-		return xy.x < size.x && xy.y < size.z;
+		try
+		{
+			if (map == null) return false;
+			var size = map.Size;
+			return xy.x < size.x && xy.y < size.z;
+		}
+		catch
+		{
+			return false;
+		}
 	}
 }

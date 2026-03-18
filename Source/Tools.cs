@@ -210,7 +210,7 @@ static class Tools
 
 	public static IEnumerable<XY> Expand(this IEnumerable<XY> existing, Map map, int radius)
 	{
-		if (radius == 0) yield break;
+		if (map == null || radius == 0) yield break;
 
 		var visited = new HashSet<XY>(existing);
 		var queue = new Queue<XY>(visited);
@@ -238,7 +238,7 @@ static class Tools
 		}
 	}
 
-	public static void Expand(this Map map, Func<Map, IEnumerator<int>> func, int count)
+	public static int Expand(this Map map, Func<Map, IEnumerator<int>> func, int count)
 	{
 		var total = 0;
 		while (total < count)
@@ -248,13 +248,15 @@ static class Tools
 			while (i.MoveNext())
 			{
 				var n = i.Current;
-				if (n < 0) continue;
-				added = n;
-				break;
+				if (n <= 0) continue;
+				added += n;
+				total += n;
+				if (total >= count)
+					return total;
 			}
 			if (added == 0) break;
-			total += added;
 		}
+		return total;
 	}
 
 	public static IEnumerable<XY> AllCells(this Thing thing)
