@@ -348,6 +348,13 @@ public class ForcedJob : IExposable
 			return false;
 		}
 
+		// Some jobs queue their own non-forced follow-up work. Let that run before
+		// we continue the forced chain, otherwise mods like Pick Up And Haul never
+		// get a chance to unload hauled inventory between forced targets.
+		if (condition != JobCondition.InterruptForced
+			&& pawn.jobs?.jobQueue?.Any(queuedJob => queuedJob?.job?.playerForced == false) == true)
+			return false;
+
 		if (condition == JobCondition.InterruptForced)
 		{
 			forcedJob.ExpandJob(4);
