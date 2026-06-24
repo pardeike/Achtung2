@@ -76,7 +76,7 @@ public sealed class AchtungBridgeTools
 	}
 
 	[Tool("achtung/force_work_at_cell", Description = "Invoke Achtung's actual force-work button path for a pawn at a map cell, optionally matching a menu label fragment.")]
-	public object ForceWorkAtCell(int x, int z, string pawnId = null, string labelContains = null)
+	public object ForceWorkAtCell(int x, int z, string pawnId = null, string labelContains = null, int cellRadius = -1, int expandCount = 0)
 	{
 		var pawn = FindPawn(pawnId);
 		if (pawn == null)
@@ -106,9 +106,9 @@ public sealed class AchtungBridgeTools
 		AddOptionsForCurrentDraftState();
 		if (Achtung.Settings.keepDraftedAndUndraftedCommandsSeparate == false)
 		{
-			_ = Tools.SetDraftStatus(pawn, !draftState);
 			try
 			{
+				_ = Tools.SetDraftStatus(pawn, !draftState);
 				AddOptionsForCurrentDraftState();
 			}
 			finally
@@ -145,6 +145,16 @@ public sealed class AchtungBridgeTools
 
 		var success = ForcedMultiFloatMenuOption.ForceAction(pawn, chosen.forceWorkgiver, chosen.forceCell);
 		var forcedJob = ForcedWork.Instance.GetForcedJob(pawn);
+		if (success && forcedJob != null)
+		{
+			if (cellRadius >= 0)
+			{
+				forcedJob.cellRadius = cellRadius;
+				forcedJob.Start();
+			}
+			if (expandCount > 0)
+				_ = forcedJob.ExpandJob(expandCount);
+		}
 
 		return new
 		{
@@ -155,6 +165,8 @@ public sealed class AchtungBridgeTools
 			workgiver = chosen.forceWorkgiver?.def?.defName,
 			forceCell = chosen.forceCell.ToString(),
 			hasForcedJob = ForcedWork.Instance.HasForcedJob(pawn, ignorePreparing: true),
+			cellRadius = forcedJob?.cellRadius ?? 0,
+			started = forcedJob?.started ?? false,
 			targetCount = forcedJob?.targets.Count ?? 0,
 			lastAssignedCell = forcedJob?.lastAssignedCell.ToString()
 		};

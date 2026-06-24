@@ -46,13 +46,19 @@ public class MultiActions
 		if (Achtung.Settings.keepDraftedAndUndraftedCommandsSeparate)
 			return;
 
-		_ = Tools.SetDraftStatus(colonist.pawn, !draftState);
-		FloatMenuMakerMap.GetOptions([colonist.pawn], clickPos, out _).Do(option =>
+		try
 		{
-			if (existingLabels.Contains(option.Label) == false)
-				AddMultiAction(colonist, !draftState, option);
-		});
-		_ = Tools.SetDraftStatus(colonist.pawn, draftState);
+			_ = Tools.SetDraftStatus(colonist.pawn, !draftState);
+			FloatMenuMakerMap.GetOptions([colonist.pawn], clickPos, out _).Do(option =>
+			{
+				if (existingLabels.Contains(option.Label) == false)
+					AddMultiAction(colonist, !draftState, option);
+			});
+		}
+		finally
+		{
+			_ = Tools.SetDraftStatus(colonist.pawn, draftState);
+		}
 	}
 
 	public void AddMultiAction(Colonist colonist, bool draftMode, FloatMenuOption option)
@@ -147,6 +153,7 @@ public class MultiActions
 		var options = actions.Select(action => action.option);
 		var autoTakeable = AllEqual(options, o => o.autoTakeable);
 		var autoTakeablePriority = AllEqual(options, o => o.autoTakeablePriority);
+		var targetsDespawned = AllEqual(options, o => o.targetsDespawned);
 		var mouseoverGuiAction = AllEqual(options, (o1, o2) => o1.mouseoverGuiAction == o2.mouseoverGuiAction, o => o.mouseoverGuiAction);
 		var revalidateClickTarget = AllEqual(options, (o1, o2) => o1.revalidateClickTarget == o2.revalidateClickTarget, o => o.revalidateClickTarget);
 		var extraPartWidth = AllEqual(options, o => o.extraPartWidth);
@@ -185,6 +192,7 @@ public class MultiActions
 		{
 			autoTakeable = autoTakeable,
 			autoTakeablePriority = autoTakeablePriority,
+			targetsDespawned = targetsDespawned,
 			tutorTag = tutorTag,
 			thingStyle = thingStyle,
 			forceBasicStyle = forceBasicStyle,
@@ -201,13 +209,13 @@ public class MultiActions
 
 		var hasForcedOptions = options.Any(o => o is ForcedFloatMenuOption);
 		if (hasForcedOptions)
-			option = new ForcedMultiFloatMenuOption(pawns, [.. options], extraPartOnGUI, title);
+			option = ForcedFloatMenuOption.CopyOptionState(option, new ForcedMultiFloatMenuOption(pawns, [.. options], extraPartOnGUI, title));
 
 		option.action = () => actions.Do(multiAction => multiAction.GetAction()());
 		option.Disabled = actions.All(a => a.option.Disabled);
 		var sizeMode = AllEqualFloatMenuSizeMode(options, o => o.sizeMode);
 		if (sizeMode != noSizeMode)
-			option.sizeMode = sizeMode;
+			option.SetSizeMode(sizeMode);
 
 		return option;
 	}

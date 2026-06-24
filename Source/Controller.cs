@@ -22,6 +22,7 @@ public class Controller
 	public bool isDragging;
 	public bool suppressMenu;
 	public bool drawColonistPreviews;
+	public bool pendingDelayedPositioning;
 
 	public static Controller instance;
 
@@ -39,6 +40,7 @@ public class Controller
 		isDragging = false;
 		suppressMenu = false;
 		drawColonistPreviews = true;
+		pendingDelayedPositioning = false;
 	}
 
 	public static void InstallDefs()
@@ -96,9 +98,10 @@ public class Controller
 	public bool MouseDown(Vector3 pos, int button, bool longPress)
 	{
 		var doPositioning = Achtung.Settings.positioningEnabled;
-		var doForceMenu = Achtung.Settings.maxForcedItems > 0;
-		if (doPositioning == false && doForceMenu == false)
+		if (doPositioning == false)
 			return true;
+
+		var doForceMenu = Achtung.Settings.maxForcedItems > 0;
 		var selector = Find.Selector;
 
 		if (longPress == false)
@@ -187,7 +190,15 @@ public class Controller
 		{
 			DoDrag();
 			if (centerOnColonist == null)
-				MouseDrag(pos, -1);
+			{
+				if (Achtung.Settings.forceCommandMenuMode == CommandMenuMode.Delayed && groupMovement == false)
+				{
+					pendingDelayedPositioning = true;
+					UpdateLinePosition(pos, false);
+				}
+				else
+					MouseDrag(pos, -1);
+			}
 			return true;
 		}
 
@@ -232,12 +243,40 @@ public class Controller
 		groupMovement = false;
 		groupedMoved = false;
 		centerOnColonist = null;
+		pendingDelayedPositioning = false;
 		if (isDragging)
 		{
 			colonists.Clear();
 			Event.current.Use();
 		}
 		isDragging = false;
+	}
+
+	private static Vector3 LineEndFor(Vector3 pos)
+	{
+		pos.y = Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays);
+		return pos;
+	}
+
+	private bool IsLineDragPastClick(Vector3 pos)
+		=> (LineEndFor(pos) - lineStart).MagnitudeHorizontalSquared() > 0.5f;
+
+	private void UpdateLinePosition(Vector3 pos, bool issueOrders)
+	{
+		lineEnd = LineEndFor(pos);
+		var draftedColonists = colonists.Where(colonist => colonist.pawn.Drafted).ToList();
+		var count = draftedColonists.Count;
+		var dragVector = lineEnd - lineStart;
+		var delta = count > 1 ? dragVector / (count - 1) : Vector3.zero;
+		var linePosition = count == 1 ? lineEnd : lineStart;
+		Tools.OrderColonistsAlongLine(draftedColonists, lineStart, lineEnd).Do(colonist =>
+		{
+			if (issueOrders)
+				colonist.OrderTo(linePosition);
+			else
+				colonist.UpdateOrderPos(linePosition);
+			linePosition += delta;
+		});
 	}
 
 	public void MouseDrag(Vector3 pos, int dragCount)
@@ -274,31 +313,46 @@ public class Controller
 			return;
 		}
 
-		lineEnd = pos;
-		lineEnd.y = Altitudes.AltitudeFor(AltitudeLayer.MetaOverlays);
-		var count = draftedColonists.Count;
-		var dragVector = lineEnd - lineStart;
-		suppressMenu |= dragVector.MagnitudeHorizontalSquared() > 0.5f;
-
-		var delta = count > 1 ? dragVector / (count - 1) : Vector3.zero;
-		var linePosition = count == 1 ? lineEnd : lineStart;
-		Tools.OrderColonistsAlongLine(draftedColonists, lineStart, lineEnd).Do(colonist =>
+		var draggedPastClick = IsLineDragPastClick(pos);
+		if (pendingDelayedPositioning && draggedPastClick == false)
 		{
-			colonist.OrderTo(linePosition);
-			linePosition += delta;
-		});
+			UpdateLinePosition(pos, false);
+			Event.current.Use();
+			return;
+		}
+
+		if (pendingDelayedPositioning)
+			pendingDelayedPositioning = false;
+
+		suppressMenu |= draggedPastClick;
+		UpdateLinePosition(pos, true);
 
 		Event.current.Use();
 	}
 
-	public void MouseUp()
+	public bool MouseUp(Vector3 pos)
 	{
 		Tools.SetCursor(AchtungCursor.Default);
 
 		if (Event.current.button != 1)
-			return;
+			return true;
+
+		if (pendingDelayedPositioning)
+		{
+			if (longPressThreshold > -1 && Tools.EnvTicks() > longPressThreshold && suppressMenu == false)
+			{
+				pendingDelayedPositioning = false;
+				longPressThreshold = -1;
+				var result = MouseDown(pos, 1, true);
+				EndDragging();
+				return result;
+			}
+
+			UpdateLinePosition(pos, true);
+		}
 
 		EndDragging();
+		return true;
 	}
 
 	public void KeyDown(KeyCode key)
@@ -347,6 +401,7 @@ public class Controller
 				case KeyCode.Escape:
 					isDragging = false;
 					suppressMenu = false;
+					pendingDelayedPositioning = false;
 					Tools.CancelDrafting(colonists);
 					colonists.Clear();
 					Event.current.Use();
@@ -460,6 +515,7 @@ public class Controller
 	{
 		if (Find.WindowStack.IsOpen<FloatMenu>())
 		{
+			pendingDelayedPositioning = false;
 			isDragging = false;
 			return true;
 		}
@@ -473,6 +529,7 @@ public class Controller
 			&& Tools.EnvTicks() > longPressThreshold
 			&& suppressMenu == false)
 		{
+			pendingDelayedPositioning = false;
 			longPressThreshold = -1;
 			return MouseDown(pos, 1, true);
 		}
@@ -491,8 +548,8 @@ public class Controller
 				break;
 
 			case EventType.MouseUp:
+				runOriginal = MouseUp(pos);
 				longPressThreshold = -1;
-				MouseUp();
 				break;
 
 			case EventType.KeyDown:

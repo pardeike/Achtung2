@@ -700,7 +700,7 @@ static class FloatMenuOptionProvider_WorkGivers_GetWorkGiverOption_Patch
 	public static void Prefix(Pawn pawn, out ForcedWork __state)
 	{
 		__state = null;
-		if (pawn?.Map != null)
+		if (Achtung.Settings.positioningEnabled && pawn?.Map != null)
 		{
 			__state = ForcedWork.Instance;
 			__state.Prepare(pawn);
@@ -718,6 +718,9 @@ static class FloatMenuOptionProvider_WorkGivers_GetWorkGiverOption_Patch
 
 	public static FloatMenuOption DecorateForcedTask(FloatMenuOption option, Pawn pawn, LocalTargetInfo target, string reservedText, ReservationLayerDef layer, WorkGiver_Scanner workgiver)
 	{
+		if (Achtung.Settings.positioningEnabled == false)
+			return FloatMenuUtility.DecoratePrioritizedTask(option, pawn, target, reservedText, layer);
+
 		var forcedOption = ForcedFloatMenuOption.CreateForcedMenuItem(option, pawn, target, workgiver);
 		return FloatMenuUtility.DecoratePrioritizedTask(forcedOption, pawn, target, reservedText, layer);
 	}

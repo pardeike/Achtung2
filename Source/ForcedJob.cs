@@ -176,54 +176,63 @@ public class ForcedJob : IExposable
 		var pathGrid = map.pathing.For(pawn).pathGrid;
 		var mapWidth = map.Size.x;
 
-		var result = targets.Where(target => target.IsValidTarget() && Tools.IsFreeTarget(pawn, target));
+		var result = targets.Where(target => target.IsValidTarget() && Tools.IsFreeTarget(pawn, target)).ToList();
 		var shouldBeDoneSmart = Achtung.Settings.buildingSmart;
 		shouldBeDoneSmart &= workgiverDefs.Any(def => buildingSmartWorkgiverDefs.Contains(def.giverClass));
 
 		if (shouldBeDoneSmart && isThingJob && startCell.IsValid && result.Any())
 		{
-			if (smartTargetsCached == null)
+			for (var attempt = 0; attempt < 2; attempt++)
 			{
-				var someTarget = result.OrderByDescending(target => target.item.Cell.DistanceTo(startCell)).FirstOrDefault();
-				if (someTarget != null)
+				if (smartTargetsCached == null)
 				{
-					var path = map.pathFinder.FindPathNow(startCell, someTarget.item.Cell, TraverseParms.For(pawn, Danger.Deadly));
-					if (path != PawnPath.NotFound)
+					var someTarget = result.OrderByDescending(target => target.item.Cell.DistanceTo(startCell)).FirstOrDefault();
+					if (someTarget != null)
 					{
-						var itemsByCell = GetItemsByCell(result);
-						LocalTargetInfo? entry = null;
-						var nodes = path.NodesReversed;
-						for (var i = nodes.Count - 1; i >= 0; i--)
-							if (itemsByCell.TryGetValue(nodes[i], out var item))
-							{
-								entry = item;
-								break;
-							}
-						if (entry != null)
+						var path = map.pathFinder.FindPathNow(startCell, someTarget.item.Cell, TraverseParms.For(pawn, Danger.Deadly));
+						if (path != PawnPath.NotFound)
 						{
-							var visited = new HashSet<LocalTargetInfo> { entry.Value };
-							var queue = new Queue<LocalTargetInfo>();
-							queue.Enqueue(entry.Value);
-							smartTargetsCached = [];
-							var offsets = new[] { new IntVec3(1, 0, 0), new IntVec3(-1, 0, 0), new IntVec3(0, 0, 1), new IntVec3(0, 0, -1) };
-							while (queue.Count > 0)
-							{
-								var item = queue.Dequeue();
-								smartTargetsCached.Insert(0, item);
-								foreach (var off in offsets)
+							var itemsByCell = GetItemsByCell(result);
+							LocalTargetInfo? entry = null;
+							var nodes = path.NodesReversed;
+							for (var i = nodes.Count - 1; i >= 0; i--)
+								if (itemsByCell.TryGetValue(nodes[i], out var item))
 								{
-									var cell = item.Cell + off;
-									if (itemsByCell.TryGetValue(cell, out var neighbourItem) && visited.Add(neighbourItem))
-										queue.Enqueue(neighbourItem);
+									entry = item;
+									break;
+								}
+							if (entry != null)
+							{
+								var visited = new HashSet<LocalTargetInfo> { entry.Value };
+								var queue = new Queue<LocalTargetInfo>();
+								queue.Enqueue(entry.Value);
+								smartTargetsCached = [];
+								var offsets = new[] { new IntVec3(1, 0, 0), new IntVec3(-1, 0, 0), new IntVec3(0, 0, 1), new IntVec3(0, 0, -1) };
+								while (queue.Count > 0)
+								{
+									var item = queue.Dequeue();
+									smartTargetsCached.Insert(0, item);
+									foreach (var off in offsets)
+									{
+										var cell = item.Cell + off;
+										if (itemsByCell.TryGetValue(cell, out var neighbourItem) && visited.Add(neighbourItem))
+											queue.Enqueue(neighbourItem);
+									}
 								}
 							}
 						}
+						path.ReleaseToPool();
 					}
-					path.ReleaseToPool();
+				}
+				if (smartTargetsCached != null)
+				{
+					var smartTargets = smartTargetsCached.Intersect(result.Select(t => t.item)).ToList();
+					if (smartTargets.Count > 0)
+						return smartTargets;
+
+					smartTargetsCached = null;
 				}
 			}
-			if (smartTargetsCached != null)
-				return smartTargetsCached.Intersect(result.Select(t => t.item));
 		}
 
 		return result

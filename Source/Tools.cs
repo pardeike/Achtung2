@@ -286,7 +286,7 @@ static class Tools
 				&& (pawn.jobs?.IsCurrentJobPlayerInterruptible() ?? false))
 			.Select(pawn => new Colonist(pawn))];
 
-	public static bool IsGoHereOption(FloatMenuOption option) => option.Label == goHereLabel;
+	public static bool IsGoHereOption(FloatMenuOption option) => option?.isGoto == true || option?.Label == goHereLabel;
 
 	public static void DraftWithSound(List<Colonist> colonists, bool draftStatus)
 	{
