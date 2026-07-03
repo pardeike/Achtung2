@@ -38,6 +38,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Remove="BridgeTools\**\*.cs" />
+		<None Include="BridgeTools\**\*" />
 		<Content Include="..\Directory.Build.props">
 			<Link>%(Filename)%(Extension)</Link>
 		</Content>
@@ -52,7 +54,6 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="RimBridgeServer.Annotations" Version="1.2.0" />
 		<PackageReference Include="TaskPubliciser" Version="1.0.3" />
 	</ItemGroup>
 
@@ -89,28 +90,41 @@
 	</Target>
 
 	<Target Name="PostBuildAction" AfterTargets="Build">
+		<Delete Files="..\1.6\Assemblies\RimBridgeServer.Annotations.dll;..\1.6\Assemblies\RimBridgeServer.Sdk.dll" />
 		<XmlPoke XmlInputPath="$(MSBuildProjectDirectory)\..\About\About.xml" Query="//ModMetaData/modVersion" Value="$(ModVersion)" />
 		<XmlPoke XmlInputPath="$(MSBuildProjectDirectory)\..\About\Manifest.xml" Query="//Manifest/version" Value="$(ModVersion)" />
+	</Target>
+
+	<Target Name="BuildBridgeTools" AfterTargets="PostBuildAction" BeforeTargets="CopyToRimworld" Condition="'$(BuildBridgeTools)' != 'false'">
+		<MSBuild
+			Projects="$(MSBuildProjectDirectory)\BridgeTools\Achtung.BridgeTools.csproj"
+			Targets="Build"
+			Properties="Configuration=$(Configuration);Platform=$(Platform);AchtungAssemblyPath=$(TargetPath)" />
 	</Target>
 
 	<Target Name="CopyToRimworld" AfterTargets="PostBuildAction" Condition="'$(RIMWORLD_MOD_DIR)' != ''">
 		<Delete Files="..\1.6\Assemblies\0Harmony.dll" />
 		<RemoveDir Directories="$(RIMWORLD_MOD_DIR)\$(ModFileName)" />
+		<PropertyGroup>
+			<!-- Keep the companion DLL paired with the deployed mod DLL: Mods/Achtung and sibling Mods/../BridgeTools/Achtung are one deployment unit. -->
+			<GlobalBridgeToolsDir>$(RIMWORLD_MOD_DIR)\..\BridgeTools</GlobalBridgeToolsDir>
+		</PropertyGroup>
 		<ItemGroup>
-			<Copy_11 Include="..\1.1\**" />
-			<Copy_12 Include="..\1.2\**" />
-			<Copy_13 Include="..\1.3\**" />
-			<Copy_14 Include="..\1.4\**" />
-			<Copy_15 Include="..\1.5\**" />
-			<Copy_16 Include="..\1.6\**" />
-			<CopyAbout Include="..\About\**" />
-			<CopyFeatures Include="..\Features\**" />
-			<CopyLanguages Include="..\Languages\**" />
-			<CopyPatches Include="..\Patches\**" />
-			<CopyTextures Include="..\Textures\**" />
+			<Copy_11 Include="..\1.1\**" Exclude="..\1.1\**\.DS_Store;..\1.1\**\._*" />
+			<Copy_12 Include="..\1.2\**" Exclude="..\1.2\**\.DS_Store;..\1.2\**\._*" />
+			<Copy_13 Include="..\1.3\**" Exclude="..\1.3\**\.DS_Store;..\1.3\**\._*" />
+			<Copy_14 Include="..\1.4\**" Exclude="..\1.4\**\.DS_Store;..\1.4\**\._*" />
+			<Copy_15 Include="..\1.5\**" Exclude="..\1.5\**\.DS_Store;..\1.5\**\._*" />
+			<Copy_16 Include="..\1.6\**" Exclude="..\1.6\BridgeTools\**;..\1.6\**\.DS_Store;..\1.6\**\._*" />
+			<CopyAbout Include="..\About\**" Exclude="..\About\**\.DS_Store;..\About\**\._*" />
+			<CopyFeatures Include="..\Features\**" Exclude="..\Features\**\.DS_Store;..\Features\**\._*" />
+			<CopyLanguages Include="..\Languages\**" Exclude="..\Languages\**\.DS_Store;..\Languages\**\._*" />
+			<CopyPatches Include="..\Patches\**" Exclude="..\Patches\**\.DS_Store;..\Patches\**\._*" />
+			<CopyTextures Include="..\Textures\**" Exclude="..\Textures\**\.DS_Store;..\Textures\**\._*" />
 			<CopyLicense Include="..\LICENSE" />
 			<CopyLoadFolders Include="..\LoadFolders.xml" />
 			<CopyReadme Include="..\README.md" />
+			<CopyBridgeTools Include="..\artifacts\BridgeTools\Achtung\Achtung.BridgeTools.dll" Condition="'$(BuildBridgeTools)' != 'false'" />
 		</ItemGroup>
 		<Copy SourceFiles="@(Copy_11)" DestinationFolder="$(RIMWORLD_MOD_DIR)\$(ModFileName)\1.1\%(RecursiveDir)" />
 		<Copy SourceFiles="@(Copy_12)" DestinationFolder="$(RIMWORLD_MOD_DIR)\$(ModFileName)\1.2\%(RecursiveDir)" />
@@ -126,6 +140,7 @@
 		<Copy SourceFiles="@(CopyLicense)" DestinationFolder="$(RIMWORLD_MOD_DIR)\$(ModFileName)" />
 		<Copy SourceFiles="@(CopyLoadFolders)" DestinationFolder="$(RIMWORLD_MOD_DIR)\$(ModFileName)" />
 		<Copy SourceFiles="@(CopyReadme)" DestinationFolder="$(RIMWORLD_MOD_DIR)\$(ModFileName)" />
+		<Copy SourceFiles="@(CopyBridgeTools)" DestinationFolder="$(GlobalBridgeToolsDir)\Achtung" SkipUnchangedFiles="true" Condition="'@(CopyBridgeTools)' != ''" />
 	</Target>
 
 	<Target Name="ZipMod" AfterTargets="CopyToRimworld" Condition="'$(RIMWORLD_MOD_DIR)' != ''">

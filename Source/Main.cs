@@ -824,7 +824,7 @@ static class Pawn_JobTracker_EndCurrentJob_Patch
 
 // fix enter portal code so it no longer uses static state
 [HarmonyPatch(typeof(FloatMenuOptionProvider_EnterMapPortal), nameof(FloatMenuOptionProvider_EnterMapPortal.GetSingleOptionFor))]
-static class FloatMenuOptionProvider_EnterMapPortal_GetSingleOptionFor_Patch
+public static class FloatMenuOptionProvider_EnterMapPortal_GetSingleOptionFor_Patch
 {
 	public static Pawn currentPawn;
 

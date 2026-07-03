@@ -1,4 +1,4 @@
-using RimBridgeServer.Annotations;
+using RimBridgeServer.Sdk;
 using RimWorld;
 using System;
 using System.Linq;
@@ -20,8 +20,17 @@ public sealed class AchtungBridgeTools
 			|| pawn.GetUniqueLoadID() == pawnId);
 	}
 
+	static bool SetDraftStatus(Pawn pawn, bool drafted)
+	{
+		pawn.drafter ??= new Pawn_DraftController(pawn);
+		var previousStatus = pawn.drafter.Drafted;
+		if (previousStatus != drafted)
+			pawn.drafter.draftedInt = drafted;
+		return previousStatus;
+	}
+
 	[Tool("achtung/get_selected_pawn_forced_state", Description = "Read Achtung forced-work state for the currently selected pawn.")]
-	public object GetSelectedPawnForcedState()
+	public static object GetSelectedPawnForcedState()
 	{
 		var pawn = FindPawn(null);
 		if (pawn == null)
@@ -76,7 +85,7 @@ public sealed class AchtungBridgeTools
 	}
 
 	[Tool("achtung/force_work_at_cell", Description = "Invoke Achtung's actual force-work button path for a pawn at a map cell, optionally matching a menu label fragment.")]
-	public object ForceWorkAtCell(int x, int z, string pawnId = null, string labelContains = null, int cellRadius = -1, int expandCount = 0)
+	public static object ForceWorkAtCell(int x, int z, string pawnId = null, string labelContains = null, int cellRadius = -1, int expandCount = 0)
 	{
 		var pawn = FindPawn(pawnId);
 		if (pawn == null)
@@ -108,12 +117,12 @@ public sealed class AchtungBridgeTools
 		{
 			try
 			{
-				_ = Tools.SetDraftStatus(pawn, !draftState);
+				_ = SetDraftStatus(pawn, !draftState);
 				AddOptionsForCurrentDraftState();
 			}
 			finally
 			{
-				_ = Tools.SetDraftStatus(pawn, draftState);
+				_ = SetDraftStatus(pawn, draftState);
 			}
 		}
 
