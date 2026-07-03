@@ -211,20 +211,25 @@ public abstract class JobDriver_Thoroughly : JobDriver
 		toil.AddPreTickAction(() =>
 		{
 			effecterProgresBar.EffectTick(toil.actor, TargetInfo.Invalid);
-			var mote = ((SubEffecter_ProgressBar)effecterProgresBar.children[0]).mote;
-			if (mote != null)
+			if (effecterProgresBar.children.Count > 0 && effecterProgresBar.children[0] is SubEffecter_ProgressBar progressBar)
 			{
-				mote.progress = Mathf.Clamp01(Progress());
-				mote.Position = toil.actor.Position;
-				mote.offsetZ = -1.1f;
+				var mote = progressBar.mote;
+				if (mote != null)
+				{
+					mote.progress = Mathf.Clamp01(Progress());
+					mote.Position = toil.actor.Position;
+					mote.offsetZ = -1.1f;
+				}
 			}
 
 			if (effecterWorkIcon != null)
 			{
 				effecterWorkIcon.EffectTick(toil.actor, TargetInfo.Invalid);
-				var interactSymbol = (SubEffecter_InteractSymbol)effecterWorkIcon.children[0];
-				var dualMode = (MoteDualAttached)interactSymbol.interactMote;
-				dualMode.Attach(toil.actor, currentItem.ToTargetInfo(toil.actor.Map));
+				if (currentItem != null
+					&& effecterWorkIcon.children.Count > 0
+					&& effecterWorkIcon.children[0] is SubEffecter_InteractSymbol interactSymbol
+					&& interactSymbol.interactMote is MoteDualAttached dualMode)
+					dualMode.Attach(toil.actor, currentItem.ToTargetInfo(toil.actor.Map));
 			}
 		});
 
