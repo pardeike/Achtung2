@@ -33,8 +33,6 @@ public class MultiActions
 
 	public void AddColonist(Colonist colonist)
 	{
-		FloatMenuOptionProvider_EnterMapPortal_GetSingleOptionFor_Patch.currentPawn = colonist.pawn;
-
 		var existingLabels = new HashSet<string>();
 		FloatMenuMakerMap.GetOptions([colonist.pawn], clickPos, out _).Do(option =>
 		{

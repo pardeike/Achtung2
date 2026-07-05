@@ -104,7 +104,6 @@ public sealed class AchtungBridgeTools
 
 		void AddOptionsForCurrentDraftState()
 		{
-			FloatMenuOptionProvider_EnterMapPortal_GetSingleOptionFor_Patch.currentPawn = pawn;
 			foreach (var option in FloatMenuMakerMap.GetOptions([pawn], clickPos, out _))
 			{
 				if (existingLabels.Add(option.Label))

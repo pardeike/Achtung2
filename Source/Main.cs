@@ -826,8 +826,6 @@ static class Pawn_JobTracker_EndCurrentJob_Patch
 [HarmonyPatch(typeof(FloatMenuOptionProvider_EnterMapPortal), nameof(FloatMenuOptionProvider_EnterMapPortal.GetSingleOptionFor))]
 public static class FloatMenuOptionProvider_EnterMapPortal_GetSingleOptionFor_Patch
 {
-	public static Pawn currentPawn;
-
 	public static bool Prefix(ref FloatMenuOption __result, Thing clickedThing, FloatMenuContext context)
 	{
 		var portal = clickedThing as MapPortal;
@@ -851,17 +849,22 @@ public static class FloatMenuOptionProvider_EnterMapPortal_GetSingleOptionFor_Pa
 				return false;
 			}
 		}
-		if (!FloatMenuOptionProvider_EnterMapPortal.CanEnterPortal(FloatMenuMakerMap.makingFor, portal))
+		var enteringPawns = context.ValidSelectedPawns
+			.Where(pawn => FloatMenuOptionProvider_EnterMapPortal.CanEnterPortal(pawn, portal))
+			.ToList();
+		if (enteringPawns.NullOrEmpty())
 		{
 			__result = null;
 			return false;
 		}
-		var pawn = currentPawn;
 		__result = new FloatMenuOption(portal.EnterString, delegate
 		{
-			var job = JobMaker.MakeJob(JobDefOf.EnterPortal, portal);
-			job.playerForced = true;
-			_ = pawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
+			foreach (var pawn in enteringPawns)
+			{
+				var job = JobMaker.MakeJob(JobDefOf.EnterPortal, portal);
+				job.playerForced = true;
+				_ = pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc, false);
+			}
 		},
 		MenuOptionPriority.High, null, null, 0f, null, null, true, 0);
 		return false;

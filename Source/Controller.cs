@@ -53,7 +53,7 @@ public class Controller
 		.DoIf(def => DefDatabase<JobDef>.GetNamedSilentFail(def.defName) == null, DefDatabase<JobDef>.Add);
 	}
 
-	bool ShowMenu(MultiActions actions, bool forceMenu, Action gotoAction)
+	bool ShowMenu(MultiActions actions, bool forceMenu, Action gotoAction, bool allowGotoWithoutMenuOption = false)
 	{
 		if (actions == null)
 			return true;
@@ -83,7 +83,7 @@ public class Controller
 			Tools.SetCursor(AchtungCursor.Default);
 			EndDragging();
 		}
-		if (optionTaken == false && menuAdded == false && actions.EveryoneHasGoto && gotoAction != null)
+		if (optionTaken == false && menuAdded == false && (actions.EveryoneHasGoto || allowGotoWithoutMenuOption) && gotoAction != null)
 		{
 			actions.allPawns.Do(pawn => Tools.SetDraftStatus(pawn, true));
 			gotoAction();
@@ -148,6 +148,8 @@ public class Controller
 				|| (pawn.Drafted == true && longPress == true)
 			).Any();
 		var standableClicked = cell.Standable(map);
+		var walkableClicked = cell.Walkable(map);
+		var foggedClicked = cell.Fogged(map);
 
 		if (subjectClicked && colonists.Count > 1 && achtungPressed == false && forceMenu == false)
 		{
@@ -160,7 +162,25 @@ public class Controller
 		{
 			if (actions == null)
 				return true;
-			return ShowMenu(actions, forceMenu, null);
+			Action gotoAction = null;
+			var allowGotoWithoutMenuOption = false;
+			if (standableClicked == false && forceMenu == false && subjectClicked == false)
+			{
+				// Fogged walkable cells with pass-through things can be valid move targets even when vanilla creates no Go here option.
+				allowGotoWithoutMenuOption = allDrafted && foggedClicked && walkableClicked;
+				gotoAction = () =>
+				{
+					StartDragging(pos, false);
+					if (Achtung.Settings.forceCommandMenuMode == CommandMenuMode.Delayed && groupMovement == false)
+					{
+						pendingDelayedPositioning = true;
+						UpdateLinePosition(pos, false);
+					}
+					else
+						MouseDrag(pos, -1);
+				};
+			}
+			return ShowMenu(actions, forceMenu, gotoAction, allowGotoWithoutMenuOption);
 		}
 
 		centerOnColonist = pawnsUnderMouse.Where(pawn =>
