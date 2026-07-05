@@ -23,7 +23,7 @@ public class FloatMenuOptionProvider_CleanRoom : FloatMenuOptionProvider
 		var driver = Activator.CreateInstance<JobDriver_CleanRoom>();
 		var existingJobs = driver.SameJobTypesOngoing();
 		var suffix = existingJobs.Count > 0 ? " " + "AlreadyDoing".Translate("" + (existingJobs.Count + 1)) : new TaggedString("");
-		return new FloatMenuOption(driver.GetLabel() + suffix, () => StartWork(context, driver), MenuOptionPriority.Low);
+		return new SupplementalFloatMenuOption(driver.GetLabel() + suffix, () => StartWork(context, driver), MenuOptionPriority.Low);
 	}
 
 	static void StartWork(FloatMenuContext context, JobDriver_Thoroughly driver)

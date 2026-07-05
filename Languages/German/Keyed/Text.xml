@@ -12,18 +12,26 @@
 	<Feature_Achtung_Rescue>Retten</Feature_Achtung_Rescue>
 	<Feature_Achtung_Dragging>Kolonisten Ziehen</Feature_Achtung_Dragging>
 	<AchtungTutorialButton>Anleitung</AchtungTutorialButton>
+	<PositioningSettingsHeader>Positionierung</PositioningSettingsHeader>
+	<ForcingSettingsHeader>Erzwungene Arbeit</ForcingSettingsHeader>
+	<ForcingCommandsTitle>Befehle</ForcingCommandsTitle>
+	<ForcingJobBehaviorTitle>Arbeitsverhalten</ForcingJobBehaviorTitle>
+	<ForcingStopRulesTitle>Abbruchregeln</ForcingStopRulesTitle>
+	<ForcingFeedbackTitle>Rückmeldung</ForcingFeedbackTitle>
+	<PositioningRightClickTitle>Rechtsklick</PositioningRightClickTitle>
+	<PositioningDraggingTitle>Ziehen und Formation</PositioningDraggingTitle>
 
 	<PositioningEnabledTitle>Benutzerdef. Positionierung via Maus</PositioningEnabledTitle>
-	<PositioningEnabledExplained>Aktiviert die Kampfpositionierung beim Klicken/Ziehen der Maus (siehe Einstellungen unten).</PositioningEnabledExplained>
+	<PositioningEnabledExplained>Aktiviert Achtungs Rechtsklick-Positionierung, Ziehen und Formationssteuerung</PositioningEnabledExplained>
 
 	<AchtungModifierTitle>Achtung!-Taste</AchtungModifierTitle>
-	<AchtungModifierExplained>Wenn du diese Taste gedrückt hältst und deine Kolonisten via Rechtsklick bewegst, werden sie automatisch in den Kampfmodus versetzt. Beim Halten können die ausgewählten Kolonisten in ihrer aktuellen Formation an deinem Mauszeiger bewegt werden. Die Formation kann mittels Q und E rotiert werden.</AchtungModifierExplained>
+	<AchtungModifierExplained>Wenn diese Taste beim Positionieren gedrückt gehalten wird, werden ausgewählte Kolonisten eingezogen und können beim Ziehen mit der rechten Maustaste ihre aktuelle Formation beibehalten. Sobald die rechte Maustaste gehalten wird, kann die Taste losgelassen werden. Die Formation kann mit Q und E gedreht werden.</AchtungModifierExplained>
 
-	<ForceCommandMenuModeTitle>Rechtsklickmodus</ForceCommandMenuModeTitle>
-	<ForceCommandMenuKeyTitle>Taste zum Überschreiben des Rechtsklicks</ForceCommandMenuKeyTitle>
+	<ForceCommandMenuModeTitle>Positionierungsmodus für Rechtsklick</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Positionierungs-Überschreibungstaste</ForceCommandMenuKeyTitle>
 
-	<CommandMenuModeOptionAuto>Kampfmodusabhängig</CommandMenuModeOptionAuto>
-	<CommandMenuModeOptionAutoExplained>Der Kampfmodus des Kolonisten entscheidet, ob das Kontextmenü angezeigt wird oder zur angeklickten Position bewegt wird.</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionAuto>Einzugsstatusabhängig</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionAutoExplained>Der Einzugsstatus des Kolonisten entscheidet, ob das Kontextmenü angezeigt wird oder zur angeklickten Position bewegt wird.</CommandMenuModeOptionAutoExplained>
 	<CommandMenuModeOptionPressForMenu>Taste für Menü</CommandMenuModeOptionPressForMenu>
 	<CommandMenuModeOptionPressForMenuExplained>Halte die Taste gedrückt, um die Standardaktion zu überschreiben und stattdessen das Kontextmenü anzuzeigen.</CommandMenuModeOptionPressForMenuExplained>
 	<CommandMenuModeOptionPressForPosition>Taste für Position</CommandMenuModeOptionPressForPosition>
@@ -31,8 +39,17 @@
 	<CommandMenuModeOptionDelayed>Halten zum Wechseln</CommandMenuModeOptionDelayed>
 	<CommandMenuModeOptionDelayedExplained>Halte die rechte Maustaste gedrückt; die Aktion wechselt nach einer bestimmten Verzögerung von der Positionierung zur Kontextmenüanzeige.</CommandMenuModeOptionDelayedExplained>
 
-	<DelayTitle>Verzögerungsdauer</DelayTitle>
-	<DelayExplained>Wie lange (in Millisekunden) die rechte Maustaste gedrückt gehalten werden muss, bevor das Kontextmenü angezeigt und die Positionierung überschrieben wird.</DelayExplained>
+	<DelayTitle>Menü-Haltedauer</DelayTitle>
+	<DelayExplained>Dauer in Millisekunden, die Rechtsklick gehalten werden muss, bevor die Positionierung zum Kontextmenü wechselt</DelayExplained>
+
+	<DraftedColonistDraggingModeTitle>Eingezogene Kolonisten ziehen</DraftedColonistDraggingModeTitle>
+	<DraftedColonistDraggingModeExplained>Legt fest, ob ein Rechtsklick auf eingezogene Kolonisten Achtungs Zieh- oder Formationsverhalten startet</DraftedColonistDraggingModeExplained>
+	<DraftedColonistDraggingModeOptionOff>Aus</DraftedColonistDraggingModeOptionOff>
+	<DraftedColonistDraggingModeOptionOffExplained>Rechtsklicks auf eingezogene Kolonisten starten das Ziehen nicht</DraftedColonistDraggingModeOptionOffExplained>
+	<DraftedColonistDraggingModeOptionUnselected>Nicht ausgewählt</DraftedColonistDraggingModeOptionUnselected>
+	<DraftedColonistDraggingModeOptionUnselectedExplained>Das Ziehen startet nur, wenn vor dem Rechtsklick kein befehlsfähiger Kolonist ausgewählt war</DraftedColonistDraggingModeOptionUnselectedExplained>
+	<DraftedColonistDraggingModeOptionAlways>Immer</DraftedColonistDraggingModeOptionAlways>
+	<DraftedColonistDraggingModeOptionAlwaysExplained>Rechtsklicks auf eingezogene Kolonisten können immer Ziehen oder Formationspositionierung starten</DraftedColonistDraggingModeOptionAlwaysExplained>
 
 	<RescueEnabledTitle>Arbeitstyp 'Retten' hinzufügen</RescueEnabledTitle>
 	<RescueEnabledExplained>Aktiviert die automatische Rettung von Kolonisten und fügt eine Spalte im Tab 'Arbeit' hinzu.</RescueEnabledExplained>
@@ -97,8 +114,8 @@
 	<WorkMarkersOptionStatic>Statisch</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Aus</WorkMarkersOptionOff>
 
-	<MaxForcedItemsTitle>Limit erzw. Objekte</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Begrenzt die Anzahl erzw. Objekte für langsamere Computer.</MaxForcedItemsExplained>
+	<MaxForcedItemsTitle>Ziellimit für erzwungene Arbeit</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Auf 0 setzen, um Befehle für erzwungene Arbeit bei gewöhnlichen Rechtsklick-Jobs zu deaktivieren. Höhere Werte begrenzen, wie viele nahe Ziele Achtung hinzufügt.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Unbegrenzt</MaxForcedItemsUnlimited>
 
 	<FeatureSettingsDesc>Schalter für Kernfunktionen</FeatureSettingsDesc>

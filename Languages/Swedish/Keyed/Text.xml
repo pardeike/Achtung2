@@ -12,18 +12,26 @@
 	<Feature_Achtung_Rescue>Räddning</Feature_Achtung_Rescue>
 	<Feature_Achtung_Dragging>Dra Kolonister</Feature_Achtung_Dragging>
 	<AchtungTutorialButton>Lär dig spela</AchtungTutorialButton>
+	<PositioningSettingsHeader>Positionering</PositioningSettingsHeader>
+	<ForcingSettingsHeader>Påtvingat arbete</ForcingSettingsHeader>
+	<ForcingCommandsTitle>Kommandon</ForcingCommandsTitle>
+	<ForcingJobBehaviorTitle>Jobbeteende</ForcingJobBehaviorTitle>
+	<ForcingStopRulesTitle>Stoppregler</ForcingStopRulesTitle>
+	<ForcingFeedbackTitle>Återkoppling</ForcingFeedbackTitle>
+	<PositioningRightClickTitle>Högerklick</PositioningRightClickTitle>
+	<PositioningDraggingTitle>Dragning och formation</PositioningDraggingTitle>
 
 	<PositioningEnabledTitle>Aktivera positioningen för kolonister</PositioningEnabledTitle>
-	<PositioningEnabledExplained>Aktiverar muskommandos för positioneringen av kolonister (se inställningar nere)</PositioningEnabledExplained>
+	<PositioningEnabledExplained>Aktiverar Achtungs högerklickspositionering, dragning och formationskontroller</PositioningEnabledExplained>
 
 	<AchtungModifierTitle>Achtung! knapp</AchtungModifierTitle>
-	<AchtungModifierExplained>Trygg knappen för att försätta kolonister i kampmodus när du positionera dem. Höll i för att flytta kolonister i deras formation. Formationen kan roteras med Q och E.</AchtungModifierExplained>
+	<AchtungModifierExplained>När den här tangenten hålls nere under positionering draftas valda kolonister och kan behålla sin nuvarande formation medan du drar med höger musknapp. När höger musknapp hålls nere kan tangenten släppas. Formationen kan roteras med Q och E.</AchtungModifierExplained>
 
-	<ForceCommandMenuModeTitle>Högerklicksläge</ForceCommandMenuModeTitle>
-	<ForceCommandMenuKeyTitle>Högerklick Överskridande Tangent</ForceCommandMenuKeyTitle>
+	<ForceCommandMenuModeTitle>Positioneringsläge för högerklick</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Positioneringens växlingstangent</ForceCommandMenuKeyTitle>
 
-	<CommandMenuModeOptionAuto>Kampmodus-Beroende</CommandMenuModeOptionAuto>
-	<CommandMenuModeOptionAutoExplained>Kampmodus för kolonisten avgör om kontextmenyn visas eller om positionen flyttas till den klickade platsen</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionAuto>Draftstatusberoende</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionAutoExplained>Kolonistens draftstatus avgör om kontextmenyn visas eller om kolonisten flyttas till den klickade platsen</CommandMenuModeOptionAutoExplained>
 	<CommandMenuModeOptionPressForMenu>Tangent för Meny</CommandMenuModeOptionPressForMenu>
 	<CommandMenuModeOptionPressForMenuExplained>Håll ned tangenten för att överskrida den förinställda åtgärden och istället visa kontextmenyn</CommandMenuModeOptionPressForMenuExplained>
 	<CommandMenuModeOptionPressForPosition>Tangent för Position</CommandMenuModeOptionPressForPosition>
@@ -31,8 +39,17 @@
 	<CommandMenuModeOptionDelayed>Håll-Switch</CommandMenuModeOptionDelayed>
 	<CommandMenuModeOptionDelayedExplained>Håll ner höger musknapp; åtgärden byter från positionering till att visa kontextmenyn efter den definierade fördröjningen</CommandMenuModeOptionDelayedExplained>
 
-	<DelayTitle>Hålltidslängd</DelayTitle>
-	<DelayExplained>Tidsintervall i millisekunder för att hålla ner höger musknapp innan kontextmenyn visas, som överskrider positionering</DelayExplained>
+	<DelayTitle>Hålltid för meny</DelayTitle>
+	<DelayExplained>Tid i millisekunder som högerklick måste hållas nere innan positionering växlar till kontextmenyn</DelayExplained>
+
+	<DraftedColonistDraggingModeTitle>Dra draftade kolonister</DraftedColonistDraggingModeTitle>
+	<DraftedColonistDraggingModeExplained>Styr om högerklick på draftade kolonister startar Achtungs drag- eller formationsbeteende</DraftedColonistDraggingModeExplained>
+	<DraftedColonistDraggingModeOptionOff>Av</DraftedColonistDraggingModeOptionOff>
+	<DraftedColonistDraggingModeOptionOffExplained>Högerklick på draftade kolonister startar inte dragning</DraftedColonistDraggingModeOptionOffExplained>
+	<DraftedColonistDraggingModeOptionUnselected>Ingen vald</DraftedColonistDraggingModeOptionUnselected>
+	<DraftedColonistDraggingModeOptionUnselectedExplained>Dragning startar bara när ingen beordringsbar kolonist var vald före högerklicket</DraftedColonistDraggingModeOptionUnselectedExplained>
+	<DraftedColonistDraggingModeOptionAlways>Alltid</DraftedColonistDraggingModeOptionAlways>
+	<DraftedColonistDraggingModeOptionAlwaysExplained>Högerklick på draftade kolonister kan alltid starta dragning eller formationspositionering</DraftedColonistDraggingModeOptionAlwaysExplained>
 
 	<RescueEnabledTitle>'Rädda' arbetsprioritetskolumn</RescueEnabledTitle>
 	<RescueEnabledExplained>Aktiverar automatisk räddning av kolonister och lägger till en kolumn på arbetsfliken</RescueEnabledExplained>
@@ -97,8 +114,8 @@
 	<WorkMarkersOptionStatic>Statiskt</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Av</WorkMarkersOptionOff>
 
-	<MaxForcedItemsTitle>Maximalt antal påtvingade saker</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Begränsar antalet påtvingade saker för långsammare datorer</MaxForcedItemsExplained>
+	<MaxForcedItemsTitle>Målgräns för påtvingat arbete</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Sätt till 0 för att inaktivera kommandon för påtvingat arbete från vanliga högerklicksjobb. Högre värden begränsar hur många närliggande mål Achtung lägger till.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Obegränsat</MaxForcedItemsUnlimited>
 
 	<FeatureSettingsDesc>Växlar för kärnfunktioner</FeatureSettingsDesc>
@@ -123,7 +140,7 @@
 	<SowZoneDescription>Så en hel zon eller rum</SowZoneDescription>
 	<SowZoneReport>Så{0}: {1}</SowZoneReport>
 
-	<AlreadyDoing>(Job #{0})</AlreadyDoing>
+	<AlreadyDoing>(Jobb #{0})</AlreadyDoing>
 
 	<CouldNotFindMoreForcedWork>{0} kunde inte hitta mer påtvingat arbete. Det återstående arbetet är troligen reserverat eller inte tillgängligt.</CouldNotFindMoreForcedWork>
 	<NoForcedWork>Inget påtvingat arbete</NoForcedWork>

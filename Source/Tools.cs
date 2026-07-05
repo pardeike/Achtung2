@@ -21,6 +21,8 @@ enum AchtungCursor
 [StaticConstructorOnStartup]
 static class Tools
 {
+	const float SettingRowBottomGap = 6f;
+
 	public static readonly Material forceIconMaterial = MaterialPool.MatFrom("ForceIcon", ShaderDatabase.Cutout);
 	public static readonly Material markerMaterial = MaterialPool.MatFrom("AchtungMarker", ShaderDatabase.Transparent);
 	public static readonly Texture2D dragPosition = LoadTexture("DragPosition");
@@ -287,6 +289,17 @@ static class Tools
 			.Select(pawn => new Colonist(pawn))];
 
 	public static bool IsGoHereOption(FloatMenuOption option) => option?.isGoto == true || option?.Label == goHereLabel;
+	public static bool CanYieldToPlainGoto(FloatMenuOption option) => option is IAchtungSupplementalFloatMenuOption;
+
+	public static bool TryGetStandableMoveAnchor(IntVec3 cell, Map map, out IntVec3 result)
+	{
+		result = IntVec3.Invalid;
+		if (map == null || cell.IsValid == false || cell.InBounds(map) == false)
+			return false;
+
+		result = cell.Standable(map) ? cell : CellFinder.StandableCellNear(cell, map, 2.9f);
+		return result.IsValid;
+	}
 
 	public static void DraftWithSound(List<Colonist> colonists, bool draftStatus)
 	{
@@ -445,123 +458,170 @@ static class Tools
 		return vector2;
 	}
 
+	static void DrawSettingHighlight(Rect rect)
+	{
+		var oldColor = GUI.color;
+		GUI.color = Color.gray;
+		Widgets.DrawHighlight(rect);
+		GUI.color = oldColor;
+	}
+
+	static float MeasureSettingRowHeight(float columnWidth, float verticalSpacing, string title, string explanation, float extraHeight, out float titleHeight, out float explanationWidth, out float explanationHeight)
+	{
+		var savedFont = Text.Font;
+		Text.Font = GameFont.Small;
+		titleHeight = Mathf.Max(Text.LineHeight, Text.CalcHeight(title, columnWidth));
+		Text.Font = GameFont.Tiny;
+		explanationWidth = Mathf.Max(0f, columnWidth - 34f);
+		explanationHeight = explanation.NullOrEmpty() ? 0f : Text.CalcHeight(explanation, explanationWidth);
+		Text.Font = savedFont;
+
+		var rowHeight = titleHeight;
+		if (explanationHeight > 0f)
+			rowHeight += verticalSpacing + explanationHeight;
+		if (extraHeight > 0f)
+			rowHeight += verticalSpacing + extraHeight;
+
+		return rowHeight;
+	}
+
+	static Rect GetSettingRow(Listing_Standard listing, string title, string explanation, float extraHeight, out Rect titleRect, out Rect explanationRect, out Rect extraRect)
+	{
+		var rowHeight = MeasureSettingRowHeight(listing.ColumnWidth, listing.verticalSpacing, title, explanation, extraHeight, out var titleHeight, out var explanationWidth, out var explanationHeight);
+
+		var rowRect = listing.GetRect(rowHeight);
+		titleRect = new Rect(rowRect.x, rowRect.y, rowRect.width, titleHeight);
+		var nextY = titleRect.yMax;
+
+		explanationRect = Rect.zero;
+		if (explanationHeight > 0f)
+		{
+			nextY += listing.verticalSpacing;
+			explanationRect = new Rect(rowRect.x, nextY, explanationWidth, explanationHeight);
+			nextY = explanationRect.yMax;
+		}
+
+		extraRect = Rect.zero;
+		if (extraHeight > 0f)
+		{
+			nextY += listing.verticalSpacing;
+			extraRect = new Rect(rowRect.x, nextY, rowRect.width, extraHeight);
+		}
+
+		return rowRect;
+	}
+
+	static void DrawSettingExplanation(Rect rect, string explanation)
+	{
+		if (explanation.NullOrEmpty())
+			return;
+		var savedFont = Text.Font;
+		var savedColor = GUI.color;
+		GUI.color = Color.gray;
+		Text.Font = GameFont.Tiny;
+		Widgets.Label(rect, explanation);
+		Text.Font = savedFont;
+		GUI.color = savedColor;
+	}
+
 	public static void CheckboxEnhanced(this Listing_Standard listing, string name, ref bool value, string tooltip = null, Action<bool> onChange = null)
 	{
-		var startHeight = listing.CurHeight;
+		var title = (name + "Title").Translate().ToString();
+		var explanation = (name + "Explained").Translate().ToString();
+		var rowRect = GetSettingRow(listing, title, explanation, 0f, out var titleRect, out var explanationRect, out _);
+		var checkboxRect = new Rect(titleRect.xMax - 24f, titleRect.y + (titleRect.height - 24f) / 2f, 24f, 24f);
+		var labelRect = titleRect;
+		labelRect.xMax -= 24f;
 
 		Text.Font = GameFont.Small;
 		GUI.color = Color.white;
 		var oldValue = value;
-		listing.CheckboxLabeled((name + "Title").Translate(), ref value);
+		var clicked = Widgets.ButtonInvisible(rowRect);
+
+		var savedAnchor = Text.Anchor;
+		Text.Anchor = TextAnchor.MiddleLeft;
+		Widgets.Label(labelRect, title);
+		Text.Anchor = savedAnchor;
+		Widgets.CheckboxDraw(checkboxRect.x, checkboxRect.y, value, false, 24f);
+
+		DrawSettingExplanation(explanationRect, explanation);
+		Text.Font = GameFont.Small;
+		if (Mouse.IsOver(rowRect))
+		{
+			DrawSettingHighlight(rowRect);
+			if (!tooltip.NullOrEmpty())
+				TooltipHandler.TipRegion(rowRect, tooltip);
+		}
+
+		if (clicked)
+		{
+			value = !value;
+			(value ? SoundDefOf.Checkbox_TurnedOn : SoundDefOf.Checkbox_TurnedOff).PlayOneShotOnCamera();
+		}
 		if (onChange != null && value != oldValue)
 			onChange(value);
 
-		Text.Font = GameFont.Tiny;
-		listing.ColumnWidth -= 34;
-		GUI.color = Color.gray;
-		_ = listing.Label((name + "Explained").Translate());
-		listing.ColumnWidth += 34;
-		Text.Font = GameFont.Small;
-
-		var rect = listing.GetRect(0);
-		rect.height = listing.CurHeight - startHeight;
-		rect.y -= rect.height;
-		if (Mouse.IsOver(rect))
-		{
-			Widgets.DrawHighlight(rect);
-			if (!tooltip.NullOrEmpty())
-				TooltipHandler.TipRegion(rect, tooltip);
-		}
-
-		listing.Gap(6);
+		listing.Gap(SettingRowBottomGap);
 	}
 
 	public static void SliderLabeled(this Listing_Standard listing, string name, ref int value, int min, int max, Func<int, string> converter, string tooltip = null)
 	{
-		var startHeight = listing.CurHeight;
-
-		var rect = listing.GetRect(Text.LineHeight + listing.verticalSpacing);
+		var title = (name + "Title").Translate().ToString();
+		var key = name + "Explained";
+		var explanation = key.CanTranslate() ? key.Translate().ToString() : null;
+		var rowRect = GetSettingRow(listing, title, explanation, 22f, out var titleRect, out var explanationRect, out var sliderRect);
 
 		Text.Font = GameFont.Small;
 		GUI.color = Color.white;
 
 		var savedAnchor = Text.Anchor;
-
 		Text.Anchor = TextAnchor.MiddleLeft;
-		Widgets.Label(rect, (name + "Title").Translate());
-
+		Widgets.Label(titleRect, title);
 		Text.Anchor = TextAnchor.MiddleRight;
-		Widgets.Label(rect, converter(value));
-
+		Widgets.Label(titleRect, converter(value));
 		Text.Anchor = savedAnchor;
 
-		var key = name + "Explained";
-		if (key.CanTranslate())
+		DrawSettingExplanation(explanationRect, explanation);
+		value = (int)Widgets.HorizontalSlider(sliderRect, value, min, max);
+		if (Mouse.IsOver(rowRect))
 		{
-			Text.Font = GameFont.Tiny;
-			listing.ColumnWidth -= 34;
-			GUI.color = Color.gray;
-			_ = listing.Label(key.Translate());
-			listing.ColumnWidth += 34;
-			Text.Font = GameFont.Small;
-		}
-
-		value = (int)listing.Slider(value, min, max);
-		rect = listing.GetRect(0);
-		rect.height = listing.CurHeight - startHeight;
-		rect.y -= rect.height;
-		if (Mouse.IsOver(rect))
-		{
-			Widgets.DrawHighlight(rect);
+			DrawSettingHighlight(rowRect);
 			if (!tooltip.NullOrEmpty())
-				TooltipHandler.TipRegion(rect, tooltip);
+				TooltipHandler.TipRegion(rowRect, tooltip);
 		}
 
-		listing.Gap(6);
+		Text.Font = GameFont.Small;
+		listing.Gap(SettingRowBottomGap);
 	}
 
 	public static void ValueLabeled<T>(this Listing_Standard listing, string name, bool useValueForExplain, ref T value, string tooltip = null)
 	{
-		var startHeight = listing.CurHeight;
-
-		var rect = listing.GetRect(Text.LineHeight + listing.verticalSpacing);
+		var title = (name + "Title").Translate().ToString();
+		var valueLabel = typeof(T).Name + "Option" + value.ToString();
+		var explanationKey = (useValueForExplain ? valueLabel : name) + "Explained";
+		var explanation = explanationKey.CanTranslate() ? explanationKey.Translate().ToString() : null;
+		var rowRect = GetSettingRow(listing, title, explanation, 0f, out var titleRect, out var explanationRect, out _);
 
 		Text.Font = GameFont.Small;
 		GUI.color = Color.white;
 
 		var savedAnchor = Text.Anchor;
-
 		Text.Anchor = TextAnchor.MiddleLeft;
-		Widgets.Label(rect, (name + "Title").Translate());
-
+		Widgets.Label(titleRect, title);
 		Text.Anchor = TextAnchor.MiddleRight;
-		var valueLabel = typeof(T).Name + "Option" + value.ToString();
 		if (typeof(T).IsEnum)
-			Widgets.Label(rect, valueLabel.Translate());
+			Widgets.Label(titleRect, valueLabel.Translate());
 		else
-			Widgets.Label(rect, value.ToString());
-
+			Widgets.Label(titleRect, value.ToString());
 		Text.Anchor = savedAnchor;
 
-		var key = (useValueForExplain ? valueLabel : name) + "Explained";
-		if (key.CanTranslate())
+		DrawSettingExplanation(explanationRect, explanation);
+		Text.Font = GameFont.Small;
+		if (Mouse.IsOver(rowRect))
 		{
-			Text.Font = GameFont.Tiny;
-			listing.ColumnWidth -= 34;
-			GUI.color = Color.gray;
-			_ = listing.Label(key.Translate());
-			listing.ColumnWidth += 34;
-			Text.Font = GameFont.Small;
-		}
-
-		rect = listing.GetRect(0);
-		rect.height = listing.CurHeight - startHeight;
-		rect.y -= rect.height;
-		if (Mouse.IsOver(rect))
-		{
-			Widgets.DrawHighlight(rect);
+			DrawSettingHighlight(rowRect);
 			if (!tooltip.NullOrEmpty())
-				TooltipHandler.TipRegion(rect, tooltip);
+				TooltipHandler.TipRegion(rowRect, tooltip);
 
 			if (Event.current.isMouse && Event.current.button == 0 && Event.current.type == EventType.MouseDown)
 			{
@@ -579,7 +639,7 @@ static class Tools
 			}
 		}
 
-		listing.Gap(6);
+		listing.Gap(SettingRowBottomGap);
 	}
 
 	public static int EnvTicks()

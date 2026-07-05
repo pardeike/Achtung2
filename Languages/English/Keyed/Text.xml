@@ -12,15 +12,23 @@
 	<Feature_Achtung_Rescue>Rescue</Feature_Achtung_Rescue>
 	<Feature_Achtung_Dragging>Drafted Dragging</Feature_Achtung_Dragging>
 	<AchtungTutorialButton>Tutorial</AchtungTutorialButton>
+	<PositioningSettingsHeader>Positioning</PositioningSettingsHeader>
+	<ForcingSettingsHeader>Forcing</ForcingSettingsHeader>
+	<ForcingCommandsTitle>Commands</ForcingCommandsTitle>
+	<ForcingJobBehaviorTitle>Job behavior</ForcingJobBehaviorTitle>
+	<ForcingStopRulesTitle>Stop rules</ForcingStopRulesTitle>
+	<ForcingFeedbackTitle>Feedback</ForcingFeedbackTitle>
+	<PositioningRightClickTitle>Right-click</PositioningRightClickTitle>
+	<PositioningDraggingTitle>Dragging and formation</PositioningDraggingTitle>
 
 	<PositioningEnabledTitle>Custom mouse positioning</PositioningEnabledTitle>
-	<PositioningEnabledExplained>Enables combat positioning for your mouse clicks/drags (see settings below)</PositioningEnabledExplained>
+	<PositioningEnabledExplained>Enables Achtung's right-click positioning, dragging, and formation controls</PositioningEnabledExplained>
 
 	<AchtungModifierTitle>Achtung! key</AchtungModifierTitle>
-	<AchtungModifierExplained>Holding this key will Force Draft colonists when they're given Move or Move-in-Formation commands. When held it will allow the selected colonists to be moved in their current formation at your cursor by holding and dragging the right mouse button. Once the right mouse button is held the Achtung! Key may be released. The formation can be rotated using Q and E.</AchtungModifierExplained>
+	<AchtungModifierExplained>Holding this key while positioning drafts selected colonists and lets them keep their current formation while dragging with the right mouse button. Once the right mouse button is held the key may be released. The formation can be rotated using Q and E.</AchtungModifierExplained>
 
-	<ForceCommandMenuModeTitle>Right-Click Mode</ForceCommandMenuModeTitle>
-	<ForceCommandMenuKeyTitle>Right-Click Override Key</ForceCommandMenuKeyTitle>
+	<ForceCommandMenuModeTitle>Positioning right-click mode</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Positioning override key</ForceCommandMenuKeyTitle>
 
 	<CommandMenuModeOptionAuto>Draft-Dependent</CommandMenuModeOptionAuto>
 	<CommandMenuModeOptionAutoExplained>The draft status of the colonist decides whether to show the context menu or move to the clicked location</CommandMenuModeOptionAutoExplained>
@@ -31,8 +39,17 @@
 	<CommandMenuModeOptionDelayed>Hold-Switch</CommandMenuModeOptionDelayed>
 	<CommandMenuModeOptionDelayedExplained>Hold down the right-click button; the action will switch from positioning to displaying the context menu after the defined delay</CommandMenuModeOptionDelayedExplained>
 
-	<DelayTitle>Hold Duration</DelayTitle>
-	<DelayExplained>Duration in milliseconds to hold right-click before the context menu appears, overriding positioning</DelayExplained>
+	<DelayTitle>Menu hold duration</DelayTitle>
+	<DelayExplained>Duration in milliseconds to hold right-click before positioning switches to the context menu</DelayExplained>
+
+	<DraftedColonistDraggingModeTitle>Dragging drafted colonists</DraftedColonistDraggingModeTitle>
+	<DraftedColonistDraggingModeExplained>Controls whether right-clicking drafted colonists starts Achtung's drag or formation behavior</DraftedColonistDraggingModeExplained>
+	<DraftedColonistDraggingModeOptionOff>Off</DraftedColonistDraggingModeOptionOff>
+	<DraftedColonistDraggingModeOptionOffExplained>Right-clicking drafted colonists will not start dragging them</DraftedColonistDraggingModeOptionOffExplained>
+	<DraftedColonistDraggingModeOptionUnselected>Unselected</DraftedColonistDraggingModeOptionUnselected>
+	<DraftedColonistDraggingModeOptionUnselectedExplained>Dragging starts only when no orderable colonist was selected before the right-click</DraftedColonistDraggingModeOptionUnselectedExplained>
+	<DraftedColonistDraggingModeOptionAlways>Always</DraftedColonistDraggingModeOptionAlways>
+	<DraftedColonistDraggingModeOptionAlwaysExplained>Right-clicking drafted colonists can always start dragging or formation positioning</DraftedColonistDraggingModeOptionAlwaysExplained>
 
 	<RescueEnabledTitle>'Rescue' work priority column</RescueEnabledTitle>
 	<RescueEnabledExplained>Enables the automatic rescue of pawns and adds a column on the work tab</RescueEnabledExplained>
@@ -97,8 +114,8 @@
 	<WorkMarkersOptionStatic>Static</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Off</WorkMarkersOptionOff>
 
-	<MaxForcedItemsTitle>Maximum forced items</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Restricts the number of forced items for slower computers</MaxForcedItemsExplained>
+	<MaxForcedItemsTitle>Forced work target limit</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Set to 0 to disable forced-work commands from ordinary right-click jobs. Higher values limit how many nearby targets Achtung adds.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Unlimited</MaxForcedItemsUnlimited>
 
 	<FeatureSettingsDesc>Toggles for core functionality</FeatureSettingsDesc>

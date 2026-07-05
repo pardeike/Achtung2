@@ -30,6 +30,7 @@ public class MultiActions
 	}
 
 	public bool EveryoneHasGoto => everyoneHasGoto;
+	public bool NonGotoActionsCanYieldToPlainGoto => allActions.All(action => Tools.CanYieldToPlainGoto(action.option));
 
 	public void AddColonist(Colonist colonist)
 	{

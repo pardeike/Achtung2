@@ -12,15 +12,23 @@
 	<Feature_Achtung_Rescue>Rescate</Feature_Achtung_Rescue>
 	<Feature_Achtung_Dragging>Arrastrar Reclutados</Feature_Achtung_Dragging>
 	<AchtungTutorialButton>Guía</AchtungTutorialButton>
+	<PositioningSettingsHeader>Posicionamiento</PositioningSettingsHeader>
+	<ForcingSettingsHeader>Trabajo forzado</ForcingSettingsHeader>
+	<ForcingCommandsTitle>Órdenes</ForcingCommandsTitle>
+	<ForcingJobBehaviorTitle>Comportamiento</ForcingJobBehaviorTitle>
+	<ForcingStopRulesTitle>Reglas de parada</ForcingStopRulesTitle>
+	<ForcingFeedbackTitle>Información</ForcingFeedbackTitle>
+	<PositioningRightClickTitle>Clic derecho</PositioningRightClickTitle>
+	<PositioningDraggingTitle>Arrastre y formación</PositioningDraggingTitle>
 
 	<PositioningEnabledTitle>Posicionamiento del ratón personalizado</PositioningEnabledTitle>
-	<PositioningEnabledExplained>Permite el posicionamiento en combate con un click o arrastre de tu ratón (ver preferencias abajo)</PositioningEnabledExplained>
+	<PositioningEnabledExplained>Activa el posicionamiento con clic derecho, el arrastre y los controles de formación de Achtung</PositioningEnabledExplained>
 
 	<AchtungModifierTitle>Tecla de Achtung!</AchtungModifierTitle>
-	<AchtungModifierExplained>Manteniendo pulsada esta tecla se forzará el reclutamiento de los colonos cuando reciban órdenes de movimiento o en formación. Cuando se mantenga pulsada, permitirá mover a los colonos seleccionados sin perder su formación actual, pulsando y arrastrando con el botón derecho del ratón. Una vez que el botón derecho del ratón se mantenga pulsado, la tecla Achtung! puede ser liberada. La formación puede rotar usando las teclas Q y E.</AchtungModifierExplained>
+	<AchtungModifierExplained>Mantener pulsada esta tecla al posicionar recluta a los colonos seleccionados y les permite conservar su formación actual al arrastrar con el botón derecho del ratón. Una vez mantenido pulsado el botón derecho, la tecla puede soltarse. La formación puede rotarse con Q y E.</AchtungModifierExplained>
 
-	<ForceCommandMenuModeTitle>Modo de clic derecho</ForceCommandMenuModeTitle>
-	<ForceCommandMenuKeyTitle>Tecla de sustitución para clic derecho</ForceCommandMenuKeyTitle>
+	<ForceCommandMenuModeTitle>Modo de posicionamiento con clic derecho</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Tecla de sustitución de posicionamiento</ForceCommandMenuKeyTitle>
 
 	<CommandMenuModeOptionAuto>Dependiente del Estado</CommandMenuModeOptionAuto>
 	<CommandMenuModeOptionAutoExplained>El estado de alistamiento del colono decide si se muestra el menú contextual o se mueve a la ubicación clickeada</CommandMenuModeOptionAutoExplained>
@@ -31,8 +39,17 @@
 	<CommandMenuModeOptionDelayed>Cambio retenido</CommandMenuModeOptionDelayed>
 	<CommandMenuModeOptionDelayedExplained>Mantén pulsado el botón derecho del ratón; la acción cambiará de posicionamiento a mostrar el menú contextual después del retardo definido</CommandMenuModeOptionDelayedExplained>
 
-	<DelayTitle>Duración de retención</DelayTitle>
-	<DelayExplained>Duración en milisegundos para mantener presionado el clic derecho antes de que aparezca el menú contextual, anulando el posicionamiento</DelayExplained>
+	<DelayTitle>Duración para abrir el menú</DelayTitle>
+	<DelayExplained>Duración en milisegundos que se debe mantener el clic derecho antes de que el posicionamiento cambie al menú contextual</DelayExplained>
+
+	<DraftedColonistDraggingModeTitle>Arrastrar colonos reclutados</DraftedColonistDraggingModeTitle>
+	<DraftedColonistDraggingModeExplained>Controla si hacer clic derecho en colonos reclutados inicia el arrastre o el comportamiento de formación de Achtung</DraftedColonistDraggingModeExplained>
+	<DraftedColonistDraggingModeOptionOff>Desactivado</DraftedColonistDraggingModeOptionOff>
+	<DraftedColonistDraggingModeOptionOffExplained>Hacer clic derecho en colonos reclutados no iniciará el arrastre</DraftedColonistDraggingModeOptionOffExplained>
+	<DraftedColonistDraggingModeOptionUnselected>Sin seleccionar</DraftedColonistDraggingModeOptionUnselected>
+	<DraftedColonistDraggingModeOptionUnselectedExplained>El arrastre solo empieza cuando no había ningún colono ordenable seleccionado antes del clic derecho</DraftedColonistDraggingModeOptionUnselectedExplained>
+	<DraftedColonistDraggingModeOptionAlways>Siempre</DraftedColonistDraggingModeOptionAlways>
+	<DraftedColonistDraggingModeOptionAlwaysExplained>Hacer clic derecho en colonos reclutados siempre puede iniciar el arrastre o el posicionamiento en formación</DraftedColonistDraggingModeOptionAlwaysExplained>
 
 	<RescueEnabledTitle>Columna de prioridad de trabajo 'Rescate'</RescueEnabledTitle>
 	<RescueEnabledExplained>Habilita el rescate automático de peones y añade una columna en la pestaña de trabajo</RescueEnabledExplained>
@@ -97,8 +114,8 @@
 	<WorkMarkersOptionStatic>Estático</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Apagado</WorkMarkersOptionOff>
 
-	<MaxForcedItemsTitle>Elementos forzados máximos</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Restringe la cantidad de elementos forzados para computadoras más lentas.</MaxForcedItemsExplained>
+	<MaxForcedItemsTitle>Límite de objetivos de trabajo forzado</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Establécelo en 0 para desactivar las órdenes de trabajo forzado en tareas normales de clic derecho. Los valores más altos limitan cuántos objetivos cercanos añade Achtung.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Ilimitado</MaxForcedItemsUnlimited>
 
 	<FeatureSettingsDesc>Opciones de funcionalidad principal</FeatureSettingsDesc>
@@ -123,7 +140,7 @@
 	<SowZoneDescription>Siembra una zona de cultivos o una habitación por completo.</SowZoneDescription>
 	<SowZoneReport>Sembrando{0}: {1}</SowZoneReport>
 
-	<AlreadyDoing>(Job #{0})</AlreadyDoing>
+	<AlreadyDoing>(Trabajo #{0})</AlreadyDoing>
 
 	<CouldNotFindMoreForcedWork>{0} No se pudo encontrar más trabajo forzado.El trabajo restante es muy probablemente reservado o no accesible.</CouldNotFindMoreForcedWork>
 	<NoForcedWork>No hay trabajo forzado</NoForcedWork>

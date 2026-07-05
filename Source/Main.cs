@@ -91,6 +91,35 @@ static class FloatMenuOptionProviders_Patch
 	}
 }
 
+[HarmonyPatch(typeof(FloatMenuMakerMap))]
+[HarmonyPatch(nameof(FloatMenuMakerMap.GetOptions))]
+static class FloatMenuMakerMap_GetOptions_Patch
+{
+	public static void Postfix(List<Pawn> selectedPawns, List<FloatMenuOption> __result)
+	{
+		if (Achtung.Settings.CustomPositioningEnabled)
+			return;
+		if (Event.current?.type != EventType.MouseDown || Event.current.button != 1)
+			return;
+		if (__result.NullOrEmpty())
+			return;
+		if (selectedPawns.NullOrEmpty())
+			return;
+		if (selectedPawns.All(pawn => pawn != null && PawnAttackGizmoUtility.CanOrderPlayerPawn(pawn) && pawn.Drafted) == false)
+			return;
+
+		var gotoOption = __result.FirstOrDefault(Tools.IsGoHereOption);
+		if (gotoOption == null || gotoOption.Disabled || gotoOption.action == null)
+			return;
+
+		var nonGotoOptions = __result.Where(option => Tools.IsGoHereOption(option) == false).ToList();
+		if (nonGotoOptions.Count == 0 || nonGotoOptions.All(Tools.CanYieldToPlainGoto) == false)
+			return;
+
+		__result.RemoveAll(Tools.CanYieldToPlainGoto);
+	}
+}
+
 [HarmonyPatch(typeof(LetterStack))]
 [HarmonyPatch(nameof(LetterStack.LettersOnGUI))]
 static class LetterStack_LettersOnGUI_Patch
@@ -529,6 +558,7 @@ static class BeautyDrawer_ShouldShow_Patch
 	public static void Postfix(ref bool __result)
 	{
 		if (__result == false) return;
+		if (Achtung.Settings.CustomPositioningEnabled == false) return;
 		if (Find.Selector.SelectedPawns.Count(pawn => PawnAttackGizmoUtility.CanOrderPlayerPawn(pawn) && pawn.Drafted) > 1)
 			__result = false;
 	}
@@ -541,6 +571,7 @@ static class CellInspectorDrawer_ShouldShow_Patch
 	public static void Postfix(ref bool __result)
 	{
 		if (__result == false) return;
+		if (Achtung.Settings.CustomPositioningEnabled == false) return;
 		if (Find.Selector.SelectedPawns.Count(pawn => PawnAttackGizmoUtility.CanOrderPlayerPawn(pawn) && pawn.Drafted) > 1)
 			__result = false;
 	}
@@ -677,7 +708,8 @@ static class FloatMenuOptionProvider_WorkGivers_ScannerShouldSkip_Patch
 {
 	public static bool Prefix(WorkGiver_Scanner scanner, Thing t, ref bool __result)
 	{
-		if (Achtung.Settings.ignoreForbidden
+		if (Achtung.Settings.ForceCommandsEnabled
+			&& Achtung.Settings.ignoreForbidden
 			&& scanner is WorkGiver_Haul
 			&& t?.def != null
 			&& t.def.alwaysHaulable
@@ -700,7 +732,7 @@ static class FloatMenuOptionProvider_WorkGivers_GetWorkGiverOption_Patch
 	public static void Prefix(Pawn pawn, out ForcedWork __state)
 	{
 		__state = null;
-		if (Achtung.Settings.positioningEnabled && pawn?.Map != null)
+		if (Achtung.Settings.ForceCommandsEnabled && pawn?.Map != null)
 		{
 			__state = ForcedWork.Instance;
 			__state.Prepare(pawn);
@@ -711,14 +743,14 @@ static class FloatMenuOptionProvider_WorkGivers_GetWorkGiverOption_Patch
 
 	public static int AchtungGetPriority(Pawn_WorkSettings workSettings, WorkTypeDef w)
 	{
-		if (Achtung.Settings.ignoreAssignments == false || workSettings.pawn == null)
+		if (Achtung.Settings.ForceCommandsEnabled == false || Achtung.Settings.ignoreAssignments == false || workSettings.pawn == null)
 			return workSettings.GetPriority(w);
 		return workSettings.pawn.WorkTypeIsDisabled(w) ? 0 : 1;
 	}
 
 	public static FloatMenuOption DecorateForcedTask(FloatMenuOption option, Pawn pawn, LocalTargetInfo target, string reservedText, ReservationLayerDef layer, WorkGiver_Scanner workgiver)
 	{
-		if (Achtung.Settings.positioningEnabled == false)
+		if (Achtung.Settings.ForceCommandsEnabled == false)
 			return FloatMenuUtility.DecoratePrioritizedTask(option, pawn, target, reservedText, layer);
 
 		var forcedOption = ForcedFloatMenuOption.CreateForcedMenuItem(option, pawn, target, workgiver);

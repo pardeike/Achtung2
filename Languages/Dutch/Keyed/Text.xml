@@ -12,18 +12,26 @@
 	<Feature_Achtung_Rescue>Redding</Feature_Achtung_Rescue>
 	<Feature_Achtung_Dragging>Geselecteerd Slepen</Feature_Achtung_Dragging>
 	<AchtungTutorialButton>Handleiding</AchtungTutorialButton>
+	<PositioningSettingsHeader>Positionering</PositioningSettingsHeader>
+	<ForcingSettingsHeader>Gedwongen werk</ForcingSettingsHeader>
+	<ForcingCommandsTitle>Opdrachten</ForcingCommandsTitle>
+	<ForcingJobBehaviorTitle>Taakgedrag</ForcingJobBehaviorTitle>
+	<ForcingStopRulesTitle>Stopregels</ForcingStopRulesTitle>
+	<ForcingFeedbackTitle>Terugkoppeling</ForcingFeedbackTitle>
+	<PositioningRightClickTitle>Rechtsklik</PositioningRightClickTitle>
+	<PositioningDraggingTitle>Slepen en formatie</PositioningDraggingTitle>
 
 	<PositioningEnabledTitle>Aangepaste muispositionering</PositioningEnabledTitle>
-	<PositioningEnabledExplained>Maakt gevechtspositionering mogelijk voor je muisklikken/slepen (zie onderstaande instellingen)</PositioningEnabledExplained>
+	<PositioningEnabledExplained>Schakelt Achtungs rechtsklik-positionering, slepen en formatiebesturing in</PositioningEnabledExplained>
 
 	<AchtungModifierTitle>Achtung! toets</AchtungModifierTitle>
-	<AchtungModifierExplained>Als je deze toets ingedrukt houdt, worden kolonisten geforceerd als ze de opdrachten Verplaatsen of Verplaatsen-in-formatie krijgen.\nAls je hem vasthoudt, kunnen de geselecteerde kolonisten in hun huidige formatie naar je cursor worden verplaatst door de rechtermuisknop ingedrukt te houden en te slepen. Zodra de rechtermuisknop wordt ingedrukt, kan de Achtung! toets worden losgelaten.\nDe formatie kan worden gedraaid met Q en E.</AchtungModifierExplained>
+	<AchtungModifierExplained>Als je deze toets ingedrukt houdt tijdens het positioneren, worden geselecteerde kolonisten gemobiliseerd en kunnen ze hun huidige formatie behouden terwijl je met de rechtermuisknop sleept. Zodra de rechtermuisknop wordt vastgehouden, kan de toets worden losgelaten. De formatie kan worden gedraaid met Q en E.</AchtungModifierExplained>
 
-	<ForceCommandMenuModeTitle>Rechterklik Modus</ForceCommandMenuModeTitle>
-	<ForceCommandMenuKeyTitle>Rechterklik Vervangtoets</ForceCommandMenuKeyTitle>
+	<ForceCommandMenuModeTitle>Positioneringsmodus voor rechtsklik</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Positionering-overschrijftoets</ForceCommandMenuKeyTitle>
 
-	<CommandMenuModeOptionAuto>Afhankelijk van Ontwerp</CommandMenuModeOptionAuto>
-	<CommandMenuModeOptionAutoExplained>De ontwerpstatus van de kolonist bepaalt of het contextmenu wordt getoond of dat er naar de aangeklikte locatie wordt verplaatst</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionAuto>Afhankelijk van mobilisatie</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionAutoExplained>De mobilisatiestatus van de kolonist bepaalt of het contextmenu wordt getoond of dat er naar de aangeklikte locatie wordt verplaatst</CommandMenuModeOptionAutoExplained>
 	<CommandMenuModeOptionPressForMenu>Toets voor Menu</CommandMenuModeOptionPressForMenu>
 	<CommandMenuModeOptionPressForMenuExplained>Houd de toets ingedrukt om de standaardactie te negeren en in plaats daarvan het contextmenu weer te geven</CommandMenuModeOptionPressForMenuExplained>
 	<CommandMenuModeOptionPressForPosition>Toets voor Positie</CommandMenuModeOptionPressForPosition>
@@ -31,8 +39,17 @@
 	<CommandMenuModeOptionDelayed>Knop-Verschuiving</CommandMenuModeOptionDelayed>
 	<CommandMenuModeOptionDelayedExplained>Houd de rechtermuisknop ingedrukt; de actie zal na de gedefinieerde vertraging overschakelen van positionering naar het weergeven van het contextmenu</CommandMenuModeOptionDelayedExplained>
 
-	<DelayTitle>Vasthoudtijd</DelayTitle>
-	<DelayExplained>Duur in milliseconden om de rechtermuisknop ingedrukt te houden voordat het contextmenu verschijnt, positionering overschrijdend</DelayExplained>
+	<DelayTitle>Vasthoudtijd voor menu</DelayTitle>
+	<DelayExplained>Duur in milliseconden om rechtsklik vast te houden voordat positionering overschakelt naar het contextmenu</DelayExplained>
+
+	<DraftedColonistDraggingModeTitle>Gemobiliseerde kolonisten slepen</DraftedColonistDraggingModeTitle>
+	<DraftedColonistDraggingModeExplained>Bepaalt of rechtsklikken op gemobiliseerde kolonisten Achtungs sleep- of formatiegedrag start</DraftedColonistDraggingModeExplained>
+	<DraftedColonistDraggingModeOptionOff>Uit</DraftedColonistDraggingModeOptionOff>
+	<DraftedColonistDraggingModeOptionOffExplained>Rechtsklikken op gemobiliseerde kolonisten start het slepen niet</DraftedColonistDraggingModeOptionOffExplained>
+	<DraftedColonistDraggingModeOptionUnselected>Niet geselecteerd</DraftedColonistDraggingModeOptionUnselected>
+	<DraftedColonistDraggingModeOptionUnselectedExplained>Slepen start alleen wanneer er voor de rechtsklik geen bestuurbare kolonist geselecteerd was</DraftedColonistDraggingModeOptionUnselectedExplained>
+	<DraftedColonistDraggingModeOptionAlways>Altijd</DraftedColonistDraggingModeOptionAlways>
+	<DraftedColonistDraggingModeOptionAlwaysExplained>Rechtsklikken op gemobiliseerde kolonisten kan altijd slepen of formatiepositionering starten</DraftedColonistDraggingModeOptionAlwaysExplained>
 
 	<RescueEnabledTitle>'Redden' werkprioriteit kolom</RescueEnabledTitle>
 	<RescueEnabledExplained>Maakt het automatisch redden van pionnen mogelijk en voegt een kolom toe aan het werk-tabblad</RescueEnabledExplained>
@@ -97,8 +114,8 @@
 	<WorkMarkersOptionStatic>Stilstaand</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Uit</WorkMarkersOptionOff>
 
-	<MaxForcedItemsTitle>Maximum gedwongen werk</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Beperkt het aantal gedwongen werk voor langzamere computers</MaxForcedItemsExplained>
+	<MaxForcedItemsTitle>Doellimiet voor gedwongen werk</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Stel in op 0 om opdrachten voor gedwongen werk bij gewone rechtsklik-taken uit te schakelen. Hogere waarden beperken hoeveel nabije doelen Achtung toevoegt.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Onbeperkt</MaxForcedItemsUnlimited>
 
 	<FeatureSettingsDesc>Schakelaars voor kernfunctionaliteit</FeatureSettingsDesc>

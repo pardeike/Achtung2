@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using System;
+using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -14,31 +15,38 @@ public class Colonist(Pawn pawn)
 	public Vector3 offsetFromCenter = Vector3.zero;
 	public bool originalDraftStatus = Tools.GetDraftingStatus(pawn);
 
-	public IntVec3 UpdateOrderPos(Vector3 pos)
+	public IntVec3 UpdateOrderPos(Vector3 pos, Predicate<IntVec3> cellValidator = null)
 	{
 		var cell = pos.ToIntVec3();
+		var map = pawn.Map;
 
 		if (AchtungLoader.IsSameSpotInstalled)
 		{
-			if (cell.Standable(pawn.Map) && ReachabilityUtility.CanReach(pawn, cell, PathEndMode.OnCell, Danger.Deadly))
+			if (cell.Standable(map)
+				&& (cellValidator?.Invoke(cell) ?? true)
+				&& ReachabilityUtility.CanReach(pawn, cell, PathEndMode.OnCell, Danger.Deadly))
 			{
 				designation = cell;
 				return cell;
 			}
 		}
 
+		if (Tools.TryGetStandableMoveAnchor(cell, map, out var moveAnchor))
+			cell = moveAnchor;
+
 		var bestCell = IntVec3.Invalid;
 		if (ModsConfig.BiotechActive && pawn.IsColonyMech && MechanitorUtility.InMechanitorCommandRange(pawn, cell) == false)
 		{
 			var overseer = pawn.GetOverseer();
-			var map = overseer.MapHeld;
-			if (map == pawn.MapHeld)
+			var overseerMap = overseer.MapHeld;
+			if (overseerMap == pawn.MapHeld)
 			{
 				var mechanitor = overseer.mechanitor;
 				foreach (var newPos in GenRadial.RadialCellsAround(cell, 20f, false))
 					if (mechanitor.CanCommandTo(newPos))
-						if (map.pawnDestinationReservationManager.CanReserve(newPos, pawn, true)
-							&& newPos.Standable(map)
+						if ((cellValidator?.Invoke(newPos) ?? true)
+							&& overseerMap.pawnDestinationReservationManager.CanReserve(newPos, pawn, true)
+							&& newPos.Standable(overseerMap)
 							&& pawn.CanReach(newPos, PathEndMode.OnCell, Danger.Deadly, false, false, TraverseMode.ByPawn)
 						)
 						{
@@ -48,8 +56,8 @@ public class Colonist(Pawn pawn)
 			}
 		}
 		else
-			bestCell = RCellFinder.BestOrderedGotoDestNear(cell, pawn);
-		if (bestCell.InBounds(pawn.Map))
+			bestCell = RCellFinder.BestOrderedGotoDestNear(cell, pawn, cellValidator);
+		if (bestCell.InBounds(map))
 		{
 			designation = bestCell;
 			return bestCell;

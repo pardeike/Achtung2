@@ -23,6 +23,8 @@ public class Controller
 	public bool suppressMenu;
 	public bool drawColonistPreviews;
 	public bool pendingDelayedPositioning;
+	bool rightClickStartedWithSelectedColonists;
+	bool capturedRightClickSelectionState;
 
 	public static Controller instance;
 
@@ -89,7 +91,7 @@ public class Controller
 			gotoAction();
 			return true;
 		}
-		if (menuAdded == false && Achtung.Settings.positioningEnabled == false)
+		if (menuAdded == false && Achtung.Settings.CustomPositioningEnabled == false)
 			return true;
 		Event.current.Use();
 		return false;
@@ -98,14 +100,69 @@ public class Controller
 	private static List<Pawn> PawnsUnderMouse(Vector3 pos)
 		=> [.. GenUI.ThingsUnderMouse(pos, 0.8f, TargetingParameters.ForPawns(), null).OfType<Pawn>()];
 
+	private static bool IsOrderableColonist(Pawn pawn)
+		=> pawn.drafter != null
+			&& pawn.IsPlayerControlled
+			&& pawn.Downed == false
+			&& (pawn.jobs?.IsCurrentJobPlayerInterruptible() ?? false);
+
+	private static bool HasSelectedOrderableColonist()
+		=> Find.Selector.SelectedObjects.OfType<Pawn>().Any(IsOrderableColonist);
+
+	private void CaptureRightClickSelectionState()
+	{
+		rightClickStartedWithSelectedColonists = HasSelectedOrderableColonist();
+		capturedRightClickSelectionState = true;
+	}
+
+	private bool CanUseClickedColonistDragging()
+	{
+		if (Achtung.Settings.CustomPositioningEnabled == false)
+			return false;
+		return Achtung.Settings.draftedColonistDraggingMode switch
+		{
+			DraftedColonistDraggingMode.Always => true,
+			DraftedColonistDraggingMode.Unselected => rightClickStartedWithSelectedColonists == false,
+			_ => false
+		};
+	}
+
+	private static bool IsPlainDraftedMoveClick(int button, bool longPress, bool forceMenu, bool achtungPressed, List<Colonist> colonists)
+		=> button == 1
+			&& longPress == false
+			&& forceMenu == false
+			&& achtungPressed == false
+			&& colonists.Count > 0
+			&& colonists.All(colonist => colonist.pawn.Drafted);
+
+	private static bool TryGetPlainDraftedMoveAnchor(Vector3 pos, List<Colonist> colonists, out Vector3 anchor)
+	{
+		anchor = Vector3.zero;
+		var map = Find.CurrentMap;
+		var clickCell = IntVec3.FromVector3(pos);
+		if (Tools.TryGetStandableMoveAnchor(clickCell, map, out var moveCell) == false)
+			return false;
+		if (colonists.Count == 0 || colonists.All(colonist => FloatMenuOptionProvider_DraftedMove.PawnCanGoto(colonist.pawn, moveCell).Accepted) == false)
+			return false;
+		anchor = moveCell.ToVector3Shifted();
+		return true;
+	}
+
+	private void BeginLineMove(Vector3 pos)
+	{
+		StartDragging(pos, false);
+		if (Achtung.Settings.forceCommandMenuMode == CommandMenuMode.Delayed && groupMovement == false)
+		{
+			pendingDelayedPositioning = true;
+			UpdateLinePosition(pos, false);
+		}
+		else
+			MouseDrag(pos, -1);
+	}
+
 	public bool MouseDown(Vector3 pos, int button, bool longPress)
 	{
-		var doPositioning = Achtung.Settings.positioningEnabled;
-		if (doPositioning == false)
-			return true;
-
-		var doForceMenu = Achtung.Settings.maxForcedItems > 0;
-		var selector = Find.Selector;
+		var doPositioning = Achtung.Settings.CustomPositioningEnabled;
 
 		if (longPress == false)
 			colonists = Tools.GetSelectedColonists();
@@ -123,7 +180,6 @@ public class Controller
 		if (button != 1)
 			return true;
 
-		var actions = doForceMenu ? new MultiActions(colonists, UI.MouseMapPosition()) : null;
 		var achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
 		var allDrafted = colonists.All(colonist => colonist.pawn.Drafted || achtungPressed);
 		var mixedDrafted = !allDrafted && colonists.Any(colonist => colonist.pawn.Drafted);
@@ -136,6 +192,12 @@ public class Controller
 			CommandMenuMode.Delayed => longPress,
 			_ => false
 		};
+
+		if (doPositioning == false)
+			return true;
+
+		var doForceMenu = Achtung.Settings.ForceCommandsEnabled;
+		var actions = doForceMenu ? new MultiActions(colonists, UI.MouseMapPosition()) : null;
 
 		var map = Find.CurrentMap;
 		var cell = IntVec3.FromVector3(pos);
@@ -153,6 +215,9 @@ public class Controller
 		var standableClicked = cell.Standable(map);
 		var walkableClicked = cell.Walkable(map);
 		var foggedClicked = cell.Fogged(map);
+		var hasPlainDraftedMove = subjectClicked == false
+			&& IsPlainDraftedMoveClick(button, longPress, forceMenu, achtungPressed, colonists)
+			&& TryGetPlainDraftedMoveAnchor(pos, colonists, out _);
 
 		if (subjectClicked && colonists.Count > 1 && achtungPressed == false && forceMenu == false)
 		{
@@ -170,31 +235,24 @@ public class Controller
 			if (standableClicked == false && forceMenu == false && subjectClicked == false)
 			{
 				// Fogged walkable cells with pass-through things can be valid move targets even when vanilla creates no Go here option.
-				allowGotoWithoutMenuOption = allDrafted && foggedClicked && walkableClicked;
-				gotoAction = () =>
+				allowGotoWithoutMenuOption = hasPlainDraftedMove && foggedClicked && walkableClicked;
+				gotoAction = () => BeginLineMove(pos);
+				if (hasPlainDraftedMove && actions.NonGotoActionsCanYieldToPlainGoto)
 				{
-					StartDragging(pos, false);
-					if (Achtung.Settings.forceCommandMenuMode == CommandMenuMode.Delayed && groupMovement == false)
-					{
-						pendingDelayedPositioning = true;
-						UpdateLinePosition(pos, false);
-					}
-					else
-						MouseDrag(pos, -1);
-				};
+					gotoAction();
+					return true;
+				}
 			}
 			return ShowMenu(actions, forceMenu, gotoAction, allowGotoWithoutMenuOption);
 		}
 
-		centerOnColonist = pawnsUnderMouse.Where(pawn =>
-			pawn.drafter != null
-			&& pawn.IsPlayerControlled
-			&& pawn.Downed == false
-			&& (pawn.jobs?.IsCurrentJobPlayerInterruptible() ?? false)
-		)
-		.OrderBy(pawn => pawn.Drafted ? 0 : 1)
-		.Select(pawn => new Colonist(pawn))
-		.FirstOrDefault();
+		centerOnColonist = CanUseClickedColonistDragging()
+			? pawnsUnderMouse
+				.Where(IsOrderableColonist)
+				.OrderBy(pawn => pawn.Drafted ? 0 : 1)
+				.Select(pawn => new Colonist(pawn))
+				.FirstOrDefault()
+			: null;
 
 		if (centerOnColonist != null && (centerOnColonist.pawn.Drafted || achtungPressed))
 		{
@@ -209,7 +267,7 @@ public class Controller
 		void DoDrag() => StartDragging(pos, useFormation);
 
 		// in multiplayer, drafting will update pawn.Drafted in the same tick, so we fake it
-		if (doPositioning && allDrafted && doPositioning && longPress == false)
+		if (allDrafted && longPress == false)
 		{
 			DoDrag();
 			if (centerOnColonist == null)
@@ -293,12 +351,21 @@ public class Controller
 		var dragVector = lineEnd - lineStart;
 		var delta = count > 1 ? dragVector / (count - 1) : Vector3.zero;
 		var linePosition = count == 1 ? lineEnd : lineStart;
+		var previewDestinations = issueOrders || AchtungLoader.IsSameSpotInstalled
+			? null
+			: new HashSet<IntVec3>();
 		Tools.OrderColonistsAlongLine(draftedColonists, lineStart, lineEnd).Do(colonist =>
 		{
 			if (issueOrders)
 				colonist.OrderTo(linePosition);
 			else
-				colonist.UpdateOrderPos(linePosition);
+			{
+				var bestCell = previewDestinations == null
+					? colonist.UpdateOrderPos(linePosition)
+					: colonist.UpdateOrderPos(linePosition, cell => previewDestinations.Contains(cell) == false);
+				if (bestCell.IsValid)
+					previewDestinations?.Add(bestCell);
+			}
 			linePosition += delta;
 		});
 	}
@@ -495,6 +562,9 @@ public class Controller
 
 	public void HandleDrawingOnGUI()
 	{
+		if (isDragging == false)
+			return;
+
 		colonists.DoIf(c => c.designation.IsValid, c =>
 		{
 			var labelPos = Tools.LabelDrawPosFor(c.designation, -0.6f);
@@ -504,21 +574,19 @@ public class Controller
 
 	public void HandleEarlyRightClicks()
 	{
-		if (Achtung.Settings.positioningEnabled == false)
+		CaptureRightClickSelectionState();
+
+		if (Achtung.Settings.CustomPositioningEnabled == false)
+			return;
+		if (Achtung.Settings.draftedColonistDraggingMode == DraftedColonistDraggingMode.Off)
+			return;
+		if (Achtung.Settings.draftedColonistDraggingMode == DraftedColonistDraggingMode.Unselected && rightClickStartedWithSelectedColonists)
 			return;
 
 		var selector = Find.Selector;
 		var achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
 
-		var hasSelectedColonists = selector.SelectedObjects.OfType<Pawn>()
-			.Where(pawn =>
-				pawn.drafter != null
-				&& pawn.IsPlayerControlled
-				&& pawn.Downed == false
-				&& (pawn.jobs?.IsCurrentJobPlayerInterruptible() ?? false)
-			)
-			.Any();
-		if (hasSelectedColonists && achtungPressed == false)
+		if (rightClickStartedWithSelectedColonists && achtungPressed == false)
 			return;
 
 		var colonistsClicked = PawnsUnderMouse(UI.MouseMapPosition())
@@ -534,12 +602,31 @@ public class Controller
 
 	static int longPressThreshold = -1;
 	static int dragCount = 0;
+
+	private void ClearCustomPositioningState()
+	{
+		pendingDelayedPositioning = false;
+		isDragging = false;
+		groupMovement = false;
+		groupedMoved = false;
+		centerOnColonist = null;
+		capturedRightClickSelectionState = false;
+		colonists.Clear();
+		longPressThreshold = -1;
+		dragCount = 0;
+	}
+
 	public bool HandleEvents()
 	{
+		if (Achtung.Settings.CustomPositioningEnabled == false)
+		{
+			ClearCustomPositioningState();
+			return true;
+		}
+
 		if (Find.WindowStack.IsOpen<FloatMenu>())
 		{
-			pendingDelayedPositioning = false;
-			isDragging = false;
+			ClearCustomPositioningState();
 			return true;
 		}
 
@@ -560,7 +647,11 @@ public class Controller
 		{
 			case EventType.MouseDown:
 				if (Event.current.button == 1)
+				{
 					suppressMenu = false;
+					if (capturedRightClickSelectionState == false)
+						CaptureRightClickSelectionState();
+				}
 				longPressThreshold = Event.current.button == 1 ? Tools.EnvTicks() + Achtung.Settings.menuDelay : -1;
 				runOriginal = MouseDown(pos, Event.current.button, false);
 				dragCount = 0;
@@ -573,6 +664,7 @@ public class Controller
 			case EventType.MouseUp:
 				runOriginal = MouseUp(pos);
 				longPressThreshold = -1;
+				capturedRightClickSelectionState = false;
 				break;
 
 			case EventType.KeyDown:
