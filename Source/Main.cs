@@ -70,14 +70,15 @@ static class FloatMenuOptionProviders_Patch
 {
 	public static IEnumerable<MethodBase> TargetMethods()
 	{
-		yield return AccessTools.PropertyGetter(typeof(FloatMenuOptionProvider_CleanRoom), nameof(FloatMenuOptionProvider_CleanRoom.Undrafted));
+		// fully qualified because AchtungMod declares its own FloatMenuOptionProvider_CleanRoom
+		yield return AccessTools.PropertyGetter(typeof(RimWorld.FloatMenuOptionProvider_CleanRoom), nameof(RimWorld.FloatMenuOptionProvider_CleanRoom.Undrafted));
 		yield return AccessTools.PropertyGetter(typeof(FloatMenuOptionProvider_ExtinguishFires), nameof(FloatMenuOptionProvider_ExtinguishFires.Drafted));
 		yield return AccessTools.PropertyGetter(typeof(FloatMenuOptionProvider_ExtinguishFires), nameof(FloatMenuOptionProvider_ExtinguishFires.Undrafted));
 	}
 
 	public static bool Prefix(MethodBase __originalMethod, ref bool __result)
 	{
-		if (Achtung.Settings.replaceCleanRoom && __originalMethod.DeclaringType == typeof(FloatMenuOptionProvider_CleanRoom))
+		if (Achtung.Settings.replaceCleanRoom && __originalMethod.DeclaringType == typeof(RimWorld.FloatMenuOptionProvider_CleanRoom))
 		{
 			__result = false;
 			return false;

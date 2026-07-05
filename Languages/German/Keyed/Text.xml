@@ -118,8 +118,6 @@
 	<MaxForcedItemsExplained>Auf 0 setzen, um Befehle für erzwungene Arbeit bei gewöhnlichen Rechtsklick-Jobs zu deaktivieren. Höhere Werte begrenzen, wie viele nahe Ziele Achtung hinzufügt.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Unbegrenzt</MaxForcedItemsUnlimited>
 
-	<FeatureSettingsDesc>Schalter für Kernfunktionen</FeatureSettingsDesc>
-	<FeatureSettingsButton>Funktionen konfigurieren</FeatureSettingsButton>
 
 	<JobInterruptedLabel>Abgebrochen: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>

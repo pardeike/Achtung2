@@ -118,8 +118,6 @@
 	<MaxForcedItemsExplained>Stel in op 0 om opdrachten voor gedwongen werk bij gewone rechtsklik-taken uit te schakelen. Hogere waarden beperken hoeveel nabije doelen Achtung toevoegt.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Onbeperkt</MaxForcedItemsUnlimited>
 
-	<FeatureSettingsDesc>Schakelaars voor kernfunctionaliteit</FeatureSettingsDesc>
-	<FeatureSettingsButton>Functies configureren</FeatureSettingsButton>
 
 	<JobInterruptedLabel>Geannuleerd: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>

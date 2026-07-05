@@ -26,7 +26,8 @@ static class Tools
 	public static readonly Material forceIconMaterial = MaterialPool.MatFrom("ForceIcon", ShaderDatabase.Cutout);
 	public static readonly Material markerMaterial = MaterialPool.MatFrom("AchtungMarker", ShaderDatabase.Transparent);
 	public static readonly Texture2D dragPosition = LoadTexture("DragPosition");
-	public static readonly string goHereLabel = "GoHere".Translate();
+	// not cached so a mid-session language change keeps matching vanilla's label
+	public static string GoHereLabel => "GoHere".Translate();
 	public static WorkTypeDef savedWorkTypeDef = null;
 
 	public static WorkTypeDef RescuingWorkTypeDef => new()
@@ -288,7 +289,7 @@ static class Tools
 				&& (pawn.jobs?.IsCurrentJobPlayerInterruptible() ?? false))
 			.Select(pawn => new Colonist(pawn))];
 
-	public static bool IsGoHereOption(FloatMenuOption option) => option?.isGoto == true || option?.Label == goHereLabel;
+	public static bool IsGoHereOption(FloatMenuOption option) => option?.isGoto == true || option?.Label == GoHereLabel;
 	public static bool CanYieldToPlainGoto(FloatMenuOption option) => option is IAchtungSupplementalFloatMenuOption;
 
 	public static bool TryGetStandableMoveAnchor(IntVec3 cell, Map map, out IntVec3 result)
@@ -466,11 +467,11 @@ static class Tools
 		GUI.color = oldColor;
 	}
 
-	static float MeasureSettingRowHeight(float columnWidth, float verticalSpacing, string title, string explanation, float extraHeight, out float titleHeight, out float explanationWidth, out float explanationHeight)
+	static float MeasureSettingRowHeight(float columnWidth, float verticalSpacing, string title, string explanation, float extraHeight, float reservedTitleWidth, out float titleHeight, out float explanationWidth, out float explanationHeight)
 	{
 		var savedFont = Text.Font;
 		Text.Font = GameFont.Small;
-		titleHeight = Mathf.Max(Text.LineHeight, Text.CalcHeight(title, columnWidth));
+		titleHeight = Mathf.Max(Text.LineHeight, Text.CalcHeight(title, columnWidth - reservedTitleWidth));
 		Text.Font = GameFont.Tiny;
 		explanationWidth = Mathf.Max(0f, columnWidth - 34f);
 		explanationHeight = explanation.NullOrEmpty() ? 0f : Text.CalcHeight(explanation, explanationWidth);
@@ -485,9 +486,9 @@ static class Tools
 		return rowHeight;
 	}
 
-	static Rect GetSettingRow(Listing_Standard listing, string title, string explanation, float extraHeight, out Rect titleRect, out Rect explanationRect, out Rect extraRect)
+	static Rect GetSettingRow(Listing_Standard listing, string title, string explanation, float extraHeight, float reservedTitleWidth, out Rect titleRect, out Rect explanationRect, out Rect extraRect)
 	{
-		var rowHeight = MeasureSettingRowHeight(listing.ColumnWidth, listing.verticalSpacing, title, explanation, extraHeight, out var titleHeight, out var explanationWidth, out var explanationHeight);
+		var rowHeight = MeasureSettingRowHeight(listing.ColumnWidth, listing.verticalSpacing, title, explanation, extraHeight, reservedTitleWidth, out var titleHeight, out var explanationWidth, out var explanationHeight);
 
 		var rowRect = listing.GetRect(rowHeight);
 		titleRect = new Rect(rowRect.x, rowRect.y, rowRect.width, titleHeight);
@@ -528,7 +529,7 @@ static class Tools
 	{
 		var title = (name + "Title").Translate().ToString();
 		var explanation = (name + "Explained").Translate().ToString();
-		var rowRect = GetSettingRow(listing, title, explanation, 0f, out var titleRect, out var explanationRect, out _);
+		var rowRect = GetSettingRow(listing, title, explanation, 0f, 24f, out var titleRect, out var explanationRect, out _);
 		var checkboxRect = new Rect(titleRect.xMax - 24f, titleRect.y + (titleRect.height - 24f) / 2f, 24f, 24f);
 		var labelRect = titleRect;
 		labelRect.xMax -= 24f;
@@ -569,7 +570,7 @@ static class Tools
 		var title = (name + "Title").Translate().ToString();
 		var key = name + "Explained";
 		var explanation = key.CanTranslate() ? key.Translate().ToString() : null;
-		var rowRect = GetSettingRow(listing, title, explanation, 22f, out var titleRect, out var explanationRect, out var sliderRect);
+		var rowRect = GetSettingRow(listing, title, explanation, 22f, 0f, out var titleRect, out var explanationRect, out var sliderRect);
 
 		Text.Font = GameFont.Small;
 		GUI.color = Color.white;
@@ -600,7 +601,7 @@ static class Tools
 		var valueLabel = typeof(T).Name + "Option" + value.ToString();
 		var explanationKey = (useValueForExplain ? valueLabel : name) + "Explained";
 		var explanation = explanationKey.CanTranslate() ? explanationKey.Translate().ToString() : null;
-		var rowRect = GetSettingRow(listing, title, explanation, 0f, out var titleRect, out var explanationRect, out _);
+		var rowRect = GetSettingRow(listing, title, explanation, 0f, 0f, out var titleRect, out var explanationRect, out _);
 
 		Text.Font = GameFont.Small;
 		GUI.color = Color.white;

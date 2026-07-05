@@ -88,7 +88,7 @@ public class AchtungSettings : ModSettings
 	public AchtungModKey achtungKey = AchtungModKey.Alt;
 	public CommandMenuMode forceCommandMenuMode = CommandMenuMode.Delayed;
 	public AchtungModKey forceCommandMenuKey = AchtungModKey.Ctrl;
-	public DraftedColonistDraggingMode draftedColonistDraggingMode = DraftedColonistDraggingMode.Unselected;
+	public DraftedColonistDraggingMode draftedColonistDraggingMode = DraftedColonistDraggingMode.Always;
 	public BreakLevel breakLevel = BreakLevel.AlmostExtreme;
 	public HealthLevel healthLevel = HealthLevel.InPainShock;
 	public bool ignoreForbidden = false;
@@ -116,7 +116,7 @@ public class AchtungSettings : ModSettings
 		Scribe_Values.Look(ref achtungKey, "achtungKey", AchtungModKey.Alt, true);
 		Scribe_Values.Look(ref forceCommandMenuMode, "forceCommandMenuMode", CommandMenuMode.Auto, true);
 		Scribe_Values.Look(ref forceCommandMenuKey, "forceCommandMenuKey", AchtungModKey.Ctrl, true);
-		Scribe_Values.Look(ref draftedColonistDraggingMode, "draftedColonistDraggingMode", DraftedColonistDraggingMode.Unselected, true);
+		Scribe_Values.Look(ref draftedColonistDraggingMode, "draftedColonistDraggingMode", DraftedColonistDraggingMode.Always, true);
 		Scribe_Values.Look(ref breakLevel, "BreakLevel", BreakLevel.AlmostExtreme, true);
 		Scribe_Values.Look(ref healthLevel, "HealthLevel", HealthLevel.InPainShock, true);
 		Scribe_Values.Look(ref ignoreForbidden, "ignoreForbidden", false, true);

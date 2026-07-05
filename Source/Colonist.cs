@@ -68,7 +68,7 @@ public class Colonist(Pawn pawn)
 	public void OrderTo(Vector3 pos)
 	{
 		var bestCell = UpdateOrderPos(pos);
-		if (bestCell.IsValid && lastOrder.IsValid == false || lastOrder != bestCell)
+		if (bestCell.IsValid && bestCell != lastOrder)
 		{
 			lastOrder = bestCell;
 			Tools.OrderTo(pawn, bestCell.x, bestCell.z);

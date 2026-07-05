@@ -91,8 +91,6 @@ public class Controller
 			gotoAction();
 			return true;
 		}
-		if (menuAdded == false && Achtung.Settings.CustomPositioningEnabled == false)
-			return true;
 		Event.current.Use();
 		return false;
 	}
@@ -146,6 +144,15 @@ public class Controller
 			return false;
 		anchor = moveCell.ToVector3Shifted();
 		return true;
+	}
+
+	private bool NonGotoOptionsCanYieldToPlainGoto(MultiActions actions)
+	{
+		if (actions != null)
+			return actions.NonGotoActionsCanYieldToPlainGoto;
+		var pawns = colonists.Select(colonist => colonist.pawn).ToList();
+		var options = FloatMenuMakerMap.GetOptions(pawns, UI.MouseMapPosition(), out _);
+		return options.Where(option => Tools.IsGoHereOption(option) == false).All(Tools.CanYieldToPlainGoto);
 	}
 
 	private void BeginLineMove(Vector3 pos)
@@ -228,8 +235,6 @@ public class Controller
 
 		if (forceMenu || (subjectClicked && achtungPressed == false) || standableClicked == false)
 		{
-			if (actions == null)
-				return true;
 			Action gotoAction = null;
 			var allowGotoWithoutMenuOption = false;
 			if (standableClicked == false && forceMenu == false && subjectClicked == false)
@@ -237,12 +242,14 @@ public class Controller
 				// Fogged walkable cells with pass-through things can be valid move targets even when vanilla creates no Go here option.
 				allowGotoWithoutMenuOption = hasPlainDraftedMove && foggedClicked && walkableClicked;
 				gotoAction = () => BeginLineMove(pos);
-				if (hasPlainDraftedMove && actions.NonGotoActionsCanYieldToPlainGoto)
+				if (hasPlainDraftedMove && NonGotoOptionsCanYieldToPlainGoto(actions))
 				{
 					gotoAction();
 					return true;
 				}
 			}
+			if (actions == null)
+				return true;
 			return ShowMenu(actions, forceMenu, gotoAction, allowGotoWithoutMenuOption);
 		}
 

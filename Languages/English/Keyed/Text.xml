@@ -118,8 +118,6 @@
 	<MaxForcedItemsExplained>Set to 0 to disable forced-work commands from ordinary right-click jobs. Higher values limit how many nearby targets Achtung adds.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Unlimited</MaxForcedItemsUnlimited>
 
-	<FeatureSettingsDesc>Toggles for core functionality</FeatureSettingsDesc>
-	<FeatureSettingsButton>Configure features</FeatureSettingsButton>
 
 	<JobInterruptedLabel>Cancelled: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>

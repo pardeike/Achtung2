@@ -118,8 +118,6 @@
 	<MaxForcedItemsExplained>Establécelo en 0 para desactivar las órdenes de trabajo forzado en tareas normales de clic derecho. Los valores más altos limitan cuántos objetivos cercanos añade Achtung.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Ilimitado</MaxForcedItemsUnlimited>
 
-	<FeatureSettingsDesc>Opciones de funcionalidad principal</FeatureSettingsDesc>
-	<FeatureSettingsButton>Configurar funciones</FeatureSettingsButton>
 
 	<JobInterruptedLabel>Cancelado: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>

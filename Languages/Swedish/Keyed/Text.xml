@@ -118,8 +118,6 @@
 	<MaxForcedItemsExplained>Sätt till 0 för att inaktivera kommandon för påtvingat arbete från vanliga högerklicksjobb. Högre värden begränsar hur många närliggande mål Achtung lägger till.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Obegränsat</MaxForcedItemsUnlimited>
 
-	<FeatureSettingsDesc>Växlar för kärnfunktioner</FeatureSettingsDesc>
-	<FeatureSettingsButton>Konfigurera funktioner</FeatureSettingsButton>
 
 	<JobInterruptedLabel>Avbruten: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
