@@ -95,6 +95,9 @@ public class Controller
 		return false;
 	}
 
+	private static List<Pawn> PawnsUnderMouse(Vector3 pos)
+		=> [.. GenUI.ThingsUnderMouse(pos, 0.8f, TargetingParameters.ForPawns(), null).OfType<Pawn>()];
+
 	public bool MouseDown(Vector3 pos, int button, bool longPress)
 	{
 		var doPositioning = Achtung.Settings.positioningEnabled;
@@ -139,7 +142,7 @@ public class Controller
 		if (cell.InBounds(map) == false)
 			return true;
 
-		var pawnsUnderMouse = map.thingGrid.ThingsListAt(cell).OfType<Pawn>().ToList();
+		var pawnsUnderMouse = PawnsUnderMouse(pos);
 
 		var subjectClicked = pawnsUnderMouse
 			.Where(pawn =>
@@ -234,13 +237,14 @@ public class Controller
 		{
 			if (centerOnColonist != null)
 			{
-				groupCenter = centerOnColonist.pawn.Position.ToVector3Shifted();
+				groupCenter = centerOnColonist.startPosition;
 			}
 			else
 			{
 				groupCenter.x = draftedColonists.Sum(colonist => colonist.startPosition.x) / draftedColonists.Count;
 				groupCenter.z = draftedColonists.Sum(colonist => colonist.startPosition.z) / draftedColonists.Count;
 			}
+			groupCenter.y = 0f;
 			groupRotation = 0;
 			groupRotationWas45 = Tools.Has45DegreeOffset(draftedColonists);
 		}
@@ -517,8 +521,7 @@ public class Controller
 		if (hasSelectedColonists && achtungPressed == false)
 			return;
 
-		var colonistsClicked = GenUI.ThingsUnderMouse(UI.MouseMapPosition(), 0.8f, TargetingParameters.ForPawns(), null)
-			.OfType<Pawn>()
+		var colonistsClicked = PawnsUnderMouse(UI.MouseMapPosition())
 			.Where(pawn => PawnAttackGizmoUtility.CanOrderPlayerPawn(pawn))
 			.ToList();
 		if (colonistsClicked.Count == 1)
