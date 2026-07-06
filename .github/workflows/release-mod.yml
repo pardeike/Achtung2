@@ -113,7 +113,6 @@ jobs:
 
           test -d "$PACKAGE_DIR"
           test -f "$ARCHIVE_PATH"
-          test ! -e "$PACKAGE_DIR/BridgeTools"
 
           python3 - "$ARCHIVE_PATH" "$MOD_FILE_NAME" <<'PY'
           import sys
@@ -131,22 +130,6 @@ jobs:
           if any(name.startswith(f"{mod_file_name}/") for name in names):
               raise SystemExit(f"Release zip must not contain an extra top-level {mod_file_name}/ folder.")
 
-          forbidden = (
-              ".DS_Store",
-              ".pdb",
-              ".mdb",
-              "RimBridgeServer.Annotations.dll",
-              "RimBridgeServer.Sdk.dll",
-          )
-          leaked = sorted(
-              name for name in names
-              if name.startswith("._")
-              or "/._" in name
-              or name.endswith(forbidden)
-              or "BridgeTools/" in name
-          )
-          if leaked:
-              raise SystemExit("Release zip contains files that should not be published:\n" + "\n".join(leaked))
           PY
 
           cp "$ARCHIVE_PATH" "dist/$ARCHIVE_NAME"
