@@ -15,6 +15,9 @@ public class Colonist(Pawn pawn)
 	public Vector3 offsetFromCenter = Vector3.zero;
 	public bool originalDraftStatus = Tools.GetDraftingStatus(pawn);
 
+	public IntVec3 UpdateOrderPos(Vector3 pos)
+		=> UpdateOrderPos(pos, null);
+
 	public IntVec3 UpdateOrderPos(Vector3 pos, Predicate<IntVec3> cellValidator = null)
 	{
 		var cell = pos.ToIntVec3();
