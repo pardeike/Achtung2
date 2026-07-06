@@ -97,33 +97,59 @@ jobs:
           git tag -a "$RELEASE_TAG" -m "Release $RELEASE_TAG"
           git push origin "refs/tags/$RELEASE_TAG"
 
-      - name: Build mod
-        env:
-          RIMWORLD_MOD_DIR: ""
-        run: dotnet build "$MOD_PROJECT" -c Release -p:BuildBridgeTools=false
-
       - name: Package mod zip
         run: |
           set -euo pipefail
 
           PACKAGE_ROOT="$RUNNER_TEMP/mod-package"
           PACKAGE_DIR="$PACKAGE_ROOT/$MOD_FILE_NAME"
-          STAGE_DIR="dist/$MOD_FILE_NAME"
+          ARCHIVE_PATH="$PACKAGE_ROOT/${MOD_FILE_NAME}.zip"
           ARCHIVE_NAME="${MOD_FILE_NAME}.zip"
 
           rm -rf "$PACKAGE_ROOT" dist
-          mkdir -p dist "$STAGE_DIR"
+          mkdir -p "$PACKAGE_ROOT" dist
 
-          dotnet build "$MOD_PROJECT" -c Release --no-restore -p:RIMWORLD_MOD_DIR="$PACKAGE_ROOT" -p:BuildBridgeTools=false
+          dotnet build "$MOD_PROJECT" -c Release -p:RIMWORLD_MOD_DIR="$PACKAGE_ROOT" -p:BuildBridgeTools=false
 
+          test -d "$PACKAGE_DIR"
+          test -f "$ARCHIVE_PATH"
           test ! -e "$PACKAGE_DIR/BridgeTools"
 
-          cp -R "$PACKAGE_DIR"/. "$STAGE_DIR"/
+          python3 - "$ARCHIVE_PATH" "$MOD_FILE_NAME" <<'PY'
+          import sys
+          import zipfile
 
-          (
-            cd dist
-            zip -qr "$ARCHIVE_NAME" "$(basename "$STAGE_DIR")"
+          archive_path, mod_file_name = sys.argv[1:]
+          with zipfile.ZipFile(archive_path) as archive:
+              names = set(archive.namelist())
+
+          required = {"About/About.xml", "LoadFolders.xml"}
+          missing = sorted(required - names)
+          if missing:
+              raise SystemExit(f"Release zip is missing expected root entries: {', '.join(missing)}")
+
+          if any(name.startswith(f"{mod_file_name}/") for name in names):
+              raise SystemExit(f"Release zip must not contain an extra top-level {mod_file_name}/ folder.")
+
+          forbidden = (
+              ".DS_Store",
+              ".pdb",
+              ".mdb",
+              "RimBridgeServer.Annotations.dll",
+              "RimBridgeServer.Sdk.dll",
           )
+          leaked = sorted(
+              name for name in names
+              if name.startswith("._")
+              or "/._" in name
+              or name.endswith(forbidden)
+              or "BridgeTools/" in name
+          )
+          if leaked:
+              raise SystemExit("Release zip contains files that should not be published:\n" + "\n".join(leaked))
+          PY
+
+          cp "$ARCHIVE_PATH" "dist/$ARCHIVE_NAME"
 
       - name: Create GitHub release if needed
         env:
