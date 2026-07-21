@@ -15,18 +15,18 @@ public class MultiActions
 	readonly List<MultiAction> allActions;
 	readonly bool everyoneHasGoto = false;
 	readonly int totalColonistsInvolved = 0;
-	int gotoActionCount = 0;
+	int draftedGotoActionCount = 0;
 
 	public MultiActions(IEnumerable<Colonist> colonists, Vector3 clickPos)
 	{
+		var colonistList = colonists.ToList();
 		this.clickPos = clickPos;
-		allPawns = [.. colonists.Select(colonist => colonist.pawn)];
+		allPawns = [.. colonistList.Select(colonist => colonist.pawn)];
 		allActions = [];
-		totalColonistsInvolved = colonists.Count();
-		colonists.Do(AddColonist);
-		if (gotoActionCount == totalColonistsInvolved)
-			if (colonists.Any(colonist => colonist.pawn.Drafted))
-				everyoneHasGoto = true;
+		totalColonistsInvolved = colonistList.Count;
+		var draftedColonistCount = colonistList.Count(colonist => colonist.originalDraftStatus);
+		colonistList.Do(AddColonist);
+		everyoneHasGoto = draftedColonistCount > 0 && draftedGotoActionCount == draftedColonistCount;
 	}
 
 	public bool EveryoneHasGoto => everyoneHasGoto;
@@ -65,8 +65,8 @@ public class MultiActions
 		var action = new MultiAction(colonist, draftMode, option);
 		if (Tools.IsGoHereOption(option) == false)
 			allActions.Add(action);
-		else
-			gotoActionCount++;
+		else if (draftMode && colonist.originalDraftStatus)
+			draftedGotoActionCount++;
 	}
 
 	public int Count(bool onlyActive)

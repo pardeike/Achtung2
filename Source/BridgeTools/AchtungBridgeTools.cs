@@ -8,7 +8,7 @@ using Verse.AI;
 
 namespace AchtungMod;
 
-public sealed class AchtungBridgeTools
+public sealed partial class AchtungBridgeTools
 {
 	static Pawn FindPawn(string pawnId)
 	{

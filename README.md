@@ -27,10 +27,13 @@ The repository still carries compatibility assets for older RimWorld versions, b
 ```bash
 git clone https://github.com/pardeike/Achtung2.git
 cd Achtung2
-dotnet build Source/Achtung.csproj -c Release -p:RIMWORLD_MOD_DIR=/path/to/RimWorld/Mods
+env -u RIMWORLD_MOD_DIR ./scripts/build-quiet.sh -c Release
+./scripts/build-quiet.sh -c Release -p:RIMWORLD_MOD_DIR=/path/to/RimWorld/Mods
 ```
 
-That build copies the mod output directly into your RimWorld `Mods` folder.
+The first command builds without deploying. The second deploys the mod and its
+RimBridge companion as one paired unit. A deploy build refuses to overwrite a
+running RimWorld process. See [TESTING.md](TESTING.md) for the live test workflow.
 
 ## What The Mod Adds
 
@@ -40,16 +43,22 @@ That build copies the mod output directly into your RimWorld `Mods` folder.
 - Smarter drafting and undrafting behavior around issued commands
 - Utility commands such as room cleaning, firefighting, and sowing workflows
 
-## Developer Workflow Used In The Bugfix Session
+## Live Developer Workflow
 
-The reproducible mod-debugging stack used for the Pick Up And Haul interaction bug was:
+The reproducible mod-debugging stack is:
 
 1. `Achtung2` for the mod under test
 2. `RimBridgeServer` for live RimWorld inspection and control
 3. `GABS` for starting RimWorld and exposing the bridge tools cleanly to an AI client
 4. `DecompilerServer` for reading RimWorld's managed assemblies while debugging job flow
 
-If you want the same toolchain, start here:
+The companion DLL under `Source/BridgeTools` contains named, reusable contracts
+that exercise Achtung against a running game. The main project restores and
+builds it automatically. Build, deploy, lifecycle, required mod configuration,
+and contract details are documented in [TESTING.md](TESTING.md).
+
+Toolchain projects:
+
 - RimBridgeServer: `https://github.com/pardeike/RimBridgeServer`
 - GABS: `https://github.com/pardeike/GABS`
 - DecompilerServer: `https://github.com/pardeike/DecompilerServer`

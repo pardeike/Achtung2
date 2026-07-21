@@ -1,0 +1,199 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+deploy_lock_dir=""
+
+cleanup_deploy_lock() {
+	if [[ -n "$deploy_lock_dir" ]]; then
+		rmdir "$deploy_lock_dir" 2>/dev/null || true
+	fi
+}
+
+usage() {
+	cat >&2 <<'USAGE'
+Usage:
+  rimworld-deploy-guard.sh check-stopped
+  rimworld-deploy-guard.sh validate RIMWORLD_MOD_DIR PROJECT_PATH MOD_FILE_NAME
+  rimworld-deploy-guard.sh deploy RIMWORLD_MOD_DIR PROJECT_PATH CONFIGURATION PLATFORM MOD_FILE_NAME [BUILD_BRIDGE_TOOLS]
+
+Validates the deploy root and serializes the destructive RimWorld deploy copy
+against the real Mods directory, so symlink aliases cannot race each other.
+USAGE
+	exit 64
+}
+
+ensure_rimworld_stopped() {
+	local running
+
+	running="$(ps ax -o pid=,comm= | awk '$0 ~ /\/RimWorld by Ludeon Studios$/ { print }' || true)"
+	if [[ -n "$running" ]]; then
+		printf 'Refusing deploy build because RimWorld is still running:\n%s\n' "$running" >&2
+		printf 'Stop the game through GABS, then rerun the build.\n' >&2
+		exit 2
+	fi
+}
+
+logical_dir() {
+	local path="$1"
+	[[ -d "$path" ]] || {
+		printf 'RimWorld deploy root does not exist: %s\n' "$path" >&2
+		exit 2
+	}
+	(cd -L "$path" && pwd -L)
+}
+
+physical_dir() {
+	local path="$1"
+	[[ -d "$path" ]] || {
+		printf 'RimWorld deploy root does not exist: %s\n' "$path" >&2
+		exit 2
+	}
+	(cd -P "$path" && pwd -P)
+}
+
+validate_mod_dir() {
+	local rimworld_mod_dir="$1"
+	local mod_file_name="$2"
+	local provided_abs resolved_abs parent parent_name app_mods app_resolved
+
+	provided_abs="$(logical_dir "$rimworld_mod_dir")"
+	resolved_abs="$(physical_dir "$rimworld_mod_dir")"
+	parent="$(dirname "$provided_abs")"
+	parent_name="$(basename "$parent")"
+
+	if [[ "$parent_name" == *-UserData ]]; then
+		app_mods="${parent%-UserData}.app/Mods"
+		if [[ -L "$app_mods" && -d "$app_mods" ]]; then
+			app_resolved="$(physical_dir "$app_mods")"
+			if [[ "$app_resolved" == "$resolved_abs" ]]; then
+				cat >&2 <<EOF
+Refusing RimWorld deploy through the UserData Mods path:
+  $provided_abs
+
+Use the paired app Mods symlink instead:
+  $app_mods
+
+That path deploys $mod_file_name to the same physical Mods folder while keeping
+the derived sibling BridgeTools directory paired with the RimWorld app that
+loads it.
+EOF
+				exit 2
+			fi
+		fi
+	fi
+}
+
+lock_key_for() {
+	local resolved_abs="$1"
+	local mod_file_name="$2"
+
+	if command -v shasum >/dev/null 2>&1; then
+		printf '%s\n%s\n' "$resolved_abs" "$mod_file_name" | shasum -a 256 | awk '{ print $1 }'
+	else
+		printf '%s\n%s\n' "$resolved_abs" "$mod_file_name" | cksum | awk '{ print $1 "-" $2 }'
+	fi
+}
+
+run_inner_deploy() {
+	local rimworld_mod_dir="$1"
+	local project_path="$2"
+	local configuration="$3"
+	local platform="$4"
+	local mod_file_name="$5"
+	local build_bridge_tools="${6:-}"
+	local args=(
+		"$project_path"
+		-nologo
+		-v:q
+		-clp:ErrorsOnly
+		"/t:_CopyToRimworldUnlocked;_ZipModUnlocked"
+		"/p:RIMWORLD_MOD_DIR=$rimworld_mod_dir"
+		"/p:Configuration=$configuration"
+		"/p:Platform=$platform"
+		"/p:RimworldDeployGuardInner=true"
+	)
+
+	# Repeat this check inside the lock. The wrapper check is an early diagnostic,
+	# but this is the safety boundary immediately before destructive MSBuild targets.
+	ensure_rimworld_stopped
+
+	if [[ -n "$build_bridge_tools" ]]; then
+		args+=("/p:BuildBridgeTools=$build_bridge_tools")
+	fi
+
+	printf 'Deploying %s to %s\n' "$mod_file_name" "$rimworld_mod_dir" >&2
+	dotnet msbuild "${args[@]}"
+}
+
+deploy_with_lock() {
+	local rimworld_mod_dir="$1"
+	local project_path="$2"
+	local configuration="$3"
+	local platform="$4"
+	local mod_file_name="$5"
+	local build_bridge_tools="${6:-}"
+	local resolved_abs lock_root key lock_file lock_dir
+
+	validate_mod_dir "$rimworld_mod_dir" "$mod_file_name"
+
+	resolved_abs="$(physical_dir "$rimworld_mod_dir")"
+	# The protected resource is the physical deploy target, not this checkout.
+	# Use a process-global root so separate clones and worktrees share the lock.
+	lock_root="/tmp/brrainz-rimworld-deploy-locks-$(id -u)"
+	mkdir -p "$lock_root"
+	chmod 700 "$lock_root"
+	key="$(lock_key_for "$resolved_abs" "$mod_file_name")"
+	lock_file="$lock_root/$key.lock"
+
+	if command -v lockf >/dev/null 2>&1; then
+		touch "$lock_file"
+		lockf -k -t 0 "$lock_file" "$0" deploy-inner "$rimworld_mod_dir" "$project_path" "$configuration" "$platform" "$mod_file_name" "$build_bridge_tools"
+		return
+	fi
+
+	if command -v flock >/dev/null 2>&1; then
+		touch "$lock_file"
+		flock -n "$lock_file" "$0" deploy-inner "$rimworld_mod_dir" "$project_path" "$configuration" "$platform" "$mod_file_name" "$build_bridge_tools"
+		return
+	fi
+
+	lock_dir="$lock_file.dir"
+	if mkdir "$lock_dir" 2>/dev/null; then
+		deploy_lock_dir="$lock_dir"
+		trap cleanup_deploy_lock EXIT
+		run_inner_deploy "$rimworld_mod_dir" "$project_path" "$configuration" "$platform" "$mod_file_name" "$build_bridge_tools"
+		return
+	fi
+
+	cat >&2 <<EOF
+Refusing concurrent RimWorld deploy to:
+  $resolved_abs
+
+Another deploy for $mod_file_name is already holding:
+  $lock_dir
+EOF
+	exit 3
+}
+
+mode="${1:-}"
+case "$mode" in
+	check-stopped)
+		(($# == 1)) || usage
+		ensure_rimworld_stopped
+		;;
+	validate)
+		(($# == 4)) || usage
+		validate_mod_dir "$2" "$4"
+		;;
+	deploy)
+		(($# == 6 || $# == 7)) || usage
+		deploy_with_lock "$2" "$3" "$4" "$5" "$6" "${7:-}"
+		;;
+	deploy-inner)
+		(($# == 6 || $# == 7)) || usage
+		run_inner_deploy "$2" "$3" "$4" "$5" "$6" "${7:-}"
+		;;
+	*)
+		usage
+		;;
+esac

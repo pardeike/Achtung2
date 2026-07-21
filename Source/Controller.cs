@@ -87,7 +87,6 @@ public class Controller
 		}
 		if (optionTaken == false && menuAdded == false && (actions.EveryoneHasGoto || allowGotoWithoutMenuOption) && gotoAction != null)
 		{
-			actions.allPawns.Do(pawn => Tools.SetDraftStatus(pawn, true));
 			gotoAction();
 			return true;
 		}
@@ -158,6 +157,18 @@ public class Controller
 	private void BeginLineMove(Vector3 pos)
 	{
 		StartDragging(pos, false);
+		UpdateInitialLinePosition(pos);
+	}
+
+	private void BeginPositioning(Vector3 pos, bool asGroup)
+	{
+		StartDragging(pos, asGroup);
+		if (centerOnColonist == null)
+			UpdateInitialLinePosition(pos);
+	}
+
+	private void UpdateInitialLinePosition(Vector3 pos)
+	{
 		if (Achtung.Settings.forceCommandMenuMode == CommandMenuMode.Delayed && groupMovement == false)
 		{
 			pendingDelayedPositioning = true;
@@ -271,26 +282,16 @@ public class Controller
 			Tools.DraftWithSound(colonists, true);
 
 		var useFormation = doPositioning && (centerOnColonist != null || achtungPressed);
-		void DoDrag() => StartDragging(pos, useFormation);
+		void DoPositioning() => BeginPositioning(pos, useFormation);
 
 		// in multiplayer, drafting will update pawn.Drafted in the same tick, so we fake it
 		if (allDrafted && longPress == false)
 		{
-			DoDrag();
-			if (centerOnColonist == null)
-			{
-				if (Achtung.Settings.forceCommandMenuMode == CommandMenuMode.Delayed && groupMovement == false)
-				{
-					pendingDelayedPositioning = true;
-					UpdateLinePosition(pos, false);
-				}
-				else
-					MouseDrag(pos, -1);
-			}
+			DoPositioning();
 			return true;
 		}
 
-		return ShowMenu(actions, forceMenu, doPositioning ? DoDrag : null);
+		return ShowMenu(actions, forceMenu, doPositioning ? DoPositioning : null);
 	}
 
 	private void StartDragging(Vector3 pos, bool asGroup)
