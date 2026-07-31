@@ -97,7 +97,7 @@ public sealed partial class AchtungBridgeTools
 	public static async Task<object> TestForcedTargetSaveLoad(
 		IRimBridgeContext ctx,
 		CancellationToken cancellationToken,
-		[ToolParameter(Description = "Target representation to exercise: blueprint or frame.", Required = false, DefaultValue = "blueprint")] string targetKind = "blueprint",
+		[ToolParameter(Description = "Target representation to exercise: blueprint, frame, or thing.", Required = false, DefaultValue = "blueprint")] string targetKind = "blueprint",
 		[ToolParameter(Description = "Maximum wait for the full save reload.", Required = false, DefaultValue = 120000)] int timeoutMs = 120000)
 	{
 		if (ctx == null)
@@ -106,8 +106,8 @@ public sealed partial class AchtungBridgeTools
 			return new { success = false, error = "timeoutMs must be between 10000 and 300000." };
 
 		targetKind = targetKind?.Trim().ToLowerInvariant();
-		if (targetKind is not ("blueprint" or "frame"))
-			return new { success = false, error = "targetKind must be blueprint or frame." };
+		if (targetKind is not ("blueprint" or "frame" or "thing"))
+			return new { success = false, error = "targetKind must be blueprint, frame, or thing." };
 
 		await forcedTargetSaveLoadGate.WaitAsync(cancellationToken);
 		var result = new ForcedTargetSaveLoadContract
@@ -267,9 +267,12 @@ public sealed partial class AchtungBridgeTools
 				return false;
 			}
 
-			var expectedWorkgiverDefName = targetKind == "frame"
-				? "ConstructDeliverResourcesToFrames"
-				: "ConstructDeliverResourcesToBlueprints";
+			var expectedWorkgiverDefName = targetKind switch
+			{
+				"frame" => "ConstructDeliverResourcesToFrames",
+				"thing" => "HaulGeneral",
+				_ => "ConstructDeliverResourcesToBlueprints"
+			};
 			var workgiver = DefDatabase<WorkGiverDef>.GetNamedSilentFail(expectedWorkgiverDefName);
 			if (workgiver == null)
 			{
@@ -294,6 +297,11 @@ public sealed partial class AchtungBridgeTools
 			{
 				var frame = ThingMaker.MakeThing(ThingDefOf.Wall.frameDef, ThingDefOf.WoodLog);
 				targetThing = GenSpawn.Spawn(frame, targetCell, Find.CurrentMap, Rot4.North);
+			}
+			else if (targetKind == "thing")
+			{
+				var thing = ThingMaker.MakeThing(ThingDefOf.Steel);
+				targetThing = GenSpawn.Spawn(thing, targetCell, Find.CurrentMap, Rot4.North);
 			}
 			if (targetThing == null || targetThing.Spawned == false)
 				throw new InvalidOperationException($"Could not create a spawned {targetKind} target.");
@@ -385,6 +393,9 @@ public sealed partial class AchtungBridgeTools
 			{
 				"blueprint" => targetThing is Blueprint_Build,
 				"frame" => targetThing is Frame,
+				"thing" => targetThing?.def == ThingDefOf.Steel
+					&& targetThing is not Blueprint_Build
+					&& targetThing is not Frame,
 				_ => false
 			},
 			targetThingExistsOnMap = targetThingExistsOnMap,

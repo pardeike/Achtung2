@@ -185,8 +185,8 @@ normal in-game `Clear prioritized work` command after collecting evidence.
 target through `ForcedWork.AddForcedJob`, saves the complete game with
 `rimworld/save_game`, reloads it to playable readiness with
 `rimworld/load_game_ready`, and reads the target back from the newly loaded
-`ForcedWork` world component. It accepts `targetKind=blueprint` and
-`targetKind=frame`.
+`ForcedWork` world component. It accepts `targetKind=blueprint`,
+`targetKind=frame`, and `targetKind=thing`.
 
 The blueprint contract passes only when the same player pawn and spawned wall
 blueprint are resolved by their stable load IDs, the forced job still owns
@@ -198,6 +198,11 @@ also exist independently in the loaded map, which distinguishes a lost
 The frame case repeats that contract with a spawned wooden wall frame and
 `ConstructDeliverResourcesToFrames`, proving that the fix covers the next
 construction phase rather than only blueprint subclasses.
+
+The ordinary Thing case uses a spawned steel item with `HaulGeneral`. It must
+retain the exact item reference while preserving the legitimate default
+material score of zero, covering non-construction targets and default-valued
+serialized metadata.
 
 Run this contract only in a paused singleplayer game. An installed but inactive
 Multiplayer mod is allowed and exercises the compatibility fallback; a hosted
