@@ -19,6 +19,7 @@ public sealed partial class AchtungBridgeTools
 		public string targetLoadId { get; set; }
 		public string targetThingId { get; set; }
 		public string targetDefName { get; set; }
+		public string expectedWorkgiverDefName { get; set; }
 		public string saveName { get; set; }
 		public string savePath { get; set; }
 		public IntVec3 targetCell { get; set; } = IntVec3.Invalid;
@@ -73,6 +74,7 @@ public sealed partial class AchtungBridgeTools
 		public string targetLoadId { get; set; }
 		public string targetThingId { get; set; }
 		public string targetDefName { get; set; }
+		public string expectedWorkgiverDefName { get; set; }
 		public int targetX { get; set; }
 		public int targetZ { get; set; }
 		public int expectedMaterialScore { get; set; }
@@ -95,7 +97,7 @@ public sealed partial class AchtungBridgeTools
 	public static async Task<object> TestForcedTargetSaveLoad(
 		IRimBridgeContext ctx,
 		CancellationToken cancellationToken,
-		[ToolParameter(Description = "Target representation to exercise. The current fixture supports blueprint.", Required = false, DefaultValue = "blueprint")] string targetKind = "blueprint",
+		[ToolParameter(Description = "Target representation to exercise: blueprint or frame.", Required = false, DefaultValue = "blueprint")] string targetKind = "blueprint",
 		[ToolParameter(Description = "Maximum wait for the full save reload.", Required = false, DefaultValue = 120000)] int timeoutMs = 120000)
 	{
 		if (ctx == null)
@@ -104,8 +106,8 @@ public sealed partial class AchtungBridgeTools
 			return new { success = false, error = "timeoutMs must be between 10000 and 300000." };
 
 		targetKind = targetKind?.Trim().ToLowerInvariant();
-		if (targetKind != "blueprint")
-			return new { success = false, error = "targetKind must be blueprint." };
+		if (targetKind is not ("blueprint" or "frame"))
+			return new { success = false, error = "targetKind must be blueprint or frame." };
 
 		await forcedTargetSaveLoadGate.WaitAsync(cancellationToken);
 		var result = new ForcedTargetSaveLoadContract
@@ -135,6 +137,7 @@ public sealed partial class AchtungBridgeTools
 			result.targetLoadId = fixture.targetLoadId;
 			result.targetThingId = fixture.targetThingId;
 			result.targetDefName = fixture.targetDefName;
+			result.expectedWorkgiverDefName = fixture.expectedWorkgiverDefName;
 			result.targetX = fixture.targetCell.x;
 			result.targetZ = fixture.targetCell.z;
 			result.expectedMaterialScore = fixture.materialScore;
@@ -264,10 +267,13 @@ public sealed partial class AchtungBridgeTools
 				return false;
 			}
 
-			var workgiver = DefDatabase<WorkGiverDef>.GetNamedSilentFail("ConstructDeliverResourcesToBlueprints");
+			var expectedWorkgiverDefName = targetKind == "frame"
+				? "ConstructDeliverResourcesToFrames"
+				: "ConstructDeliverResourcesToBlueprints";
+			var workgiver = DefDatabase<WorkGiverDef>.GetNamedSilentFail(expectedWorkgiverDefName);
 			if (workgiver == null)
 			{
-				error = "The vanilla blueprint construction WorkGiverDef is unavailable.";
+				error = $"The vanilla {targetKind} construction WorkGiverDef is unavailable.";
 				return false;
 			}
 
@@ -283,6 +289,11 @@ public sealed partial class AchtungBridgeTools
 					null,
 					null,
 					false);
+			}
+			else if (targetKind == "frame")
+			{
+				var frame = ThingMaker.MakeThing(ThingDefOf.Wall.frameDef, ThingDefOf.WoodLog);
+				targetThing = GenSpawn.Spawn(frame, targetCell, Find.CurrentMap, Rot4.North);
 			}
 			if (targetThing == null || targetThing.Spawned == false)
 				throw new InvalidOperationException($"Could not create a spawned {targetKind} target.");
@@ -302,6 +313,7 @@ public sealed partial class AchtungBridgeTools
 				targetLoadId = targetThing.GetUniqueLoadID(),
 				targetThingId = targetThing.ThingID,
 				targetDefName = targetThing.def.defName,
+				expectedWorkgiverDefName = expectedWorkgiverDefName,
 				targetCell = targetCell,
 				materialScore = forcedTarget.materialScore,
 				saveName = saveName,
@@ -369,13 +381,18 @@ public sealed partial class AchtungBridgeTools
 			targetCount = forcedJob?.targets.Count ?? 0,
 			targetIsValid = item.IsValid,
 			targetHasThing = item.HasThing,
-			targetIsExpectedType = targetThing is Blueprint_Build,
+			targetIsExpectedType = fixture.targetKind switch
+			{
+				"blueprint" => targetThing is Blueprint_Build,
+				"frame" => targetThing is Frame,
+				_ => false
+			},
 			targetThingExistsOnMap = targetThingExistsOnMap,
 			targetThingIdMatches = targetThing?.ThingID == fixture.targetThingId,
 			targetCellMatches = item.Cell == fixture.targetCell,
 			materialScoreMatches = forcedTarget?.materialScore == fixture.materialScore,
 			lastAssignedCellMatches = forcedJob?.lastAssignedCell == fixture.targetCell,
-			workgiverMatches = workgivers.Contains("ConstructDeliverResourcesToBlueprints"),
+			workgiverMatches = workgivers.Contains(fixture.expectedWorkgiverDefName),
 			targetX = item.Cell.x,
 			targetZ = item.Cell.z,
 			materialScore = forcedTarget?.materialScore ?? int.MinValue,
