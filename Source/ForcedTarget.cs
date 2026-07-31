@@ -24,7 +24,9 @@ public class ForcedTarget : IExposable, IEquatable<ForcedTarget>
 
 	public void ExposeData()
 	{
-		if (Scribe.mode != LoadSaveMode.ResolvingCrossRefs || item.IsValid)
+		// Thing targets are temporarily invalid until their saved load ID is resolved.
+		// Cell targets are already valid and have no Thing cross-reference to consume.
+		if (Scribe.mode != LoadSaveMode.ResolvingCrossRefs || item.IsValid == false)
 			Scribe_TargetInfo.Look(ref item, "item");
 		Scribe_Values.Look(ref materialScore, "materialScore", 0, true);
 	}

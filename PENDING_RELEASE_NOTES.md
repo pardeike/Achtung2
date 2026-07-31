@@ -1,0 +1,1 @@
+- Fix prioritized-work targets losing their referenced blueprint or other map object after loading a save.

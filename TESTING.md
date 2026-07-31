@@ -179,6 +179,27 @@ The tool deliberately leaves the forced job active so it never clears
 simulation state through an unsynchronized test-only path. Clear it with the
 normal in-game `Clear prioritized work` command after collecting evidence.
 
+### Forced-target save/load contract
+
+`achtung/test_forced_target_save_load` creates one temporary prioritized-work
+target through `ForcedWork.AddForcedJob`, saves the complete game with
+`rimworld/save_game`, reloads it to playable readiness with
+`rimworld/load_game_ready`, and reads the target back from the newly loaded
+`ForcedWork` world component. It currently accepts `targetKind=blueprint`.
+
+The blueprint contract passes only when the same player pawn and spawned wall
+blueprint are resolved by their stable load IDs, the forced job still owns
+exactly one valid Thing target at the original cell, and the saved material
+score, workgiver, job kind, and last-assigned cell all match. The blueprint must
+also exist independently in the loaded map, which distinguishes a lost
+`LocalTargetInfo` cross-reference from a missing map object.
+
+Run this contract only in a paused singleplayer game. An installed but inactive
+Multiplayer mod is allowed and exercises the compatibility fallback; a hosted
+Multiplayer session is rejected because fixture setup and cleanup deliberately
+mutate local state. The tool uses a unique save name and removes the forced job,
+blueprint, and generated save in its `finally` path.
+
 ## Hosted Multiplayer pass
 
 Presence in the mod list is not enough to test synchronization. Start a fresh
