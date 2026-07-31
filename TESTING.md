@@ -186,7 +186,7 @@ target through `ForcedWork.AddForcedJob`, saves the complete game with
 `rimworld/save_game`, reloads it to playable readiness with
 `rimworld/load_game_ready`, and reads the target back from the newly loaded
 `ForcedWork` world component. It accepts `targetKind=blueprint`,
-`targetKind=frame`, and `targetKind=thing`.
+`targetKind=frame`, `targetKind=thing`, and `targetKind=cell`.
 
 The blueprint contract passes only when the same player pawn and spawned wall
 blueprint are resolved by their stable load IDs, the forced job still owns
@@ -204,11 +204,19 @@ retain the exact item reference while preserving the legitimate default
 material score of zero, covering non-construction targets and default-valued
 serialized metadata.
 
+The cell-only case uses a valid empty map cell with `CleanFilth`. It must reload
+as a non-Thing job with the same cell and no phantom Thing ID. This is the
+opposite side of the cross-reference boundary: `LoadingVars` recognizes the
+existing coordinate representation directly, so it neither registers a null
+Thing wanted ID nor replaces the complete cell during `ResolvingCrossRefs`.
+
 Run this contract only in a paused singleplayer game. An installed but inactive
 Multiplayer mod is allowed and exercises the compatibility fallback; a hosted
 Multiplayer session is rejected because fixture setup and cleanup deliberately
 mutate local state. The tool uses a unique save name and removes the forced job,
-blueprint, and generated save in its `finally` path.
+temporary target, and generated save in its `finally` path. It also brackets the
+run with `rimbridge/list_logs` and fails when RimWorld reports unconsumed target
+load IDs, even if the visible target state otherwise looks correct.
 
 ## Hosted Multiplayer pass
 

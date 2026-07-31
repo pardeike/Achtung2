@@ -24,9 +24,21 @@ public class ForcedTarget : IExposable, IEquatable<ForcedTarget>
 
 	public void ExposeData()
 	{
-		// Thing targets are temporarily invalid until their saved load ID is resolved.
-		// Cell targets are already valid and have no Thing cross-reference to consume.
-		if (Scribe.mode != LoadSaveMode.ResolvingCrossRefs || item.IsValid == false)
+		if (Scribe.mode == LoadSaveMode.LoadingVars)
+		{
+			// Vanilla's LocalTargetInfo loader registers a null Thing wanted ID
+			// for cell coordinates, then has no resolved object with which to
+			// consume it. Parse that existing on-disk representation directly.
+			var node = Scribe.loader.curXmlParent["item"];
+			var value = node?.InnerText;
+			if (value?.Length > 0 && value[0] == '(')
+				item = new LocalTargetInfo(IntVec3.FromString(value));
+			else if (node == null)
+				item = LocalTargetInfo.Invalid;
+			else
+				Scribe_TargetInfo.Look(ref item, "item");
+		}
+		else if (Scribe.mode != LoadSaveMode.ResolvingCrossRefs || item.IsValid == false)
 			Scribe_TargetInfo.Look(ref item, "item");
 		Scribe_Values.Look(ref materialScore, "materialScore", 0, true);
 	}

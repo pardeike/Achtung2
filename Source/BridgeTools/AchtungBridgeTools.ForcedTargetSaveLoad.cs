@@ -33,11 +33,14 @@ public sealed partial class AchtungBridgeTools
 		public bool hasForcedJob { get; set; }
 		public bool pawnReferenceMatches { get; set; }
 		public bool isThingJob { get; set; }
+		public bool thingJobMatches { get; set; }
 		public bool targetIsValid { get; set; }
 		public bool targetHasThing { get; set; }
+		public bool targetThingPresenceMatches { get; set; }
 		public bool targetIsExpectedType { get; set; }
 		public bool targetThingExistsOnMap { get; set; }
 		public bool targetThingIdMatches { get; set; }
+		public bool targetLoadIdMatches { get; set; }
 		public bool targetCellMatches { get; set; }
 		public bool materialScoreMatches { get; set; }
 		public bool lastAssignedCellMatches { get; set; }
@@ -61,10 +64,22 @@ public sealed partial class AchtungBridgeTools
 		public string error { get; set; }
 	}
 
+	sealed class ForcedTargetLogEntry
+	{
+		public long sequence { get; set; }
+		public string level { get; set; }
+		public string message { get; set; }
+	}
+
+	sealed class ForcedTargetLogJournal
+	{
+		public ForcedTargetLogEntry[] logs { get; set; } = [];
+	}
+
 	sealed class ForcedTargetSaveLoadContract
 	{
 		public bool success { get; set; }
-		public string contract { get; set; } = "A real Achtung forced target must retain its Thing reference and target metadata through RimWorld's complete save/load pipeline.";
+		public string contract { get; set; } = "A real Achtung forced target must retain its target representation and metadata through RimWorld's complete save/load pipeline.";
 		public string stage { get; set; }
 		public string targetKind { get; set; }
 		public string error { get; set; }
@@ -75,6 +90,7 @@ public sealed partial class AchtungBridgeTools
 		public string targetThingId { get; set; }
 		public string targetDefName { get; set; }
 		public string expectedWorkgiverDefName { get; set; }
+		public bool expectsThingTarget { get; set; }
 		public int targetX { get; set; }
 		public int targetZ { get; set; }
 		public int expectedMaterialScore { get; set; }
@@ -85,6 +101,13 @@ public sealed partial class AchtungBridgeTools
 		public bool loadSucceeded { get; set; }
 		public object loadError { get; set; }
 		public object loadResult { get; set; }
+		public bool logJournalSucceeded { get; set; }
+		public object logJournalError { get; set; }
+		public long logCursor { get; set; }
+		public int warningCount { get; set; }
+		public int loadIdWarningCount { get; set; }
+		public int loadIdErrorCount { get; set; }
+		public string[] warnings { get; set; } = [];
 		public ForcedTargetSaveLoadSnapshot actual { get; set; }
 		public ForcedTargetSaveLoadCleanup cleanup { get; set; }
 	}
@@ -97,7 +120,7 @@ public sealed partial class AchtungBridgeTools
 	public static async Task<object> TestForcedTargetSaveLoad(
 		IRimBridgeContext ctx,
 		CancellationToken cancellationToken,
-		[ToolParameter(Description = "Target representation to exercise: blueprint, frame, or thing.", Required = false, DefaultValue = "blueprint")] string targetKind = "blueprint",
+		[ToolParameter(Description = "Target representation to exercise: blueprint, frame, thing, or cell.", Required = false, DefaultValue = "blueprint")] string targetKind = "blueprint",
 		[ToolParameter(Description = "Maximum wait for the full save reload.", Required = false, DefaultValue = 120000)] int timeoutMs = 120000)
 	{
 		if (ctx == null)
@@ -106,8 +129,8 @@ public sealed partial class AchtungBridgeTools
 			return new { success = false, error = "timeoutMs must be between 10000 and 300000." };
 
 		targetKind = targetKind?.Trim().ToLowerInvariant();
-		if (targetKind is not ("blueprint" or "frame" or "thing"))
-			return new { success = false, error = "targetKind must be blueprint, frame, or thing." };
+		if (targetKind is not ("blueprint" or "frame" or "thing" or "cell"))
+			return new { success = false, error = "targetKind must be blueprint, frame, thing, or cell." };
 
 		await forcedTargetSaveLoadGate.WaitAsync(cancellationToken);
 		var result = new ForcedTargetSaveLoadContract
@@ -118,6 +141,24 @@ public sealed partial class AchtungBridgeTools
 		ForcedTargetSaveLoadFixture fixture = null;
 		try
 		{
+			result.stage = "log-baseline";
+			var logBaseline = await ctx.Tools.CallAsync<ForcedTargetLogJournal>(
+				"rimbridge/list_logs",
+				new { afterSequence = 0, minimumLevel = "info", limit = 1 },
+				cancellationToken: cancellationToken);
+			result.logJournalSucceeded = logBaseline.Succeeded();
+			result.logJournalError = logBaseline.Error;
+			if (result.logJournalSucceeded == false)
+			{
+				result.error = "Could not establish the pre-fixture RimWorld log cursor.";
+				return result;
+			}
+			result.logCursor = (logBaseline.Result?.logs ?? [])
+				.Select(entry => entry.sequence)
+				.DefaultIfEmpty(0)
+				.Max();
+
+			result.stage = "setup";
 			var setupError = null as string;
 			await ctx.MainThread.InvokeAsync(() =>
 			{
@@ -138,6 +179,7 @@ public sealed partial class AchtungBridgeTools
 			result.targetThingId = fixture.targetThingId;
 			result.targetDefName = fixture.targetDefName;
 			result.expectedWorkgiverDefName = fixture.expectedWorkgiverDefName;
+			result.expectsThingTarget = fixture.targetKind != "cell";
 			result.targetX = fixture.targetCell.x;
 			result.targetZ = fixture.targetCell.z;
 			result.expectedMaterialScore = fixture.materialScore;
@@ -184,13 +226,46 @@ public sealed partial class AchtungBridgeTools
 				return result;
 			}
 
-			result.stage = "verify";
+			result.stage = "verify-state";
 			result.actual = await ctx.MainThread.InvokeAsync(
 				() => CaptureForcedTargetSaveLoadSnapshot(fixture),
 				cancellationToken);
-			result.success = result.actual.success;
+
+			result.stage = "verify-logs";
+			var logJournal = await ctx.Tools.CallAsync<ForcedTargetLogJournal>(
+				"rimbridge/list_logs",
+				new
+				{
+					afterSequence = result.logCursor,
+					minimumLevel = "warning",
+					limit = 100
+				},
+				cancellationToken: cancellationToken);
+			result.logJournalSucceeded = logJournal.Succeeded();
+			result.logJournalError = logJournal.Error;
+			var warnings = logJournal.Result?.logs ?? [];
+			result.warningCount = warnings.Length;
+			result.loadIdWarningCount = warnings.Count(entry =>
+				entry.message?.IndexOf(
+					"Not all loadIDs which were read were consumed",
+					StringComparison.OrdinalIgnoreCase) >= 0);
+			result.loadIdErrorCount = warnings.Count(entry =>
+				entry.message?.IndexOf(
+					"Could not get load ID",
+					StringComparison.OrdinalIgnoreCase) >= 0);
+			result.warnings = warnings
+				.Select(entry => $"{entry.level}: {entry.message}")
+				.ToArray();
+			result.success = result.actual.success
+				&& result.logJournalSucceeded
+				&& result.loadIdWarningCount == 0
+				&& result.loadIdErrorCount == 0;
 			if (result.success == false)
-				result.error = "The forced target did not retain its complete saved representation.";
+			{
+				result.error = result.loadIdWarningCount > 0 || result.loadIdErrorCount > 0
+					? "RimWorld reported a target load-ID problem after reloading the fixture."
+					: "The forced target did not retain its complete saved representation.";
+			}
 			return result;
 		}
 		catch (Exception ex)
@@ -271,12 +346,13 @@ public sealed partial class AchtungBridgeTools
 			{
 				"frame" => "ConstructDeliverResourcesToFrames",
 				"thing" => "HaulGeneral",
+				"cell" => "CleanFilth",
 				_ => "ConstructDeliverResourcesToBlueprints"
 			};
 			var workgiver = DefDatabase<WorkGiverDef>.GetNamedSilentFail(expectedWorkgiverDefName);
 			if (workgiver == null)
 			{
-				error = $"The vanilla {targetKind} construction WorkGiverDef is unavailable.";
+				error = $"The vanilla {targetKind} fixture WorkGiverDef is unavailable.";
 				return false;
 			}
 
@@ -303,10 +379,13 @@ public sealed partial class AchtungBridgeTools
 				var thing = ThingMaker.MakeThing(ThingDefOf.Steel);
 				targetThing = GenSpawn.Spawn(thing, targetCell, Find.CurrentMap, Rot4.North);
 			}
-			if (targetThing == null || targetThing.Spawned == false)
+			if (targetKind != "cell" && (targetThing == null || targetThing.Spawned == false))
 				throw new InvalidOperationException($"Could not create a spawned {targetKind} target.");
 
-			_ = forcedWork.AddForcedJob(pawn, [workgiver], new LocalTargetInfo(targetThing), out var forcedJob);
+			var target = targetKind == "cell"
+				? new LocalTargetInfo(targetCell)
+				: new LocalTargetInfo(targetThing);
+			_ = forcedWork.AddForcedJob(pawn, [workgiver], target, out var forcedJob);
 			var forcedTarget = forcedJob.targets.Single();
 			var saveName = $"Achtung_ForcedTarget_{targetKind}_{Guid.NewGuid():N}";
 			var savePath = GenFilePaths.FilePathForSavedGame(saveName);
@@ -318,9 +397,9 @@ public sealed partial class AchtungBridgeTools
 				targetKind = targetKind,
 				pawnLoadId = pawn.GetUniqueLoadID(),
 				pawnThingId = pawn.ThingID,
-				targetLoadId = targetThing.GetUniqueLoadID(),
-				targetThingId = targetThing.ThingID,
-				targetDefName = targetThing.def.defName,
+				targetLoadId = targetThing?.GetUniqueLoadID(),
+				targetThingId = targetThing?.ThingID,
+				targetDefName = targetThing?.def.defName,
 				expectedWorkgiverDefName = expectedWorkgiverDefName,
 				targetCell = targetCell,
 				materialScore = forcedTarget.materialScore,
@@ -373,9 +452,11 @@ public sealed partial class AchtungBridgeTools
 		var forcedTarget = forcedJob?.targets.FirstOrDefault();
 		var item = forcedTarget?.item ?? LocalTargetInfo.Invalid;
 		var targetThing = item.thingInt;
-		var targetThingExistsOnMap = Find.Maps
-			.SelectMany(map => map.listerThings.AllThings)
-			.Any(thing => thing.ThingID == fixture.targetThingId);
+		var expectsThingTarget = fixture.targetKind != "cell";
+		var targetThingExistsOnMap = fixture.targetThingId != null
+			&& Find.Maps
+				.SelectMany(map => map.listerThings.AllThings)
+				.Any(thing => thing.ThingID == fixture.targetThingId);
 		var workgivers = forcedJob?.workgiverDefs
 			.Select(def => def?.defName)
 			.Where(defName => defName != null)
@@ -386,9 +467,11 @@ public sealed partial class AchtungBridgeTools
 			hasForcedJob = forcedJob != null,
 			pawnReferenceMatches = forcedJob?.pawn == pawn,
 			isThingJob = forcedJob?.isThingJob == true,
+			thingJobMatches = (forcedJob?.isThingJob == true) == expectsThingTarget,
 			targetCount = forcedJob?.targets.Count ?? 0,
 			targetIsValid = item.IsValid,
 			targetHasThing = item.HasThing,
+			targetThingPresenceMatches = item.HasThing == expectsThingTarget,
 			targetIsExpectedType = fixture.targetKind switch
 			{
 				"blueprint" => targetThing is Blueprint_Build,
@@ -396,10 +479,12 @@ public sealed partial class AchtungBridgeTools
 				"thing" => targetThing?.def == ThingDefOf.Steel
 					&& targetThing is not Blueprint_Build
 					&& targetThing is not Frame,
+				"cell" => item.IsValid && item.HasThing == false,
 				_ => false
 			},
 			targetThingExistsOnMap = targetThingExistsOnMap,
 			targetThingIdMatches = targetThing?.ThingID == fixture.targetThingId,
+			targetLoadIdMatches = targetThing?.GetUniqueLoadID() == fixture.targetLoadId,
 			targetCellMatches = item.Cell == fixture.targetCell,
 			materialScoreMatches = forcedTarget?.materialScore == fixture.materialScore,
 			lastAssignedCellMatches = forcedJob?.lastAssignedCell == fixture.targetCell,
@@ -416,13 +501,14 @@ public sealed partial class AchtungBridgeTools
 		snapshot.success = snapshot.pawnFound
 			&& snapshot.hasForcedJob
 			&& snapshot.pawnReferenceMatches
-			&& snapshot.isThingJob
+			&& snapshot.thingJobMatches
 			&& snapshot.targetCount == 1
 			&& snapshot.targetIsValid
-			&& snapshot.targetHasThing
+			&& snapshot.targetThingPresenceMatches
 			&& snapshot.targetIsExpectedType
-			&& snapshot.targetThingExistsOnMap
+			&& snapshot.targetThingExistsOnMap == expectsThingTarget
 			&& snapshot.targetThingIdMatches
+			&& snapshot.targetLoadIdMatches
 			&& snapshot.targetCellMatches
 			&& snapshot.materialScoreMatches
 			&& snapshot.lastAssignedCellMatches
@@ -440,9 +526,11 @@ public sealed partial class AchtungBridgeTools
 			if (currentPawn != null)
 				ForcedWork.Instance.Remove(currentPawn);
 
-			var currentTarget = Find.Maps
-				.SelectMany(map => map.listerThings.AllThings)
-				.FirstOrDefault(thing => thing.ThingID == fixture.targetThingId);
+			var currentTarget = fixture.targetThingId == null
+				? null
+				: Find.Maps
+					.SelectMany(map => map.listerThings.AllThings)
+					.FirstOrDefault(thing => thing.ThingID == fixture.targetThingId);
 			if (currentTarget != null && currentTarget.Destroyed == false)
 				currentTarget.Destroy(DestroyMode.Vanish);
 
@@ -450,9 +538,10 @@ public sealed partial class AchtungBridgeTools
 			{
 				forcedJobRemoved = currentPawn == null
 					|| ForcedWork.Instance.HasForcedJob(currentPawn, ignorePreparing: true) == false,
-				targetRemoved = Find.Maps
-					.SelectMany(map => map.listerThings.AllThings)
-					.All(thing => thing.ThingID != fixture.targetThingId)
+				targetRemoved = fixture.targetThingId == null
+					|| Find.Maps
+						.SelectMany(map => map.listerThings.AllThings)
+						.All(thing => thing.ThingID != fixture.targetThingId)
 			};
 		}, CancellationToken.None);
 
