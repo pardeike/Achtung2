@@ -28,6 +28,12 @@ public class FloatMenuOptionProvider_FightFire : FloatMenuOptionProvider
 
 	static void StartWork(FloatMenuContext context, JobDriver_Thoroughly driver)
 	{
+		if (MultiplayerSupport.IsActive)
+		{
+			MultiplayerSupport.StartThoroughWork([.. context.ValidSelectedPawns], context.ClickedCell, ThoroughWorkType.FightFire);
+			return;
+		}
+
 		foreach (var pawn in context.ValidSelectedPawns)
 			driver.StartJob(pawn, context.ClickedCell, context.ClickedCell);
 	}

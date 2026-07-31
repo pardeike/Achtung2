@@ -58,27 +58,78 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 				return true;
 			actionSelected = true;
 
-			var success = options.Any(option =>
+			bool success;
+			if (MultiplayerSupport.IsActive)
 			{
-				if (option is ForcedFloatMenuOption forceOption)
+				var forceOption = options.OfType<ForcedFloatMenuOption>().FirstOrDefault();
+				success = forceOption != null
+					? BeginForceWork(forcedPawns, forceOption.forceWorkgiver, forceOption.forceCell)
+					: options.Any(option => option.extraPartOnGUI?.Invoke(drawRect) == true);
+			}
+			else
+			{
+				success = options.Any(option =>
 				{
-					var success = false;
-					foreach (var pawn in forcedPawns)
+					if (option is ForcedFloatMenuOption forceOption)
 					{
-						var result = ForceAction(pawn, forceOption.forceWorkgiver, forceOption.forceCell);
-						success |= result;
+						var forced = false;
+						foreach (var pawn in forcedPawns)
+							forced |= ForceAction(pawn, forceOption.forceWorkgiver, forceOption.forceCell);
+						return forced;
 					}
-					return success;
-				}
-				if (option.extraPartOnGUI != null)
-					return option.extraPartOnGUI(drawRect);
-				return false;
-			});
+					if (option.extraPartOnGUI != null)
+						return option.extraPartOnGUI(drawRect);
+					return false;
+				});
+			}
 
 			if (success)
 				return true;
 		}
 		return false;
+	}
+
+	static bool BeginForceWork(List<Pawn> pawns, WorkGiver_Scanner forceWorkgiver, IntVec3 clickedCell)
+	{
+		if (forceWorkgiver?.def == null)
+			return false;
+
+		var validPawns = pawns
+			.Where(pawn => CanForceWork(pawn, forceWorkgiver, clickedCell))
+			.Distinct()
+			.OrderBy(pawn => pawn.thingIDNumber)
+			.ToList();
+		if (validPawns.Count == 0)
+			return false;
+
+		var cellRadius = 0;
+		MouseTracker.StartDragging(
+			validPawns[0],
+			clickedCell,
+			radius => cellRadius = radius,
+			() => MultiplayerSupport.ForceWork(validPawns, forceWorkgiver.def, clickedCell, cellRadius));
+		return true;
+	}
+
+	static bool CanForceWork(Pawn pawn, WorkGiver_Scanner forceWorkgiver, IntVec3 clickedCell)
+	{
+		if (pawn?.Map == null || forceWorkgiver == null || clickedCell.InBounds(pawn.Map) == false)
+			return false;
+
+		var forcedWork = ForcedWork.Instance;
+		forcedWork.Prepare(pawn);
+		try
+		{
+			return ForcedWork.GetCombinedDefs(forceWorkgiver)
+				.Select(def => def?.giverClass == null ? null : def.Worker as WorkGiver_Scanner)
+				.Where(workgiver => workgiver != null)
+				.Any(workgiver => ForcedWork.HasJobItem(pawn, workgiver, clickedCell, false) != null
+					|| ForcedWork.HasJobItem(pawn, workgiver, clickedCell, true) != null);
+		}
+		finally
+		{
+			forcedWork.Unprepare(pawn);
+		}
 	}
 
 	public static bool ForceAction(Pawn pawn, WorkGiver_Scanner forceWorkgiver, IntVec3 clickedCell)
@@ -123,5 +174,50 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 		forcedWork.RemoveForcedJob(pawn);
 		Messages.Message("CouldNotFindMoreForcedWork".Translate(pawn.Name.ToStringShort), MessageTypeDefOf.RejectInput);
 		return false;
+	}
+
+	internal static bool ApplyForceWork(Pawn pawn, WorkGiver_Scanner forceWorkgiver, IntVec3 clickedCell, int initialExpansionCount, int cellRadius)
+	{
+		var forcedWork = ForcedWork.Instance;
+		forcedWork.Prepare(pawn);
+
+		try
+		{
+			var workgiverDefs = ForcedWork.GetCombinedDefs(forceWorkgiver);
+			foreach (var expandSearch in new[] { false, true })
+				foreach (var workgiverDef in workgiverDefs)
+				{
+					var workgiver = workgiverDef.giverClass == null ? null : workgiverDef.Worker as WorkGiver_Scanner;
+					if (workgiver == null)
+						continue;
+
+					var jobItem = ForcedWork.HasJobItem(pawn, workgiver, clickedCell, expandSearch);
+					if (jobItem == null)
+						continue;
+
+					Tools.CancelWorkOn(pawn, jobItem);
+
+					if (forcedWork.AddForcedJob(pawn, workgiverDefs, jobItem, out var forcedJob))
+					{
+						forcedJob.ExpandJob(initialExpansionCount);
+						if (forcedJob.GetNextNonConflictingJob(forcedWork) == false)
+							continue;
+						forcedWork.Unprepare(pawn);
+					}
+
+					forcedJob.cellRadius = cellRadius;
+					forcedJob.Start();
+					return true;
+				}
+
+			forcedWork.RemoveForcedJob(pawn);
+			if (MultiplayerSupport.ShouldShowCommandFeedback)
+				Messages.Message("CouldNotFindMoreForcedWork".Translate(pawn.Name.ToStringShort), MessageTypeDefOf.RejectInput);
+			return false;
+		}
+		finally
+		{
+			forcedWork.Unprepare(pawn);
+		}
 	}
 }

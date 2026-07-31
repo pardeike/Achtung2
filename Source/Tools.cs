@@ -216,14 +216,16 @@ static class Tools
 		if (map == null || radius == 0) yield break;
 
 		var visited = new HashSet<XY>(existing);
-		var queue = new Queue<XY>(visited);
+		var queue = MultiplayerSupport.IsActive
+			? new Queue<XY>(visited.OrderBy(cell => cell.x).ThenBy(cell => cell.y))
+			: new Queue<XY>(visited);
 		var added = new Queue<XY>();
 		for (var i = 1; i <= radius && queue.Count > 0; i++)
 		{
 			while (queue.Count > 0)
 			{
 				var cell = queue.Dequeue();
-				var j = Rand.Range(0, 8);
+				var j = MultiplayerSupport.IsActive ? cell.GetHashCode() & 7 : Rand.Range(0, 8);
 				for (var k = 0; k < 8; k++)
 				{
 					var newCell = cell + XY.Adjacent[(j + k) % 8];
@@ -328,19 +330,39 @@ static class Tools
 	{
 		var gotDrafted = false;
 		var gotUndrafted = false;
-		colonists.Do(colonist =>
+		if (MultiplayerSupport.IsActive == false)
 		{
-			var newDraftStatus = SetDraftStatus(colonist.pawn, colonist.originalDraftStatus);
+			colonists.Do(colonist =>
+			{
+				var newDraftStatus = SetDraftStatusLocal(colonist.pawn, colonist.originalDraftStatus);
+				if (colonist.originalDraftStatus && !newDraftStatus)
+					gotDrafted = true;
+				if (colonist.originalDraftStatus == false && newDraftStatus)
+					gotUndrafted = true;
+				colonist.pawn.mindState.priorityWork.Clear();
+				if (colonist.pawn.jobs?.curJob != null && colonist.pawn.jobs.IsCurrentJobPlayerInterruptible())
+					colonist.pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
+			});
+			if (gotDrafted)
+				SoundDefOf.DraftOn.PlayOneShotOnCamera(null);
+			if (gotUndrafted)
+				SoundDefOf.DraftOff.PlayOneShotOnCamera(null);
+			return;
+		}
+
+		var pawns = new List<Pawn>();
+		var originalDraftStatuses = new List<bool>();
+		colonists.DoIf(colonist => colonist?.pawn != null, colonist =>
+		{
+			var newDraftStatus = GetDraftingStatus(colonist.pawn);
 			if (colonist.originalDraftStatus && !newDraftStatus)
 				gotDrafted = true;
 			if (colonist.originalDraftStatus == false && newDraftStatus)
 				gotUndrafted = true;
-			colonist.pawn.mindState.priorityWork.Clear();
-			if (colonist.pawn.jobs?.curJob != null && colonist.pawn.jobs.IsCurrentJobPlayerInterruptible())
-			{
-				colonist.pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
-			}
+			pawns.Add(colonist.pawn);
+			originalDraftStatuses.Add(colonist.originalDraftStatus);
 		});
+		MultiplayerSupport.CancelDrafting(pawns, originalDraftStatuses);
 		if (gotDrafted)
 			SoundDefOf.DraftOn.PlayOneShotOnCamera(null);
 		if (gotUndrafted)
@@ -353,7 +375,20 @@ static class Tools
 		return pawn.drafter.Drafted;
 	}
 
-	public static bool SetDraftStatus(Pawn pawn, bool drafted)
+	public static bool SetDraftStatus(Pawn pawn, bool drafted, bool localOnly = false)
+	{
+		var previousStatus = GetDraftingStatus(pawn);
+		if (previousStatus != drafted)
+		{
+			if (localOnly || MultiplayerSupport.IsActive == false)
+				_ = SetDraftStatusLocal(pawn, drafted);
+			else
+				MultiplayerSupport.SetDraftStatus(pawn, drafted);
+		}
+		return previousStatus;
+	}
+
+	internal static bool SetDraftStatusLocal(Pawn pawn, bool drafted)
 	{
 		var previousStatus = GetDraftingStatus(pawn);
 		if (previousStatus != drafted)
@@ -362,6 +397,14 @@ static class Tools
 	}
 
 	public static void OrderTo(Pawn pawn, int x, int z)
+	{
+		if (MultiplayerSupport.IsActive)
+			MultiplayerSupport.OrderTo(pawn, x, z);
+		else
+			OrderToLocal(pawn, x, z);
+	}
+
+	internal static void OrderToLocal(Pawn pawn, int x, int z)
 	{
 		var bestCell = new IntVec3(x, 0, z);
 		var job = JobMaker.MakeJob(JobDefOf.Goto, bestCell);
@@ -432,11 +475,14 @@ static class Tools
 		var vector = lineEnd - lineStart;
 		vector.y = 0;
 		var rotation = Quaternion.FromToRotation(vector, Vector3.right);
-		return colonists.OrderBy(colonist =>
+		var ordered = colonists.OrderBy(colonist =>
 		{
 			var vec = rotation * colonist.pawn.DrawPos;
 			return vec.x * 1000 + vec.z;
 		});
+		return MultiplayerSupport.IsActive
+			? ordered.ThenBy(colonist => colonist.pawn.thingIDNumber)
+			: ordered;
 	}
 
 	public static void Note(this Listing_Standard listing, string name, GameFont font = GameFont.Small)

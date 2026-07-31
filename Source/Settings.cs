@@ -137,6 +137,7 @@ public class AchtungSettings : ModSettings
 
 	public static void DoWindowContents(Rect canvas)
 	{
+		var settingsBeforeDraw = AchtungSimulationSettingsSnapshot.Capture();
 		var helpRect = canvas;
 		helpRect.height = Text.LineHeight + 2;
 		helpRect.x -= 17;
@@ -154,6 +155,7 @@ public class AchtungSettings : ModSettings
 
 		DrawColumn(positioningRect, "PositioningSettingsHeader", ref positioningScrollPosition, ref positioningMeasureCache, DrawPositioningSettings);
 		DrawColumn(forcingRect, "ForcingSettingsHeader", ref forcingScrollPosition, ref forcingMeasureCache, DrawForcingSettings);
+		MultiplayerSupport.SynchronizeSettings(settingsBeforeDraw);
 	}
 
 	static void DrawColumn(Rect rect, string titleKey, ref Vector2 scrollPosition, ref ColumnMeasureCache measureCache, Action<Listing_Standard> drawSettings)
@@ -331,5 +333,11 @@ public class AchtungSettings : ModSettings
 			else
 				DynamicWorkTypes.RemoveWorkTypeDef(Tools.RescuingWorkTypeDef, Tools.savedWorkTypeDef, doctorRescueWorkGiver);
 		}
+	}
+
+	internal static void ApplyRuntimeEffects()
+	{
+		ToggleRescue(Achtung.Settings.rescueEnabled);
+		ForbidUtility_IsForbidden_Patch.FixPatch();
 	}
 }

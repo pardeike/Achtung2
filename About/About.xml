@@ -19,6 +19,9 @@
       <downloadUrl>https://github.com/pardeike/HarmonyRimWorld/releases/latest</downloadUrl>
     </li>
   </modDependencies>
+  <loadAfter>
+    <li>rwmt.multiplayer</li>
+  </loadAfter>
   <packageId>brrainz.achtung</packageId>
   <modVersion>4.1.12</modVersion>
   <steamAppId>730936602</steamAppId>

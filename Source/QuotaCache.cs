@@ -9,6 +9,7 @@ public class QuotaCache<S, T>(int maxRetrievals)
 	private readonly int maxRetrievals = maxRetrievals;
 
 	private void Add(S key, T value) => cache[key] = (value, 0);
+	public void Clear() => cache.Clear();
 
 	public T Get(S key, Func<S, T> fetchCallback)
 	{

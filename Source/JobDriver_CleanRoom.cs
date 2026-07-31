@@ -33,7 +33,13 @@ public class JobDriver_CleanRoom : JobDriver_Thoroughly
 		if (totalWorkCount < currentWorkCount)
 			totalWorkCount = currentWorkCount;
 		var pos = pawn.Position;
-		return filth.OrderBy(f => (pos - f.Position).LengthHorizontalSquared).FirstOrDefault();
+		var ordered = filth.OrderBy(f => (pos - f.Position).LengthHorizontalSquared);
+		if (MultiplayerSupport.IsActive)
+			ordered = ordered
+				.ThenBy(f => f.Position.x)
+				.ThenBy(f => f.Position.z)
+				.ThenBy(f => f.thingIDNumber);
+		return ordered.FirstOrDefault();
 	}
 
 	public override bool DoWorkToItem()

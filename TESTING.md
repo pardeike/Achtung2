@@ -52,6 +52,22 @@ RimWorld's normal mod configuration, then restart. Other DLCs are not required
 for this contract. Keep unrelated gameplay mods out of the baseline unless the
 scenario is explicitly testing an interaction with them.
 
+For Multiplayer compatibility tests, use this active order:
+
+- `zetrith.prepatcher`
+- `brrainz.harmony`
+- the installed RimBridgeServer package
+- `ludeon.rimworld`
+- `ludeon.rimworld.biotech`
+- `rwmt.multiplayer`
+- `brrainz.achtung`
+
+Create the test save with that exact list before hosting. Loading an older
+singleplayer fixture with Multiplayer added is useful for migration testing,
+but it is not a clean synchronization baseline. The compatibility project and
+packaged API dependency are 1.6-only; do not edit the frozen 1.1 through 1.5
+release directories while maintaining this integration.
+
 ## GABS lifecycle
 
 Use the normal GABS lifecycle rather than launching a second game process:
@@ -136,6 +152,56 @@ These contracts deliberately test the behavioral boundary instead of the
 Mech tab's implementation. The tab establishes draft state; Achtung must then
 respect that state when a mixed map selection receives an implicit move.
 
+### Forced-work neighbour propagation contract
+
+`achtung/test_force_work_spread_at_cell` is a companion-only contract for the
+force-work path. Prepare a connected line of buildable items through normal
+Multiplayer-synchronized gameplay (for example, 12 or more wooden wall
+blueprints), select a capable pawn with no existing Achtung prioritized work,
+and call the contract on a blueprint near the middle of the line.
+
+The companion resolves the same `ForcedFloatMenuOption` that the context menu
+would display and calls `MultiplayerSupport.ForceWork`, which is the exact
+synchronized command invoked when the lightning-button drag completes. It does
+not call `ForcedMultiFloatMenuOption.ApplyForceWork`, mutate a `ForcedJob`, or
+expand targets directly. After Multiplayer executes the command, the contract
+advances deterministic ticks in 15-tick samples and records the complete cell
+set used by Achtung's force-marker renderer.
+
+The contract passes only when:
+
+- Multiplayer executes the synchronized command and creates the forced job;
+- the peak target count grows beyond the initial target set;
+- at least one newly added marker cell neighbours the prior marker set; and
+- the peak reaches `expectedMinimumTargets` (six by default).
+
+The tool deliberately leaves the forced job active so it never clears
+simulation state through an unsynchronized test-only path. Clear it with the
+normal in-game `Clear prioritized work` command after collecting evidence.
+
+## Hosted Multiplayer pass
+
+Presence in the mod list is not enough to test synchronization. Start a fresh
+debug colony with the Multiplayer test list active, save it, open RimWorld's
+in-game menu, choose `Host a server`, and start the host. Confirm the Multiplayer
+session indicator is visible before calling an Achtung contract.
+
+Run `achtung/run_mixed_draft_mech_scenario` after the host has unpaused. Then
+prepare a long wall blueprint line through normal gameplay and run
+`achtung/test_force_work_spread_at_cell` on its center. A valid hosted result
+advances game ticks, assigns the drafted combat mech a player-forced `Goto`
+without affecting the labor mech, and grows the wall job's marker cells through
+neighbouring blueprints. Also inspect the post-contract log journal: successful
+structured output is not enough if Multiplayer logged a map-command exception.
+
+Multiplayer's current RimWorld 1.6 macOS build may fail inside its own native
+deferred stack-trace walker while ordinary pawns and animals tick. If that
+happens before any Achtung command, repeat the isolation run with the host's
+`Desync traces` option disabled and record the upstream failure separately.
+Achtung suppresses that optional collector only while its synchronized job
+commands allocate deterministic IDs; it does not disable Multiplayer's state
+synchronization.
+
 ## Evidence to retain
 
 For a code change, record:
@@ -143,7 +209,7 @@ For a code change, record:
 - the source build result;
 - deployed mod and companion DLL hashes;
 - the restarted GABS instance identity;
-- fresh tool discovery showing all three named contracts;
+- fresh tool discovery showing all four named contracts;
 - structured results from both no-tick contracts and the realtime contract; and
 - relevant new errors from RimWorld's player log.
 

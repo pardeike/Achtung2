@@ -47,10 +47,17 @@ public class ForcedWork(World world) : WorldComponent(world)
 	public static List<WorkGiverDef> GetCombinedDefs(WorkGiver baseWorkgiver)
 	{
 		if (constructionDefs.Contains(baseWorkgiver.def))
-			return [.. constructionDefs];
+			return MultiplayerSupport.IsActive
+				? [.. constructionDefs.OrderBy(def => def.defName, StringComparer.Ordinal)]
+				: [.. constructionDefs];
 
 		if (baseWorkgiver.IsOfType<WorkGiver_Warden>())
-			return AllWorkerDefs<WorkGiver_Warden>();
+		{
+			var defs = AllWorkerDefs<WorkGiver_Warden>();
+			return MultiplayerSupport.IsActive
+				? [.. defs.OrderBy(def => def.defName, StringComparer.Ordinal)]
+				: defs;
+		}
 
 		return [baseWorkgiver.def];
 	}
@@ -175,7 +182,9 @@ public class ForcedWork(World world) : WorldComponent(world)
 			var job = cell.GetCellJob(pawn, workgiver, expandSearch);
 			if (job != null)
 				return new LocalTargetInfo(cell);
-			var things = pawn.Map.thingGrid.ThingsAt(cell);
+			IEnumerable<Thing> things = pawn.Map.thingGrid.ThingsAt(cell);
+			if (MultiplayerSupport.IsActive)
+				things = things.OrderBy(thing => thing.thingIDNumber);
 			foreach (var thing in things)
 			{
 				job = thing.GetThingJob(pawn, workgiver, expandSearch);
@@ -200,8 +209,10 @@ public class ForcedWork(World world) : WorldComponent(world)
 	{
 		if (hasForcedJobs == false)
 			return [];
-		return allForcedJobs
-			.Where(pair => pair.Key.Map == map)
+		IEnumerable<KeyValuePair<Pawn, ForcedJobs>> jobs = allForcedJobs.Where(pair => pair.Key.Map == map);
+		if (MultiplayerSupport.IsActive)
+			jobs = jobs.OrderBy(pair => pair.Key.thingIDNumber);
+		return jobs
 			.SelectMany(pair => pair.Value.jobs ?? []);
 	}
 
@@ -209,19 +220,33 @@ public class ForcedWork(World world) : WorldComponent(world)
 	{
 		if (hasForcedJobs == false)
 			return [];
-		return [.. allForcedJobs.Values
-			.SelectMany(forcedJobs => forcedJobs.jobs)
+		IEnumerable<KeyValuePair<Pawn, ForcedJobs>> jobs = allForcedJobs;
+		if (MultiplayerSupport.IsActive)
+			jobs = jobs.OrderBy(pair => pair.Key.thingIDNumber);
+		return [.. jobs
+			.SelectMany(pair => pair.Value.jobs)
 			.OfType<ForcedJob>()
 			.Where(job => job.cancelled == false)];
+	}
+
+	public void ResetRuntimeStateForMultiplayer()
+	{
+		preparing.Clear();
+		foreach (var job in AllForcedJobs())
+			job.ResetRuntimeStateForMultiplayer();
 	}
 
 	public override void WorldComponentTick()
 	{
 		if (Find.TickManager.TicksGame % 139 != 0) return;
-		var pawns = allForcedJobs.Keys.ToArray();
+		var pawns = MultiplayerSupport.IsActive
+			? allForcedJobs.Keys.OrderBy(pawn => pawn.thingIDNumber).ToArray()
+			: allForcedJobs.Keys.ToArray();
 		var n = pawns.Length;
 		if (n == 0) return;
-		var pawn = pawns[++counter % n];
+		var pawn = MultiplayerSupport.IsActive
+			? pawns[(Find.TickManager.TicksGame / 139) % n]
+			: pawns[++counter % n];
 		var map = pawn.Map;
 		if (map == null) return;
 

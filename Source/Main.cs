@@ -28,6 +28,7 @@ public static class AchtungLoader
 
 		Achtung.harmony = new Harmony("net.pardeike.rimworld.mods.achtung");
 		Achtung.harmony.PatchAll();
+		MultiplayerSupport.Install();
 
 		const string sameSpotId = "net.pardeike.rimworld.mod.samespot";
 		IsSameSpotInstalled = Achtung.harmony.GetPatchedMethods()
@@ -149,9 +150,10 @@ static class LetterStack_LettersOnGUI_Patch
 [HarmonyPatch(nameof(Game.UpdatePlay))]
 static class Game_UpdatePlay_Patch
 {
-	static readonly IEnumerator it = Looper();
+	static IEnumerator iterator = Looper();
 	const float maxForcedWorkFrameTimeMs = 8f;
 	const int maxIterations = 800;
+	const int multiplayerWorkIntervalTicks = 15;
 	const int iterationBackoff = 8;
 	const int fpsRecoveryBuffer = 3;
 	const int contractIntervalTicks = 15;
@@ -164,6 +166,51 @@ static class Game_UpdatePlay_Patch
 	public static int[] fpsSlots = new int[10];
 	static int previousN = -1;
 	static int slowLaneFrames = 0;
+	static bool multiplayerMode = false;
+
+	static void SetMode(bool useMultiplayer)
+	{
+		if (multiplayerMode == useMultiplayer)
+			return;
+
+		multiplayerMode = useMultiplayer;
+		iterator = Looper();
+		iterations = 0;
+		prevFrames = 0;
+		fps = 0;
+		Array.Clear(fpsSlots, 0, fpsSlots.Length);
+		previousN = -1;
+		slowLaneFrames = 0;
+
+		if (useMultiplayer)
+			ForcedWork.Instance.ResetRuntimeStateForMultiplayer();
+	}
+
+	public static void MultiplayerTick()
+	{
+		var useMultiplayer = MultiplayerSupport.IsActive;
+		SetMode(useMultiplayer);
+		if (useMultiplayer == false || Find.TickManager.TicksGame % multiplayerWorkIntervalTicks != 0)
+			return;
+
+		foreach (var job in ForcedWork.Instance.AllForcedJobs())
+		{
+			var map = job?.pawn?.Map;
+			if (map == null || job.cancelled)
+				continue;
+
+			Drain(job.ExpandThingTargets(map));
+			if (job.cancelled == false)
+				Drain(job.ExpandCellTargets(map));
+			if (job.cancelled == false)
+				Drain(job.ContractTargets(map));
+		}
+	}
+
+	static void Drain(IEnumerator work)
+	{
+		while (work.MoveNext()) { }
+	}
 
 	static IEnumerator Looper()
 	{
@@ -220,6 +267,9 @@ static class Game_UpdatePlay_Patch
 	public static void Postfix()
 	{
 		if (Current.ProgramState != ProgramState.Playing) return;
+		var useMultiplayer = MultiplayerSupport.IsActive;
+		SetMode(useMultiplayer);
+		if (useMultiplayer) return;
 		var camera = Find.CameraDriver;
 		if (Root_Play_Update_Patch.isDragging) return;
 		var s1 = (int)(camera.rootSize * 1000);
@@ -272,7 +322,7 @@ static class Game_UpdatePlay_Patch
 			var frameDeadline = Time.realtimeSinceStartup + maxForcedWorkFrameTimeMs / 1000f;
 			for (var i = 0; i < frameIterations; i++)
 			{
-				_ = it.MoveNext();
+				_ = iterator.MoveNext();
 				if (Time.realtimeSinceStartup >= frameDeadline)
 					break;
 			}
@@ -698,7 +748,12 @@ static class Pawn_PathFollower_TryRecoverFromUnwalkablePosition_Patch
 [HarmonyPatch(nameof(TickManager.DoSingleTick))]
 static class TickManager_DoSingleTick_Patch
 {
-	public static void Prefix() => Achtung.usedThingsPerTick = [];
+	public static void Prefix()
+	{
+		MultiplayerSupport.ApplySharedSettings();
+		Achtung.usedThingsPerTick = [];
+	}
+	public static void Postfix() => Game_UpdatePlay_Patch.MultiplayerTick();
 }
 
 // patch in our menu options
@@ -892,6 +947,12 @@ public static class FloatMenuOptionProvider_EnterMapPortal_GetSingleOptionFor_Pa
 		}
 		__result = new FloatMenuOption(portal.EnterString, delegate
 		{
+			if (MultiplayerSupport.IsActive)
+			{
+				MultiplayerSupport.EnterPortal(enteringPawns, portal);
+				return;
+			}
+
 			foreach (var pawn in enteringPawns)
 			{
 				var job = JobMaker.MakeJob(JobDefOf.EnterPortal, portal);

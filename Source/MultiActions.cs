@@ -47,7 +47,7 @@ public class MultiActions
 
 		try
 		{
-			_ = Tools.SetDraftStatus(colonist.pawn, !draftState);
+			_ = Tools.SetDraftStatus(colonist.pawn, !draftState, true);
 			FloatMenuMakerMap.GetOptions([colonist.pawn], clickPos, out _).Do(option =>
 			{
 				if (existingLabels.Contains(option.Label) == false)
@@ -56,7 +56,7 @@ public class MultiActions
 		}
 		finally
 		{
-			_ = Tools.SetDraftStatus(colonist.pawn, draftState);
+			_ = Tools.SetDraftStatus(colonist.pawn, draftState, true);
 		}
 	}
 

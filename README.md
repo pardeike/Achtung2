@@ -20,7 +20,25 @@ Steam Workshop is also available:
 - RimWorld 1.6
 - Harmony (`brrainz.harmony`)
 
-The repository still carries compatibility assets for older RimWorld versions, but the current release and test workflow target RimWorld 1.6.
+The repository still carries compatibility assets for older RimWorld versions,
+but the current release and test workflow target RimWorld 1.6. Those older
+version directories are frozen release content; current development does not
+update them.
+
+## Multiplayer
+
+Achtung 1.6 supports the official
+[RimWorld Multiplayer](https://github.com/rwmt/Multiplayer) mod. Multiplayer is
+optional; when it is active, Achtung registers its synchronized commands through
+MultiplayerAPI and shares gameplay-affecting Achtung settings through the save.
+
+The compatibility layer covers drafting and undrafting, formation movement,
+force work, thorough room cleaning, firefighting, portal entry, cancellation,
+deterministic background expansion, and late-join restoration. Visual
+preferences remain local to each player.
+
+Load Prepatcher and Multiplayer according to Multiplayer's own requirements.
+Achtung declares Multiplayer as an optional `loadAfter` dependency.
 
 ## Build From Source
 

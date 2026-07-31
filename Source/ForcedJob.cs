@@ -143,6 +143,21 @@ public class ForcedJob : IExposable
 		}
 	}
 
+	static IEnumerable<ForcedTarget> StableTargets(IEnumerable<ForcedTarget> source)
+		=> MultiplayerSupport.IsActive
+			? source
+				.OrderBy(target => target.item.Cell.x)
+				.ThenBy(target => target.item.Cell.z)
+				.ThenBy(target => target.item.HasThing ? target.item.thingInt?.thingIDNumber ?? -1 : -1)
+			: source;
+
+	public void ResetRuntimeStateForMultiplayer()
+	{
+		smartTargetsCached = null;
+		getThingJobCache.Clear();
+		getCellJobCache.Clear();
+	}
+
 	private Dictionary<IntVec3, LocalTargetInfo> GetItemsByCell(IEnumerable<ForcedTarget> result)
 	{
 		var itemsByCell = new Dictionary<IntVec3, LocalTargetInfo>();
@@ -171,12 +186,15 @@ public class ForcedJob : IExposable
 
 	public IEnumerable<LocalTargetInfo> GetSortedTargets()
 	{
+		if (MultiplayerSupport.IsActive)
+			smartTargetsCached = null;
+
 		var map = pawn.Map;
 		var pos = pawn.Position;
 		var pathGrid = map.pathing.For(pawn).pathGrid;
 		var mapWidth = map.Size.x;
 
-		var result = targets.Where(target => target.IsValidTarget() && Tools.IsFreeTarget(pawn, target)).ToList();
+		var result = StableTargets(targets.Where(target => target.IsValidTarget() && Tools.IsFreeTarget(pawn, target))).ToList();
 		var shouldBeDoneSmart = Achtung.Settings.buildingSmart;
 		shouldBeDoneSmart &= workgiverDefs.Any(def => buildingSmartWorkgiverDefs.Contains(def.giverClass));
 
@@ -186,7 +204,13 @@ public class ForcedJob : IExposable
 			{
 				if (smartTargetsCached == null)
 				{
-					var someTarget = result.OrderByDescending(target => target.item.Cell.DistanceTo(startCell)).FirstOrDefault();
+					var orderedByDistance = result.OrderByDescending(target => target.item.Cell.DistanceTo(startCell));
+					if (MultiplayerSupport.IsActive)
+						orderedByDistance = orderedByDistance
+							.ThenBy(target => target.item.Cell.x)
+							.ThenBy(target => target.item.Cell.z)
+							.ThenBy(target => target.item.HasThing ? target.item.thingInt?.thingIDNumber ?? -1 : -1);
+					var someTarget = orderedByDistance.FirstOrDefault();
 					if (someTarget != null)
 					{
 						var path = map.pathFinder.FindPathNow(startCell, someTarget.item.Cell, TraverseParms.For(pawn, Danger.Deadly));
@@ -235,13 +259,17 @@ public class ForcedJob : IExposable
 			}
 		}
 
-		return result
-			.OrderByDescending(target =>
+		var prioritizedTargets = result.OrderByDescending(target =>
 			{
 				var distanceFromStart = target.item.Cell.DistanceToSquared(pawn.Position);
 				return 1000 * target.materialScore - distanceFromStart;
-			})
-			.Select(target => target.item);
+			});
+		if (MultiplayerSupport.IsActive)
+			prioritizedTargets = prioritizedTargets
+				.ThenBy(target => target.item.Cell.x)
+				.ThenBy(target => target.item.Cell.z)
+				.ThenBy(target => target.item.HasThing ? target.item.thingInt?.thingIDNumber ?? -1 : -1);
+		return prioritizedTargets.Select(target => target.item);
 	}
 
 	public int ExpandJob(int count)
@@ -249,9 +277,12 @@ public class ForcedJob : IExposable
 
 	IEnumerable<XY> ExpansionSeedCells()
 	{
-		var result = targets.Select(target => target.XY);
+		IEnumerable<ForcedTarget> orderedTargets = targets;
+		if (MultiplayerSupport.IsActive)
+			orderedTargets = StableTargets(targets).ToList();
+		var result = orderedTargets.Select(target => target.XY);
 		if (isThingJob)
-			result = targets
+			result = orderedTargets
 				.Select(target => target.item.thingInt)
 				.OfType<Thing>()
 				.SelectMany(thing => thing.AllCells())
@@ -265,7 +296,10 @@ public class ForcedJob : IExposable
 
 	public bool GetNextNonConflictingJob(ForcedWork forcedWork)
 	{
-		foreach (var workgiverDef in workgiverDefs)
+		IEnumerable<WorkGiverDef> defs = workgiverDefs;
+		if (MultiplayerSupport.IsActive)
+			defs = defs.OrderBy(def => def?.defName, StringComparer.Ordinal);
+		foreach (var workgiverDef in defs)
 		{
 			var workgiver = workgiverDef.giverClass == null ? null : workgiverDef.Worker as WorkGiver_Scanner;
 			if (workgiver == null)
@@ -311,6 +345,8 @@ public class ForcedJob : IExposable
 			if (worker is WorkGiver_ConstructAffectFloor) return 7;
 			return 999;
 		});
+		if (MultiplayerSupport.IsActive)
+			workGiversByPrio = workGiversByPrio.ThenBy(worker => worker?.def?.defName, StringComparer.Ordinal);
 
 		foreach (var workgiver in workGiversByPrio)
 			foreach (var target in GetSortedTargets())
@@ -408,6 +444,8 @@ public class ForcedJob : IExposable
 		{
 			lock (pawn.Map)
 			{
+				if (MultiplayerSupport.IsActive)
+					return workgiverScanners.Any(scanner => thing.GetThingJob(pawn, scanner, true) != null);
 				return getThingJobCache.Get(thing, t => workgiverScanners.Any(scanner => t.GetThingJob(pawn, scanner, true) != null));
 			}
 		}
@@ -423,6 +461,8 @@ public class ForcedJob : IExposable
 		{
 			lock (pawn.Map)
 			{
+				if (MultiplayerSupport.IsActive)
+					return workgiverScanners.Any(scanner => ((IntVec3)cell).GetCellJob(pawn, scanner) != null);
 				return getCellJobCache.Get(cell, c => workgiverScanners.Any(scanner => ((IntVec3)c).GetCellJob(pawn, scanner) != null));
 			}
 		}
@@ -451,7 +491,9 @@ public class ForcedJob : IExposable
 						break;
 
 					var yielded = false;
-					var thingsInCell = thingGrid.ThingsListAtFast(cell);
+					var thingsInCell = MultiplayerSupport.IsActive
+						? thingGrid.ThingsListAtFast(cell).OrderBy(thing => thing.thingIDNumber).ToList()
+						: thingGrid.ThingsListAtFast(cell);
 					for (var i = 0; i < thingsInCell.Count; i++)
 					{
 						if (cancelled || maxCountVerifier() == false)
@@ -514,12 +556,16 @@ public class ForcedJob : IExposable
 	{
 		_ = targets.RemoveWhere(targets => targets.item.thingInt?.Spawned == false);
 
-		var cells = targets.Select(target => target.item.thingInt)
+		var targetCells = targets.Select(target => target.item.thingInt)
 			.OfType<Thing>()
 			.SelectMany(thing => thing.AllCells())
 			.Union(targets.Select(target => target.XY))
-			.Distinct()
-			.ToArray();
+			.Distinct();
+		if (MultiplayerSupport.IsActive)
+			targetCells = targetCells
+				.OrderBy(cell => cell.x)
+				.ThenBy(cell => cell.y);
+		var cells = targetCells.ToArray();
 		yield return null;
 
 		for (var i = 0; i < cells.Length && cancelled == false; i++)
@@ -537,7 +583,7 @@ public class ForcedJob : IExposable
 	void ScribeTargets()
 	{
 		if (Scribe.mode == LoadSaveMode.Saving)
-			targets_temp_list = [.. targets];
+			targets_temp_list = [.. StableTargets(targets)];
 
 		Scribe_Collections.Look(ref targets_temp_list, "targets", LookMode.Deep);
 
@@ -562,6 +608,11 @@ public class ForcedJob : IExposable
 		Scribe_Values.Look(ref initialized, "inited", false, true);
 		Scribe_Values.Look(ref cellRadius, "radius", 0, true);
 		Scribe_Values.Look(ref lastAssignedCell, "lastAssignedCell", IntVec3.Invalid, true);
+		if (Scribe.mode != LoadSaveMode.Saving || MultiplayerSupport.IsActive)
+		{
+			Scribe_Values.Look(ref started, "started", false, true);
+			Scribe_Values.Look(ref cancelled, "cancelled", false, true);
+		}
 
 		if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			workgiverScanners = [.. workgiverDefs.Select(wgd => wgd.Worker).OfType<WorkGiver_Scanner>()];

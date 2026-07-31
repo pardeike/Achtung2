@@ -44,8 +44,12 @@ public class JobDriver_FightFire : JobDriver_Thoroughly
 
 	public override LocalTargetInfo FindNextWorkItem()
 	{
-		return workLocations
-			.OrderBy(loc => Math.Abs(loc.x - pawn.Position.x) + Math.Abs(loc.z - pawn.Position.z))
+		var ordered = workLocations.OrderBy(loc => Math.Abs(loc.x - pawn.Position.x) + Math.Abs(loc.z - pawn.Position.z));
+		if (MultiplayerSupport.IsActive)
+			ordered = ordered
+				.ThenBy(loc => loc.x)
+				.ThenBy(loc => loc.z);
+		return ordered
 			.Select(loc => pawn.Map.thingGrid.ThingAt(loc, ThingDefOf.Fire) as Fire)
 			.FirstOrDefault(f => f != null && f.Destroyed == false && pawn.CanReach(f, PathEndMode.Touch, pawn.NormalMaxDanger()) && pawn.CanReserve(f, 1));
 	}
