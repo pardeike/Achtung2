@@ -2,79 +2,79 @@
 <LanguageData>
 
 	<Feature_Achtung_Welcome>Welcome to Achtung!</Feature_Achtung_Welcome>
-	<Feature_Achtung_Forcing>Forcing</Feature_Achtung_Forcing>
-	<Feature_Achtung_MenuError>Menu Error</Feature_Achtung_MenuError>
+	<Feature_Achtung_Forcing>Forced work</Feature_Achtung_Forcing>
+	<Feature_Achtung_MenuError>Menu errors</Feature_Achtung_MenuError>
 	<Feature_Achtung_Formations>Formations</Feature_Achtung_Formations>
 	<Feature_Achtung_Cooperation>Cooperation</Feature_Achtung_Cooperation>
-	<Feature_Achtung_FourModes>Four Modes</Feature_Achtung_FourModes>
+	<Feature_Achtung_FourModes>Four modes</Feature_Achtung_FourModes>
 	<Feature_Achtung_Settings>Settings</Feature_Achtung_Settings>
-	<Feature_Achtung_Draftstatus>Draft Status</Feature_Achtung_Draftstatus>
+	<Feature_Achtung_Draftstatus>Draft status</Feature_Achtung_Draftstatus>
 	<Feature_Achtung_Rescue>Rescue</Feature_Achtung_Rescue>
-	<Feature_Achtung_Dragging>Drafted Dragging</Feature_Achtung_Dragging>
+	<Feature_Achtung_Dragging>Dragging while drafted</Feature_Achtung_Dragging>
 	<AchtungTutorialButton>Tutorial</AchtungTutorialButton>
 	<PositioningSettingsHeader>Positioning</PositioningSettingsHeader>
-	<ForcingSettingsHeader>Forcing</ForcingSettingsHeader>
+	<ForcingSettingsHeader>Forced work</ForcingSettingsHeader>
 	<ForcingCommandsTitle>Commands</ForcingCommandsTitle>
-	<ForcingJobBehaviorTitle>Job behavior</ForcingJobBehaviorTitle>
+	<ForcingJobBehaviorTitle>Work behavior</ForcingJobBehaviorTitle>
 	<ForcingStopRulesTitle>Stop rules</ForcingStopRulesTitle>
 	<ForcingFeedbackTitle>Feedback</ForcingFeedbackTitle>
 	<PositioningRightClickTitle>Right-click</PositioningRightClickTitle>
-	<PositioningDraggingTitle>Dragging and formation</PositioningDraggingTitle>
+	<PositioningDraggingTitle>Dragging and formations</PositioningDraggingTitle>
 
 	<PositioningEnabledTitle>Custom mouse positioning</PositioningEnabledTitle>
-	<PositioningEnabledExplained>Enables Achtung's right-click positioning, dragging, and formation controls</PositioningEnabledExplained>
+	<PositioningEnabledExplained>Enable Achtung's right-click positioning, dragging, and formation controls.</PositioningEnabledExplained>
 
 	<AchtungModifierTitle>Achtung! key</AchtungModifierTitle>
-	<AchtungModifierExplained>Holding this key while positioning drafts selected colonists and lets them keep their current formation while dragging with the right mouse button. Once the right mouse button is held the key may be released. The formation can be rotated using Q and E.</AchtungModifierExplained>
+	<AchtungModifierExplained>Hold this key while positioning to draft the selected colonists. They keep their current formation while you drag with the right mouse button. You can release the key once the right mouse button is held. Rotate the formation with Q and E.</AchtungModifierExplained>
 
-	<ForceCommandMenuModeTitle>Positioning right-click mode</ForceCommandMenuModeTitle>
-	<ForceCommandMenuKeyTitle>Positioning override key</ForceCommandMenuKeyTitle>
+	<ForceCommandMenuModeTitle>Right-click mode</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Override key</ForceCommandMenuKeyTitle>
 
-	<CommandMenuModeOptionAuto>Draft-Dependent</CommandMenuModeOptionAuto>
-	<CommandMenuModeOptionAutoExplained>The draft status of the colonist decides whether to show the context menu or move to the clicked location</CommandMenuModeOptionAutoExplained>
-	<CommandMenuModeOptionPressForMenu>Key for Menu</CommandMenuModeOptionPressForMenu>
-	<CommandMenuModeOptionPressForMenuExplained>Hold the key to override the default action and display the context menu instead</CommandMenuModeOptionPressForMenuExplained>
-	<CommandMenuModeOptionPressForPosition>Key for Position</CommandMenuModeOptionPressForPosition>
-	<CommandMenuModeOptionPressForPositionExplained>Hold the key to override the context menu and issue a positioning command</CommandMenuModeOptionPressForPositionExplained>
-	<CommandMenuModeOptionDelayed>Hold-Switch</CommandMenuModeOptionDelayed>
-	<CommandMenuModeOptionDelayedExplained>Hold down the right-click button; the action will switch from positioning to displaying the context menu after the defined delay</CommandMenuModeOptionDelayedExplained>
+	<CommandMenuModeOptionAuto>Draft status</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionAutoExplained>Use the colonist's draft status to choose between the context menu and positioning.</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionPressForMenu>Key for menu</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForMenuExplained>Hold the key to open the context menu instead of performing the default action.</CommandMenuModeOptionPressForMenuExplained>
+	<CommandMenuModeOptionPressForPosition>Key for positioning</CommandMenuModeOptionPressForPosition>
+	<CommandMenuModeOptionPressForPositionExplained>Hold the key to position colonists instead of opening the context menu.</CommandMenuModeOptionPressForPositionExplained>
+	<CommandMenuModeOptionDelayed>Hold for menu</CommandMenuModeOptionDelayed>
+	<CommandMenuModeOptionDelayedExplained>Right-click to position; hold the button for the set delay to open the context menu.</CommandMenuModeOptionDelayedExplained>
 
-	<DelayTitle>Menu hold duration</DelayTitle>
-	<DelayExplained>Duration in milliseconds to hold right-click before positioning switches to the context menu</DelayExplained>
+	<DelayTitle>Menu hold delay</DelayTitle>
+	<DelayExplained>How long, in milliseconds, to hold right-click before the context menu opens.</DelayExplained>
 
-	<DraftedColonistDraggingModeTitle>Dragging drafted colonists</DraftedColonistDraggingModeTitle>
-	<DraftedColonistDraggingModeExplained>Controls whether right-clicking drafted colonists starts Achtung's drag or formation behavior</DraftedColonistDraggingModeExplained>
+	<DraftedColonistDraggingModeTitle>Drafted colonists</DraftedColonistDraggingModeTitle>
+	<DraftedColonistDraggingModeExplained>Choose when right-clicking a drafted colonist starts dragging or formation positioning.</DraftedColonistDraggingModeExplained>
 	<DraftedColonistDraggingModeOptionOff>Off</DraftedColonistDraggingModeOptionOff>
-	<DraftedColonistDraggingModeOptionOffExplained>Right-clicking drafted colonists will not start dragging them</DraftedColonistDraggingModeOptionOffExplained>
-	<DraftedColonistDraggingModeOptionUnselected>Unselected</DraftedColonistDraggingModeOptionUnselected>
-	<DraftedColonistDraggingModeOptionUnselectedExplained>Dragging starts only when no orderable colonist was selected before the right-click</DraftedColonistDraggingModeOptionUnselectedExplained>
+	<DraftedColonistDraggingModeOptionOffExplained>Right-clicking drafted colonists does not start dragging.</DraftedColonistDraggingModeOptionOffExplained>
+	<DraftedColonistDraggingModeOptionUnselected>None selected</DraftedColonistDraggingModeOptionUnselected>
+	<DraftedColonistDraggingModeOptionUnselectedExplained>Start dragging only if no orderable colonist was selected before the right-click.</DraftedColonistDraggingModeOptionUnselectedExplained>
 	<DraftedColonistDraggingModeOptionAlways>Always</DraftedColonistDraggingModeOptionAlways>
-	<DraftedColonistDraggingModeOptionAlwaysExplained>Right-clicking drafted colonists can always start dragging or formation positioning</DraftedColonistDraggingModeOptionAlwaysExplained>
+	<DraftedColonistDraggingModeOptionAlwaysExplained>Right-clicking a drafted colonist always enables dragging or formation positioning.</DraftedColonistDraggingModeOptionAlwaysExplained>
 
-	<RescueEnabledTitle>'Rescue' work priority column</RescueEnabledTitle>
-	<RescueEnabledExplained>Enables the automatic rescue of pawns and adds a column on the work tab</RescueEnabledExplained>
+	<RescueEnabledTitle>Rescue column on the Work tab</RescueEnabledTitle>
+	<RescueEnabledExplained>Add a Rescue work priority so colonists automatically carry downed allies to beds.</RescueEnabledExplained>
 
-	<ShowForceEndLetterTitle>Show when forced work ends</ShowForceEndLetterTitle>
-	<ShowForceEndLetterExplained>When enabled, a letter is shown when a colonist runs out of forced work</ShowForceEndLetterExplained>
-	<KeepDraftedAndUndraftedCommandsSeparateTitle>Keep drafted and undrafted commands separate</KeepDraftedAndUndraftedCommandsSeparateTitle>
-	<KeepDraftedAndUndraftedCommandsSeparateExplained>When enabled, Achtung keeps drafted and undrafted right-click commands separate, like vanilla RimWorld</KeepDraftedAndUndraftedCommandsSeparateExplained>
+	<ShowForceEndLetterTitle>Notify when forced work ends</ShowForceEndLetterTitle>
+	<ShowForceEndLetterExplained>Show a letter when a colonist has no forced work left.</ShowForceEndLetterExplained>
+	<KeepDraftedAndUndraftedCommandsSeparateTitle>Separate drafted and undrafted commands</KeepDraftedAndUndraftedCommandsSeparateTitle>
+	<KeepDraftedAndUndraftedCommandsSeparateExplained>Keep right-click commands for drafted and undrafted colonists separate, as in unmodded RimWorld.</KeepDraftedAndUndraftedCommandsSeparateExplained>
 
-	<ReplaceCleanRoomTitle>Replace Clean Room Command</ReplaceCleanRoomTitle>
-	<ReplaceCleanRoomExplained>Replaces the vanilla clean room job with Achtung's clean room</ReplaceCleanRoomExplained>
+	<ReplaceCleanRoomTitle>Replace the “Clean room” command</ReplaceCleanRoomTitle>
+	<ReplaceCleanRoomExplained>Use Achtung's thorough room-cleaning command instead of RimWorld's command.</ReplaceCleanRoomExplained>
 
-	<ReplaceFightFireTitle>Replace Fight Fire Command</ReplaceFightFireTitle>
-	<ReplaceFightFireExplained>Replaces the vanilla fight fire job with Achtung's fight fire</ReplaceFightFireExplained>
+	<ReplaceFightFireTitle>Replace the “Fight fire” command</ReplaceFightFireTitle>
+	<ReplaceFightFireExplained>Use Achtung's thorough firefighting command instead of RimWorld's command.</ReplaceFightFireExplained>
 
-	<ForcedCommandState>Ordered to work until done.</ForcedCommandState>
+	<ForcedCommandState>Ordered to keep working until done.</ForcedCommandState>
 
 	<ForceMenuButtonText>Force</ForceMenuButtonText>
 
-	<IncreaseForceRadius>Increase Radius</IncreaseForceRadius>
-	<IncreaseForceRadiusDesc>Increase the search distance for forced work (current radius is {0})</IncreaseForceRadiusDesc>
-	<DecreaseForceRadius>Decrease Radius</DecreaseForceRadius>
-	<DecreaseForceRadiusDesc>Decrease the search distance for forced work (current radius is {0})</DecreaseForceRadiusDesc>
-	<BuildingSmart>Building Smart</BuildingSmart>
-	<BuildingSmartDesc>Building smart prevents holes or getting stuck but is slower and always builds around your start location</BuildingSmartDesc>
+	<IncreaseForceRadius>Increase radius</IncreaseForceRadius>
+	<IncreaseForceRadiusDesc>Increase the search radius for forced work (currently {0}).</IncreaseForceRadiusDesc>
+	<DecreaseForceRadius>Decrease radius</DecreaseForceRadius>
+	<DecreaseForceRadiusDesc>Decrease the search radius for forced work (currently {0}).</DecreaseForceRadiusDesc>
+	<BuildingSmart>Smart building</BuildingSmart>
+	<BuildingSmartDesc>Avoids unreachable gaps and trapped builders. It is slower and builds outward from the starting point.</BuildingSmartDesc>
 
 	<AchtungModKeyOptionNone>Disabled</AchtungModKeyOptionNone>
 	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
@@ -82,71 +82,72 @@
 	<AchtungModKeyOptionShift>Shift</AchtungModKeyOptionShift>
 	<AchtungModKeyOptionMeta>Win/Cmd</AchtungModKeyOptionMeta>
 
-	<BreakLevelTitle>Mental break level for jobs</BreakLevelTitle>
-	<BreakLevelExplained>Set the break level at which a colonist stop a given Achtung job</BreakLevelExplained>
+	<BreakLevelTitle>Mental-break risk</BreakLevelTitle>
+	<BreakLevelExplained>Stop forced work when the colonist reaches this level of mental-break risk.</BreakLevelExplained>
 	<BreakLevelOptionNone>Ignore</BreakLevelOptionNone>
 	<BreakLevelOptionMinor>Minor</BreakLevelOptionMinor>
 	<BreakLevelOptionMajor>Major</BreakLevelOptionMajor>
 	<BreakLevelOptionAlmostExtreme>Almost extreme</BreakLevelOptionAlmostExtreme>
 	<BreakLevelOptionExtreme>Extreme</BreakLevelOptionExtreme>
 
-	<HealthLevelTitle>Health status for jobs</HealthLevelTitle>
-	<HealthLevelExplained>Set the health status at which a colonist stop a given Achtung job</HealthLevelExplained>
+	<HealthLevelTitle>Health condition</HealthLevelTitle>
+	<HealthLevelExplained>Stop forced work when the colonist reaches this health condition.</HealthLevelExplained>
 	<HealthLevelOptionNone>Ignore</HealthLevelOptionNone>
-	<HealthLevelOptionShouldBeTendedNow>Should be tended now</HealthLevelOptionShouldBeTendedNow>
-	<HealthLevelOptionPrefersMedicalRest>Medical care</HealthLevelOptionPrefersMedicalRest>
-	<HealthLevelOptionNeedsMedicalRest>Needs medical rest</HealthLevelOptionNeedsMedicalRest>
+	<HealthLevelOptionShouldBeTendedNow>Needs tending now</HealthLevelOptionShouldBeTendedNow>
+	<HealthLevelOptionPrefersMedicalRest>Needs medical rest</HealthLevelOptionPrefersMedicalRest>
+	<HealthLevelOptionNeedsMedicalRest>Needs urgent medical rest</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>In pain shock</HealthLevelOptionInPainShock>
 
-	<IgnoreForbiddenTitle>Ignore forbidden markings</IgnoreForbiddenTitle>
-	<IgnoreForbiddenExplained>Allows forced work on forbidden items</IgnoreForbiddenExplained>
-	<IgnoreRestrictionsTitle>Ignore zone restrictions</IgnoreRestrictionsTitle>
-	<IgnoreRestrictionsExplained>Allows forced work in restricted areas</IgnoreRestrictionsExplained>
-	<IgnoreAssignmentsTitle>Ignore work type assignments</IgnoreAssignmentsTitle>
-	<IgnoreAssignmentsExplained>Allows forced work when work priorities are unset</IgnoreAssignmentsExplained>
+	<IgnoreForbiddenTitle>Ignore forbidden status</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Allow forced work on forbidden items.</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>Ignore allowed-area restrictions</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Allow forced work outside a colonist's allowed area.</IgnoreRestrictionsExplained>
+	<IgnoreAssignmentsTitle>Ignore work priorities</IgnoreAssignmentsTitle>
+	<IgnoreAssignmentsExplained>Allow forced work when the relevant work priority is disabled.</IgnoreAssignmentsExplained>
 
-	<BuildingSmartTitle>Smart building is on for new Achtung! jobs</BuildingSmartTitle>
-	<BuildingSmartExplained>Sets the default for how new jobs choose their build order</BuildingSmartExplained>
+	<BuildingSmartTitle>Use smart building for new forced jobs</BuildingSmartTitle>
+	<BuildingSmartExplained>Use the safer build order by default for new forced jobs.</BuildingSmartExplained>
 
-	<WorkMarkersTitle>Force work markers</WorkMarkersTitle>
-	<WorkMarkersExplained>Forced work is displayed with small markers</WorkMarkersExplained>
+	<WorkMarkersTitle>Forced-work markers</WorkMarkersTitle>
+	<WorkMarkersExplained>Show small markers on forced-work targets.</WorkMarkersExplained>
 	<WorkMarkersOptionAnimated>Animated</WorkMarkersOptionAnimated>
 	<WorkMarkersOptionStatic>Static</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Off</WorkMarkersOptionOff>
 
-	<MaxForcedItemsTitle>Forced work target limit</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Set to 0 to disable forced-work commands from ordinary right-click jobs. Higher values limit how many nearby targets Achtung adds.</MaxForcedItemsExplained>
+	<MaxForcedItemsTitle>Forced-work target limit</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Set to 0 to disable forced work for ordinary right-click jobs. Higher values limit how many nearby targets Achtung adds.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Unlimited</MaxForcedItemsUnlimited>
 
 
-	<JobInterruptedLabel>Cancelled: {0}</JobInterruptedLabel>
+	<JobInterruptedLabel>Canceled: {0}</JobInterruptedLabel>
 	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
-	<JobInterruptedBadHealth>{0} is in bad shape</JobInterruptedBadHealth>
+	<JobInterruptedBadHealth>{0} is in poor health.</JobInterruptedBadHealth>
 
 	<CleanRoomLabel>Clean room (Achtung)</CleanRoomLabel>
 	<CleanRoomInfoText>Cleaning room thoroughly</CleanRoomInfoText>
-	<CleanRoomDescription>Clean a room until it is completely clean</CleanRoomDescription>
+	<CleanRoomDescription>Clean the entire room, not just one spot.</CleanRoomDescription>
 	<CleanRoomReport>Cleaning{0}: {1}</CleanRoomReport>
 
 	<FireFightLabel>Fight fire (Achtung)</FireFightLabel>
 	<FireFightInfoText>Fighting a fire</FireFightInfoText>
-	<FireFightDescription>Fights a fire (even outside home zone)</FireFightDescription>
+	<FireFightDescription>Extinguish a fire completely, even outside the home area.</FireFightDescription>
 	<FireFightReport>Fighting fire: {0}</FireFightReport>
 
-	<SowZoneLabel>Sow this zone/room</SowZoneLabel>
-	<SowZoneInfoText>Sowing zone/room</SowZoneInfoText>
-	<SowZoneDescription>Sow a growing zone or room until it is completely sowed</SowZoneDescription>
+	<SowZoneLabel>Sow this zone or room</SowZoneLabel>
+	<SowZoneInfoText>Sowing zone or room</SowZoneInfoText>
+	<SowZoneDescription>Sow an entire growing zone or room.</SowZoneDescription>
 	<SowZoneReport>Sowing{0}: {1}</SowZoneReport>
 
 	<AlreadyDoing>(Job #{0})</AlreadyDoing>
 
-	<CouldNotFindMoreForcedWork>{0} could not find more forced work. The remaining work is most likely reserved or not accessible.</CouldNotFindMoreForcedWork>
+	<CouldNotFindMoreForcedWork>{0} could not find any more forced work. The remaining targets are probably reserved or unreachable.</CouldNotFindMoreForcedWork>
 	<NoForcedWork>No forced work</NoForcedWork>
-	<ForcedWorkWasInterrupted>Forced work of {0} was interrupted.</ForcedWorkWasInterrupted>
+	<ForcedWorkWasInterrupted>{0}'s forced work was interrupted.</ForcedWorkWasInterrupted>
 
 	<WorkType_Rescue_Label>rescue</WorkType_Rescue_Label>
-	<WorkType_Rescue_PawnLabel>Rescue</WorkType_Rescue_PawnLabel>
-	<WorkType_Rescue_GerundLabel>Colonist Rescue</WorkType_Rescue_GerundLabel>
-	<WorkType_Rescue_Description>Wounded colonists are brought to beds where they can be treated.</WorkType_Rescue_Description>
+	<WorkType_Rescue_PawnLabel>Rescuer</WorkType_Rescue_PawnLabel>
+	<WorkType_Rescue_GerundLabel>rescuing</WorkType_Rescue_GerundLabel>
+	<WorkType_Rescue_Description>Carry downed allies to beds where they can be treated.</WorkType_Rescue_Description>
+	<WorkType_Rescue_Verb>Rescue</WorkType_Rescue_Verb>
 
 </LanguageData>

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+	<Feature_Achtung_Welcome>Bienvenue dans Achtung !</Feature_Achtung_Welcome>
+	<Feature_Achtung_Forcing>Travail forcé</Feature_Achtung_Forcing>
+	<Feature_Achtung_MenuError>Erreurs de menu</Feature_Achtung_MenuError>
+	<Feature_Achtung_Formations>Formations</Feature_Achtung_Formations>
+	<Feature_Achtung_Cooperation>Coopération</Feature_Achtung_Cooperation>
+	<Feature_Achtung_FourModes>Quatre modes</Feature_Achtung_FourModes>
+	<Feature_Achtung_Settings>Paramètres</Feature_Achtung_Settings>
+	<Feature_Achtung_Draftstatus>État de mobilisation</Feature_Achtung_Draftstatus>
+	<Feature_Achtung_Rescue>Sauvetage</Feature_Achtung_Rescue>
+	<Feature_Achtung_Dragging>Déplacement pendant la mobilisation</Feature_Achtung_Dragging>
+	<AchtungTutorialButton>Tutoriel</AchtungTutorialButton>
+	<PositioningSettingsHeader>Positionnement</PositioningSettingsHeader>
+	<ForcingSettingsHeader>Travail forcé</ForcingSettingsHeader>
+	<ForcingCommandsTitle>Ordres</ForcingCommandsTitle>
+	<ForcingJobBehaviorTitle>Comportement au travail</ForcingJobBehaviorTitle>
+	<ForcingStopRulesTitle>Règles d'arrêt</ForcingStopRulesTitle>
+	<ForcingFeedbackTitle>Affichage et notifications</ForcingFeedbackTitle>
+	<PositioningRightClickTitle>Clic droit</PositioningRightClickTitle>
+	<PositioningDraggingTitle>Déplacement et formations</PositioningDraggingTitle>
+
+	<PositioningEnabledTitle>Positionnement personnalisé à la souris</PositioningEnabledTitle>
+	<PositioningEnabledExplained>Active le positionnement par clic droit, le déplacement et les formations d'Achtung.</PositioningEnabledExplained>
+
+	<AchtungModifierTitle>Touche Achtung !</AchtungModifierTitle>
+	<AchtungModifierExplained>Maintenez cette touche pendant le positionnement pour mobiliser les colons sélectionnés. Ils conservent leur formation actuelle lorsque vous les faites glisser avec le bouton droit. Vous pouvez relâcher la touche dès que le bouton droit est maintenu. Faites pivoter la formation avec Q et E.</AchtungModifierExplained>
+
+	<ForceCommandMenuModeTitle>Mode du clic droit</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Touche de bascule</ForceCommandMenuKeyTitle>
+
+	<CommandMenuModeOptionAuto>État de mobilisation</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionAutoExplained>Utilise l'état de mobilisation du colon pour choisir entre le menu contextuel et le positionnement.</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionPressForMenu>Touche du menu</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForMenuExplained>Maintenez la touche pour ouvrir le menu contextuel au lieu d'effectuer l'action par défaut.</CommandMenuModeOptionPressForMenuExplained>
+	<CommandMenuModeOptionPressForPosition>Touche de positionnement</CommandMenuModeOptionPressForPosition>
+	<CommandMenuModeOptionPressForPositionExplained>Maintenez la touche pour positionner les colons au lieu d'ouvrir le menu contextuel.</CommandMenuModeOptionPressForPositionExplained>
+	<CommandMenuModeOptionDelayed>Maintenir pour le menu</CommandMenuModeOptionDelayed>
+	<CommandMenuModeOptionDelayedExplained>Faites un clic droit pour positionner ; maintenez le bouton pendant le délai défini pour ouvrir le menu contextuel.</CommandMenuModeOptionDelayedExplained>
+
+	<DelayTitle>Délai d'ouverture du menu</DelayTitle>
+	<DelayExplained>Durée, en millisecondes, pendant laquelle maintenir le clic droit avant l'ouverture du menu contextuel.</DelayExplained>
+
+	<DraftedColonistDraggingModeTitle>Colons mobilisés</DraftedColonistDraggingModeTitle>
+	<DraftedColonistDraggingModeExplained>Détermine quand un clic droit sur un colon mobilisé permet de le faire glisser ou de le positionner en formation.</DraftedColonistDraggingModeExplained>
+	<DraftedColonistDraggingModeOptionOff>Désactivé</DraftedColonistDraggingModeOptionOff>
+	<DraftedColonistDraggingModeOptionOffExplained>Un clic droit sur un colon mobilisé ne permet pas de le faire glisser.</DraftedColonistDraggingModeOptionOffExplained>
+	<DraftedColonistDraggingModeOptionUnselected>Aucun sélectionné</DraftedColonistDraggingModeOptionUnselected>
+	<DraftedColonistDraggingModeOptionUnselectedExplained>Permet de faire glisser le colon uniquement si aucun colon pouvant recevoir des ordres n'était sélectionné avant le clic droit.</DraftedColonistDraggingModeOptionUnselectedExplained>
+	<DraftedColonistDraggingModeOptionAlways>Toujours</DraftedColonistDraggingModeOptionAlways>
+	<DraftedColonistDraggingModeOptionAlwaysExplained>Un clic droit sur un colon mobilisé permet toujours de le faire glisser ou de le positionner en formation.</DraftedColonistDraggingModeOptionAlwaysExplained>
+
+	<RescueEnabledTitle>Colonne « Sauvetage » dans l'onglet Travail</RescueEnabledTitle>
+	<RescueEnabledExplained>Ajoute une priorité de travail Sauvetage afin que les colons transportent automatiquement les alliés à terre jusqu'à un lit.</RescueEnabledExplained>
+
+	<ShowForceEndLetterTitle>Notifier à la fin du travail forcé</ShowForceEndLetterTitle>
+	<ShowForceEndLetterExplained>Affiche une lettre lorsqu'un colon n'a plus de travail forcé.</ShowForceEndLetterExplained>
+	<KeepDraftedAndUndraftedCommandsSeparateTitle>Séparer les ordres selon la mobilisation</KeepDraftedAndUndraftedCommandsSeparateTitle>
+	<KeepDraftedAndUndraftedCommandsSeparateExplained>Garde séparés les ordres du clic droit pour les colons mobilisés et non mobilisés, comme dans RimWorld sans mods.</KeepDraftedAndUndraftedCommandsSeparateExplained>
+
+	<ReplaceCleanRoomTitle>Remplacer l'ordre « Nettoyer la pièce »</ReplaceCleanRoomTitle>
+	<ReplaceCleanRoomExplained>Utilise l'ordre de nettoyage complet d'Achtung à la place de celui de RimWorld.</ReplaceCleanRoomExplained>
+
+	<ReplaceFightFireTitle>Remplacer l'ordre « Éteindre le feu »</ReplaceFightFireTitle>
+	<ReplaceFightFireExplained>Utilise l'ordre d'extinction complète d'Achtung à la place de celui de RimWorld.</ReplaceFightFireExplained>
+
+	<ForcedCommandState>A reçu l'ordre de continuer à travailler jusqu'à la fin.</ForcedCommandState>
+
+	<ForceMenuButtonText>Forcer</ForceMenuButtonText>
+
+	<IncreaseForceRadius>Augmenter le rayon</IncreaseForceRadius>
+	<IncreaseForceRadiusDesc>Augmente le rayon de recherche du travail forcé (actuellement {0}).</IncreaseForceRadiusDesc>
+	<DecreaseForceRadius>Réduire le rayon</DecreaseForceRadius>
+	<DecreaseForceRadiusDesc>Réduit le rayon de recherche du travail forcé (actuellement {0}).</DecreaseForceRadiusDesc>
+	<BuildingSmart>Construction intelligente</BuildingSmart>
+	<BuildingSmartDesc>Évite les espaces inaccessibles et les constructeurs piégés. Plus lente, elle progresse vers l'extérieur depuis le point de départ.</BuildingSmartDesc>
+
+	<AchtungModKeyOptionNone>Désactivée</AchtungModKeyOptionNone>
+	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
+	<AchtungModKeyOptionCtrl>Ctrl</AchtungModKeyOptionCtrl>
+	<AchtungModKeyOptionShift>Maj</AchtungModKeyOptionShift>
+	<AchtungModKeyOptionMeta>Win/Cmd</AchtungModKeyOptionMeta>
+
+	<BreakLevelTitle>Risque de démence</BreakLevelTitle>
+	<BreakLevelExplained>Arrête le travail forcé lorsque le colon atteint ce niveau de risque de démence.</BreakLevelExplained>
+	<BreakLevelOptionNone>Ignorer</BreakLevelOptionNone>
+	<BreakLevelOptionMinor>Mineur</BreakLevelOptionMinor>
+	<BreakLevelOptionMajor>Majeur</BreakLevelOptionMajor>
+	<BreakLevelOptionAlmostExtreme>Presque extrême</BreakLevelOptionAlmostExtreme>
+	<BreakLevelOptionExtreme>Extrême</BreakLevelOptionExtreme>
+
+	<HealthLevelTitle>État de santé</HealthLevelTitle>
+	<HealthLevelExplained>Arrête le travail forcé lorsque le colon atteint cet état de santé.</HealthLevelExplained>
+	<HealthLevelOptionNone>Ignorer</HealthLevelOptionNone>
+	<HealthLevelOptionShouldBeTendedNow>Requiert un traitement immédiat</HealthLevelOptionShouldBeTendedNow>
+	<HealthLevelOptionPrefersMedicalRest>Devrait prendre un repos médical</HealthLevelOptionPrefersMedicalRest>
+	<HealthLevelOptionNeedsMedicalRest>Requiert un repos médical urgent</HealthLevelOptionNeedsMedicalRest>
+	<HealthLevelOptionInPainShock>Choqué par la douleur</HealthLevelOptionInPainShock>
+
+	<IgnoreForbiddenTitle>Ignorer les interdictions</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Autorise le travail forcé sur les objets interdits.</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>Ignorer les restrictions de zone autorisée</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Autorise le travail forcé en dehors de la zone autorisée d'un colon.</IgnoreRestrictionsExplained>
+	<IgnoreAssignmentsTitle>Ignorer les priorités de travail</IgnoreAssignmentsTitle>
+	<IgnoreAssignmentsExplained>Autorise le travail forcé lorsque la priorité de travail concernée est désactivée.</IgnoreAssignmentsExplained>
+
+	<BuildingSmartTitle>Construction intelligente par défaut</BuildingSmartTitle>
+	<BuildingSmartExplained>Utilise par défaut l'ordre de construction le plus sûr pour les nouveaux travaux forcés.</BuildingSmartExplained>
+
+	<WorkMarkersTitle>Marqueurs de travail forcé</WorkMarkersTitle>
+	<WorkMarkersExplained>Affiche de petits marqueurs sur les cibles du travail forcé.</WorkMarkersExplained>
+	<WorkMarkersOptionAnimated>Animés</WorkMarkersOptionAnimated>
+	<WorkMarkersOptionStatic>Fixes</WorkMarkersOptionStatic>
+	<WorkMarkersOptionOff>Désactivés</WorkMarkersOptionOff>
+
+	<MaxForcedItemsTitle>Limite de cibles du travail forcé</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Réglez sur 0 pour désactiver le travail forcé des tâches ordinaires au clic droit. Les valeurs supérieures limitent le nombre de cibles proches ajoutées par Achtung.</MaxForcedItemsExplained>
+	<MaxForcedItemsUnlimited>Illimité</MaxForcedItemsUnlimited>
+
+
+	<JobInterruptedLabel>Annulé : {0}</JobInterruptedLabel>
+	<JobInterruptedBreakdown>{0} : {1}</JobInterruptedBreakdown>
+	<JobInterruptedBadHealth>{0} est en mauvaise santé.</JobInterruptedBadHealth>
+
+	<CleanRoomLabel>Nettoyer la pièce (Achtung)</CleanRoomLabel>
+	<CleanRoomInfoText>Nettoyage complet de la pièce</CleanRoomInfoText>
+	<CleanRoomDescription>Nettoie toute la pièce, pas seulement un emplacement.</CleanRoomDescription>
+	<CleanRoomReport>Nettoyage{0} : {1}</CleanRoomReport>
+
+	<FireFightLabel>Éteindre le feu (Achtung)</FireFightLabel>
+	<FireFightInfoText>Extinction d'un incendie</FireFightInfoText>
+	<FireFightDescription>Éteint complètement un incendie, même en dehors de la zone de base.</FireFightDescription>
+	<FireFightReport>Extinction du feu : {0}</FireFightReport>
+
+	<SowZoneLabel>Semer dans cette zone ou cette pièce</SowZoneLabel>
+	<SowZoneInfoText>Semis dans la zone ou la pièce</SowZoneInfoText>
+	<SowZoneDescription>Sème toute une zone de culture ou une pièce.</SowZoneDescription>
+	<SowZoneReport>Semis{0} : {1}</SowZoneReport>
+
+	<AlreadyDoing>(Tâche nº {0})</AlreadyDoing>
+
+	<CouldNotFindMoreForcedWork>{0} n'a trouvé aucun autre travail forcé. Les cibles restantes sont probablement réservées ou inaccessibles.</CouldNotFindMoreForcedWork>
+	<NoForcedWork>Aucun travail forcé</NoForcedWork>
+	<ForcedWorkWasInterrupted>Le travail forcé de {0} a été interrompu.</ForcedWorkWasInterrupted>
+
+	<WorkType_Rescue_Label>sauvetage</WorkType_Rescue_Label>
+	<WorkType_Rescue_PawnLabel>Secouriste</WorkType_Rescue_PawnLabel>
+	<WorkType_Rescue_GerundLabel>sauvetage</WorkType_Rescue_GerundLabel>
+	<WorkType_Rescue_Description>Transporter les alliés à terre jusqu'à un lit où ils pourront être soignés.</WorkType_Rescue_Description>
+	<WorkType_Rescue_Verb>Secourir</WorkType_Rescue_Verb>
+
+</LanguageData>

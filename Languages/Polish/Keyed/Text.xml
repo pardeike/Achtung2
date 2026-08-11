@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+	<Feature_Achtung_Welcome>Witaj w Achtung!</Feature_Achtung_Welcome>
+	<Feature_Achtung_Forcing>Praca wymuszona</Feature_Achtung_Forcing>
+	<Feature_Achtung_MenuError>Błędy menu</Feature_Achtung_MenuError>
+	<Feature_Achtung_Formations>Formacje</Feature_Achtung_Formations>
+	<Feature_Achtung_Cooperation>Współpraca</Feature_Achtung_Cooperation>
+	<Feature_Achtung_FourModes>Cztery tryby</Feature_Achtung_FourModes>
+	<Feature_Achtung_Settings>Ustawienia</Feature_Achtung_Settings>
+	<Feature_Achtung_Draftstatus>Stan trybu bojowego</Feature_Achtung_Draftstatus>
+	<Feature_Achtung_Rescue>Ratowanie</Feature_Achtung_Rescue>
+	<Feature_Achtung_Dragging>Przeciąganie w trybie bojowym</Feature_Achtung_Dragging>
+	<AchtungTutorialButton>Samouczek</AchtungTutorialButton>
+	<PositioningSettingsHeader>Pozycjonowanie</PositioningSettingsHeader>
+	<ForcingSettingsHeader>Praca wymuszona</ForcingSettingsHeader>
+	<ForcingCommandsTitle>Polecenia</ForcingCommandsTitle>
+	<ForcingJobBehaviorTitle>Zachowanie podczas pracy</ForcingJobBehaviorTitle>
+	<ForcingStopRulesTitle>Zasady przerwania</ForcingStopRulesTitle>
+	<ForcingFeedbackTitle>Znaczniki i powiadomienia</ForcingFeedbackTitle>
+	<PositioningRightClickTitle>Prawy przycisk myszy</PositioningRightClickTitle>
+	<PositioningDraggingTitle>Przeciąganie i formacje</PositioningDraggingTitle>
+
+	<PositioningEnabledTitle>Niestandardowe pozycjonowanie myszą</PositioningEnabledTitle>
+	<PositioningEnabledExplained>Włącza pozycjonowanie prawym przyciskiem myszy, przeciąganie i sterowanie formacjami w Achtung.</PositioningEnabledExplained>
+
+	<AchtungModifierTitle>Klawisz Achtung!</AchtungModifierTitle>
+	<AchtungModifierExplained>Przytrzymaj ten klawisz podczas pozycjonowania, aby włączyć tryb bojowy wybranym kolonistom. Podczas przeciągania prawym przyciskiem myszy zachowają obecną formację. Możesz zwolnić klawisz po przytrzymaniu prawego przycisku myszy. Obracaj formację klawiszami Q i E.</AchtungModifierExplained>
+
+	<ForceCommandMenuModeTitle>Tryb prawego przycisku myszy</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Klawisz przełączający</ForceCommandMenuKeyTitle>
+
+	<CommandMenuModeOptionAuto>Stan trybu bojowego</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionAutoExplained>Stan trybu bojowego kolonisty decyduje, czy otworzyć menu kontekstowe, czy rozpocząć pozycjonowanie.</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionPressForMenu>Klawisz menu</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForMenuExplained>Przytrzymaj klawisz, aby otworzyć menu kontekstowe zamiast wykonać domyślną czynność.</CommandMenuModeOptionPressForMenuExplained>
+	<CommandMenuModeOptionPressForPosition>Klawisz pozycjonowania</CommandMenuModeOptionPressForPosition>
+	<CommandMenuModeOptionPressForPositionExplained>Przytrzymaj klawisz, aby pozycjonować kolonistów zamiast otwierać menu kontekstowe.</CommandMenuModeOptionPressForPositionExplained>
+	<CommandMenuModeOptionDelayed>Przytrzymaj dla menu</CommandMenuModeOptionDelayed>
+	<CommandMenuModeOptionDelayedExplained>Kliknij prawym przyciskiem, aby pozycjonować; przytrzymaj go przez ustawiony czas, aby otworzyć menu kontekstowe.</CommandMenuModeOptionDelayedExplained>
+
+	<DelayTitle>Opóźnienie otwarcia menu</DelayTitle>
+	<DelayExplained>Czas w milisekundach, przez który trzeba przytrzymać prawy przycisk myszy przed otwarciem menu kontekstowego.</DelayExplained>
+
+	<DraftedColonistDraggingModeTitle>Koloniści w trybie bojowym</DraftedColonistDraggingModeTitle>
+	<DraftedColonistDraggingModeExplained>Określa, kiedy kliknięcie prawym przyciskiem kolonisty w trybie bojowym rozpoczyna przeciąganie lub pozycjonowanie formacji.</DraftedColonistDraggingModeExplained>
+	<DraftedColonistDraggingModeOptionOff>Wyłączone</DraftedColonistDraggingModeOptionOff>
+	<DraftedColonistDraggingModeOptionOffExplained>Kliknięcie prawym przyciskiem kolonisty w trybie bojowym nie rozpoczyna przeciągania.</DraftedColonistDraggingModeOptionOffExplained>
+	<DraftedColonistDraggingModeOptionUnselected>Nikt nie jest zaznaczony</DraftedColonistDraggingModeOptionUnselected>
+	<DraftedColonistDraggingModeOptionUnselectedExplained>Rozpoczyna przeciąganie tylko wtedy, gdy przed kliknięciem prawym przyciskiem nie był zaznaczony żaden sterowalny kolonista.</DraftedColonistDraggingModeOptionUnselectedExplained>
+	<DraftedColonistDraggingModeOptionAlways>Zawsze</DraftedColonistDraggingModeOptionAlways>
+	<DraftedColonistDraggingModeOptionAlwaysExplained>Kliknięcie prawym przyciskiem kolonisty w trybie bojowym zawsze pozwala go przeciągnąć lub ustawić w formacji.</DraftedColonistDraggingModeOptionAlwaysExplained>
+
+	<RescueEnabledTitle>Kolumna „Ratowanie” w zakładce Praca</RescueEnabledTitle>
+	<RescueEnabledExplained>Dodaje priorytet pracy Ratowanie, aby koloniści automatycznie przenosili rannych sojuszników do łóżek.</RescueEnabledExplained>
+
+	<ShowForceEndLetterTitle>Powiadamiaj o zakończeniu pracy wymuszonej</ShowForceEndLetterTitle>
+	<ShowForceEndLetterExplained>Wyświetla powiadomienie, gdy koloniście nie pozostała żadna praca wymuszona.</ShowForceEndLetterExplained>
+	<KeepDraftedAndUndraftedCommandsSeparateTitle>Rozdziel polecenia według trybu bojowego</KeepDraftedAndUndraftedCommandsSeparateTitle>
+	<KeepDraftedAndUndraftedCommandsSeparateExplained>Rozdziela polecenia prawego przycisku myszy dla kolonistów w trybie bojowym i poza nim, jak w RimWorld bez modów.</KeepDraftedAndUndraftedCommandsSeparateExplained>
+
+	<ReplaceCleanRoomTitle>Zastąp polecenie „Posprzątaj pokój”</ReplaceCleanRoomTitle>
+	<ReplaceCleanRoomExplained>Używa dokładnego sprzątania pomieszczeń z Achtung zamiast polecenia RimWorld.</ReplaceCleanRoomExplained>
+
+	<ReplaceFightFireTitle>Zastąp polecenie „Ugaś pożar”</ReplaceFightFireTitle>
+	<ReplaceFightFireExplained>Używa dokładnego gaszenia pożaru z Achtung zamiast polecenia RimWorld.</ReplaceFightFireExplained>
+
+	<ForcedCommandState>Ma pracować aż do ukończenia zadania.</ForcedCommandState>
+
+	<ForceMenuButtonText>Wymuś</ForceMenuButtonText>
+
+	<IncreaseForceRadius>Zwiększ promień</IncreaseForceRadius>
+	<IncreaseForceRadiusDesc>Zwiększa promień wyszukiwania pracy wymuszonej (obecnie {0}).</IncreaseForceRadiusDesc>
+	<DecreaseForceRadius>Zmniejsz promień</DecreaseForceRadius>
+	<DecreaseForceRadiusDesc>Zmniejsza promień wyszukiwania pracy wymuszonej (obecnie {0}).</DecreaseForceRadiusDesc>
+	<BuildingSmart>Inteligentne budowanie</BuildingSmart>
+	<BuildingSmartDesc>Zapobiega powstawaniu niedostępnych luk i uwięzieniu budowniczych. Działa wolniej i buduje na zewnątrz od punktu początkowego.</BuildingSmartDesc>
+
+	<AchtungModKeyOptionNone>Wyłączone</AchtungModKeyOptionNone>
+	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
+	<AchtungModKeyOptionCtrl>Ctrl</AchtungModKeyOptionCtrl>
+	<AchtungModKeyOptionShift>Shift</AchtungModKeyOptionShift>
+	<AchtungModKeyOptionMeta>Win/Cmd</AchtungModKeyOptionMeta>
+
+	<BreakLevelTitle>Ryzyko załamania</BreakLevelTitle>
+	<BreakLevelExplained>Zatrzymuje pracę wymuszoną, gdy kolonista osiągnie ten poziom ryzyka załamania.</BreakLevelExplained>
+	<BreakLevelOptionNone>Ignoruj</BreakLevelOptionNone>
+	<BreakLevelOptionMinor>Niewielkie</BreakLevelOptionMinor>
+	<BreakLevelOptionMajor>Duże</BreakLevelOptionMajor>
+	<BreakLevelOptionAlmostExtreme>Prawie ekstremalne</BreakLevelOptionAlmostExtreme>
+	<BreakLevelOptionExtreme>Ekstremalne</BreakLevelOptionExtreme>
+
+	<HealthLevelTitle>Stan zdrowia</HealthLevelTitle>
+	<HealthLevelExplained>Zatrzymuje pracę wymuszoną, gdy kolonista osiągnie ten stan zdrowia.</HealthLevelExplained>
+	<HealthLevelOptionNone>Ignoruj</HealthLevelOptionNone>
+	<HealthLevelOptionShouldBeTendedNow>Potrzebuje teraz leczenia</HealthLevelOptionShouldBeTendedNow>
+	<HealthLevelOptionPrefersMedicalRest>Powinien odpoczywać w łóżku medycznym</HealthLevelOptionPrefersMedicalRest>
+	<HealthLevelOptionNeedsMedicalRest>Pilnie potrzebuje łóżka medycznego</HealthLevelOptionNeedsMedicalRest>
+	<HealthLevelOptionInPainShock>Szok bólowy</HealthLevelOptionInPainShock>
+
+	<IgnoreForbiddenTitle>Ignoruj zakazy</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Pozwala wykonywać pracę wymuszoną na zakazanych przedmiotach.</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>Ignoruj ograniczenia dozwolonego obszaru</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Pozwala wykonywać pracę wymuszoną poza dozwolonym obszarem kolonisty.</IgnoreRestrictionsExplained>
+	<IgnoreAssignmentsTitle>Ignoruj priorytety pracy</IgnoreAssignmentsTitle>
+	<IgnoreAssignmentsExplained>Pozwala wykonywać pracę wymuszoną, gdy odpowiedni priorytet pracy jest wyłączony.</IgnoreAssignmentsExplained>
+
+	<BuildingSmartTitle>Inteligentne budowanie domyślnie</BuildingSmartTitle>
+	<BuildingSmartExplained>Domyślnie używa bezpieczniejszej kolejności budowania dla nowych prac wymuszonych.</BuildingSmartExplained>
+
+	<WorkMarkersTitle>Znaczniki pracy wymuszonej</WorkMarkersTitle>
+	<WorkMarkersExplained>Wyświetla małe znaczniki na celach pracy wymuszonej.</WorkMarkersExplained>
+	<WorkMarkersOptionAnimated>Animowane</WorkMarkersOptionAnimated>
+	<WorkMarkersOptionStatic>Statyczne</WorkMarkersOptionStatic>
+	<WorkMarkersOptionOff>Wyłączone</WorkMarkersOptionOff>
+
+	<MaxForcedItemsTitle>Limit celów pracy wymuszonej</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Ustaw 0, aby wyłączyć pracę wymuszoną dla zwykłych zadań wydawanych prawym przyciskiem. Wyższe wartości ograniczają liczbę pobliskich celów dodawanych przez Achtung.</MaxForcedItemsExplained>
+	<MaxForcedItemsUnlimited>Bez limitu</MaxForcedItemsUnlimited>
+
+
+	<JobInterruptedLabel>Anulowano: {0}</JobInterruptedLabel>
+	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
+	<JobInterruptedBadHealth>{0} jest w złym stanie zdrowia.</JobInterruptedBadHealth>
+
+	<CleanRoomLabel>Posprzątaj pokój (Achtung)</CleanRoomLabel>
+	<CleanRoomInfoText>Dokładne sprzątanie pomieszczenia</CleanRoomInfoText>
+	<CleanRoomDescription>Sprząta całe pomieszczenie, a nie tylko jedno miejsce.</CleanRoomDescription>
+	<CleanRoomReport>Sprzątanie{0}: {1}</CleanRoomReport>
+
+	<FireFightLabel>Ugaś pożar (Achtung)</FireFightLabel>
+	<FireFightInfoText>Gaszenie pożaru</FireFightInfoText>
+	<FireFightDescription>Gasi pożar całkowicie, nawet poza obszarem domu.</FireFightDescription>
+	<FireFightReport>Gaszenie pożaru: {0}</FireFightReport>
+
+	<SowZoneLabel>Obsiej tę strefę lub pomieszczenie</SowZoneLabel>
+	<SowZoneInfoText>Obsiewanie strefy lub pomieszczenia</SowZoneInfoText>
+	<SowZoneDescription>Obsiewa całą strefę upraw lub pomieszczenie.</SowZoneDescription>
+	<SowZoneReport>Siew{0}: {1}</SowZoneReport>
+
+	<AlreadyDoing>(Zadanie nr {0})</AlreadyDoing>
+
+	<CouldNotFindMoreForcedWork>{0} nie może znaleźć dalszej pracy wymuszonej. Pozostałe cele są prawdopodobnie zarezerwowane lub niedostępne.</CouldNotFindMoreForcedWork>
+	<NoForcedWork>Brak pracy wymuszonej</NoForcedWork>
+	<ForcedWorkWasInterrupted>{0}: praca wymuszona została przerwana.</ForcedWorkWasInterrupted>
+
+	<WorkType_Rescue_Label>ratowanie</WorkType_Rescue_Label>
+	<WorkType_Rescue_PawnLabel>Ratownik</WorkType_Rescue_PawnLabel>
+	<WorkType_Rescue_GerundLabel>ratowanie</WorkType_Rescue_GerundLabel>
+	<WorkType_Rescue_Description>Przenoszenie rannych sojuszników do łóżek, gdzie mogą otrzymać leczenie.</WorkType_Rescue_Description>
+	<WorkType_Rescue_Verb>Ratuj</WorkType_Rescue_Verb>
+
+</LanguageData>

@@ -17,7 +17,7 @@
 	<ForcingCommandsTitle>Órdenes</ForcingCommandsTitle>
 	<ForcingJobBehaviorTitle>Comportamiento del trabajo</ForcingJobBehaviorTitle>
 	<ForcingStopRulesTitle>Reglas de interrupción</ForcingStopRulesTitle>
-	<ForcingFeedbackTitle>Información</ForcingFeedbackTitle>
+	<ForcingFeedbackTitle>Marcadores y avisos</ForcingFeedbackTitle>
 	<PositioningRightClickTitle>Clic derecho</PositioningRightClickTitle>
 	<PositioningDraggingTitle>Arrastre y formaciones</PositioningDraggingTitle>
 
@@ -51,12 +51,12 @@
 	<DraftedColonistDraggingModeOptionAlways>Siempre</DraftedColonistDraggingModeOptionAlways>
 	<DraftedColonistDraggingModeOptionAlwaysExplained>Hacer clic derecho en un colono reclutado siempre permite arrastrarlo o posicionarlo en formación.</DraftedColonistDraggingModeOptionAlwaysExplained>
 
-	<RescueEnabledTitle>Columna «Rescatar» en Trabajo</RescueEnabledTitle>
-	<RescueEnabledExplained>Añade la prioridad de trabajo Rescatar para que los colonos lleven automáticamente a los aliados incapacitados a una cama.</RescueEnabledExplained>
+	<RescueEnabledTitle>Columna «Rescate» en Trabajo</RescueEnabledTitle>
+	<RescueEnabledExplained>Añade la prioridad de trabajo Rescate para que los colonos lleven automáticamente a los aliados incapacitados a una cama.</RescueEnabledExplained>
 
 	<ShowForceEndLetterTitle>Avisar al terminar el trabajo forzado</ShowForceEndLetterTitle>
 	<ShowForceEndLetterExplained>Muestra un mensaje cuando a un colono no le queda trabajo forzado.</ShowForceEndLetterExplained>
-	<KeepDraftedAndUndraftedCommandsSeparateTitle>Separar órdenes de reclutados y no reclutados</KeepDraftedAndUndraftedCommandsSeparateTitle>
+	<KeepDraftedAndUndraftedCommandsSeparateTitle>Separar órdenes según el reclutamiento</KeepDraftedAndUndraftedCommandsSeparateTitle>
 	<KeepDraftedAndUndraftedCommandsSeparateExplained>Mantiene separadas las órdenes de clic derecho para colonos reclutados y no reclutados, como en RimWorld sin mods.</KeepDraftedAndUndraftedCommandsSeparateExplained>
 
 	<ReplaceCleanRoomTitle>Reemplazar la orden «Limpiar habitación»</ReplaceCleanRoomTitle>
@@ -74,7 +74,7 @@
 	<DecreaseForceRadius>Reducir radio</DecreaseForceRadius>
 	<DecreaseForceRadiusDesc>Reduce el radio de búsqueda del trabajo forzado (actualmente {0}).</DecreaseForceRadiusDesc>
 	<BuildingSmart>Construcción inteligente</BuildingSmart>
-	<BuildingSmartDesc>Evita huecos inaccesibles y que los constructores queden atrapados. Es más lenta y construye desde el punto inicial hacia fuera.</BuildingSmartDesc>
+	<BuildingSmartDesc>Evita huecos inaccesibles y que los constructores queden atrapados. Es más lenta y construye desde el punto inicial hacia afuera.</BuildingSmartDesc>
 
 	<AchtungModKeyOptionNone>Desactivada</AchtungModKeyOptionNone>
 	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
@@ -93,10 +93,10 @@
 	<HealthLevelTitle>Estado de salud</HealthLevelTitle>
 	<HealthLevelExplained>Detiene el trabajo forzado cuando el colono alcanza este estado de salud.</HealthLevelExplained>
 	<HealthLevelOptionNone>Ignorar</HealthLevelOptionNone>
-	<HealthLevelOptionShouldBeTendedNow>Necesita tratamiento inmediato</HealthLevelOptionShouldBeTendedNow>
+	<HealthLevelOptionShouldBeTendedNow>Necesita tratamiento ahora</HealthLevelOptionShouldBeTendedNow>
 	<HealthLevelOptionPrefersMedicalRest>Necesita descanso médico</HealthLevelOptionPrefersMedicalRest>
 	<HealthLevelOptionNeedsMedicalRest>Necesita descanso médico urgente</HealthLevelOptionNeedsMedicalRest>
-	<HealthLevelOptionInPainShock>Shock por dolor</HealthLevelOptionInPainShock>
+	<HealthLevelOptionInPainShock>En shock por dolor</HealthLevelOptionInPainShock>
 
 	<IgnoreForbiddenTitle>Ignorar prohibiciones</IgnoreForbiddenTitle>
 	<IgnoreForbiddenExplained>Permite trabajo forzado con objetos prohibidos.</IgnoreForbiddenExplained>
@@ -105,7 +105,7 @@
 	<IgnoreAssignmentsTitle>Ignorar prioridades de trabajo</IgnoreAssignmentsTitle>
 	<IgnoreAssignmentsExplained>Permite trabajo forzado aunque la prioridad de trabajo correspondiente esté desactivada.</IgnoreAssignmentsExplained>
 
-	<BuildingSmartTitle>Construcción inteligente para trabajos nuevos</BuildingSmartTitle>
+	<BuildingSmartTitle>Construcción inteligente por defecto</BuildingSmartTitle>
 	<BuildingSmartExplained>Usa de forma predeterminada el orden de construcción más seguro en los nuevos trabajos forzados.</BuildingSmartExplained>
 
 	<WorkMarkersTitle>Marcadores de trabajo forzado</WorkMarkersTitle>
@@ -115,7 +115,7 @@
 	<WorkMarkersOptionOff>Desactivados</WorkMarkersOptionOff>
 
 	<MaxForcedItemsTitle>Límite de objetivos de trabajo forzado</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Establécelo en 0 para desactivar el trabajo forzado en tareas normales de clic derecho. Los valores más altos limitan el número de objetivos cercanos.</MaxForcedItemsExplained>
+	<MaxForcedItemsExplained>Establécelo en 0 para desactivar el trabajo forzado en tareas normales de clic derecho. Los valores más altos limitan el número de objetivos cercanos que añade Achtung.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Ilimitado</MaxForcedItemsUnlimited>
 
 
@@ -130,7 +130,7 @@
 
 	<FireFightLabel>Apagar fuego (Achtung)</FireFightLabel>
 	<FireFightInfoText>Apagando un fuego</FireFightInfoText>
-	<FireFightDescription>Apaga un fuego por completo, incluso fuera del área de hogar.</FireFightDescription>
+	<FireFightDescription>Apaga un fuego por completo, incluso fuera del área del hogar.</FireFightDescription>
 	<FireFightReport>Apagando fuego: {0}</FireFightReport>
 
 	<SowZoneLabel>Sembrar esta zona o habitación</SowZoneLabel>
@@ -144,10 +144,10 @@
 	<NoForcedWork>No hay trabajo forzado</NoForcedWork>
 	<ForcedWorkWasInterrupted>Se interrumpió el trabajo forzado de {0}.</ForcedWorkWasInterrupted>
 
-	<WorkType_Rescue_Label>rescatar</WorkType_Rescue_Label>
+	<WorkType_Rescue_Label>rescate</WorkType_Rescue_Label>
 	<WorkType_Rescue_PawnLabel>Rescatador</WorkType_Rescue_PawnLabel>
-	<WorkType_Rescue_GerundLabel>rescatar</WorkType_Rescue_GerundLabel>
+	<WorkType_Rescue_GerundLabel>rescatando</WorkType_Rescue_GerundLabel>
 	<WorkType_Rescue_Description>Lleva a los aliados incapacitados a camas donde puedan recibir tratamiento.</WorkType_Rescue_Description>
-	<WorkType_Rescue_Verb>rescatar</WorkType_Rescue_Verb>
+	<WorkType_Rescue_Verb>Rescatar</WorkType_Rescue_Verb>
 
 </LanguageData>

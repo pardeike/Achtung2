@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+	<Feature_Achtung_Welcome>Achtung!'a hoş geldiniz!</Feature_Achtung_Welcome>
+	<Feature_Achtung_Forcing>Zorunlu çalışma</Feature_Achtung_Forcing>
+	<Feature_Achtung_MenuError>Menü hataları</Feature_Achtung_MenuError>
+	<Feature_Achtung_Formations>Formasyonlar</Feature_Achtung_Formations>
+	<Feature_Achtung_Cooperation>İş birliği</Feature_Achtung_Cooperation>
+	<Feature_Achtung_FourModes>Dört mod</Feature_Achtung_FourModes>
+	<Feature_Achtung_Settings>Ayarlar</Feature_Achtung_Settings>
+	<Feature_Achtung_Draftstatus>Çatışma modu</Feature_Achtung_Draftstatus>
+	<Feature_Achtung_Rescue>Kurtarma</Feature_Achtung_Rescue>
+	<Feature_Achtung_Dragging>Çatışma modunda sürükleme</Feature_Achtung_Dragging>
+	<AchtungTutorialButton>Eğitim</AchtungTutorialButton>
+	<PositioningSettingsHeader>Konumlandırma</PositioningSettingsHeader>
+	<ForcingSettingsHeader>Zorunlu çalışma</ForcingSettingsHeader>
+	<ForcingCommandsTitle>Komutlar</ForcingCommandsTitle>
+	<ForcingJobBehaviorTitle>Çalışma davranışı</ForcingJobBehaviorTitle>
+	<ForcingStopRulesTitle>Durdurma kuralları</ForcingStopRulesTitle>
+	<ForcingFeedbackTitle>İşaretler ve bildirimler</ForcingFeedbackTitle>
+	<PositioningRightClickTitle>Sağ tık</PositioningRightClickTitle>
+	<PositioningDraggingTitle>Sürükleme ve formasyonlar</PositioningDraggingTitle>
+
+	<PositioningEnabledTitle>Özel fare konumlandırması</PositioningEnabledTitle>
+	<PositioningEnabledExplained>Achtung'ın sağ tıkla konumlandırma, sürükleme ve formasyon denetimlerini etkinleştirir.</PositioningEnabledExplained>
+
+	<AchtungModifierTitle>Achtung! tuşu</AchtungModifierTitle>
+	<AchtungModifierExplained>Konumlandırma sırasında seçili kolonicileri çatışma moduna geçirmek için bu tuşu basılı tutun. Sağ fare tuşuyla sürüklerken mevcut formasyonlarını korurlar. Sağ fare tuşunu basılı tuttuktan sonra bu tuşu bırakabilirsiniz. Formasyonu Q ve E ile döndürün.</AchtungModifierExplained>
+
+	<ForceCommandMenuModeTitle>Sağ tık modu</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Geçiş tuşu</ForceCommandMenuKeyTitle>
+
+	<CommandMenuModeOptionAuto>Çatışma modu</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionAutoExplained>Bağlam menüsü ile konumlandırma arasında seçim yapmak için kolonicinin çatışma modunu kullanır.</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionPressForMenu>Menü tuşu</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForMenuExplained>Varsayılan eylem yerine bağlam menüsünü açmak için tuşu basılı tutun.</CommandMenuModeOptionPressForMenuExplained>
+	<CommandMenuModeOptionPressForPosition>Konumlandırma tuşu</CommandMenuModeOptionPressForPosition>
+	<CommandMenuModeOptionPressForPositionExplained>Bağlam menüsünü açmak yerine kolonicileri konumlandırmak için tuşu basılı tutun.</CommandMenuModeOptionPressForPositionExplained>
+	<CommandMenuModeOptionDelayed>Menü için basılı tut</CommandMenuModeOptionDelayed>
+	<CommandMenuModeOptionDelayedExplained>Konumlandırmak için sağ tıklayın; bağlam menüsünü açmak için düğmeyi ayarlanan gecikme süresince basılı tutun.</CommandMenuModeOptionDelayedExplained>
+
+	<DelayTitle>Menü açma gecikmesi</DelayTitle>
+	<DelayExplained>Bağlam menüsü açılmadan önce sağ tıklamanın kaç milisaniye basılı tutulacağını belirler.</DelayExplained>
+
+	<DraftedColonistDraggingModeTitle>Çatışma modundaki koloniciler</DraftedColonistDraggingModeTitle>
+	<DraftedColonistDraggingModeExplained>Çatışma modundaki bir koloniciye sağ tıklamanın ne zaman sürükleme veya formasyon konumlandırmasını başlatacağını belirler.</DraftedColonistDraggingModeExplained>
+	<DraftedColonistDraggingModeOptionOff>Kapalı</DraftedColonistDraggingModeOptionOff>
+	<DraftedColonistDraggingModeOptionOffExplained>Çatışma modundaki kolonicilere sağ tıklamak sürüklemeyi başlatmaz.</DraftedColonistDraggingModeOptionOffExplained>
+	<DraftedColonistDraggingModeOptionUnselected>Hiç kimse seçili değil</DraftedColonistDraggingModeOptionUnselected>
+	<DraftedColonistDraggingModeOptionUnselectedExplained>Yalnızca sağ tıklamadan önce komut verilebilir bir kolonici seçili değilse sürüklemeyi başlatır.</DraftedColonistDraggingModeOptionUnselectedExplained>
+	<DraftedColonistDraggingModeOptionAlways>Her zaman</DraftedColonistDraggingModeOptionAlways>
+	<DraftedColonistDraggingModeOptionAlwaysExplained>Çatışma modundaki bir koloniciye sağ tıklamak her zaman sürükleme veya formasyon konumlandırmasına izin verir.</DraftedColonistDraggingModeOptionAlwaysExplained>
+
+	<RescueEnabledTitle>İş sekmesindeki “Kurtarma” sütunu</RescueEnabledTitle>
+	<RescueEnabledExplained>Kolonicilerin yaralı müttefikleri otomatik olarak yataklara taşıması için Kurtarma iş önceliği ekler.</RescueEnabledExplained>
+
+	<ShowForceEndLetterTitle>Zorunlu çalışma bitince bildir</ShowForceEndLetterTitle>
+	<ShowForceEndLetterExplained>Bir kolonicinin zorunlu işi kalmadığında mektup gösterir.</ShowForceEndLetterExplained>
+	<KeepDraftedAndUndraftedCommandsSeparateTitle>Komutları çatışma moduna göre ayır</KeepDraftedAndUndraftedCommandsSeparateTitle>
+	<KeepDraftedAndUndraftedCommandsSeparateExplained>Çatışma modundaki ve normal kolonicilerin sağ tık komutlarını modsuz RimWorld'deki gibi ayrı tutar.</KeepDraftedAndUndraftedCommandsSeparateExplained>
+
+	<ReplaceCleanRoomTitle>“Odayı temizle” komutunu değiştir</ReplaceCleanRoomTitle>
+	<ReplaceCleanRoomExplained>RimWorld komutu yerine Achtung'ın kapsamlı oda temizleme komutunu kullanır.</ReplaceCleanRoomExplained>
+
+	<ReplaceFightFireTitle>“Yangını söndür” komutunu değiştir</ReplaceFightFireTitle>
+	<ReplaceFightFireExplained>RimWorld komutu yerine Achtung'ın kapsamlı yangın söndürme komutunu kullanır.</ReplaceFightFireExplained>
+
+	<ForcedCommandState>Bitene kadar çalışması emredildi.</ForcedCommandState>
+
+	<ForceMenuButtonText>Zorla</ForceMenuButtonText>
+
+	<IncreaseForceRadius>Yarıçapı artır</IncreaseForceRadius>
+	<IncreaseForceRadiusDesc>Zorunlu çalışma için arama yarıçapını artırır (şu anda {0}).</IncreaseForceRadiusDesc>
+	<DecreaseForceRadius>Yarıçapı azalt</DecreaseForceRadius>
+	<DecreaseForceRadiusDesc>Zorunlu çalışma için arama yarıçapını azaltır (şu anda {0}).</DecreaseForceRadiusDesc>
+	<BuildingSmart>Akıllı inşa</BuildingSmart>
+	<BuildingSmartDesc>Ulaşılamayan boşlukları ve inşaatçıların sıkışmasını önler. Daha yavaştır ve başlangıç noktasından dışarı doğru inşa eder.</BuildingSmartDesc>
+
+	<AchtungModKeyOptionNone>Devre dışı</AchtungModKeyOptionNone>
+	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
+	<AchtungModKeyOptionCtrl>Ctrl</AchtungModKeyOptionCtrl>
+	<AchtungModKeyOptionShift>Shift</AchtungModKeyOptionShift>
+	<AchtungModKeyOptionMeta>Win/Cmd</AchtungModKeyOptionMeta>
+
+	<BreakLevelTitle>Ruhsal çöküş riski</BreakLevelTitle>
+	<BreakLevelExplained>Kolonici bu ruhsal çöküş riski düzeyine ulaştığında zorunlu çalışmayı durdurur.</BreakLevelExplained>
+	<BreakLevelOptionNone>Görmezden gel</BreakLevelOptionNone>
+	<BreakLevelOptionMinor>Küçük</BreakLevelOptionMinor>
+	<BreakLevelOptionMajor>Büyük</BreakLevelOptionMajor>
+	<BreakLevelOptionAlmostExtreme>Neredeyse ciddi</BreakLevelOptionAlmostExtreme>
+	<BreakLevelOptionExtreme>Ciddi</BreakLevelOptionExtreme>
+
+	<HealthLevelTitle>Sağlık durumu</HealthLevelTitle>
+	<HealthLevelExplained>Kolonici bu sağlık durumuna ulaştığında zorunlu çalışmayı durdurur.</HealthLevelExplained>
+	<HealthLevelOptionNone>Görmezden gel</HealthLevelOptionNone>
+	<HealthLevelOptionShouldBeTendedNow>Tedavi gerekiyor</HealthLevelOptionShouldBeTendedNow>
+	<HealthLevelOptionPrefersMedicalRest>Tıbbi istirahat gerekiyor</HealthLevelOptionPrefersMedicalRest>
+	<HealthLevelOptionNeedsMedicalRest>Acil tıbbi istirahat gerekiyor</HealthLevelOptionNeedsMedicalRest>
+	<HealthLevelOptionInPainShock>Acı şoku</HealthLevelOptionInPainShock>
+
+	<IgnoreForbiddenTitle>Yasak durumunu görmezden gel</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Yasaklanmış eşyalar üzerinde zorunlu çalışmaya izin verir.</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>İzinli alan kısıtlamalarını görmezden gel</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Kolonicinin izinli alanı dışında zorunlu çalışmaya izin verir.</IgnoreRestrictionsExplained>
+	<IgnoreAssignmentsTitle>İş önceliklerini görmezden gel</IgnoreAssignmentsTitle>
+	<IgnoreAssignmentsExplained>İlgili iş önceliği devre dışıyken zorunlu çalışmaya izin verir.</IgnoreAssignmentsExplained>
+
+	<BuildingSmartTitle>Yeni zorunlu işler için akıllı inşa</BuildingSmartTitle>
+	<BuildingSmartExplained>Yeni zorunlu işler için varsayılan olarak daha güvenli inşa sırasını kullanır.</BuildingSmartExplained>
+
+	<WorkMarkersTitle>Zorunlu çalışma işaretleri</WorkMarkersTitle>
+	<WorkMarkersExplained>Zorunlu çalışma hedeflerinde küçük işaretler gösterir.</WorkMarkersExplained>
+	<WorkMarkersOptionAnimated>Hareketli</WorkMarkersOptionAnimated>
+	<WorkMarkersOptionStatic>Sabit</WorkMarkersOptionStatic>
+	<WorkMarkersOptionOff>Kapalı</WorkMarkersOptionOff>
+
+	<MaxForcedItemsTitle>Zorunlu çalışma hedef sınırı</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Normal sağ tık işleri için zorunlu çalışmayı kapatmak üzere 0 yapın. Daha yüksek değerler Achtung'ın eklediği yakındaki hedef sayısını sınırlar.</MaxForcedItemsExplained>
+	<MaxForcedItemsUnlimited>Sınırsız</MaxForcedItemsUnlimited>
+
+
+	<JobInterruptedLabel>İptal edildi: {0}</JobInterruptedLabel>
+	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
+	<JobInterruptedBadHealth>{0} kötü sağlık durumunda.</JobInterruptedBadHealth>
+
+	<CleanRoomLabel>Odayı temizle (Achtung)</CleanRoomLabel>
+	<CleanRoomInfoText>Oda kapsamlı şekilde temizleniyor</CleanRoomInfoText>
+	<CleanRoomDescription>Yalnızca bir noktayı değil, tüm odayı temizler.</CleanRoomDescription>
+	<CleanRoomReport>Temizlik{0}: {1}</CleanRoomReport>
+
+	<FireFightLabel>Yangını söndür (Achtung)</FireFightLabel>
+	<FireFightInfoText>Yangın söndürülüyor</FireFightInfoText>
+	<FireFightDescription>Ev alanının dışında olsa bile yangını tamamen söndürür.</FireFightDescription>
+	<FireFightReport>Yangın söndürme: {0}</FireFightReport>
+
+	<SowZoneLabel>Bu bölgeyi veya odayı ek</SowZoneLabel>
+	<SowZoneInfoText>Bölge veya oda ekiliyor</SowZoneInfoText>
+	<SowZoneDescription>Tüm ekim alanını veya odayı eker.</SowZoneDescription>
+	<SowZoneReport>Ekim{0}: {1}</SowZoneReport>
+
+	<AlreadyDoing>(İş #{0})</AlreadyDoing>
+
+	<CouldNotFindMoreForcedWork>{0} başka zorunlu çalışma bulamadı. Kalan hedefler muhtemelen ayrılmış veya ulaşılamaz durumda.</CouldNotFindMoreForcedWork>
+	<NoForcedWork>Zorunlu çalışma yok</NoForcedWork>
+	<ForcedWorkWasInterrupted>{0} için zorunlu çalışma kesintiye uğradı.</ForcedWorkWasInterrupted>
+
+	<WorkType_Rescue_Label>kurtarma</WorkType_Rescue_Label>
+	<WorkType_Rescue_PawnLabel>Kurtarıcı</WorkType_Rescue_PawnLabel>
+	<WorkType_Rescue_GerundLabel>kurtarma</WorkType_Rescue_GerundLabel>
+	<WorkType_Rescue_Description>Yaralı müttefikleri tedavi edilebilecekleri yataklara taşı.</WorkType_Rescue_Description>
+	<WorkType_Rescue_Verb>Kurtar</WorkType_Rescue_Verb>
+
+</LanguageData>

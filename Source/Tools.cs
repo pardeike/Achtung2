@@ -37,7 +37,7 @@ static class Tools
 		pawnLabel = "WorkType_Rescue_PawnLabel".Translate(),
 		gerundLabel = "WorkType_Rescue_GerundLabel".Translate(),
 		description = "WorkType_Rescue_Description".Translate(),
-		verb = "Rescue",
+		verb = "WorkType_Rescue_Verb".Translate(),
 		naturalPriority = 1310,
 		alwaysStartActive = true,
 		workTags = WorkTags.Caring | WorkTags.Commoner | WorkTags.AllWork

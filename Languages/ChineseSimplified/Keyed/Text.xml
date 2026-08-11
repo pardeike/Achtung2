@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+	<Feature_Achtung_Welcome>欢迎使用 Achtung!</Feature_Achtung_Welcome>
+	<Feature_Achtung_Forcing>强制工作</Feature_Achtung_Forcing>
+	<Feature_Achtung_MenuError>菜单错误</Feature_Achtung_MenuError>
+	<Feature_Achtung_Formations>队形</Feature_Achtung_Formations>
+	<Feature_Achtung_Cooperation>协作</Feature_Achtung_Cooperation>
+	<Feature_Achtung_FourModes>四种模式</Feature_Achtung_FourModes>
+	<Feature_Achtung_Settings>设置</Feature_Achtung_Settings>
+	<Feature_Achtung_Draftstatus>征召状态</Feature_Achtung_Draftstatus>
+	<Feature_Achtung_Rescue>救援</Feature_Achtung_Rescue>
+	<Feature_Achtung_Dragging>征召时拖动</Feature_Achtung_Dragging>
+	<AchtungTutorialButton>教程</AchtungTutorialButton>
+	<PositioningSettingsHeader>定位</PositioningSettingsHeader>
+	<ForcingSettingsHeader>强制工作</ForcingSettingsHeader>
+	<ForcingCommandsTitle>命令</ForcingCommandsTitle>
+	<ForcingJobBehaviorTitle>工作行为</ForcingJobBehaviorTitle>
+	<ForcingStopRulesTitle>停止规则</ForcingStopRulesTitle>
+	<ForcingFeedbackTitle>标记与通知</ForcingFeedbackTitle>
+	<PositioningRightClickTitle>右键</PositioningRightClickTitle>
+	<PositioningDraggingTitle>拖动与队形</PositioningDraggingTitle>
+
+	<PositioningEnabledTitle>自定义鼠标定位</PositioningEnabledTitle>
+	<PositioningEnabledExplained>启用 Achtung 的右键定位、拖动和队形控制。</PositioningEnabledExplained>
+
+	<AchtungModifierTitle>Achtung! 键</AchtungModifierTitle>
+	<AchtungModifierExplained>定位时按住此键可征召所选殖民者。用鼠标右键拖动时，他们会保持当前队形。按住鼠标右键后即可松开此键。使用 Q 和 E 旋转队形。</AchtungModifierExplained>
+
+	<ForceCommandMenuModeTitle>右键模式</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>切换键</ForceCommandMenuKeyTitle>
+
+	<CommandMenuModeOptionAuto>征召状态</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionAutoExplained>根据殖民者的征召状态，在右键菜单和定位之间选择。</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionPressForMenu>菜单键</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForMenuExplained>按住此键可打开右键菜单，而不是执行默认操作。</CommandMenuModeOptionPressForMenuExplained>
+	<CommandMenuModeOptionPressForPosition>定位键</CommandMenuModeOptionPressForPosition>
+	<CommandMenuModeOptionPressForPositionExplained>按住此键可定位殖民者，而不是打开右键菜单。</CommandMenuModeOptionPressForPositionExplained>
+	<CommandMenuModeOptionDelayed>长按打开菜单</CommandMenuModeOptionDelayed>
+	<CommandMenuModeOptionDelayedExplained>单击右键进行定位；按住按钮达到设定时长后打开右键菜单。</CommandMenuModeOptionDelayedExplained>
+
+	<DelayTitle>菜单长按延迟</DelayTitle>
+	<DelayExplained>打开右键菜单前需要按住右键的时长（毫秒）。</DelayExplained>
+
+	<DraftedColonistDraggingModeTitle>已征召殖民者</DraftedColonistDraggingModeTitle>
+	<DraftedColonistDraggingModeExplained>选择右键单击已征召殖民者时，何时开始拖动或队形定位。</DraftedColonistDraggingModeExplained>
+	<DraftedColonistDraggingModeOptionOff>关闭</DraftedColonistDraggingModeOptionOff>
+	<DraftedColonistDraggingModeOptionOffExplained>右键单击已征召殖民者不会开始拖动。</DraftedColonistDraggingModeOptionOffExplained>
+	<DraftedColonistDraggingModeOptionUnselected>未选中任何人</DraftedColonistDraggingModeOptionUnselected>
+	<DraftedColonistDraggingModeOptionUnselectedExplained>仅当右键前未选中任何可控制的殖民者时才开始拖动。</DraftedColonistDraggingModeOptionUnselectedExplained>
+	<DraftedColonistDraggingModeOptionAlways>总是</DraftedColonistDraggingModeOptionAlways>
+	<DraftedColonistDraggingModeOptionAlwaysExplained>右键单击已征召殖民者时，总是允许拖动或队形定位。</DraftedColonistDraggingModeOptionAlwaysExplained>
+
+	<RescueEnabledTitle>“工作”选项卡中的“救援”栏</RescueEnabledTitle>
+	<RescueEnabledExplained>添加“救援”工作优先级，使殖民者自动将倒地的盟友送到床上。</RescueEnabledExplained>
+
+	<ShowForceEndLetterTitle>强制工作结束时通知</ShowForceEndLetterTitle>
+	<ShowForceEndLetterExplained>当殖民者没有剩余强制工作时显示信件。</ShowForceEndLetterExplained>
+	<KeepDraftedAndUndraftedCommandsSeparateTitle>分开征召与未征召命令</KeepDraftedAndUndraftedCommandsSeparateTitle>
+	<KeepDraftedAndUndraftedCommandsSeparateExplained>将已征召和未征召殖民者的右键命令分开，与未安装模组的 RimWorld 一致。</KeepDraftedAndUndraftedCommandsSeparateExplained>
+
+	<ReplaceCleanRoomTitle>替换“清洁房间”命令</ReplaceCleanRoomTitle>
+	<ReplaceCleanRoomExplained>使用 Achtung 的彻底清洁房间命令替代 RimWorld 的命令。</ReplaceCleanRoomExplained>
+
+	<ReplaceFightFireTitle>替换“灭火”命令</ReplaceFightFireTitle>
+	<ReplaceFightFireExplained>使用 Achtung 的彻底灭火命令替代 RimWorld 的命令。</ReplaceFightFireExplained>
+
+	<ForcedCommandState>已命令其继续工作，直到完成。</ForcedCommandState>
+
+	<ForceMenuButtonText>强制</ForceMenuButtonText>
+
+	<IncreaseForceRadius>增大半径</IncreaseForceRadius>
+	<IncreaseForceRadiusDesc>增大强制工作的搜索半径（当前为 {0}）。</IncreaseForceRadiusDesc>
+	<DecreaseForceRadius>减小半径</DecreaseForceRadius>
+	<DecreaseForceRadiusDesc>减小强制工作的搜索半径（当前为 {0}）。</DecreaseForceRadiusDesc>
+	<BuildingSmart>智能建造</BuildingSmart>
+	<BuildingSmartDesc>避免出现无法到达的空隙，也防止建造者受困。速度较慢，并从起点向外建造。</BuildingSmartDesc>
+
+	<AchtungModKeyOptionNone>禁用</AchtungModKeyOptionNone>
+	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
+	<AchtungModKeyOptionCtrl>Ctrl</AchtungModKeyOptionCtrl>
+	<AchtungModKeyOptionShift>Shift</AchtungModKeyOptionShift>
+	<AchtungModKeyOptionMeta>Win/Cmd</AchtungModKeyOptionMeta>
+
+	<BreakLevelTitle>精神崩溃风险</BreakLevelTitle>
+	<BreakLevelExplained>殖民者达到此精神崩溃风险等级时停止强制工作。</BreakLevelExplained>
+	<BreakLevelOptionNone>忽略</BreakLevelOptionNone>
+	<BreakLevelOptionMinor>低</BreakLevelOptionMinor>
+	<BreakLevelOptionMajor>中</BreakLevelOptionMajor>
+	<BreakLevelOptionAlmostExtreme>接近高</BreakLevelOptionAlmostExtreme>
+	<BreakLevelOptionExtreme>高</BreakLevelOptionExtreme>
+
+	<HealthLevelTitle>健康状况</HealthLevelTitle>
+	<HealthLevelExplained>殖民者达到此健康状况时停止强制工作。</HealthLevelExplained>
+	<HealthLevelOptionNone>忽略</HealthLevelOptionNone>
+	<HealthLevelOptionShouldBeTendedNow>当前需要治疗</HealthLevelOptionShouldBeTendedNow>
+	<HealthLevelOptionPrefersMedicalRest>建议休养</HealthLevelOptionPrefersMedicalRest>
+	<HealthLevelOptionNeedsMedicalRest>急需休养</HealthLevelOptionNeedsMedicalRest>
+	<HealthLevelOptionInPainShock>疼痛休克</HealthLevelOptionInPainShock>
+
+	<IgnoreForbiddenTitle>忽略禁用状态</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>允许对已禁用的物品执行强制工作。</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>忽略允许活动区域限制</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>允许在殖民者的允许活动区域外执行强制工作。</IgnoreRestrictionsExplained>
+	<IgnoreAssignmentsTitle>忽略工作优先级</IgnoreAssignmentsTitle>
+	<IgnoreAssignmentsExplained>相关工作优先级已禁用时仍允许执行强制工作。</IgnoreAssignmentsExplained>
+
+	<BuildingSmartTitle>新强制任务使用智能建造</BuildingSmartTitle>
+	<BuildingSmartExplained>新强制任务默认使用更安全的建造顺序。</BuildingSmartExplained>
+
+	<WorkMarkersTitle>强制工作标记</WorkMarkersTitle>
+	<WorkMarkersExplained>在强制工作目标上显示小型标记。</WorkMarkersExplained>
+	<WorkMarkersOptionAnimated>动画</WorkMarkersOptionAnimated>
+	<WorkMarkersOptionStatic>静态</WorkMarkersOptionStatic>
+	<WorkMarkersOptionOff>关闭</WorkMarkersOptionOff>
+
+	<MaxForcedItemsTitle>强制工作目标上限</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>设为 0 可禁用普通右键任务的强制工作。较高的值会限制 Achtung 添加的附近目标数量。</MaxForcedItemsExplained>
+	<MaxForcedItemsUnlimited>无限制</MaxForcedItemsUnlimited>
+
+
+	<JobInterruptedLabel>已取消：{0}</JobInterruptedLabel>
+	<JobInterruptedBreakdown>{0}：{1}</JobInterruptedBreakdown>
+	<JobInterruptedBadHealth>{0} 的健康状况不佳。</JobInterruptedBadHealth>
+
+	<CleanRoomLabel>清洁房间（Achtung）</CleanRoomLabel>
+	<CleanRoomInfoText>正在彻底清洁房间</CleanRoomInfoText>
+	<CleanRoomDescription>清洁整个房间，而不只是一个地点。</CleanRoomDescription>
+	<CleanRoomReport>正在清洁{0}：{1}</CleanRoomReport>
+
+	<FireFightLabel>灭火（Achtung）</FireFightLabel>
+	<FireFightInfoText>正在灭火</FireFightInfoText>
+	<FireFightDescription>彻底扑灭火灾，即使火灾位于居住区外。</FireFightDescription>
+	<FireFightReport>正在灭火：{0}</FireFightReport>
+
+	<SowZoneLabel>播种此区域或房间</SowZoneLabel>
+	<SowZoneInfoText>正在区域或房间内播种</SowZoneInfoText>
+	<SowZoneDescription>播种整个种植区或房间。</SowZoneDescription>
+	<SowZoneReport>正在播种{0}：{1}</SowZoneReport>
+
+	<AlreadyDoing>（任务 #{0}）</AlreadyDoing>
+
+	<CouldNotFindMoreForcedWork>{0} 找不到更多强制工作。其余目标可能已被预留或无法到达。</CouldNotFindMoreForcedWork>
+	<NoForcedWork>没有强制工作</NoForcedWork>
+	<ForcedWorkWasInterrupted>{0} 的强制工作已中断。</ForcedWorkWasInterrupted>
+
+	<WorkType_Rescue_Label>救援</WorkType_Rescue_Label>
+	<WorkType_Rescue_PawnLabel>救援者</WorkType_Rescue_PawnLabel>
+	<WorkType_Rescue_GerundLabel>救援</WorkType_Rescue_GerundLabel>
+	<WorkType_Rescue_Description>将倒地的盟友送到床上接受治疗。</WorkType_Rescue_Description>
+	<WorkType_Rescue_Verb>救援</WorkType_Rescue_Verb>
+
+</LanguageData>
