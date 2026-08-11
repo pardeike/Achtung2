@@ -177,7 +177,9 @@ qualifies, while an all-undrafted selection does not enter implicit positioning.
 mechs and calls Achtung's real `Controller.MouseDown` path twice. The first call
 simulates no modifier and must position only the drafted centipede. The second
 call simulates the configured Achtung modifier and must draft and position both
-mechs.
+mechs. The modifier pass also requires the undrafted mech's local draft request,
+positioning eligibility, and formation offset to exist before a tick can update
+the synchronized pawn state.
 
 GABS cannot make `Input.GetKey` report a held modifier merely by adding a Unity
 event modifier. The contract therefore applies callback-scoped Harmony prefixes

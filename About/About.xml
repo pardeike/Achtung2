@@ -23,7 +23,7 @@
     <li>rwmt.multiplayer</li>
   </loadAfter>
   <packageId>brrainz.achtung</packageId>
-  <modVersion>4.1.12</modVersion>
+  <modVersion>4.1.13</modVersion>
   <steamAppId>730936602</steamAppId>
   <url>https://github.com/pardeike/Achtung2</url>
   <description>Command your colonists like a boss!

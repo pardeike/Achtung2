@@ -279,7 +279,10 @@ public class Controller
 		}
 
 		if (achtungPressed)
+		{
+			colonists.Do(colonist => colonist.draftRequestedForPositioning = true);
 			Tools.DraftWithSound(colonists, true);
+		}
 
 		var useFormation = doPositioning && (centerOnColonist != null || achtungPressed);
 		void DoPositioning() => BeginPositioning(pos, useFormation);
@@ -296,7 +299,7 @@ public class Controller
 
 	private void StartDragging(Vector3 pos, bool asGroup)
 	{
-		var draftedColonists = colonists.Where(colonist => colonist.pawn.Drafted).ToList();
+		var draftedColonists = DraftedColonistsForPositioning();
 
 		groupMovement = asGroup;
 		if (groupMovement)
@@ -351,10 +354,13 @@ public class Controller
 	private bool IsLineDragPastClick(Vector3 pos)
 		=> (LineEndFor(pos) - lineStart).MagnitudeHorizontalSquared() > 0.5f;
 
+	private List<Colonist> DraftedColonistsForPositioning()
+		=> colonists.Where(colonist => colonist.DraftedForPositioning).ToList();
+
 	private void UpdateLinePosition(Vector3 pos, bool issueOrders)
 	{
 		lineEnd = LineEndFor(pos);
-		var draftedColonists = colonists.Where(colonist => colonist.pawn.Drafted).ToList();
+		var draftedColonists = DraftedColonistsForPositioning();
 		var count = draftedColonists.Count;
 		var dragVector = lineEnd - lineStart;
 		var delta = count > 1 ? dragVector / (count - 1) : Vector3.zero;
@@ -396,7 +402,7 @@ public class Controller
 			}
 		}
 
-		var draftedColonists = colonists.Where(colonist => colonist.pawn.Drafted).ToList();
+		var draftedColonists = DraftedColonistsForPositioning();
 
 		if (Event.current.button != 1)
 			return;
@@ -469,7 +475,7 @@ public class Controller
 				}
 			}
 
-			var draftedColonists = colonists.Where(colonist => colonist.pawn.Drafted).ToList();
+			var draftedColonists = DraftedColonistsForPositioning();
 
 			switch (key)
 			{

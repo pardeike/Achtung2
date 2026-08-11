@@ -1,4 +1,0 @@
-- Fix prioritized-work targets losing referenced map objects or logging unresolved target IDs after loading a save.
-- Reworked English, Dutch, German, Spanish, and Swedish text for clearer wording and consistent RimWorld terminology.
-- Added complete Simplified Chinese, Traditional Chinese, French, Polish, Russian, Latin American Spanish, and Turkish translations.
-- Shortened Russian medical-rest settings so their values remain readable beside their labels.

@@ -65,6 +65,10 @@ public sealed partial class AchtungBridgeTools
 		public int selectedPawnCount;
 		public bool combatDrafted;
 		public bool laborDrafted;
+		public bool laborDraftRequested;
+		public bool combatDraftedForPositioning;
+		public bool laborDraftedForPositioning;
+		public bool laborFormationOffsetRecorded;
 		public bool positioningStarted;
 		public bool groupMovement;
 		public bool lineStartMatchesTarget;
@@ -671,6 +675,10 @@ public sealed partial class AchtungBridgeTools
 				selectedPawnCount = controller.colonists.Count,
 				combatDrafted = fixture.combatMech.Drafted,
 				laborDrafted = fixture.laborMech.Drafted,
+				laborDraftRequested = laborColonist?.draftRequestedForPositioning == true,
+				combatDraftedForPositioning = combatColonist?.DraftedForPositioning == true,
+				laborDraftedForPositioning = laborColonist?.DraftedForPositioning == true,
+				laborFormationOffsetRecorded = laborColonist != null && laborColonist.offsetFromCenter != Vector3.zero,
 				positioningStarted = controller.isDragging,
 				groupMovement = controller.groupMovement,
 				lineStartMatchesTarget = controller.lineStart.ToIntVec3() == target,
@@ -685,6 +693,10 @@ public sealed partial class AchtungBridgeTools
 				&& phase.mouseDownReturned
 				&& phase.selectedPawnCount == 2
 				&& phase.combatDrafted
+				&& phase.laborDraftRequested == modifierPressed
+				&& phase.combatDraftedForPositioning
+				&& phase.laborDraftedForPositioning == modifierPressed
+				&& phase.laborFormationOffsetRecorded == modifierPressed
 				&& phase.positioningStarted
 				&& phase.combatDesignationValid
 				&& phase.laborDrafted == modifierPressed

@@ -37,6 +37,10 @@ force work, thorough room cleaning, firefighting, portal entry, cancellation,
 deterministic background expansion, and late-join restoration. Visual
 preferences remain local to each player.
 
+All players must use the same Rescue setting before starting a Multiplayer
+session and leave it unchanged until the session ends. Rescue adds or removes a
+work type, so changing it while a game is hosted is not supported.
+
 Load Prepatcher and Multiplayer according to Multiplayer's own requirements.
 Achtung declares Multiplayer as an optional `loadAfter` dependency.
 
