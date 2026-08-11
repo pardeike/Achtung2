@@ -74,6 +74,11 @@ jobs:
           echo "MOD_VERSION=$MOD_VERSION" >> "$GITHUB_ENV"
           echo "RELEASE_TAG=$RELEASE_TAG" >> "$GITHUB_ENV"
 
+      - name: Verify conditional settings layout evidence
+        run: |
+          set -euo pipefail
+          python3 scripts/check-settings-layout-release-gate.py --target-ref "$GITHUB_SHA"
+
       - name: Create or verify release tag
         run: |
           set -euo pipefail

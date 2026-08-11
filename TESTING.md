@@ -99,6 +99,57 @@ Use the least expensive layer that answers the question:
 4. Use screenshots or manual interaction only for behavior that depends on
    visual UI state.
 
+## Conditional localization release gate
+
+Releases run `scripts/check-settings-layout-release-gate.py` before creating a
+tag. The gate compares the release tree with the previous semantic release tag
+and has exactly two outcomes:
+
+- when no `Languages/*/Keyed/*.xml` wording changed, it reports `skipped` and
+  requires no RimWorld localization matrix;
+- when keyed wording changed, it requires `TestEvidence/SettingsLayout.json`
+  to contain a passing, current live matrix for every shipped language.
+
+The evidence digest covers all keyed language XML plus the settings renderer
+and companion audit sources. Any wording or relevant layout/audit change makes
+old evidence stale. Inspect the trigger and current digest with:
+
+```bash
+python3 scripts/check-settings-layout-release-gate.py --print-input-digest
+```
+
+The release script never estimates text dimensions. All font selection,
+translation lookup, width measurement, and fit assertions come from the
+companion-only `achtung/audit_settings_layout` Bridge tool; the script only
+decides whether wording changed and rejects missing, stale, or failing Bridge
+evidence.
+
+When the matrix is required, deploy the paired Release build, start RimWorld
+through GABS, and automate this sequence for every language directory:
+
+1. call `rimworld/switch_language` with the installed language's recommended
+   query;
+2. wait for `rimbridge/wait_for_long_event_idle`;
+3. call `achtung/audit_settings_layout` with that language as
+   `expectedLanguage`;
+4. require all 33 shared title/value states and eight fixed-height texts to
+   pass.
+
+Replace the single curated evidence file with the resulting 12-language
+summary and the digest printed above, then run:
+
+```bash
+python3 scripts/check-settings-layout-release-gate.py
+```
+
+The audit uses RimWorld's active-language fonts and the proven logical widths:
+399 pixels for shared title/value rows with a 12-pixel minimum gap, 423 pixels
+for Medium-font column headers, and 387 pixels for Small-font subheadings.
+Checkbox titles and explanations are deliberately excluded because their
+measured height expands the scrollable column. No per-language dialog opening,
+scrolling, or option cycling is required. Restore the original language and
+stop RimWorld after recording evidence.
+
 ### Mixed draft menu contract
 
 `achtung/test_mixed_draft_menu_contract` creates a temporary mechanitor, a real

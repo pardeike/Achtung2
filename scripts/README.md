@@ -25,3 +25,19 @@ The paired destinations are:
 - the physical Mods root's sibling `BridgeTools/Achtung`
 
 Both paths must come from the same `RIMWORLD_MOD_DIR` value.
+
+## check-settings-layout-release-gate.py
+
+Enforces the conditional localization gate used by the GitHub release workflow.
+It compares the intended release with the previous semantic release tag. It
+skips when no keyed language wording changed and otherwise requires the current
+`TestEvidence/SettingsLayout.json` digest and all 12 live RimWorld language
+results to pass before a release tag can be created.
+
+It does not reproduce RimWorld layout calculations. Those are owned by the
+companion-only `achtung/audit_settings_layout` Bridge tool; this script handles
+only Git history, evidence freshness, and release gating.
+
+Run it without arguments against the working tree. Use
+`--print-input-digest` when recording fresh evidence, or `--target-ref REF` for
+a committed release target such as GitHub Actions' `GITHUB_SHA`.

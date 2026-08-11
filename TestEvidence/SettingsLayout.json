@@ -1,0 +1,423 @@
+{
+  "schemaVersion": 1,
+  "baseTag": "v4.1.12",
+  "testedAtUtc": "2026-08-11T17:26:18Z",
+  "inputDigest": "sha256:be3c54e34500ad0ca964dfb26eff5b3909d46facad4638f9a935c962fd3b143e",
+  "measurementTool": "achtung/audit_settings_layout",
+  "measurementScope": "Only horizontally constrained settings text: shared title/value rows, fixed-height column headers, and fixed-height subheadings.",
+  "ignoredByDesign": "Checkbox titles and explanations use measured wrapping height and extend their scroll columns vertically.",
+  "geometry": {
+    "columnWidth": 399,
+    "headerWidth": 423,
+    "subheadingWidth": 387,
+    "minimumGap": 12
+  },
+  "totalChecks": 492,
+  "passed": true,
+  "observations": {
+    "russianUrgentMedicalRest": {
+      "titleKey": "HealthLevelTitle",
+      "valueKey": "HealthLevelOptionNeedsMedicalRest",
+      "remainingWidth": 42,
+      "minimumGap": 12
+    }
+  },
+  "results": [
+    {
+      "language": "English",
+      "activeLanguage": "English",
+      "success": true,
+      "assertions": {
+        "allFixedWidthHeadersFit": true,
+        "allTitleValuePairsFit": true,
+        "fixedTextCheckCount": 8,
+        "fixedTextClipCount": 0,
+        "overlapCount": 0,
+        "requestedLanguageActive": true,
+        "titleValueCheckCount": 33
+      },
+      "tightestPair": {
+        "setting": "HealthLevel",
+        "titleKey": "HealthLevelTitle",
+        "valueKey": "HealthLevelOptionNeedsMedicalRest",
+        "remainingWidth": 130,
+        "minimumGap": 12
+      },
+      "widestHeader": {
+        "key": "ForcingSettingsHeader",
+        "font": "Medium",
+        "textWidth": 118,
+        "availableWidth": 423
+      },
+      "widestSubheading": {
+        "key": "PositioningDraggingTitle",
+        "font": "Small",
+        "textWidth": 157,
+        "availableWidth": 387
+      }
+    },
+    {
+      "language": "ChineseSimplified",
+      "activeLanguage": "ChineseSimplified (简体中文)",
+      "success": true,
+      "assertions": {
+        "allFixedWidthHeadersFit": true,
+        "allTitleValuePairsFit": true,
+        "fixedTextCheckCount": 8,
+        "fixedTextClipCount": 0,
+        "overlapCount": 0,
+        "requestedLanguageActive": true,
+        "titleValueCheckCount": 33
+      },
+      "tightestPair": {
+        "setting": "DraftedColonistDraggingMode",
+        "titleKey": "DraftedColonistDraggingModeTitle",
+        "valueKey": "DraftedColonistDraggingModeOptionUnselected",
+        "remainingWidth": 231,
+        "minimumGap": 12
+      },
+      "widestHeader": {
+        "key": "ForcingSettingsHeader",
+        "font": "Medium",
+        "textWidth": 84,
+        "availableWidth": 423
+      },
+      "widestSubheading": {
+        "key": "PositioningDraggingTitle",
+        "font": "Small",
+        "textWidth": 70,
+        "availableWidth": 387
+      }
+    },
+    {
+      "language": "ChineseTraditional",
+      "activeLanguage": "ChineseTraditional (繁體中文)",
+      "success": true,
+      "assertions": {
+        "allFixedWidthHeadersFit": true,
+        "allTitleValuePairsFit": true,
+        "fixedTextCheckCount": 8,
+        "fixedTextClipCount": 0,
+        "overlapCount": 0,
+        "requestedLanguageActive": true,
+        "titleValueCheckCount": 33
+      },
+      "tightestPair": {
+        "setting": "DraftedColonistDraggingMode",
+        "titleKey": "DraftedColonistDraggingModeTitle",
+        "valueKey": "DraftedColonistDraggingModeOptionUnselected",
+        "remainingWidth": 231,
+        "minimumGap": 12
+      },
+      "widestHeader": {
+        "key": "ForcingSettingsHeader",
+        "font": "Medium",
+        "textWidth": 84,
+        "availableWidth": 423
+      },
+      "widestSubheading": {
+        "key": "PositioningDraggingTitle",
+        "font": "Small",
+        "textWidth": 70,
+        "availableWidth": 387
+      }
+    },
+    {
+      "language": "Dutch",
+      "activeLanguage": "Dutch (Nederlands)",
+      "success": true,
+      "assertions": {
+        "allFixedWidthHeadersFit": true,
+        "allTitleValuePairsFit": true,
+        "fixedTextCheckCount": 8,
+        "fixedTextClipCount": 0,
+        "overlapCount": 0,
+        "requestedLanguageActive": true,
+        "titleValueCheckCount": 33
+      },
+      "tightestPair": {
+        "setting": "DraftedColonistDraggingMode",
+        "titleKey": "DraftedColonistDraggingModeTitle",
+        "valueKey": "DraftedColonistDraggingModeOptionUnselected",
+        "remainingWidth": 49,
+        "minimumGap": 12
+      },
+      "widestHeader": {
+        "key": "ForcingSettingsHeader",
+        "font": "Medium",
+        "textWidth": 166,
+        "availableWidth": 423
+      },
+      "widestSubheading": {
+        "key": "PositioningDraggingTitle",
+        "font": "Small",
+        "textWidth": 127,
+        "availableWidth": 387
+      }
+    },
+    {
+      "language": "French",
+      "activeLanguage": "French (Français)",
+      "success": true,
+      "assertions": {
+        "allFixedWidthHeadersFit": true,
+        "allTitleValuePairsFit": true,
+        "fixedTextCheckCount": 8,
+        "fixedTextClipCount": 0,
+        "overlapCount": 0,
+        "requestedLanguageActive": true,
+        "titleValueCheckCount": 33
+      },
+      "tightestPair": {
+        "setting": "HealthLevel",
+        "titleKey": "HealthLevelTitle",
+        "valueKey": "HealthLevelOptionPrefersMedicalRest",
+        "remainingWidth": 103,
+        "minimumGap": 12
+      },
+      "widestHeader": {
+        "key": "PositioningSettingsHeader",
+        "font": "Medium",
+        "textWidth": 149,
+        "availableWidth": 423
+      },
+      "widestSubheading": {
+        "key": "PositioningDraggingTitle",
+        "font": "Small",
+        "textWidth": 171,
+        "availableWidth": 387
+      }
+    },
+    {
+      "language": "German",
+      "activeLanguage": "German (Deutsch)",
+      "success": true,
+      "assertions": {
+        "allFixedWidthHeadersFit": true,
+        "allTitleValuePairsFit": true,
+        "fixedTextCheckCount": 8,
+        "fixedTextClipCount": 0,
+        "overlapCount": 0,
+        "requestedLanguageActive": true,
+        "titleValueCheckCount": 33
+      },
+      "tightestPair": {
+        "setting": "HealthLevel",
+        "titleKey": "HealthLevelTitle",
+        "valueKey": "HealthLevelOptionNeedsMedicalRest",
+        "remainingWidth": 72,
+        "minimumGap": 12
+      },
+      "widestHeader": {
+        "key": "ForcingSettingsHeader",
+        "font": "Medium",
+        "textWidth": 181,
+        "availableWidth": 423
+      },
+      "widestSubheading": {
+        "key": "PositioningDraggingTitle",
+        "font": "Small",
+        "textWidth": 157,
+        "availableWidth": 387
+      }
+    },
+    {
+      "language": "Polish",
+      "activeLanguage": "Polish (Polski)",
+      "success": true,
+      "assertions": {
+        "allFixedWidthHeadersFit": true,
+        "allTitleValuePairsFit": true,
+        "fixedTextCheckCount": 8,
+        "fixedTextClipCount": 0,
+        "overlapCount": 0,
+        "requestedLanguageActive": true,
+        "titleValueCheckCount": 33
+      },
+      "tightestPair": {
+        "setting": "HealthLevel",
+        "titleKey": "HealthLevelTitle",
+        "valueKey": "HealthLevelOptionPrefersMedicalRest",
+        "remainingWidth": 47,
+        "minimumGap": 12
+      },
+      "widestHeader": {
+        "key": "ForcingSettingsHeader",
+        "font": "Medium",
+        "textWidth": 176,
+        "availableWidth": 423
+      },
+      "widestSubheading": {
+        "key": "ForcingJobBehaviorTitle",
+        "font": "Small",
+        "textWidth": 173,
+        "availableWidth": 387
+      }
+    },
+    {
+      "language": "Russian",
+      "activeLanguage": "Russian (Русский)",
+      "success": true,
+      "assertions": {
+        "allFixedWidthHeadersFit": true,
+        "allTitleValuePairsFit": true,
+        "fixedTextCheckCount": 8,
+        "fixedTextClipCount": 0,
+        "overlapCount": 0,
+        "requestedLanguageActive": true,
+        "titleValueCheckCount": 33
+      },
+      "tightestPair": {
+        "setting": "ForceCommandMenuMode",
+        "titleKey": "ForceCommandMenuModeTitle",
+        "valueKey": "CommandMenuModeOptionPressForPosition",
+        "remainingWidth": 26,
+        "minimumGap": 12
+      },
+      "widestHeader": {
+        "key": "ForcingSettingsHeader",
+        "font": "Medium",
+        "textWidth": 240,
+        "availableWidth": 423
+      },
+      "widestSubheading": {
+        "key": "PositioningDraggingTitle",
+        "font": "Small",
+        "textWidth": 194,
+        "availableWidth": 387
+      }
+    },
+    {
+      "language": "Spanish",
+      "activeLanguage": "Spanish (Español(Castellano))",
+      "success": true,
+      "assertions": {
+        "allFixedWidthHeadersFit": true,
+        "allTitleValuePairsFit": true,
+        "fixedTextCheckCount": 8,
+        "fixedTextClipCount": 0,
+        "overlapCount": 0,
+        "requestedLanguageActive": true,
+        "titleValueCheckCount": 33
+      },
+      "tightestPair": {
+        "setting": "HealthLevel",
+        "titleKey": "HealthLevelTitle",
+        "valueKey": "HealthLevelOptionNeedsMedicalRest",
+        "remainingWidth": 74,
+        "minimumGap": 12
+      },
+      "widestHeader": {
+        "key": "PositioningSettingsHeader",
+        "font": "Medium",
+        "textWidth": 159,
+        "availableWidth": 423
+      },
+      "widestSubheading": {
+        "key": "ForcingJobBehaviorTitle",
+        "font": "Small",
+        "textWidth": 177,
+        "availableWidth": 387
+      }
+    },
+    {
+      "language": "SpanishLatin",
+      "activeLanguage": "SpanishLatin (Español(Latinoamérica))",
+      "success": true,
+      "assertions": {
+        "allFixedWidthHeadersFit": true,
+        "allTitleValuePairsFit": true,
+        "fixedTextCheckCount": 8,
+        "fixedTextClipCount": 0,
+        "overlapCount": 0,
+        "requestedLanguageActive": true,
+        "titleValueCheckCount": 33
+      },
+      "tightestPair": {
+        "setting": "HealthLevel",
+        "titleKey": "HealthLevelTitle",
+        "valueKey": "HealthLevelOptionNeedsMedicalRest",
+        "remainingWidth": 74,
+        "minimumGap": 12
+      },
+      "widestHeader": {
+        "key": "PositioningSettingsHeader",
+        "font": "Medium",
+        "textWidth": 159,
+        "availableWidth": 423
+      },
+      "widestSubheading": {
+        "key": "ForcingJobBehaviorTitle",
+        "font": "Small",
+        "textWidth": 177,
+        "availableWidth": 387
+      }
+    },
+    {
+      "language": "Swedish",
+      "activeLanguage": "Swedish (Svenska)",
+      "success": true,
+      "assertions": {
+        "allFixedWidthHeadersFit": true,
+        "allTitleValuePairsFit": true,
+        "fixedTextCheckCount": 8,
+        "fixedTextClipCount": 0,
+        "overlapCount": 0,
+        "requestedLanguageActive": true,
+        "titleValueCheckCount": 33
+      },
+      "tightestPair": {
+        "setting": "ForceCommandMenuMode",
+        "titleKey": "ForceCommandMenuModeTitle",
+        "valueKey": "CommandMenuModeOptionAuto",
+        "remainingWidth": 118,
+        "minimumGap": 12
+      },
+      "widestHeader": {
+        "key": "ForcingSettingsHeader",
+        "font": "Medium",
+        "textWidth": 138,
+        "availableWidth": 423
+      },
+      "widestSubheading": {
+        "key": "PositioningDraggingTitle",
+        "font": "Small",
+        "textWidth": 162,
+        "availableWidth": 387
+      }
+    },
+    {
+      "language": "Turkish",
+      "activeLanguage": "Turkish (Türkçe)",
+      "success": true,
+      "assertions": {
+        "allFixedWidthHeadersFit": true,
+        "allTitleValuePairsFit": true,
+        "fixedTextCheckCount": 8,
+        "fixedTextClipCount": 0,
+        "overlapCount": 0,
+        "requestedLanguageActive": true,
+        "titleValueCheckCount": 33
+      },
+      "tightestPair": {
+        "setting": "DraftedColonistDraggingMode",
+        "titleKey": "DraftedColonistDraggingModeTitle",
+        "valueKey": "DraftedColonistDraggingModeOptionUnselected",
+        "remainingWidth": 75,
+        "minimumGap": 12
+      },
+      "widestHeader": {
+        "key": "ForcingSettingsHeader",
+        "font": "Medium",
+        "textWidth": 154,
+        "availableWidth": 423
+      },
+      "widestSubheading": {
+        "key": "PositioningDraggingTitle",
+        "font": "Small",
+        "textWidth": 174,
+        "availableWidth": 387
+      }
+    }
+  ]
+}

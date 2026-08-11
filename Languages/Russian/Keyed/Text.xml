@@ -94,8 +94,8 @@
 	<HealthLevelExplained>Останавливает принудительную работу, когда поселенец достигает этого состояния здоровья.</HealthLevelExplained>
 	<HealthLevelOptionNone>Игнорировать</HealthLevelOptionNone>
 	<HealthLevelOptionShouldBeTendedNow>Требуется лечение</HealthLevelOptionShouldBeTendedNow>
-	<HealthLevelOptionPrefersMedicalRest>Нужен отдых на медицинской кровати</HealthLevelOptionPrefersMedicalRest>
-	<HealthLevelOptionNeedsMedicalRest>Срочно нужен отдых на медицинской кровати</HealthLevelOptionNeedsMedicalRest>
+	<HealthLevelOptionPrefersMedicalRest>Нужен постельный режим</HealthLevelOptionPrefersMedicalRest>
+	<HealthLevelOptionNeedsMedicalRest>Срочно нужен постельный режим</HealthLevelOptionNeedsMedicalRest>
 	<HealthLevelOptionInPainShock>Болевой шок</HealthLevelOptionInPainShock>
 
 	<IgnoreForbiddenTitle>Игнорировать запреты</IgnoreForbiddenTitle>
