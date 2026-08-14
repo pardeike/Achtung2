@@ -53,40 +53,37 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 
 		var selected = isOver && Input.GetMouseButtonDown(0);
 		if (selected)
-		{
-			if (actionSelected)
-				return true;
-			actionSelected = true;
-
-			bool success;
-			if (MultiplayerSupport.IsActive)
-			{
-				var forceOption = options.OfType<ForcedFloatMenuOption>().FirstOrDefault();
-				success = forceOption != null
-					? BeginForceWork(forcedPawns, forceOption.forceWorkgiver, forceOption.forceCell)
-					: options.Any(option => option.extraPartOnGUI?.Invoke(drawRect) == true);
-			}
-			else
-			{
-				success = options.Any(option =>
-				{
-					if (option is ForcedFloatMenuOption forceOption)
-					{
-						var forced = false;
-						foreach (var pawn in forcedPawns)
-							forced |= ForceAction(pawn, forceOption.forceWorkgiver, forceOption.forceCell);
-						return forced;
-					}
-					if (option.extraPartOnGUI != null)
-						return option.extraPartOnGUI(drawRect);
-					return false;
-				});
-			}
-
-			if (success)
-				return true;
-		}
+			return ActivateForceAction(drawRect);
 		return false;
+	}
+
+	public bool ActivateForceAction(Rect drawRect)
+	{
+		if (actionSelected)
+			return true;
+		actionSelected = true;
+
+		if (MultiplayerSupport.IsActive)
+		{
+			var forceOption = options.OfType<ForcedFloatMenuOption>().FirstOrDefault();
+			return forceOption != null
+				? BeginForceWork(forcedPawns, forceOption.forceWorkgiver, forceOption.forceCell)
+				: options.Any(option => option.extraPartOnGUI?.Invoke(drawRect) == true);
+		}
+
+		return options.Any(option =>
+		{
+			if (option is ForcedFloatMenuOption forceOption)
+			{
+				var forced = false;
+				foreach (var pawn in forcedPawns)
+					forced |= ForceAction(pawn, forceOption.forceWorkgiver, forceOption.forceCell);
+				return forced;
+			}
+			if (option.extraPartOnGUI != null)
+				return option.extraPartOnGUI(drawRect);
+			return false;
+		});
 	}
 
 	static bool BeginForceWork(List<Pawn> pawns, WorkGiver_Scanner forceWorkgiver, IntVec3 clickedCell)

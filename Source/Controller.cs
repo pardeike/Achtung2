@@ -181,6 +181,7 @@ public class Controller
 	public bool MouseDown(Vector3 pos, int button, bool longPress)
 	{
 		var doPositioning = Achtung.Settings.CustomPositioningEnabled;
+		var doForceMenu = Achtung.Settings.ForceCommandsEnabled;
 
 		if (longPress == false)
 			colonists = Tools.GetSelectedColonists();
@@ -198,6 +199,17 @@ public class Controller
 		if (button != 1)
 			return true;
 
+		var map = Find.CurrentMap;
+		var cell = IntVec3.FromVector3(pos);
+		if (cell.InBounds(map) == false)
+			return true;
+
+		var actions = doForceMenu ? new MultiActions(colonists, UI.MouseMapPosition()) : null;
+		if (doPositioning == false)
+			return actions?.HasForcedOptions == true
+				? ShowMenu(actions, true, null)
+				: true;
+
 		var achtungPressed = Tools.IsModKeyPressed(Achtung.Settings.achtungKey);
 		var allDrafted = colonists.All(colonist => colonist.pawn.Drafted || achtungPressed);
 		var mixedDrafted = !allDrafted && colonists.Any(colonist => colonist.pawn.Drafted);
@@ -210,17 +222,6 @@ public class Controller
 			CommandMenuMode.Delayed => longPress,
 			_ => false
 		};
-
-		if (doPositioning == false)
-			return true;
-
-		var doForceMenu = Achtung.Settings.ForceCommandsEnabled;
-		var actions = doForceMenu ? new MultiActions(colonists, UI.MouseMapPosition()) : null;
-
-		var map = Find.CurrentMap;
-		var cell = IntVec3.FromVector3(pos);
-		if (cell.InBounds(map) == false)
-			return true;
 
 		var pawnsUnderMouse = PawnsUnderMouse(pos);
 
@@ -588,10 +589,10 @@ public class Controller
 
 	public void HandleEarlyRightClicks()
 	{
-		CaptureRightClickSelectionState();
-
 		if (Achtung.Settings.CustomPositioningEnabled == false)
 			return;
+
+		CaptureRightClickSelectionState();
 		if (Achtung.Settings.draftedColonistDraggingMode == DraftedColonistDraggingMode.Off)
 			return;
 		if (Achtung.Settings.draftedColonistDraggingMode == DraftedColonistDraggingMode.Unselected && rightClickStartedWithSelectedColonists)
@@ -635,6 +636,12 @@ public class Controller
 		if (Achtung.Settings.CustomPositioningEnabled == false)
 		{
 			ClearCustomPositioningState();
+			if (Find.WindowStack.IsOpen<FloatMenu>())
+				return true;
+			if (Achtung.Settings.ForceCommandsEnabled
+				&& Event.current.rawType == EventType.MouseDown
+				&& Event.current.button == 1)
+				return MouseDown(UI.MouseMapPosition(), 1, false);
 			return true;
 		}
 

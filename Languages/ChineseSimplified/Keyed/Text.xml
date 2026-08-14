@@ -114,8 +114,10 @@
 	<WorkMarkersOptionStatic>静态</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>关闭</WorkMarkersOptionOff>
 
+	<ForceCommandsEnabledTitle>强制工作命令</ForceCommandsEnabledTitle>
+	<ForceCommandsEnabledExplained>在普通右键工作中显示闪电按钮。点击后会开始强制工作，并可添加附近的同类目标。</ForceCommandsEnabledExplained>
 	<MaxForcedItemsTitle>强制工作目标上限</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>设为 0 可禁用普通右键任务的强制工作。较高的值会限制 Achtung 添加的附近目标数量。</MaxForcedItemsExplained>
+	<MaxForcedItemsExplained>限制 Achtung 为一项强制工作命令添加的附近同类目标数量。</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>无限制</MaxForcedItemsUnlimited>
 
 

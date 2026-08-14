@@ -102,11 +102,28 @@ public class AchtungSettings : ModSettings
 	public bool forcedEndedLetter = true;
 	public bool replaceCleanRoom = true;
 	public bool replaceFightFire = true;
+	int lastEnabledMaxForcedItems = 64;
 
 	public static readonly int UnlimitedForcedItems = 2000;
 
 	public bool CustomPositioningEnabled => positioningEnabled;
-	public bool ForceCommandsEnabled => maxForcedItems > 0;
+	public bool ForceCommandsEnabled
+	{
+		get => maxForcedItems > 0;
+		set
+		{
+			if (value)
+			{
+				if (maxForcedItems <= 0)
+					maxForcedItems = Mathf.Clamp(lastEnabledMaxForcedItems, 1, UnlimitedForcedItems);
+			}
+			else if (maxForcedItems > 0)
+			{
+				lastEnabledMaxForcedItems = maxForcedItems;
+				maxForcedItems = 0;
+			}
+		}
+	}
 
 	public override void ExposeData()
 	{
@@ -126,13 +143,21 @@ public class AchtungSettings : ModSettings
 		Scribe_Values.Look(ref buildingSmart, "buildingSmart", false, true);
 		Scribe_Values.Look(ref keepDraftedAndUndraftedCommandsSeparate, "keepDraftedAndUndraftedCommandsSeparate", false, true);
 		Scribe_Values.Look(ref maxForcedItems, "maxForcedItems", 64, true);
+		Scribe_Values.Look(ref lastEnabledMaxForcedItems, "lastEnabledMaxForcedItems", 64, true);
 		Scribe_Values.Look(ref menuDelay, "menuDelay", 250, true);
 		Scribe_Values.Look(ref forcedEndedLetter, "forcedEndedLetter", true, true);
 		Scribe_Values.Look(ref replaceCleanRoom, "replaceCleanRoom", true, true);
 		Scribe_Values.Look(ref replaceFightFire, "replaceFightFire", true, true);
 
-		if (Scribe.mode == LoadSaveMode.PostLoadInit && Achtung.harmony != null)
-			ForbidUtility_IsForbidden_Patch.FixPatch();
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			lastEnabledMaxForcedItems = Mathf.Clamp(
+				maxForcedItems > 0 ? maxForcedItems : lastEnabledMaxForcedItems,
+				1,
+				UnlimitedForcedItems);
+			if (Achtung.harmony != null)
+				ForbidUtility_IsForbidden_Patch.FixPatch();
+		}
 	}
 
 	public static void DoWindowContents(Rect canvas)
@@ -266,7 +291,13 @@ public class AchtungSettings : ModSettings
 	static void DrawForcingSettings(Listing_Standard list)
 	{
 		DrawSubheading(list, "ForcingCommands", false);
-		DrawSliderSetting(list, "MaxForcedItems", ref Achtung.Settings.maxForcedItems, 0, UnlimitedForcedItems, ForcedItemsString);
+		var forceCommandsEnabled = Achtung.Settings.ForceCommandsEnabled;
+		DrawCheckboxSetting(list, "ForceCommandsEnabled", ref forceCommandsEnabled, enabled => Achtung.Settings.ForceCommandsEnabled = enabled);
+		if (Achtung.Settings.ForceCommandsEnabled)
+		{
+			DrawSettingGap(list);
+			DrawSliderSetting(list, "MaxForcedItems", ref Achtung.Settings.maxForcedItems, 1, UnlimitedForcedItems, ForcedItemsString);
+		}
 		DrawSettingGap(list);
 		DrawCheckboxSetting(list, "ReplaceCleanRoom", ref Achtung.Settings.replaceCleanRoom, null);
 		DrawSettingGap(list);
@@ -295,7 +326,7 @@ public class AchtungSettings : ModSettings
 	}
 
 	static string ForcedItemsString(int n)
-		=> n == 0 ? "Disabled".Translate().ToString() : n >= UnlimitedForcedItems ? "MaxForcedItemsUnlimited".Translate().ToString() : $"{n}";
+		=> n >= UnlimitedForcedItems ? "MaxForcedItemsUnlimited".Translate().ToString() : $"{n}";
 
 	static void DrawPositioningModeOptions(Listing_Standard list)
 	{

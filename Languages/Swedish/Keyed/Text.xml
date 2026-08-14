@@ -114,8 +114,10 @@
 	<WorkMarkersOptionStatic>Statiska</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Av</WorkMarkersOptionOff>
 
+	<ForceCommandsEnabledTitle>Kommandon för tvingat arbete</ForceCommandsEnabledTitle>
+	<ForceCommandsEnabledExplained>Visar en blixtknapp för vanliga arbeten i högerklicksmenyn. Den startar tvingat arbete och kan lägga till närliggande mål av samma typ.</ForceCommandsEnabledExplained>
 	<MaxForcedItemsTitle>Målgräns för tvingat arbete</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Sätt till 0 för att inaktivera tvingat arbete för vanliga arbeten från högerklicksmenyn. Högre värden begränsar antalet närliggande mål.</MaxForcedItemsExplained>
+	<MaxForcedItemsExplained>Begränsar hur många närliggande mål av samma typ som Achtung lägger till i ett kommando för tvingat arbete.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Obegränsat</MaxForcedItemsUnlimited>
 
 

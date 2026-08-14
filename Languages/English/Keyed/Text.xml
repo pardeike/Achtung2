@@ -114,8 +114,10 @@
 	<WorkMarkersOptionStatic>Static</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Off</WorkMarkersOptionOff>
 
+	<ForceCommandsEnabledTitle>Forced-work commands</ForceCommandsEnabledTitle>
+	<ForceCommandsEnabledExplained>Show a lightning button on ordinary right-click jobs. It starts forced work and can add nearby matching targets.</ForceCommandsEnabledExplained>
 	<MaxForcedItemsTitle>Forced-work target limit</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Set to 0 to disable forced work for ordinary right-click jobs. Higher values limit how many nearby targets Achtung adds.</MaxForcedItemsExplained>
+	<MaxForcedItemsExplained>Limit how many nearby matching targets Achtung adds to one forced-work command.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Unlimited</MaxForcedItemsUnlimited>
 
 

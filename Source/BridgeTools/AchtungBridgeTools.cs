@@ -161,6 +161,68 @@ public sealed partial class AchtungBridgeTools
 		};
 	}
 
+	[Tool("achtung/activate_force_menu_button_at_cell", Description = "Build the same merged context-menu option used by Achtung's visible lightning button, activate that button semantically, and complete its radius drag without desktop input.")]
+	public static object ActivateForceMenuButtonAtCell(
+		int x,
+		int z,
+		string pawnId = null,
+		string labelContains = null)
+	{
+		var pawn = FindPawn(pawnId);
+		if (pawn?.Map == null)
+			return new { success = false, error = "The requested pawn is not spawned on the current map." };
+		if (Achtung.Settings.ForceCommandsEnabled == false)
+			return new { success = false, error = "Forced-work commands are disabled in Achtung's settings." };
+		if (ForcedWork.Instance.HasForcedJob(pawn, ignorePreparing: true))
+			return new { success = false, error = "The pawn already has Achtung prioritized work." };
+
+		var cell = new IntVec3(x, 0, z);
+		if (cell.InBounds(pawn.Map) == false)
+			return new { success = false, error = "The requested cell is outside the pawn's map." };
+
+		var menuOptions = new MultiActions([new Colonist(pawn)], cell.ToVector3Shifted()).GetOptions();
+		var forcedOptions = menuOptions.OfType<ForcedMultiFloatMenuOption>().ToList();
+		var option = labelContains.NullOrEmpty()
+			? forcedOptions.FirstOrDefault()
+			: forcedOptions.FirstOrDefault(candidate => candidate.Label.IndexOf(labelContains, StringComparison.OrdinalIgnoreCase) >= 0);
+		if (option == null)
+		{
+			return new
+			{
+				success = false,
+				error = "The merged context menu did not contain a matching lightning-button option.",
+				availableLabels = menuOptions.Select(candidate => candidate.Label).ToArray()
+			};
+		}
+
+		var multiplayerActive = MultiplayerSupport.IsActive;
+		var buttonActivated = option.ActivateForceAction(Rect.zero);
+		var dragCompleted = buttonActivated && MouseTracker.GetInstance().CompleteDragging();
+		var commandDispatched = buttonActivated && dragCompleted;
+		var forcedJob = ForcedWork.Instance.GetForcedJob(pawn);
+		var hasForcedJobNow = ForcedWork.Instance.HasForcedJob(pawn, ignorePreparing: true);
+
+		return new
+		{
+			success = commandDispatched && (multiplayerActive || hasForcedJobNow),
+			customPositioningEnabled = Achtung.Settings.CustomPositioningEnabled,
+			forceCommandsEnabled = Achtung.Settings.ForceCommandsEnabled,
+			menuUsesLightningOption = true,
+			buttonActivated,
+			dragCompleted,
+			commandDispatched,
+			multiplayerActive,
+			execution = multiplayerActive ? "queued synchronized command" : "executed immediately",
+			pawnId = pawn.ThingID,
+			pawnName = pawn.Name?.ToStringShort ?? pawn.LabelShort,
+			label = option.Label,
+			forceCell = cell.ToString(),
+			hasForcedJobNow,
+			forcedJobStartedNow = forcedJob?.started ?? false,
+			currentTargetCount = forcedJob?.targets.Count ?? 0
+		};
+	}
+
 	[Tool("achtung/test_force_work_spread_at_cell", Description = "Invoke the real local or synchronized force-work path, then sample its target/marker cells every 15 ticks to verify propagation to neighbouring work items such as a wall blueprint line.")]
 	public static async Task<object> TestForceWorkSpreadAtCell(
 		IRimBridgeContext ctx,

@@ -114,8 +114,10 @@
 	<WorkMarkersOptionStatic>Estáticos</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Desactivados</WorkMarkersOptionOff>
 
+	<ForceCommandsEnabledTitle>Órdenes de trabajo forzado</ForceCommandsEnabledTitle>
+	<ForceCommandsEnabledExplained>Muestra un botón con un rayo en las tareas normales de clic derecho. Inicia el trabajo forzado y puede añadir objetivos similares cercanos.</ForceCommandsEnabledExplained>
 	<MaxForcedItemsTitle>Límite de objetivos de trabajo forzado</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Establécelo en 0 para desactivar el trabajo forzado en tareas normales de clic derecho. Los valores más altos limitan el número de objetivos cercanos.</MaxForcedItemsExplained>
+	<MaxForcedItemsExplained>Limita cuántos objetivos similares cercanos añade Achtung a una orden de trabajo forzado.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Ilimitado</MaxForcedItemsUnlimited>
 
 

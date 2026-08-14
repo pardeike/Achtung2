@@ -41,6 +41,19 @@ public class MouseTracker
 		tracker.mouseUpActions[pawn] = mouseUpCallback;
 	}
 
+	public bool CompleteDragging()
+	{
+		if (dragging == DragState.stopped)
+			return false;
+
+		dragging = DragState.stopped;
+		foreach (var action in mouseUpActions.Values)
+			action();
+		mouseMovedActions.Clear();
+		mouseUpActions.Clear();
+		return true;
+	}
+
 	public void OnGUI()
 	{
 		if (dragging == DragState.stopped) return;
@@ -55,13 +68,8 @@ public class MouseTracker
 
 		if (Input.GetMouseButton(0) == false)
 		{
-			dragging = DragState.stopped;
-			foreach (var action in mouseUpActions.Values)
-				action();
-			mouseMovedActions.Clear();
-			mouseUpActions.Clear();
+			CompleteDragging();
 			return;
-
 		}
 
 		var delta = Mathf.RoundToInt((mousePos - start).magnitude / UI.CurUICellSize());

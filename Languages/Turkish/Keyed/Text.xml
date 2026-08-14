@@ -114,8 +114,10 @@
 	<WorkMarkersOptionStatic>Sabit</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Kapalı</WorkMarkersOptionOff>
 
+	<ForceCommandsEnabledTitle>Zorunlu çalışma komutları</ForceCommandsEnabledTitle>
+	<ForceCommandsEnabledExplained>Normal sağ tık işlerinde bir şimşek düğmesi gösterir. Bu düğme zorunlu çalışmayı başlatır ve yakındaki eşleşen hedefleri ekleyebilir.</ForceCommandsEnabledExplained>
 	<MaxForcedItemsTitle>Zorunlu çalışma hedef sınırı</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Normal sağ tık işleri için zorunlu çalışmayı kapatmak üzere 0 yapın. Daha yüksek değerler Achtung'ın eklediği yakındaki hedef sayısını sınırlar.</MaxForcedItemsExplained>
+	<MaxForcedItemsExplained>Achtung'ın tek bir zorunlu çalışma komutuna eklediği yakındaki eşleşen hedeflerin sayısını sınırlar.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Sınırsız</MaxForcedItemsUnlimited>
 
 

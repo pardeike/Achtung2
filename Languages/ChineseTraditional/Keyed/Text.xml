@@ -114,8 +114,10 @@
 	<WorkMarkersOptionStatic>靜態</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>關閉</WorkMarkersOptionOff>
 
+	<ForceCommandsEnabledTitle>強制工作指令</ForceCommandsEnabledTitle>
+	<ForceCommandsEnabledExplained>在一般右鍵工作中顯示閃電按鈕。點擊後會開始強制工作，並可新增附近的同類目標。</ForceCommandsEnabledExplained>
 	<MaxForcedItemsTitle>強制工作目標上限</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>設為 0 可停用一般右鍵工作的強制工作。較高的值會限制 Achtung 新增的附近目標數量。</MaxForcedItemsExplained>
+	<MaxForcedItemsExplained>限制 Achtung 為一項強制工作指令新增的附近同類目標數量。</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>無限制</MaxForcedItemsUnlimited>
 
 

@@ -205,6 +205,24 @@ These contracts deliberately test the behavioral boundary instead of the
 Mech tab's implementation. The tab establishes draft state; Achtung must then
 respect that state when a mixed map selection receives an implicit move.
 
+### Forced-work menu-button contract
+
+Use `achtung/activate_force_menu_button_at_cell` after a live
+`rimworld/open_context_menu` and `rimworld/screenshot_cell_rect` check when the
+lightning-button UI itself is under test. The companion builds the same
+`MultiActions` option used by the visible context menu, requires a
+`ForcedMultiFloatMenuOption`, invokes its production button-activation method,
+and completes the production radius-drag callback without desktop input.
+
+The screenshot proves that the player can see the button; this tool separately
+proves that the displayed option accepts the click and completes its radius
+drag. In singleplayer it also requires the forced job to exist immediately. In
+an active Multiplayer session it reports the queued synchronized dispatch;
+`achtung/test_force_work_spread_at_cell` owns the later execution assertion. It
+rejects the call when forced-work commands are disabled and otherwise leaves
+the player action or queued command active. Reload the fixture or clear
+prioritized work through the normal command after collecting evidence.
+
 ### Forced-work neighbour propagation contract
 
 `achtung/test_force_work_spread_at_cell` is a companion-only contract for the

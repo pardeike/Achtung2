@@ -114,8 +114,10 @@
 	<WorkMarkersOptionStatic>Statisch</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Aus</WorkMarkersOptionOff>
 
+	<ForceCommandsEnabledTitle>Befehle für erzwungene Arbeit</ForceCommandsEnabledTitle>
+	<ForceCommandsEnabledExplained>Zeigt bei normalen Rechtsklick-Aufträgen eine Blitzschaltfläche. Sie startet erzwungene Arbeit und kann passende Ziele in der Nähe hinzufügen.</ForceCommandsEnabledExplained>
 	<MaxForcedItemsTitle>Höchstzahl erzwungener Arbeitsziele</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Setze den Wert auf 0, um erzwungene Arbeit für normale Rechtsklick-Aufträge zu deaktivieren. Höhere Werte begrenzen die Zahl naher Ziele.</MaxForcedItemsExplained>
+	<MaxForcedItemsExplained>Begrenzt, wie viele passende Ziele in der Nähe Achtung einem Befehl für erzwungene Arbeit hinzufügt.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Unbegrenzt</MaxForcedItemsUnlimited>
 
 

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "baseTag": "v4.1.12",
-  "testedAtUtc": "2026-08-11T17:26:18Z",
-  "inputDigest": "sha256:be3c54e34500ad0ca964dfb26eff5b3909d46facad4638f9a935c962fd3b143e",
+  "baseTag": "v4.1.13",
+  "testedAtUtc": "2026-08-14T20:23:25Z",
+  "inputDigest": "sha256:61b30a2f5ffa9eed63442e374e8a2bd3096c2435dac1814ddcd85ed6fbc93414",
   "measurementTool": "achtung/audit_settings_layout",
   "measurementScope": "Only horizontally constrained settings text: shared title/value rows, fixed-height column headers, and fixed-height subheadings.",
   "ignoredByDesign": "Checkbox titles and explanations use measured wrapping height and extend their scroll columns vertically.",

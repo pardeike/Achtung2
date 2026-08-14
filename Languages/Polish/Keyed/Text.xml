@@ -114,8 +114,10 @@
 	<WorkMarkersOptionStatic>Statyczne</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Wyłączone</WorkMarkersOptionOff>
 
+	<ForceCommandsEnabledTitle>Polecenia pracy wymuszonej</ForceCommandsEnabledTitle>
+	<ForceCommandsEnabledExplained>Pokazuje przy zwykłych zadaniach z menu prawego przycisku przycisk z błyskawicą. Rozpoczyna on pracę wymuszoną i może dodać pobliskie pasujące cele.</ForceCommandsEnabledExplained>
 	<MaxForcedItemsTitle>Limit celów pracy wymuszonej</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Ustaw 0, aby wyłączyć pracę wymuszoną dla zwykłych zadań wydawanych prawym przyciskiem. Wyższe wartości ograniczają liczbę pobliskich celów dodawanych przez Achtung.</MaxForcedItemsExplained>
+	<MaxForcedItemsExplained>Ogranicza liczbę pobliskich pasujących celów dodawanych przez Achtung do jednego polecenia pracy wymuszonej.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Bez limitu</MaxForcedItemsUnlimited>
 
 

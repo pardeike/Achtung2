@@ -114,8 +114,10 @@
 	<WorkMarkersOptionStatic>Статичные</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Выкл</WorkMarkersOptionOff>
 
+	<ForceCommandsEnabledTitle>Команды принудительной работы</ForceCommandsEnabledTitle>
+	<ForceCommandsEnabledExplained>Показывает кнопку с молнией для обычных заданий правой кнопкой мыши. Она запускает принудительную работу и может добавить подходящие цели поблизости.</ForceCommandsEnabledExplained>
 	<MaxForcedItemsTitle>Лимит целей принудительной работы</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Установите 0, чтобы отключить принудительную работу для обычных заданий правой кнопки мыши. Более высокие значения ограничивают число ближайших целей, добавляемых Achtung.</MaxForcedItemsExplained>
+	<MaxForcedItemsExplained>Ограничивает число подходящих целей поблизости, которые Achtung добавляет к одной команде принудительной работы.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Не ограничен</MaxForcedItemsUnlimited>
 
 

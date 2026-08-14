@@ -30,6 +30,7 @@ public class MultiActions
 	}
 
 	public bool EveryoneHasGoto => everyoneHasGoto;
+	public bool HasForcedOptions => allActions.Any(action => action.option is ForcedFloatMenuOption);
 	public bool NonGotoActionsCanYieldToPlainGoto => allActions.All(action => Tools.CanYieldToPlainGoto(action.option));
 
 	public void AddColonist(Colonist colonist)
@@ -244,7 +245,7 @@ public class MultiActions
 		return options;
 	}
 
-	public Window GetWindow()
+	public List<FloatMenuOption> GetOptions()
 	{
 		var options = new List<FloatMenuOption>();
 		GetKeys().Do(key =>
@@ -255,6 +256,8 @@ public class MultiActions
 			var option = GetOption(title, subActions);
 			options.Add(option);
 		});
-		return new FloatMenu(options) { givesColonistOrders = true };
+		return options;
 	}
+
+	public Window GetWindow() => new FloatMenu(GetOptions()) { givesColonistOrders = true };
 }

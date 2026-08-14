@@ -114,8 +114,10 @@
 	<WorkMarkersOptionStatic>Statisch</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Uit</WorkMarkersOptionOff>
 
+	<ForceCommandsEnabledTitle>Opdrachten voor gedwongen werk</ForceCommandsEnabledTitle>
+	<ForceCommandsEnabledExplained>Toon een bliksemknop bij gewone rechtsklikopdrachten. Deze start gedwongen werk en kan vergelijkbare doelen in de buurt toevoegen.</ForceCommandsEnabledExplained>
 	<MaxForcedItemsTitle>Doellimiet voor gedwongen werk</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Stel in op 0 om gedwongen werk voor gewone rechtsklikopdrachten uit te schakelen. Hogere waarden beperken het aantal nabije doelen.</MaxForcedItemsExplained>
+	<MaxForcedItemsExplained>Beperk hoeveel vergelijkbare doelen in de buurt Achtung aan één opdracht voor gedwongen werk toevoegt.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Onbeperkt</MaxForcedItemsUnlimited>
 
 

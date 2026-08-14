@@ -114,8 +114,10 @@
 	<WorkMarkersOptionStatic>Fixes</WorkMarkersOptionStatic>
 	<WorkMarkersOptionOff>Désactivés</WorkMarkersOptionOff>
 
+	<ForceCommandsEnabledTitle>Commandes de travail forcé</ForceCommandsEnabledTitle>
+	<ForceCommandsEnabledExplained>Affiche un bouton en forme d’éclair pour les tâches ordinaires au clic droit. Il lance le travail forcé et peut ajouter des cibles similaires à proximité.</ForceCommandsEnabledExplained>
 	<MaxForcedItemsTitle>Limite de cibles du travail forcé</MaxForcedItemsTitle>
-	<MaxForcedItemsExplained>Réglez sur 0 pour désactiver le travail forcé des tâches ordinaires au clic droit. Les valeurs supérieures limitent le nombre de cibles proches ajoutées par Achtung.</MaxForcedItemsExplained>
+	<MaxForcedItemsExplained>Limite le nombre de cibles similaires proches ajoutées par Achtung à une commande de travail forcé.</MaxForcedItemsExplained>
 	<MaxForcedItemsUnlimited>Illimité</MaxForcedItemsUnlimited>
 
 
