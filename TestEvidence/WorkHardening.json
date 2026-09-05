@@ -1,0 +1,443 @@
+{
+  "date": "2026-09-05",
+  "scope": "Focused Achtung work hardening verification, not an exhaustive compatibility certification.",
+  "finalArtifacts": {
+    "achtungSha256": "2f61fd183138035d597be95ec4e7be55af6d4fc6c43a05ca80dc5260e9302346",
+    "companionSha256": "b8f8644b2b81eba285ae546da81da41a94dd1b49efb04af280fcb12e20b3ab60",
+    "deployedHashesMatch": true,
+    "version": "4.1.14"
+  },
+  "finalActiveMods": [
+    "brrainz.harmony",
+    "brrainz.rimbridgeserver_steam",
+    "ludeon.rimworld",
+    "ludeon.rimworld.biotech",
+    "brrainz.achtung"
+  ],
+  "build": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "independentOrderingChecks": 9,
+  "checks": {
+    "sharedTargetsAndScope": {
+      "actualWidth": 117,
+      "directRestored": true,
+      "expectedWidth": 117,
+      "innerRejected": true,
+      "limit": "No GUI rendering, game ticks, settings changes or pawn-job mutations.",
+      "outerRestored": true,
+      "queuedCells": true,
+      "queuedThings": true,
+      "scopeRestored": true,
+      "success": true,
+      "widthPreserved": true
+    },
+    "permissionSelection": {
+      "assertions": {
+        "current_job_unchanged": true,
+        "exception_restores_outer_scope": true,
+        "explicit_forbidden_target_permitted": true,
+        "forbidden_queue_A_rejected": true,
+        "forbidden_queue_B_rejected": true,
+        "forbidden_queue_override_permitted": true,
+        "nested_scope_suspends_outer": true,
+        "no_forbidden_dependencies_drafted_False": true,
+        "no_forbidden_dependencies_drafted_True": true,
+        "permitted_material_selected_drafted_False": true,
+        "permitted_material_selected_drafted_True": true,
+        "scanner_has_job_drafted_False_ignore_False": true,
+        "scanner_has_job_drafted_False_ignore_True": true,
+        "scanner_has_job_drafted_True_ignore_False": true,
+        "scanner_has_job_drafted_True_ignore_True": true,
+        "scope_does_not_leak": true
+      },
+      "evidence": "Production scanner and permission checks, not job execution.",
+      "pawnId": "Human976",
+      "success": true,
+      "targetId": "Blueprint_Wall36177",
+      "ticksAdvanced": 0
+    },
+    "rescuePriorityRoundtrip": {
+      "dead": 0,
+      "errors": [],
+      "pawnCount": 8,
+      "phases": [
+        {
+          "enabled": false,
+          "errors": [],
+          "expectedCount": 20
+        },
+        {
+          "enabled": true,
+          "errors": [],
+          "expectedCount": 21
+        },
+        {
+          "enabled": false,
+          "errors": [],
+          "expectedCount": 20
+        },
+        {
+          "enabled": true,
+          "errors": [],
+          "expectedCount": 21
+        }
+      ],
+      "rescueEnabled": true,
+      "settingChange": "Rescue remains enabled and its priorities are newly copied from Doctor.",
+      "spawned": 3,
+      "success": true,
+      "unspawned": 5
+    },
+    "queuedMaterialForbiddenAfterDispatch": {
+      "pawn": "Wilfred",
+      "drafted": true,
+      "stackId": "WoodLog36113",
+      "position": [
+        126,
+        0,
+        134
+      ],
+      "initialCount": 75,
+      "offFinalCount": 75,
+      "onFinalCount": 71,
+      "offOperation": "op_53e0088f25df49a8b6cbd8553e4a0ed1",
+      "onOperation": "op_6e9cffad1c774f919b08d8aec613da96",
+      "note": "Those operation IDs identify each phase's final error-log readback. Queued material was forbidden through its live gizmo after force command dispatch."
+    },
+    "directForbiddenEquip": {
+      "actionOperation": "op_7ec978eca9f14387a3e2f01663092d45",
+      "readbackOperation": "op_8ab12edacba34873bd81966f8eb5dd71",
+      "completed": true,
+      "inspectString": "Equipped: Wood",
+      "originalStackCount": 61,
+      "remainingStackCount": 60
+    },
+    "cleaningSaveLoad": {
+      "before": {
+        "cleaningSpeed": 1,
+        "currentCell": "(137, 0, 124)",
+        "currentThingId": "Filth_Dirt45051",
+        "currentWorkCount": 2,
+        "driver": "JobDriver_CleanRoom",
+        "expectedCleaningWorkPerTick": 1,
+        "filthThickness": 1,
+        "isMoving": false,
+        "jobTargetA": "Thing_Filth_Dirt45051",
+        "patherMoving": false,
+        "pawnId": "Human970",
+        "roomAnchor": "(137, 0, 124)",
+        "subCounter": 11,
+        "success": true,
+        "terrainFactor": 1,
+        "ticksGame": 2170,
+        "totalWorkCount": 2,
+        "workToThin": 35
+      },
+      "after": {
+        "cleaningSpeed": 1,
+        "currentCell": "(137, 0, 124)",
+        "currentThingId": "Filth_Dirt45051",
+        "currentWorkCount": 2,
+        "driver": "JobDriver_CleanRoom",
+        "expectedCleaningWorkPerTick": 1,
+        "filthThickness": 1,
+        "isMoving": false,
+        "jobTargetA": "Thing_Filth_Dirt45051",
+        "patherMoving": false,
+        "pawnId": "Human970",
+        "roomAnchor": "(137, 0, 124)",
+        "subCounter": 12,
+        "success": true,
+        "terrainFactor": 1,
+        "ticksGame": 2171,
+        "totalWorkCount": 2,
+        "workToThin": 35
+      },
+      "savedXmlCounter": 11,
+      "expectedPostLoadTickCounter": 12,
+      "sameTarget": true,
+      "sameRoom": true,
+      "movementBefore": {
+        "cleaningSpeed": 1,
+        "currentCell": "(138, 0, 125)",
+        "currentThingId": "Filth_Dirt45050",
+        "currentWorkCount": 1,
+        "driver": "JobDriver_CleanRoom",
+        "expectedCleaningWorkPerTick": 1,
+        "filthThickness": 1,
+        "isMoving": true,
+        "jobTargetA": "Thing_Filth_Dirt45050",
+        "patherMoving": true,
+        "pawnId": "Human970",
+        "roomAnchor": "(137, 0, 124)",
+        "subCounter": 0,
+        "success": true,
+        "terrainFactor": 1,
+        "ticksGame": 2196,
+        "totalWorkCount": 2,
+        "workToThin": 35
+      },
+      "movementAfter": {
+        "cleaningSpeed": 1,
+        "currentCell": "(138, 0, 125)",
+        "currentThingId": "Filth_Dirt45050",
+        "currentWorkCount": 1,
+        "driver": "JobDriver_CleanRoom",
+        "expectedCleaningWorkPerTick": 1,
+        "filthThickness": 1,
+        "isMoving": true,
+        "jobTargetA": "Thing_Filth_Dirt45050",
+        "patherMoving": true,
+        "pawnId": "Human970",
+        "roomAnchor": "(137, 0, 124)",
+        "subCounter": 0,
+        "success": true,
+        "terrainFactor": 1,
+        "ticksGame": 2197,
+        "totalWorkCount": 2,
+        "workToThin": 35
+      },
+      "bothFilthTargetsRemovedAfterContinuation": true,
+      "pawn": "Matvei",
+      "terrainFactorTested": 1,
+      "cleaningSpeedTested": 1
+    },
+    "mixedMechMenu": {
+      "contract": "Only pawns drafted before the command contribute to implicit Go-here eligibility, and fallback dispatch does not draft other selected pawns.",
+      "eligibilityMatrix": {
+        "allDraftedAccepted": true,
+        "allUndraftedRejected": true,
+        "mixedDraftedAccepted": true,
+        "success": true
+      },
+      "invocation": {
+        "combatDesignationValid": true,
+        "combatDrafted": true,
+        "combatJob": "GotoWander",
+        "combatJobPlayerForced": false,
+        "everyoneHasGoto": true,
+        "fallbackInvoked": true,
+        "laborDesignationValid": false,
+        "laborDrafted": false,
+        "laborJob": "GotoWander",
+        "laborJobPlayerForced": false,
+        "lineEndMatchesTarget": true,
+        "lineStartMatchesTarget": true,
+        "nonGotoActionCount": 0,
+        "positioningStarted": true,
+        "showMenuReturned": true
+      },
+      "success": true
+    },
+    "mixedMechModifier": {
+      "contract": "Plain mixed-selection positioning preserves the undrafted pawn, while the configured Achtung modifier drafts and positions the whole selection.",
+      "result": {
+        "draftStateRestored": true,
+        "inputPatchApplied": true,
+        "modified": {
+          "combatDesignationValid": true,
+          "combatDrafted": true,
+          "combatDraftedForPositioning": true,
+          "combatReceivedPlayerGoto": true,
+          "groupMovement": true,
+          "inputReportedPressed": true,
+          "laborDesignationValid": true,
+          "laborDraftRequested": true,
+          "laborDrafted": true,
+          "laborDraftedForPositioning": true,
+          "laborFormationOffsetRecorded": true,
+          "laborReceivedPlayerGoto": true,
+          "lineEndMatchesTarget": false,
+          "lineStartMatchesTarget": false,
+          "modifierPressed": true,
+          "mouseDownReturned": true,
+          "positioningStarted": true,
+          "selectedPawnCount": 2,
+          "success": true
+        },
+        "mousePositionPatchApplied": true,
+        "patchesRemoved": true,
+        "selectionRestored": true,
+        "simulatedKey": "Alt",
+        "success": true,
+        "testSettingsRetained": true,
+        "unmodified": {
+          "combatDesignationValid": true,
+          "combatDrafted": true,
+          "combatDraftedForPositioning": true,
+          "combatReceivedPlayerGoto": false,
+          "groupMovement": false,
+          "inputReportedPressed": false,
+          "laborDesignationValid": false,
+          "laborDraftRequested": false,
+          "laborDrafted": false,
+          "laborDraftedForPositioning": false,
+          "laborFormationOffsetRecorded": false,
+          "laborReceivedPlayerGoto": false,
+          "lineEndMatchesTarget": true,
+          "lineStartMatchesTarget": true,
+          "modifierPressed": false,
+          "mouseDownReturned": true,
+          "positioningStarted": true,
+          "selectedPawnCount": 2,
+          "success": true
+        }
+      },
+      "shims": {
+        "input": "UnityEngine.Input.GetKey(KeyCode)",
+        "mouseMapPosition": "Verse.UI.MouseMapPosition()",
+        "scope": "One serialized main-thread callback with no tick or frame boundary"
+      },
+      "success": true
+    },
+    "mixedMechExecution": {
+      "contract": "The drafted centipede receives and executes the implicit line move; the selected undrafted cleansweeper remains undrafted and receives no player-forced GoTo job.",
+      "invocation": {
+        "combatDesignationValid": true,
+        "combatDrafted": true,
+        "combatJob": "Goto",
+        "combatJobPlayerForced": true,
+        "everyoneHasGoto": true,
+        "fallbackInvoked": true,
+        "laborDesignationValid": false,
+        "laborDrafted": false,
+        "laborJob": "GotoWander",
+        "laborJobPlayerForced": false,
+        "lineEndMatchesTarget": true,
+        "lineStartMatchesTarget": true,
+        "nonGotoActionCount": 0,
+        "positioningStarted": true,
+        "showMenuReturned": true
+      },
+      "observation": {
+        "advancedTicks": 592,
+        "combatExecutedExpectedGoto": true,
+        "combatJob": "Wait_Combat",
+        "combatMoved": true,
+        "combatPosition": {
+          "x": 130,
+          "z": 128
+        },
+        "combatReachedDestination": true,
+        "deadlineReached": false,
+        "endTick": 850,
+        "laborEverDrafted": false,
+        "laborEverReceivedPlayerGoto": false,
+        "laborJob": "Clean",
+        "laborPosition": {
+          "x": 125,
+          "z": 130
+        },
+        "startTick": 258
+      },
+      "success": true,
+      "wait": {
+        "AdvancedTicks": 399,
+        "ElapsedFrames": 3,
+        "EndTicksGame": 714,
+        "Message": "Condition was satisfied.",
+        "StartTicksGame": 315,
+        "Status": "completed",
+        "Success": true
+      }
+    },
+    "finalExpansionReplay": {
+      "initialTargets": [
+        [
+          {
+            "cell": "(129,131)",
+            "hasThing": true,
+            "label": "Wooden wall (blueprint)",
+            "thingId": "Blueprint_Wall36174",
+            "x": 129,
+            "z": 131
+          },
+          {
+            "cell": "(130,131)",
+            "hasThing": true,
+            "label": "Wooden wall (blueprint)",
+            "thingId": "Blueprint_Wall36175",
+            "x": 130,
+            "z": 131
+          },
+          {
+            "cell": "(131,131)",
+            "hasThing": true,
+            "label": "Wooden wall (blueprint)",
+            "thingId": "Blueprint_Wall36176",
+            "x": 131,
+            "z": 131
+          },
+          {
+            "cell": "(132,131)",
+            "hasThing": true,
+            "label": "Wooden wall (blueprint)",
+            "thingId": "Blueprint_Wall36177",
+            "x": 132,
+            "z": 131
+          }
+        ],
+        [
+          {
+            "cell": "(129,131)",
+            "hasThing": true,
+            "label": "Wooden wall (blueprint)",
+            "thingId": "Blueprint_Wall36174",
+            "x": 129,
+            "z": 131
+          },
+          {
+            "cell": "(130,131)",
+            "hasThing": true,
+            "label": "Wooden wall (blueprint)",
+            "thingId": "Blueprint_Wall36175",
+            "x": 130,
+            "z": 131
+          },
+          {
+            "cell": "(131,131)",
+            "hasThing": true,
+            "label": "Wooden wall (blueprint)",
+            "thingId": "Blueprint_Wall36176",
+            "x": 131,
+            "z": 131
+          },
+          {
+            "cell": "(132,131)",
+            "hasThing": true,
+            "label": "Wooden wall (blueprint)",
+            "thingId": "Blueprint_Wall36177",
+            "x": 132,
+            "z": 131
+          }
+        ]
+      ],
+      "sameTargets": true,
+      "note": "Two fresh loads; both select allowed wood and the same four initial forced targets. Final expansion-only change was checked after the earlier execution contracts."
+    }
+  },
+  "limits": [
+    "No full two-client Multiplayer synchronization run.",
+    "Smart construction is an anti-trapping heuristic, not a multi-colonist enclosure guarantee.",
+    "Vanilla batched delivery, including floor placement during delivery, retains nearest-destination routing.",
+    "No dedicated live allowed-area, changed-priority, doorway-cleaning, zero/non-unit cleaning-factor, or modded thinker/widget fixture in this pass.",
+    "Rescue fixture had three spawned and five unspawned initialized pawns, no dead/held-dead pawn coverage.",
+    "Saves from before this patch lack activeJobId; their current forced task receives execution scoping from the next Achtung task.",
+    "Independent ordering helper tests do not prove live double-wall enclosure safety."
+  ],
+  "finalSettings": {
+    "ignoreForbidden": false,
+    "ignoreRestrictions": false,
+    "ignoreAssignments": false,
+    "buildingSmart": true,
+    "rescueEnabled": true,
+    "positioningEnabled": true
+  },
+  "originalSaveUnmodified": true,
+  "retainedDiagnosticSaves": [
+    "achtung-hardening-cleaning-20260905",
+    "achtung-hardening-cleaning-moving-20260905"
+  ]
+}

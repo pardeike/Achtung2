@@ -187,7 +187,7 @@ public class ForcedWork(World world) : WorldComponent(world)
 				things = things.OrderBy(thing => thing.thingIDNumber);
 			foreach (var thing in things)
 			{
-				job = thing.GetThingJob(pawn, workgiver, expandSearch);
+				job = thing.GetThingJob(pawn, workgiver, expandSearch, directTarget: cell == pos ? thing : null);
 				if (job != null)
 					return new LocalTargetInfo(thing);
 			}
@@ -198,11 +198,11 @@ public class ForcedWork(World world) : WorldComponent(world)
 		return null;
 	}
 
-	public static Job GetJobItem(Pawn pawn, WorkGiver_Scanner workgiver, LocalTargetInfo item)
+	public static Job GetJobItem(Pawn pawn, WorkGiver_Scanner workgiver, LocalTargetInfo item, Thing directTarget = null)
 	{
 		if (item.HasThing)
-			return item.thingInt.GetThingJob(pawn, workgiver);
-		return item.Cell.GetCellJob(pawn, workgiver);
+			return item.thingInt.GetThingJob(pawn, workgiver, directTarget: directTarget);
+		return item.Cell.GetCellJob(pawn, workgiver, directTarget: directTarget);
 	}
 
 	public IEnumerable<ForcedJob> ForcedJobsForMap(Map map)

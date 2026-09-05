@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using RimWorld;
 using Verse;
 
@@ -21,8 +22,8 @@ public class FloatMenuOptionProvider_CleanRoom : FloatMenuOptionProvider
 	{
 		if (Achtung.Settings.replaceCleanRoom == false) return null;
 		var driver = Activator.CreateInstance<JobDriver_CleanRoom>();
-		var existingJobs = driver.SameJobTypesOngoing();
-		var suffix = existingJobs.Count > 0 ? " " + "AlreadyDoing".Translate("" + (existingJobs.Count + 1)) : new TaggedString("");
+		var existingJobs = context.ValidSelectedPawns.Select(p => driver.SameJobTypesOngoing(p).Count).DefaultIfEmpty().Max();
+		var suffix = existingJobs > 0 ? " " + "AlreadyDoing".Translate("" + (existingJobs + 1)) : new TaggedString("");
 		return new SupplementalFloatMenuOption(driver.GetLabel() + suffix, () => StartWork(context, driver), MenuOptionPriority.Low);
 	}
 

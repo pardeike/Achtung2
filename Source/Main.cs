@@ -374,8 +374,7 @@ static class Game_DeinitAndRemoveMap_Patch
 	public static void Prefix(Map map) => ForcedWork.Instance?.Cleanup(map);
 }
 
-// a way to store an extra property on a pawn
-// we subclass Pawn_Thinker and hope for nobody doing the same thing
+// Optional fast path. Custom thinkers keep their state and use ForcedWork's dictionary.
 //
 [HarmonyPatch(typeof(PawnComponentsUtility))]
 [HarmonyPatch(nameof(PawnComponentsUtility.AddComponentsForSpawn))]
@@ -386,16 +385,13 @@ static class PawnComponentsUtility_AddComponentsForSpawn_Patch
 	{
 		if (PawnAttackGizmoUtility.CanOrderPlayerPawn(pawn) == false) return;
 
-		var t = pawn.thinker.GetType();
-		while (true)
+		if (pawn.thinker is Pawn_AchtungThinker existing)
 		{
-			var t2 = t.BaseType;
-			if (t2 == null || t2 == typeof(object))
-				break;
-			t = t2;
+			existing.forcedJobs = ForcedWork.Instance.GetForcedJobsInstance(pawn);
+			return;
 		}
-		if (t != typeof(Pawn_Thinker))
-			Log.Error($"Achtung identified a potential mod conflict: The instance for pawn.thinker is of type {t} but should be {typeof(Pawn_Thinker)}. As a result Achtung performance is degraded");
+		if (pawn.thinker != null && pawn.thinker.GetType() != typeof(Pawn_Thinker))
+			return;
 
 		pawn.thinker = new Pawn_AchtungThinker(pawn)
 		{
@@ -438,8 +434,8 @@ static class Pawn_WorkSettings_WorkIsActive_Patch
 	{
 		if (__result == true) return;
 		if (Achtung.Settings.ignoreAssignments == false) return;
-		if (ForcedWork.Instance.HasForcedJob(___pawn) == false) return;
-		__result = ___pawn.workSettings.GetPriority(w) == 0;
+		if (ForcedExtensions.AppliesTo(___pawn) == false && ForcedWork.Instance.IsPreparing(___pawn) == false) return;
+		__result = ___pawn.WorkTypeIsDisabled(w) == false && ___pawn.workSettings.GetPriority(w) == 0;
 	}
 }
 //
@@ -458,94 +454,6 @@ static class Alert_HunterLacksRangedWeapon_HuntersWithoutRangedWeapon_Patch
 	}
 }
 
-// forced hauling outside of allowed area
-//
-[HarmonyPatch(typeof(HaulAIUtility))]
-[HarmonyPatch(nameof(HaulAIUtility.PawnCanAutomaticallyHaulFast))]
-static class HaulAIUtility_PawnCanAutomaticallyHaulFast_Patch
-{
-	public static bool Prefix(Pawn p, Thing t, bool forced, ref bool __result)
-	{
-		var map = p?.Map;
-		if (map != null && map.reservationManager.IsReserved(t) == false && p.RaceProps.Humanlike && Achtung.Settings.ignoreRestrictions)
-		{
-			var forcedWork = ForcedWork.Instance;
-			if (forced || forcedWork.HasForcedJob(p))
-			{
-				__result = true;
-				return false;
-			}
-		}
-		return true;
-	}
-}
-
-// replace toil conditions that call IsForbidden with a new condition
-// that calls the original condition only every 60 ticks to improve tps
-// with the risk of pawns in extreme cases using forbidden cells/items
-//
-[HarmonyPatch(typeof(Toil))]
-[HarmonyPatch(nameof(Toil.AddEndCondition))]
-static class Toil_AddEndCondition_Patch
-{
-	public static readonly MethodInfo mIsForbidden = SymbolExtensions.GetMethodInfo(() => ForbidUtility.IsForbidden(null, (Pawn)null));
-	public static readonly Dictionary<MethodInfo, bool> hasForbiddenState = [];
-
-	public static void Prefix(Toil __instance, ref Func<JobCondition> newEndCondition)
-	{
-		var method = newEndCondition?.Method;
-		if (method == null) return;
-
-		if (hasForbiddenState.TryGetValue(method, out var hasForbidden) == false)
-		{
-			hasForbidden = PatchProcessor.ReadMethodBody(method).Any(pair => pair.Value is MethodInfo method && method == mIsForbidden);
-			hasForbiddenState.Add(method, hasForbidden);
-		}
-		if (hasForbidden)
-		{
-			var condition = newEndCondition;
-			newEndCondition = () =>
-			{
-				if (__instance.actor?.IsHashIntervalTick(60) ?? true)
-					return condition();
-				return JobCondition.Ongoing;
-			};
-		}
-	}
-}
-
-// replace toil conditions that call IsForbidden with a new condition
-// that calls the original condition only every 60 ticks to improve tps
-// with the risk of pawns in extreme cases using forbidden cells/items
-//
-[HarmonyPatch(typeof(Toil))]
-[HarmonyPatch(nameof(Toil.AddFailCondition))]
-static class Toil_AddFailCondition_Patch
-{
-	public static void Prefix(Toil __instance, ref Func<bool> newFailCondition)
-	{
-		var method = newFailCondition?.Method;
-		if (method == null) return;
-
-		if (Toil_AddEndCondition_Patch.hasForbiddenState.TryGetValue(method, out var hasForbidden) == false)
-		{
-			var mIsForbidden = Toil_AddEndCondition_Patch.mIsForbidden;
-			hasForbidden = PatchProcessor.ReadMethodBody(method).Any(pair => pair.Value is MethodInfo method && method == mIsForbidden);
-			Toil_AddEndCondition_Patch.hasForbiddenState.Add(method, hasForbidden);
-		}
-		if (hasForbidden)
-		{
-			var condition = newFailCondition;
-			newFailCondition = () =>
-			{
-				if (__instance.actor?.IsHashIntervalTick(60) ?? true)
-					return condition();
-				return false;
-			};
-		}
-	}
-}
-
 // allow for jobs outside allowed area
 //
 [HarmonyPatch(typeof(Pawn_PlayerSettings))]
@@ -557,8 +465,7 @@ static class Pawn_PlayerSettings_RespectsAllowedArea_Patch
 		if (__result == false) return;
 		if (Achtung.Settings.ignoreRestrictions == false) return;
 		var forcedWork = ForcedWork.Instance;
-		if (forcedWork.hasForcedJobs == false && forcedWork.IsPreparing(___pawn) == false) return;
-		if (forcedWork.HasForcedJob(___pawn) == false) return;
+		if (ForcedExtensions.AppliesTo(___pawn) == false && forcedWork.IsPreparing(___pawn) == false) return;
 		__result = false;
 	}
 }
@@ -685,41 +592,85 @@ static class Toils_Construct_MakeSolidThingFromBlueprintIfNecessary_Patch
 	}
 }
 
-// ignore forbidden for forced jobs
+// Keep vanilla forbidden checks, including areas and ritual reservations, while
+// removing the drafted/mech bypass only during Achtung-generated work.
+//
+[HarmonyPatch(typeof(ForbidUtility), nameof(ForbidUtility.CaresAboutForbidden))]
+static class ForbidUtility_CaresAboutForbidden_Patch
+{
+	public static void Postfix(Pawn pawn, ref bool __result)
+	{
+		if (ForcedExtensions.AppliesTo(pawn))
+			__result = true;
+	}
+}
+
+// Toil init can also run from path arrival, outside the regular/interval ticks.
+// Restore all scopes on exceptions, without affecting menu/direct vanilla orders.
+//
+[HarmonyPatch]
+static class JobDriver_ForcedPermissions_Patch
+{
+	public static IEnumerable<MethodBase> TargetMethods()
+	{
+		yield return AccessTools.Method(typeof(JobDriver), nameof(JobDriver.DriverTick));
+		yield return AccessTools.Method(typeof(JobDriver), nameof(JobDriver.DriverTickInterval));
+		yield return AccessTools.Method(typeof(JobDriver), "TryActuallyStartNextToil");
+	}
+
+	public static void Prefix(JobDriver __instance, out ForcedExtensions.PermissionScope __state)
+	{
+		var pawn = __instance.pawn;
+		var job = __instance.job;
+		var forcedJob = pawn?.Map != null ? ForcedWork.Instance.GetForcedJob(pawn) : null;
+		var forced = forcedJob != null && job != null && pawn.CurJob == job && forcedJob.activeJobId == job.loadID;
+		__state = new ForcedExtensions.PermissionScope(forced ? pawn : null, job, forcedJob?.explicitTarget);
+	}
+
+	public static void Finalizer(ForcedExtensions.PermissionScope __state) => __state.Dispose();
+}
+
+// Ignore only the faction's forbidden flag, not every reason IsForbidden can
+// return true. Direct vanilla orders outside the scope retain vanilla behavior.
 //
 [HarmonyPatch(typeof(ForbidUtility))]
 [HarmonyPatch(nameof(ForbidUtility.IsForbidden))]
 [HarmonyPatch([typeof(Thing), typeof(Pawn)])]
 static class ForbidUtility_IsForbidden_Patch
 {
-	public static bool Prepare() => Achtung.Settings.ignoreForbidden;
+	public static bool Prepare() => true;
 
 	public static void FixPatch()
 	{
 		var method = SymbolExtensions.GetMethodInfo(() => ForbidUtility.IsForbidden(null, (Pawn)null));
 		var hasPatch = Harmony.GetPatchInfo(method)?.Owners.Contains(Achtung.harmony.Id) ?? false;
-		if (Prepare() != hasPatch)
-		{
-			if (hasPatch)
-				Achtung.harmony.Unpatch(method, HarmonyPatchType.All, Achtung.harmony.Id);
-			else
-				_ = new PatchClassProcessor(Achtung.harmony, typeof(ForbidUtility_IsForbidden_Patch)).Patch();
-		}
+		if (hasPatch == false)
+			_ = new PatchClassProcessor(Achtung.harmony, typeof(ForbidUtility_IsForbidden_Patch)).Patch();
 	}
 
-	public static bool Prefix(Thing t, Pawn pawn, ref bool __result)
+	public static bool IsForbiddenToFaction(Thing thing, Faction faction, Pawn pawn)
 	{
-		if (pawn?.Map != null && pawn.RaceProps.Humanlike)
+		if (ForcedExtensions.IsDirectTarget(pawn, thing))
+			return false;
+		if (Achtung.Settings.ignoreForbidden && pawn?.Map != null
+			&& (ForcedExtensions.AppliesTo(pawn) || ForcedWork.Instance.IsPreparing(pawn)))
+			return false;
+		return thing.IsForbidden(faction);
+	}
+
+	public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+	{
+		var original = SymbolExtensions.GetMethodInfo(() => ForbidUtility.IsForbidden(null, (Faction)null));
+		var replacement = SymbolExtensions.GetMethodInfo(() => IsForbiddenToFaction(default, default, default));
+		foreach (var instruction in instructions)
 		{
-			var forcedWork = ForcedWork.Instance;
-			// t.IsForbidden() is necessary or else we allow a lot more jobs as a side effect
-			if (forcedWork.HasForcedJob(pawn) && t.IsForbidden(pawn.Faction))
+			if (instruction.Calls(original))
 			{
-				__result = false;
-				return false;
+				yield return new CodeInstruction(OpCodes.Ldarg_1).MoveLabelsFrom(instruction);
+				instruction.operand = replacement;
 			}
+			yield return instruction;
 		}
-		return true;
 	}
 }
 
@@ -790,12 +741,16 @@ static class FloatMenuOptionProvider_WorkGivers_GetWorkGiverOption_Patch
 		__state = null;
 		if (Achtung.Settings.ForceCommandsEnabled && pawn?.Map != null)
 		{
-			__state = ForcedWork.Instance;
-			__state.Prepare(pawn);
+			var forcedWork = ForcedWork.Instance;
+			if (forcedWork.IsPreparing(pawn) == false)
+			{
+				__state = forcedWork;
+				__state.Prepare(pawn);
+			}
 		}
 	}
 
-	public static void Postfix(Pawn pawn, ForcedWork __state) => __state?.Unprepare(pawn);
+	public static void Finalizer(Pawn pawn, ForcedWork __state) => __state?.Unprepare(pawn);
 
 	public static int AchtungGetPriority(Pawn_WorkSettings workSettings, WorkTypeDef w)
 	{

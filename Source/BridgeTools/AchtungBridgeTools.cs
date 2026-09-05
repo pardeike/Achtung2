@@ -96,12 +96,24 @@ public sealed partial class AchtungBridgeTools
 			drafted = pawn.Drafted,
 			currentJob = currentJob?.def?.defName,
 			currentJobReport = currentJob?.GetReport(pawn),
+			currentJobTargets = currentJob.TargetThings().Select(thing => new
+			{
+				thingId = thing.ThingID,
+				position = thing.PositionHeld.ToString(),
+				forbiddenToPlayer = thing.IsForbidden(Faction.OfPlayer),
+				inAllowedArea = thing.PositionHeld.InAllowedArea(pawn)
+			}).ToArray(),
+			carriedThing = pawn.carryTracker?.CarriedThing?.ThingID,
 			hasForcedJob = forcedWork.HasForcedJob(pawn),
 			hasForcedJobIgnoringPrepare = forcedWork.HasForcedJob(pawn, ignorePreparing: true),
 			isPreparing = forcedWork.IsPreparing(pawn),
 			forcedJob = forcedJob == null ? null : new
 			{
 				started = forcedJob.started,
+				forcedJob.activeJobId,
+				currentJobId = currentJob?.loadID,
+				forcedJob.buildingSmart,
+				orderStartCell = forcedJob.orderStartCell.ToString(),
 				cancelled = forcedJob.cancelled,
 				isThingJob = forcedJob.isThingJob,
 				cellRadius = forcedJob.cellRadius,
@@ -201,6 +213,18 @@ public sealed partial class AchtungBridgeTools
 		var commandDispatched = buttonActivated && dragCompleted;
 		var forcedJob = ForcedWork.Instance.GetForcedJob(pawn);
 		var hasForcedJobNow = ForcedWork.Instance.HasForcedJob(pawn, ignorePreparing: true);
+		var currentJob = pawn.jobs?.curJob;
+		var currentJobTargets = currentJob.TargetThings()
+			.Select(thing => new
+			{
+				thingId = thing.ThingID,
+				label = thing.LabelCap,
+				position = thing.PositionHeld.ToString(),
+				forbiddenToPlayer = thing.IsForbidden(Faction.OfPlayer),
+				forbiddenToPawn = thing.IsForbidden(pawn),
+				inAllowedArea = thing.PositionHeld.InAllowedArea(pawn)
+			})
+			.ToArray() ?? [];
 
 		return new
 		{
@@ -219,7 +243,10 @@ public sealed partial class AchtungBridgeTools
 			forceCell = cell.ToString(),
 			hasForcedJobNow,
 			forcedJobStartedNow = forcedJob?.started ?? false,
-			currentTargetCount = forcedJob?.targets.Count ?? 0
+			currentTargetCount = forcedJob?.targets.Count ?? 0,
+			currentJob = currentJob?.def?.defName,
+			currentJobReport = currentJob?.GetReport(pawn),
+			currentJobTargets
 		};
 	}
 

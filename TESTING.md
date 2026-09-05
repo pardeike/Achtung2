@@ -52,6 +52,10 @@ RimWorld's normal mod configuration, then restart. Other DLCs are not required
 for this contract. Keep unrelated gameplay mods out of the baseline unless the
 scenario is explicitly testing an interaction with them.
 
+Leave the tested mod selection and settings in place. Do not restore an older
+configuration after testing unless Andreas explicitly requests it. Temporary
+fixture pawns, input shims, selection changes and test objects still need cleanup.
+
 For Multiplayer compatibility tests, use this active order:
 
 - `zetrith.prepatcher`
@@ -87,6 +91,47 @@ If start or reconnect fails, stop and restart the related game and bridge
 processes. Do not rewrite GABS configuration to work around a stale process.
 
 ## Contract layers
+
+### Work hardening
+
+Run the pure production ordering helper independently:
+
+```bash
+dotnet run --project Tests/ConstructionOrder/ConstructionOrder.Tests.csproj --verbosity quiet
+```
+
+The checks cover opposite approaches and clicked branches, double-wall traversal,
+stable ties, and large selections. They do not prove live pathfinding or enclosure
+safety. Smart construction retains the original approach and clicked cell; vanilla
+batched material delivery still chooses its own stops.
+
+On a paused loaded map, the companion provides these focused checks:
+
+- `achtung/test_work_hardening_contract`: production target enumeration across
+  all three primary targets and both queues, nested exception cleanup, unrelated
+  job rejection, and retained menu-control width. No game ticks or settings changes.
+- `achtung/test_permission_contract`: use Wilfred and the resource-needing wall
+  at `(132, 0, 131)` in `achtung-building-test-new`. Checks drafted/undrafted and
+  forbidden OFF/ON scanner results plus queued dependencies. Leaves forbidden OFF.
+  This proves job selection, not actual pickup or completion.
+- `achtung/test_rescue_priority_roundtrip`: exercises the production setting
+  toggle and checks indexed priorities for all existing initialized pawns. Reports
+  which spawned/unspawned/dead cases are present; leaves Rescue enabled.
+- `achtung/start_thorough_work_at_cell` and `achtung/get_thorough_work_state`:
+  start production cleaning/firefighting and compare target identity, partial work
+  and original room around a normal save/load. Use a new test save name, never
+  overwrite the source fixture. Include an active target and a moving target.
+- `achtung/test_cleaning_work_tick`: advances a real tick and checks the current
+  pawn-speed/terrain formula. Non-unit and zero factors need suitable fixtures.
+
+For actual forced-work execution, read `achtung/get_selected_pawn_forced_state`
+through pickup and job transitions, not just immediately after the button. It
+includes both queues and the tracked job identity. Check forbidden extra stacks,
+expanded targets, allowed-area boundaries and disabled priorities independently.
+Direct Wear/Equip/Use requires inventory/equipment readback after completion;
+an enabled menu option is not execution proof.
+
+### Choosing a layer
 
 Use the least expensive layer that answers the question:
 
@@ -147,8 +192,7 @@ The audit uses RimWorld's active-language fonts and the proven logical widths:
 for Medium-font column headers, and 387 pixels for Small-font subheadings.
 Checkbox titles and explanations are deliberately excluded because their
 measured height expands the scrollable column. No per-language dialog opening,
-scrolling, or option cycling is required. Restore the original language and
-stop RimWorld after recording evidence.
+scrolling, or option cycling is required. Leave the tested configuration in place.
 
 ### Mixed draft menu contract
 
@@ -185,21 +229,22 @@ GABS cannot make `Input.GetKey` report a held modifier merely by adding a Unity
 event modifier. The contract therefore applies callback-scoped Harmony prefixes
 to `Input.GetKey(KeyCode)` and `UI.MouseMapPosition()`. They force a deterministic
 Alt-key state and target cell only while one serialized main-thread callback is
-running. The tool removes both patches, restores the user's selection and
-settings, and resets the fixture draft state before returning. No tick or frame
+running. The tool removes both patches, restores the user's selection,
+retains the tested settings, and resets the fixture draft state before returning. No tick or frame
 boundary occurs while either shim is installed.
 
 ### Mixed draft realtime scenario
 
 `achtung/run_mixed_draft_mech_scenario` uses the same fixture but dispatches
 Achtung's real line-order path. It then calls `IRimBridgeContext.Game.RunUntilAsync`
-and observes the live game until the centipede has moved, the labor mech has
+and observes the live game until the centipede reaches its destination, the labor mech has
 incorrectly reacted, or the game-tick deadline is reached.
 
-The scenario passes only when the centipede moves under a player-forced GoTo
-order while the cleansweeper is never drafted and never receives that target as
-a player-forced GoTo job. The tool restores the previous game speed and Achtung
-setting and removes all fixture pawns in a `finally` path.
+The scenario passes only when the centipede receives the expected player-forced
+GoTo and reaches its destination while the cleansweeper is never drafted and
+never receives that target as a player-forced GoTo job. Unrelated movement is
+not sufficient. The tool restores the previous game speed and removes all
+fixture pawns in a `finally` path, leaving the tested Achtung settings in place.
 
 These contracts deliberately test the behavioral boundary instead of the
 Mech tab's implementation. The tab establishes draft state; Achtung must then

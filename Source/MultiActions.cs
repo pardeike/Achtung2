@@ -209,7 +209,7 @@ public class MultiActions
 
 		var hasForcedOptions = options.Any(o => o is ForcedFloatMenuOption);
 		if (hasForcedOptions)
-			option = ForcedFloatMenuOption.CopyOptionState(option, new ForcedMultiFloatMenuOption(pawns, [.. options], extraPartOnGUI, title));
+			option = ForcedFloatMenuOption.CopyOptionState(option, new ForcedMultiFloatMenuOption(pawns, [.. options], extraPartOnGUI, title, extraPartWidth));
 
 		option.action = () => actions.Do(multiAction => multiAction.GetAction()());
 		option.Disabled = actions.All(a => a.option.Disabled);

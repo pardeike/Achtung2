@@ -164,21 +164,23 @@ static class Tools
 		}));
 	}
 
-	public static IEnumerable<IntVec3> TargetCells(this Job job)
+	public static IEnumerable<LocalTargetInfo> AllTargets(this Job job)
 	{
 		if (job == null) yield break;
-		if (job.targetA.cellInt.IsValid) yield return job.targetA.cellInt;
-		if (job.targetB.cellInt.IsValid) yield return job.targetB.cellInt;
-		if (job.targetC.cellInt.IsValid) yield return job.targetC.cellInt;
+		yield return job.targetA;
+		yield return job.targetB;
+		yield return job.targetC;
+		if (job.targetQueueA != null)
+			foreach (var target in job.targetQueueA) yield return target;
+		if (job.targetQueueB != null)
+			foreach (var target in job.targetQueueB) yield return target;
 	}
 
+	public static IEnumerable<IntVec3> TargetCells(this Job job)
+		=> job.AllTargets().Where(target => !target.HasThing && target.Cell.IsValid).Select(target => target.Cell).Distinct();
+
 	public static IEnumerable<Thing> TargetThings(this Job job)
-	{
-		if (job == null) yield break;
-		if (job.targetA.thingInt != null) yield return job.targetA.thingInt;
-		if (job.targetB.thingInt != null) yield return job.targetB.thingInt;
-		if (job.targetC.thingInt != null) yield return job.targetC.thingInt;
-	}
+		=> job.AllTargets().Where(target => target.HasThing).Select(target => target.Thing).Distinct();
 
 	public static bool IsFreeTarget(Pawn pawn, ForcedTarget target)
 	{
@@ -216,19 +218,16 @@ static class Tools
 		if (map == null || radius == 0) yield break;
 
 		var visited = new HashSet<XY>(existing);
-		var queue = MultiplayerSupport.IsActive
-			? new Queue<XY>(visited.OrderBy(cell => cell.x).ThenBy(cell => cell.y))
-			: new Queue<XY>(visited);
+		var queue = new Queue<XY>(visited.OrderBy(cell => cell.x).ThenBy(cell => cell.y));
 		var added = new Queue<XY>();
 		for (var i = 1; i <= radius && queue.Count > 0; i++)
 		{
 			while (queue.Count > 0)
 			{
 				var cell = queue.Dequeue();
-				var j = MultiplayerSupport.IsActive ? cell.GetHashCode() & 7 : Rand.Range(0, 8);
 				for (var k = 0; k < 8; k++)
 				{
-					var newCell = cell + XY.Adjacent[(j + k) % 8];
+					var newCell = cell + XY.Adjacent[k];
 					if (visited.Contains(newCell))
 						continue;
 					if (newCell.InBounds(map) == false)
@@ -339,9 +338,12 @@ static class Tools
 					gotDrafted = true;
 				if (colonist.originalDraftStatus == false && newDraftStatus)
 					gotUndrafted = true;
-				colonist.pawn.mindState.priorityWork.Clear();
-				if (colonist.pawn.jobs?.curJob != null && colonist.pawn.jobs.IsCurrentJobPlayerInterruptible())
-					colonist.pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
+				if (newDraftStatus == colonist.originalDraftStatus)
+				{
+					colonist.pawn.mindState.priorityWork.Clear();
+					if (colonist.pawn.jobs?.curJob != null && colonist.pawn.jobs.IsCurrentJobPlayerInterruptible())
+						colonist.pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
+				}
 			});
 			if (gotDrafted)
 				SoundDefOf.DraftOn.PlayOneShotOnCamera(null);
@@ -380,7 +382,9 @@ static class Tools
 		var previousStatus = GetDraftingStatus(pawn);
 		if (previousStatus != drafted)
 		{
-			if (localOnly || MultiplayerSupport.IsActive == false)
+			if (localOnly)
+				pawn.drafter.draftedInt = drafted; // Hypothetical menu inspection only, never a player command.
+			else if (MultiplayerSupport.IsActive == false)
 				_ = SetDraftStatusLocal(pawn, drafted);
 			else
 				MultiplayerSupport.SetDraftStatus(pawn, drafted);
@@ -392,7 +396,7 @@ static class Tools
 	{
 		var previousStatus = GetDraftingStatus(pawn);
 		if (previousStatus != drafted)
-			pawn.drafter.draftedInt = drafted;
+			pawn.drafter.Drafted = drafted;
 		return previousStatus;
 	}
 
@@ -406,7 +410,13 @@ static class Tools
 
 	internal static void OrderToLocal(Pawn pawn, int x, int z)
 	{
-		var bestCell = new IntVec3(x, 0, z);
+		if (pawn?.Map == null || !(pawn.jobs?.IsCurrentJobPlayerInterruptible() ?? false))
+			return;
+		// Recheck at execution, not just while drawing the local preview. Earlier
+		// synchronized orders may have reserved a destination in the meantime.
+		var bestCell = new Colonist(pawn).UpdateOrderPos(new IntVec3(x, 0, z).ToVector3Shifted());
+		if (!bestCell.IsValid)
+			return;
 		var job = JobMaker.MakeJob(JobDefOf.Goto, bestCell);
 		job.playerForced = true;
 		job.collideWithPawns = false;

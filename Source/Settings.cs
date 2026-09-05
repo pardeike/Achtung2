@@ -355,14 +355,14 @@ public class AchtungSettings : ModSettings
 
 	static void ToggleRescue(bool state)
 	{
-		var hasRescuing = DefDatabase<WorkTypeDef>.GetNamedSilentFail(Tools.RescuingWorkTypeDef.defName) != null;
+		var rescuing = DefDatabase<WorkTypeDef>.GetNamedSilentFail(Tools.RescuingWorkTypeDef.defName);
 		var doctorRescueWorkGiver = DefDatabase<WorkGiverDef>.GetNamed("DoctorRescue");
-		if (hasRescuing != state)
+		if ((rescuing != null) != state)
 		{
 			if (state)
 				Tools.savedWorkTypeDef = DynamicWorkTypes.AddWorkTypeDef(Tools.RescuingWorkTypeDef, WorkTypeDefOf.Doctor, doctorRescueWorkGiver);
 			else
-				DynamicWorkTypes.RemoveWorkTypeDef(Tools.RescuingWorkTypeDef, Tools.savedWorkTypeDef, doctorRescueWorkGiver);
+				DynamicWorkTypes.RemoveWorkTypeDef(rescuing, Tools.savedWorkTypeDef, doctorRescueWorkGiver);
 		}
 	}
 

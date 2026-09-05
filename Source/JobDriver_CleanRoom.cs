@@ -15,6 +15,7 @@ public class JobDriver_CleanRoom : JobDriver_Thoroughly
 	public override EffecterDef GetWorkIcon() => EffecterDefOf.Clean;
 
 	static readonly WorkTypeDef cleanDef = DefDatabase<WorkTypeDef>.GetNamed("Cleaning");
+	public override WorkTypeDef WorkType => cleanDef;
 	public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, LocalTargetInfo clickCell)
 	{
 		_ = base.CanStart(thePawn, clickCell);
@@ -44,7 +45,9 @@ public class JobDriver_CleanRoom : JobDriver_Thoroughly
 
 	public override bool DoWorkToItem()
 	{
-		subCounter++;
+		var terrainFactor = currentItem.Cell.GetTerrain(pawn.Map).GetStatValueAbstract(StatDefOf.CleaningTimeFactor);
+		var work = pawn.GetStatValue(StatDefOf.CleaningSpeed);
+		subCounter += terrainFactor == 0f ? work : work / terrainFactor;
 		if (subCounter > currentItem.thingInt.def.filth.cleaningWorkToReduceThickness)
 		{
 			var filth = currentItem.thingInt as Filth;
@@ -68,8 +71,8 @@ public class JobDriver_CleanRoom : JobDriver_Thoroughly
 
 	private IEnumerable<Filth> AllFilth(IntVec3? useCell = null)
 	{
-		room = ValidateRoom(room ?? RoomAt(useCell ?? TargetLocA));
-		room ??= ValidateRoom(RoomAt(useCell ?? TargetLocA));
+		room = ValidateRoom(room ?? RoomAt(useCell ?? TargetB.Cell));
+		room ??= ValidateRoom(RoomAt(useCell ?? TargetB.Cell));
 		if (room == null) return [];
 
 		var pathGrid = pawn.Map.pathing.For(pawn).pathGrid;
@@ -80,6 +83,7 @@ public class JobDriver_CleanRoom : JobDriver_Thoroughly
 			.Where(f =>
 			{
 				if (f == null || f.Destroyed) return false;
+				if (!ForcedExtensions.AllowedTarget(pawn, f)) return false;
 				if (pathGrid.Walkable(f.Position) == false) return false;
 				var fRoom = f.GetRoom();
 				if (fRoom == null) return false;

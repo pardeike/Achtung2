@@ -1,4 +1,4 @@
-﻿using RimWorld;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,19 +23,21 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 	public static float buttonSpace = 10;
 	public static float buttonWidth = 32;
 
-	public ForcedMultiFloatMenuOption(List<Pawn> forcedPawns, List<FloatMenuOption> options, Func<Rect, bool> originalExtraPartOnGUI, string label)
+	public ForcedMultiFloatMenuOption(List<Pawn> forcedPawns, List<FloatMenuOption> options, Func<Rect, bool> originalExtraPartOnGUI, string label, float originalExtraPartWidth = 0f)
 		: base(label, null, MenuOptionPriority.Default, null, null, 0f, null, null, false, 0)
 	{
 		this.forcedPawns = forcedPawns;
 		this.options = options;
 		extraPartOnGUI = extraPartRect =>
 		{
-			if (originalExtraPartOnGUI != null && originalExtraPartOnGUI(extraPartRect))
+			var originalRect = extraPartRect;
+			originalRect.xMax -= buttonSpace + buttonWidth;
+			if (originalExtraPartOnGUI != null && originalExtraPartOnGUI(originalRect))
 				return true;
 			return RenderExtraPartOnGui(extraPartRect);
 		};
 		// somehow necessary or else 'extraPartWidth' will be 0
-		extraPartWidth = buttonSpace + buttonWidth;
+		extraPartWidth = originalExtraPartWidth + buttonSpace + buttonWidth;
 	}
 
 	public bool RenderExtraPartOnGui(Rect drawRect)
@@ -68,21 +70,15 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 			var forceOption = options.OfType<ForcedFloatMenuOption>().FirstOrDefault();
 			return forceOption != null
 				? BeginForceWork(forcedPawns, forceOption.forceWorkgiver, forceOption.forceCell)
-				: options.Any(option => option.extraPartOnGUI?.Invoke(drawRect) == true);
+				: false;
 		}
 
-		return options.Any(option =>
+		return options.OfType<ForcedFloatMenuOption>().Any(forceOption =>
 		{
-			if (option is ForcedFloatMenuOption forceOption)
-			{
-				var forced = false;
-				foreach (var pawn in forcedPawns)
-					forced |= ForceAction(pawn, forceOption.forceWorkgiver, forceOption.forceCell);
-				return forced;
-			}
-			if (option.extraPartOnGUI != null)
-				return option.extraPartOnGUI(drawRect);
-			return false;
+			var forced = false;
+			foreach (var pawn in forcedPawns.Distinct())
+				forced |= ForceAction(pawn, forceOption.forceWorkgiver, forceOption.forceCell);
+			return forced;
 		});
 	}
 
@@ -114,6 +110,7 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 			return false;
 
 		var forcedWork = ForcedWork.Instance;
+		var wasPreparing = forcedWork.IsPreparing(pawn);
 		forcedWork.Prepare(pawn);
 		try
 		{
@@ -125,57 +122,69 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 		}
 		finally
 		{
-			forcedWork.Unprepare(pawn);
+			if (wasPreparing) forcedWork.Prepare(pawn);
+			else forcedWork.Unprepare(pawn);
 		}
 	}
 
 	public static bool ForceAction(Pawn pawn, WorkGiver_Scanner forceWorkgiver, IntVec3 clickedCell)
 	{
 		var forcedWork = ForcedWork.Instance;
+		var wasPreparing = forcedWork.IsPreparing(pawn);
 		forcedWork.Prepare(pawn);
-
-		var workgiverDefs = ForcedWork.GetCombinedDefs(forceWorkgiver);
-		foreach (var expandSearch in new[] { false, true })
-			foreach (var workgiverDef in workgiverDefs)
-			{
-				var workgiver = workgiverDef.giverClass == null ? null : workgiverDef.Worker as WorkGiver_Scanner;
-				if (workgiver == null)
-					continue;
-
-				var jobItem = ForcedWork.HasJobItem(pawn, workgiver, clickedCell, expandSearch);
-				if (jobItem == null)
-					continue;
-
-				Tools.CancelWorkOn(pawn, jobItem);
-
-				if (forcedWork.AddForcedJob(pawn, workgiverDefs, jobItem, out var forcedJob))
+		try
+		{
+			var workgiverDefs = ForcedWork.GetCombinedDefs(forceWorkgiver);
+			foreach (var expandSearch in new[] { false, true })
+				foreach (var workgiverDef in workgiverDefs)
 				{
-					forcedJob.ExpandJob(1 + Find.Selector.SelectedPawns.Count * 2);
-					var success = forcedJob.GetNextNonConflictingJob(forcedWork);
-					if (success == false)
+					var workgiver = workgiverDef.giverClass == null ? null : workgiverDef.Worker as WorkGiver_Scanner;
+					if (workgiver == null)
 						continue;
-					else
-						forcedWork.Unprepare(pawn);
+
+					var jobItem = ForcedWork.HasJobItem(pawn, workgiver, clickedCell, expandSearch);
+					if (jobItem == null)
+						continue;
+
+					Tools.CancelWorkOn(pawn, jobItem);
+
+					var firstJob = forcedWork.AddForcedJob(pawn, workgiverDefs, jobItem, out var forcedJob);
+					forcedJob.orderStartCell = clickedCell;
+					forcedJob.explicitTarget = jobItem.HasThing && jobItem.Thing.OccupiedRect().Contains(clickedCell) ? jobItem.Thing : null;
+					if (firstJob)
+					{
+						forcedJob.ExpandJob(1 + Find.Selector.SelectedPawns.Count * 2);
+						var success = forcedJob.GetNextNonConflictingJob(forcedWork);
+						if (success == false)
+							continue;
+						else
+							forcedWork.Unprepare(pawn);
+					}
+
+					MouseTracker.StartDragging(
+						pawn,
+						clickedCell,
+						cellRadius => forcedJob?.cellRadius = cellRadius,
+						() => forcedJob.Start()
+					);
+
+					return true;
 				}
 
-				MouseTracker.StartDragging(
-					pawn,
-					clickedCell,
-					cellRadius => forcedJob?.cellRadius = cellRadius,
-					() => forcedJob.Start()
-				);
-
-				return true;
-			}
-
-		forcedWork.RemoveForcedJob(pawn);
-		Messages.Message("CouldNotFindMoreForcedWork".Translate(pawn.Name.ToStringShort), MessageTypeDefOf.RejectInput);
-		return false;
+			Messages.Message("CouldNotFindMoreForcedWork".Translate(pawn.Name.ToStringShort), MessageTypeDefOf.RejectInput);
+			return false;
+		}
+		finally
+		{
+			if (wasPreparing) forcedWork.Prepare(pawn);
+			else forcedWork.Unprepare(pawn);
+		}
 	}
 
 	internal static bool ApplyForceWork(Pawn pawn, WorkGiver_Scanner forceWorkgiver, IntVec3 clickedCell, int initialExpansionCount, int cellRadius)
 	{
 		var forcedWork = ForcedWork.Instance;
+		var wasPreparing = forcedWork.IsPreparing(pawn);
 		forcedWork.Prepare(pawn);
 
 		try
@@ -194,7 +203,10 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 
 					Tools.CancelWorkOn(pawn, jobItem);
 
-					if (forcedWork.AddForcedJob(pawn, workgiverDefs, jobItem, out var forcedJob))
+					var firstJob = forcedWork.AddForcedJob(pawn, workgiverDefs, jobItem, out var forcedJob);
+					forcedJob.orderStartCell = clickedCell;
+					forcedJob.explicitTarget = jobItem.HasThing && jobItem.Thing.OccupiedRect().Contains(clickedCell) ? jobItem.Thing : null;
+					if (firstJob)
 					{
 						forcedJob.ExpandJob(initialExpansionCount);
 						if (forcedJob.GetNextNonConflictingJob(forcedWork) == false)
@@ -207,14 +219,14 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 					return true;
 				}
 
-			forcedWork.RemoveForcedJob(pawn);
 			if (MultiplayerSupport.ShouldShowCommandFeedback)
 				Messages.Message("CouldNotFindMoreForcedWork".Translate(pawn.Name.ToStringShort), MessageTypeDefOf.RejectInput);
 			return false;
 		}
 		finally
 		{
-			forcedWork.Unprepare(pawn);
+			if (wasPreparing) forcedWork.Prepare(pawn);
+			else forcedWork.Unprepare(pawn);
 		}
 	}
 }

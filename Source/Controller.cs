@@ -366,21 +366,18 @@ public class Controller
 		var dragVector = lineEnd - lineStart;
 		var delta = count > 1 ? dragVector / (count - 1) : Vector3.zero;
 		var linePosition = count == 1 ? lineEnd : lineStart;
-		var previewDestinations = issueOrders || AchtungLoader.IsSameSpotInstalled
+		var previewDestinations = AchtungLoader.IsSameSpotInstalled
 			? null
 			: new HashSet<IntVec3>();
 		Tools.OrderColonistsAlongLine(draftedColonists, lineStart, lineEnd).Do(colonist =>
 		{
+			var bestCell = previewDestinations == null
+				? colonist.UpdateOrderPos(linePosition)
+				: colonist.UpdateOrderPos(linePosition, cell => previewDestinations.Contains(cell) == false);
+			if (bestCell.IsValid)
+				previewDestinations?.Add(bestCell);
 			if (issueOrders)
-				colonist.OrderTo(linePosition);
-			else
-			{
-				var bestCell = previewDestinations == null
-					? colonist.UpdateOrderPos(linePosition)
-					: colonist.UpdateOrderPos(linePosition, cell => previewDestinations.Contains(cell) == false);
-				if (bestCell.IsValid)
-					previewDestinations?.Add(bestCell);
-			}
+				colonist.OrderTo(bestCell);
 			linePosition += delta;
 		});
 	}

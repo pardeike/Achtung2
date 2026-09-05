@@ -11,6 +11,7 @@ namespace AchtungMod;
 public class JobDriver_FightFire : JobDriver_Thoroughly
 {
 	public override string GetPrefix() => "FireFight";
+	public override WorkTypeDef WorkType => WorkTypeDefOf.Firefighter;
 
 	public override IEnumerable<LocalTargetInfo> CanStart(Pawn thePawn, LocalTargetInfo clickCell)
 	{
@@ -22,7 +23,7 @@ public class JobDriver_FightFire : JobDriver_Thoroughly
 		var item = thePawn.Map.thingGrid.ThingAt(clickCell.Cell, ThingDefOf.Fire);
 		if (item == null)
 			return null;
-		var canFight = item.Destroyed == false && thePawn.CanReach(item, PathEndMode.Touch, thePawn.NormalMaxDanger()) && thePawn.CanReserve(item, 1);
+		var canFight = item.Destroyed == false && ForcedExtensions.AllowedTarget(thePawn, item) && thePawn.CanReach(item, PathEndMode.Touch, thePawn.NormalMaxDanger()) && thePawn.CanReserve(item, 1);
 		return canFight ? new List<LocalTargetInfo> { clickCell } : null;
 	}
 
@@ -33,6 +34,7 @@ public class JobDriver_FightFire : JobDriver_Thoroughly
 			if (pawn.Map.thingGrid.CellContains(pos, ThingDefOf.Fire) == false)
 				_ = workLocations.Remove(pos);
 			GenAdj.CellsAdjacent8Way(new LocalTargetInfo(pos).ToTargetInfo(pawn.Map))
+				.Where(loc => loc.InBounds(pawn.Map) && ForcedExtensions.InAllowedArea(pawn, loc))
 				.Where(loc => workLocations.Contains(loc) == false)
 				.Where(loc => pawn.Map.thingGrid.CellContains(loc, ThingDefOf.Fire))
 				.Do(loc => workLocations.Add(loc));
@@ -51,7 +53,7 @@ public class JobDriver_FightFire : JobDriver_Thoroughly
 				.ThenBy(loc => loc.z);
 		return ordered
 			.Select(loc => pawn.Map.thingGrid.ThingAt(loc, ThingDefOf.Fire) as Fire)
-			.FirstOrDefault(f => f != null && f.Destroyed == false && pawn.CanReach(f, PathEndMode.Touch, pawn.NormalMaxDanger()) && pawn.CanReserve(f, 1));
+			.FirstOrDefault(f => f != null && f.Destroyed == false && ForcedExtensions.AllowedTarget(pawn, f) && pawn.CanReach(f, PathEndMode.Touch, pawn.NormalMaxDanger()) && pawn.CanReserve(f, 1));
 	}
 
 	public override bool DoWorkToItem()

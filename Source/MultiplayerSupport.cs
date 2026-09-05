@@ -243,10 +243,13 @@ public static class MultiplayerSupport
 			var pawn = pawns[i];
 			if (pawn == null)
 				continue;
-			_ = Tools.SetDraftStatusLocal(pawn, originalDraftStatuses[i]);
-			pawn.mindState?.priorityWork?.Clear();
-			if (pawn.jobs?.curJob != null && pawn.jobs.IsCurrentJobPlayerInterruptible())
-				pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
+			var previous = Tools.SetDraftStatusLocal(pawn, originalDraftStatuses[i]);
+			if (previous == originalDraftStatuses[i])
+			{
+				pawn.mindState?.priorityWork?.Clear();
+				if (pawn.jobs?.curJob != null && pawn.jobs.IsCurrentJobPlayerInterruptible())
+					pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
+			}
 		}
 	}
 

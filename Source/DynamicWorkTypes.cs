@@ -54,24 +54,38 @@ public class DynamicWorkTypes
 
 	static void UpdatePawns(int index, int copyFrom)
 	{
-		Find.Maps.Do(map => map.mapPawns.AllPawnsSpawned.DoIf(p => p.workSettings?.priorities != null, p =>
+		// World.ExposeData installs the definition before world components and pawn
+		// priorities are read. DefMap.ExposeData sizes those incoming arrays itself.
+		// Traversing or shifting them during loading would inspect incomplete state.
+		if (Scribe.mode == LoadSaveMode.LoadingVars || Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
+			return;
+		// Pawns in caravans, containers and world storage keep the same indexed priorities.
+		var pawns = PawnsFinder.All_AliveOrDead.ToList();
+		// MapPawns excludes held dead pawns, whose settings are still needed after resurrection.
+		var heldPawns = new List<Pawn>();
+		foreach (var map in Find.Maps)
 		{
-			if (p.workSettings.EverWork)
+			ThingOwnerUtility.GetAllThingsRecursively(map, ThingRequest.ForGroup(ThingRequestGroup.Pawn), heldPawns, allowUnreal: true, alsoGetSpawnedThings: false);
+			pawns.AddRange(heldPawns);
+		}
+		pawns.Distinct().ToList().DoIf(p => p.workSettings?.priorities != null, p =>
+		{
+			var priorities = p.workSettings.priorities.values;
+			if (copyFrom != -1)
 			{
-				if (copyFrom != -1)
-				{
-					var value = p.workSettings.priorities.values[copyFrom];
-					p.workSettings.priorities.values.Insert(index, value);
-				}
-				else
-					_ = p.workSettings.priorities.values.Remove(index);
+				var value = copyFrom < priorities.Count ? priorities[copyFrom] : Pawn_WorkSettings.DefaultPriority;
+				while (priorities.Count < index)
+					priorities.Add(Pawn_WorkSettings.DefaultPriority);
+				priorities.Insert(index, value);
 			}
+			else if (index >= 0 && index < priorities.Count)
+				priorities.RemoveAt(index);
 			p.workSettings.workGiversDirty = true;
 			p.cachedDisabledWorkTypes = null;
 			p.cachedDisabledWorkTypesPermanent = null;
 			p.workSettings.CacheWorkGiversInOrder();
 			p.Notify_DisabledWorkTypesChanged();
-		}));
+		});
 	}
 
 	static void Update(PawnTableDef workTable)
@@ -119,7 +133,7 @@ public class DynamicWorkTypes
 		var workTable = PawnTableDefOf.Work;
 		var prio = columnDef.workType.naturalPriority;
 		var idx = workTable.columns.FirstIndexOf(col => col.workType != null && col.workType.naturalPriority < prio);
-		workTable.columns.Insert(idx, columnDef);
+		workTable.columns.Insert(idx < 0 ? workTable.columns.Count : idx, columnDef);
 		Update(workTable);
 
 		Reload<PawnColumnDef>();

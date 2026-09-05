@@ -15,10 +15,16 @@ public abstract class JobDriver_Thoroughly : JobDriver
 	public float subCounter;
 	public float currentWorkCount = -1f;
 	public float totalWorkCount = -1f;
+	IntVec3 savedCurrentCell = IntVec3.Invalid;
+	Thing savedCurrentThing;
 
 	public virtual string GetPrefix() => "DoThoroughly";
 
 	public virtual EffecterDef GetWorkIcon() => null;
+	public virtual WorkTypeDef WorkType => null;
+
+	bool WorkEnabled => WorkType == null || (pawn.workSettings != null && !pawn.WorkTypeIsDisabled(WorkType)
+		&& (Achtung.Settings.ignoreAssignments || pawn.workSettings.GetPriority(WorkType) > 0));
 
 	public string GetLabel() => (GetPrefix() + "Label").Translate();
 
@@ -50,21 +56,20 @@ public abstract class JobDriver_Thoroughly : JobDriver
 		Scribe_Values.Look(ref currentWorkCount, "currentWorkCount", -1f, false);
 		Scribe_Values.Look(ref totalWorkCount, "totalWorkCount", -1f, false);
 
-		var dummyCell = IntVec3.Invalid;
-		Thing dummyThing = null;
-		if (Scribe.mode == LoadSaveMode.Saving && currentItem != null)
+		if (Scribe.mode == LoadSaveMode.Saving)
 		{
-			dummyCell = currentItem.Cell;
-			dummyThing = currentItem.thingInt;
+			savedCurrentCell = currentItem.Cell;
+			savedCurrentThing = currentItem.thingInt;
 		}
-		Scribe_Values.Look(ref dummyCell, "current-cell", IntVec3.Invalid, false);
-		Scribe_References.Look(ref dummyThing, "current-thing-ref");
+		Scribe_Values.Look(ref savedCurrentCell, "current-cell", IntVec3.Invalid, false);
+		Scribe_References.Look(ref savedCurrentThing, "current-thing-ref");
 		if (Scribe.mode == LoadSaveMode.PostLoadInit)
 		{
-			if (dummyThing != null)
-				currentItem = new LocalTargetInfo(dummyThing);
-			else
-				currentItem = new LocalTargetInfo(dummyCell);
+			currentItem = savedCurrentThing != null ? new LocalTargetInfo(savedCurrentThing) : LocalTargetInfo.Invalid;
+			// The pather may not have retained its path; restart it on the next tick.
+			isMoving = false;
+			if (!currentItem.IsValid)
+				subCounter = 0f;
 		}
 	}
 
@@ -74,14 +79,16 @@ public abstract class JobDriver_Thoroughly : JobDriver
 		return null;
 	}
 
-	public List<Job> SameJobTypesOngoing()
+	public List<Job> SameJobTypesOngoing() => SameJobTypesOngoing(pawn);
+
+	public List<Job> SameJobTypesOngoing(Pawn targetPawn)
 	{
 		var jobs = new List<Job>();
-		var queue = pawn?.jobs?.jobQueue;
+		var queue = targetPawn?.jobs?.jobQueue;
 		if (queue != null)
 			for (var i = -1; i < queue.Count; i++)
 			{
-				var aJob = i == -1 ? pawn.CurJob : queue[i].job;
+				var aJob = i == -1 ? targetPawn.CurJob : queue[i].job;
 				if (aJob?.def?.driverClass.IsInstanceOfType(this) ?? false)
 					jobs.Add(aJob);
 			}
@@ -125,9 +132,9 @@ public abstract class JobDriver_Thoroughly : JobDriver
 	{
 		return
 			currentItem == null ||
-			(currentItem.HasThing && currentItem.thingInt.Destroyed) ||
+			(currentItem.HasThing && (currentItem.thingInt.Destroyed || currentItem.thingInt.Map != pawn.Map)) ||
 			currentItem.Cell.IsValid == false ||
-			(currentItem.Cell.x == 0 && currentItem.Cell.z == 0);
+			(currentItem.HasThing && !ForcedExtensions.AllowedTarget(pawn, currentItem.thingInt));
 	}
 
 	public void CheckJobCancelling()
@@ -165,15 +172,25 @@ public abstract class JobDriver_Thoroughly : JobDriver
 	public void TickAction()
 	{
 		CheckJobCancelling();
+		if (pawn.CurJob != job) return;
 		UpdateVerbAndWorkLocations();
 
 		if (CurrentItemInvalid())
 		{
+			if (!WorkEnabled)
+			{
+				EndJobWith(JobCondition.Incompletable);
+				return;
+			}
+			isMoving = false;
+			subCounter = 0f;
 			currentItem = FindNextWorkItem();
 			if (CurrentItemInvalid() == false)
 			{
 				if (pawn.Map.reservationManager.Reserve(pawn, job, currentItem))
 					pawn.CurJob?.SetTarget(TargetIndex.A, currentItem);
+				else
+					currentItem = null;
 			}
 		}
 		if (CurrentItemInvalid())

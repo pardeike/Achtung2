@@ -1,0 +1,7 @@
+- Forced work no longer uses forbidden materials or other dependencies chosen by the game when "Ignore forbidden status" is disabled.
+- Forbidden status, allowed areas and work assignments are checked when forced work continues, including drafted pawns and worker mechs. Directly ordering a forbidden item remains possible.
+- Smart construction finishes branches in a repeatable order guided by the chosen start, keeping approach cells until later. Each forced job retains the smart-building setting it started with. Material deliveries still use RimWorld's normal batching.
+- Cleaning uses the pawn's cleaning speed and the floor's cleaning time. Cleaning and firefighting retain their current target and partial progress across saves; room cleaning keeps its original room.
+- Changing the separate Rescue work type preserves other work priorities for pawns away from the map and in containers, too.
+- Drafting runs RimWorld's normal notifications. Formation orders recheck occupied destinations when they execute, and mech previews stay within command range.
+- Preserve other mods' custom pawn thinkers and extra menu controls. Failed new force commands no longer cancel an existing forced-work chain.

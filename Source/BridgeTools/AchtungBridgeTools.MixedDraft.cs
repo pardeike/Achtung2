@@ -25,8 +25,6 @@ public sealed partial class AchtungBridgeTools
 		public IntVec3 combatStart;
 		public IntVec3 laborStart;
 		public IntVec3 targetCell;
-		public bool previousSeparateCommands;
-		public CommandMenuMode previousCommandMenuMode;
 		public TimeSpeed previousSpeed;
 	}
 
@@ -88,7 +86,7 @@ public sealed partial class AchtungBridgeTools
 		public bool patchesRemoved;
 		public bool selectionRestored;
 		public bool draftStateRestored;
-		public bool settingsRestored;
+		public bool testSettingsRetained;
 		public MixedDraftModifierPhase unmodified;
 		public MixedDraftModifierPhase modified;
 		public bool success;
@@ -236,6 +234,8 @@ public sealed partial class AchtungBridgeTools
 		var laborEverDrafted = false;
 		var laborEverReceivedPlayerGoto = false;
 		var combatMoved = false;
+		var combatExecutedExpectedGoto = false;
+		var combatReachedDestination = false;
 		var deadlineReached = false;
 		var startTick = 0;
 		var deadlineTick = 0;
@@ -257,6 +257,7 @@ public sealed partial class AchtungBridgeTools
 				startTick = Find.TickManager.TicksGame;
 				deadlineTick = startTick + 1800;
 				invocation = InvokeMixedDraftFallback(fixture, true);
+				combatExecutedExpectedGoto = HasPlayerGoto(fixture.combatMech, fixture.targetCell);
 				laborEverDrafted = fixture.laborMech.Drafted;
 				laborEverReceivedPlayerGoto = HasPlayerGoto(fixture.laborMech, fixture.targetCell);
 				Find.TickManager.CurTimeSpeed = scenarioSpeed;
@@ -284,8 +285,10 @@ public sealed partial class AchtungBridgeTools
 				combatMoved = fixture.combatMech != null
 					&& fixture.combatMech.Spawned
 					&& fixture.combatMech.Position.DistanceToSquared(fixture.combatStart) >= 4;
+				combatExecutedExpectedGoto |= HasPlayerGoto(fixture.combatMech, fixture.targetCell);
+				combatReachedDestination = fixture.combatMech?.Position == fixture.targetCell;
 				deadlineReached = Find.TickManager.TicksGame >= deadlineTick;
-				return laborEverDrafted || laborEverReceivedPlayerGoto || combatMoved || deadlineReached;
+				return laborEverDrafted || laborEverReceivedPlayerGoto || combatReachedDestination || deadlineReached;
 			}, new RimBridgeWaitOptions
 			{
 				TimeoutMs = Math.Max(1000, timeoutMs),
@@ -300,6 +303,8 @@ public sealed partial class AchtungBridgeTools
 				deadlineReached |= Find.TickManager.TicksGame >= deadlineTick;
 				var success = wait.Success
 					&& combatMoved
+					&& combatExecutedExpectedGoto
+					&& combatReachedDestination
 					&& laborEverDrafted == false
 					&& laborEverReceivedPlayerGoto == false
 					&& fixture.combatMech.Drafted
@@ -314,6 +319,8 @@ public sealed partial class AchtungBridgeTools
 					observation = new
 					{
 						combatMoved,
+						combatExecutedExpectedGoto,
+						combatReachedDestination,
 						combatPosition = DescribeCell(fixture.combatMech.Position),
 						combatJob = fixture.combatMech.CurJobDef?.defName,
 						laborEverDrafted,
@@ -386,8 +393,6 @@ public sealed partial class AchtungBridgeTools
 			mechanitorCell = mechanitorCell,
 			combatStart = combatCell,
 			laborStart = laborCell,
-			previousSeparateCommands = Achtung.Settings.keepDraftedAndUndraftedCommandsSeparate,
-			previousCommandMenuMode = Achtung.Settings.forceCommandMenuMode,
 			previousSpeed = Find.TickManager.CurTimeSpeed
 		};
 
@@ -572,9 +577,6 @@ public sealed partial class AchtungBridgeTools
 		var selector = Find.Selector;
 		var previousSelection = selector.SelectedObjectsListForReading.ToList();
 		var previousEvent = Event.current;
-		var previousPositioningEnabled = Achtung.Settings.positioningEnabled;
-		var previousMaxForcedItems = Achtung.Settings.maxForcedItems;
-		var previousAchtungKey = Achtung.Settings.achtungKey;
 		var contract = new MixedDraftModifierContract
 		{
 			simulatedKey = AchtungModKey.Alt.ToString()
@@ -608,9 +610,6 @@ public sealed partial class AchtungBridgeTools
 			mouseMapPositionOverrideActive = false;
 			simulatedModifierPressed = false;
 			TryCleanup(() => harmony.UnpatchAll(harmony.Id), ref cleanupError);
-			TryCleanup(() => Achtung.Settings.positioningEnabled = previousPositioningEnabled, ref cleanupError);
-			TryCleanup(() => Achtung.Settings.maxForcedItems = previousMaxForcedItems, ref cleanupError);
-			TryCleanup(() => Achtung.Settings.achtungKey = previousAchtungKey, ref cleanupError);
 			TryCleanup(() => _ = SetDraftStatus(fixture.combatMech, true), ref cleanupError);
 			TryCleanup(() => _ = SetDraftStatus(fixture.laborMech, false), ref cleanupError);
 			TryCleanup(() => Event.current = previousEvent, ref cleanupError);
@@ -622,9 +621,9 @@ public sealed partial class AchtungBridgeTools
 			TryCleanup(() => contract.patchesRemoved = Harmony.HasAnyPatches(harmony.Id) == false, ref cleanupError);
 			TryCleanup(() => contract.selectionRestored = selector.SelectedObjectsListForReading.SequenceEqual(previousSelection), ref cleanupError);
 			TryCleanup(() => contract.draftStateRestored = fixture.combatMech.Drafted && fixture.laborMech.Drafted == false, ref cleanupError);
-			TryCleanup(() => contract.settingsRestored = Achtung.Settings.positioningEnabled == previousPositioningEnabled
-				&& Achtung.Settings.maxForcedItems == previousMaxForcedItems
-				&& Achtung.Settings.achtungKey == previousAchtungKey, ref cleanupError);
+			TryCleanup(() => contract.testSettingsRetained = Achtung.Settings.positioningEnabled
+				&& Achtung.Settings.maxForcedItems >= 2
+				&& Achtung.Settings.achtungKey == AchtungModKey.Alt, ref cleanupError);
 		}
 
 		if (cleanupError != null)
@@ -635,7 +634,7 @@ public sealed partial class AchtungBridgeTools
 			&& contract.patchesRemoved
 			&& contract.selectionRestored
 			&& contract.draftStateRestored
-			&& contract.settingsRestored
+			&& contract.testSettingsRetained
 			&& contract.unmodified?.success == true
 			&& contract.modified?.success == true;
 		return contract;
@@ -822,11 +821,6 @@ public sealed partial class AchtungBridgeTools
 			return;
 		if (Find.TickManager != null)
 			Find.TickManager.CurTimeSpeed = fixture.previousSpeed;
-		if (Achtung.Settings != null)
-		{
-			Achtung.Settings.keepDraftedAndUndraftedCommandsSeparate = fixture.previousSeparateCommands;
-			Achtung.Settings.forceCommandMenuMode = fixture.previousCommandMenuMode;
-		}
 		DestroyFixturePawn(fixture.laborMech);
 		DestroyFixturePawn(fixture.combatMech);
 		DestroyFixturePawn(fixture.mechanitor);

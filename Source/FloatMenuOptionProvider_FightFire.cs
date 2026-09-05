@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using RimWorld;
 using Verse;
 
@@ -21,8 +22,8 @@ public class FloatMenuOptionProvider_FightFire : FloatMenuOptionProvider
 	{
 		if (Achtung.Settings.replaceFightFire == false) return null;
 		var driver = (JobDriver_Thoroughly)Activator.CreateInstance(typeof(JobDriver_FightFire));
-		var existingJobs = driver.SameJobTypesOngoing();
-		var suffix = existingJobs.Count > 0 ? " " + "AlreadyDoing".Translate("" + (existingJobs.Count + 1)) : new TaggedString("");
+		var existingJobs = context.ValidSelectedPawns.Select(p => driver.SameJobTypesOngoing(p).Count).DefaultIfEmpty().Max();
+		var suffix = existingJobs > 0 ? " " + "AlreadyDoing".Translate("" + (existingJobs + 1)) : new TaggedString("");
 		return new FloatMenuOption(driver.GetLabel() + suffix, () => StartWork(context, driver), MenuOptionPriority.Low);
 	}
 

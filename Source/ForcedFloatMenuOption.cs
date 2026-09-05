@@ -15,6 +15,12 @@ public class ForcedFloatMenuOption(string label, Action action, MenuOptionPriori
 
 	public static T CopyOptionState<T>(FloatMenuOption option, T result) where T : FloatMenuOption
 	{
+		result.priorityInt = option.priorityInt;
+		result.orderInPriority = option.orderInPriority;
+		result.mouseoverGuiAction = option.mouseoverGuiAction;
+		result.revalidateClickTarget = option.revalidateClickTarget;
+		result.revalidateWorldClickTarget = option.revalidateWorldClickTarget;
+		result.playSelectionSound = option.playSelectionSound;
 		result.autoTakeable = option.autoTakeable;
 		result.autoTakeablePriority = option.autoTakeablePriority;
 		result.targetsDespawned = option.targetsDespawned;
