@@ -12,6 +12,7 @@ public sealed class AchtungMultiplayerState(World world) : WorldComponent(world)
 	bool ignoreForbidden;
 	bool ignoreRestrictions;
 	bool ignoreAssignments;
+	bool replaceForcedWork;
 	bool buildingSmart = true;
 	int maxForcedItems = 64;
 	bool forcedEndedLetter = true;
@@ -29,6 +30,7 @@ public sealed class AchtungMultiplayerState(World world) : WorldComponent(world)
 			ignoreForbidden,
 			ignoreRestrictions,
 			ignoreAssignments,
+			replaceForcedWork,
 			buildingSmart,
 			maxForcedItems,
 			forcedEndedLetter);
@@ -42,6 +44,7 @@ public sealed class AchtungMultiplayerState(World world) : WorldComponent(world)
 		ignoreForbidden = snapshot.IgnoreForbidden;
 		ignoreRestrictions = snapshot.IgnoreRestrictions;
 		ignoreAssignments = snapshot.IgnoreAssignments;
+		replaceForcedWork = snapshot.ReplaceForcedWork;
 		buildingSmart = snapshot.BuildingSmart;
 		maxForcedItems = snapshot.MaxForcedItems;
 		forcedEndedLetter = snapshot.ForcedEndedLetter;
@@ -59,6 +62,7 @@ public sealed class AchtungMultiplayerState(World world) : WorldComponent(world)
 		Scribe_Values.Look(ref ignoreForbidden, "ignoreForbidden", false, true);
 		Scribe_Values.Look(ref ignoreRestrictions, "ignoreRestrictions", false, true);
 		Scribe_Values.Look(ref ignoreAssignments, "ignoreAssignments", false, true);
+		Scribe_Values.Look(ref replaceForcedWork, "replaceForcedWork", false, true);
 		Scribe_Values.Look(ref buildingSmart, "buildingSmart", true, true);
 		Scribe_Values.Look(ref maxForcedItems, "maxForcedItems", 64, true);
 		Scribe_Values.Look(ref forcedEndedLetter, "forcedEndedLetter", true, true);

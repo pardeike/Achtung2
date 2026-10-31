@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+	<Feature_Achtung_Welcome>Welkom bij Achtung!</Feature_Achtung_Welcome>
+	<Feature_Achtung_Forcing>Gedwongen werk</Feature_Achtung_Forcing>
+	<Feature_Achtung_MenuError>Menufouten</Feature_Achtung_MenuError>
+	<Feature_Achtung_Formations>Formaties</Feature_Achtung_Formations>
+	<Feature_Achtung_Cooperation>Samenwerking</Feature_Achtung_Cooperation>
+	<Feature_Achtung_FourModes>Vier modi</Feature_Achtung_FourModes>
+	<Feature_Achtung_Settings>Instellingen</Feature_Achtung_Settings>
+	<Feature_Achtung_Draftstatus>Wapenstatus</Feature_Achtung_Draftstatus>
+	<Feature_Achtung_Rescue>Redden</Feature_Achtung_Rescue>
+	<Feature_Achtung_Dragging>Slepen met getrokken wapen</Feature_Achtung_Dragging>
+	<AchtungTutorialButton>Handleiding</AchtungTutorialButton>
+	<PositioningSettingsHeader>Positionering</PositioningSettingsHeader>
+	<ForcingSettingsHeader>Gedwongen werk</ForcingSettingsHeader>
+	<ForcingCommandsTitle>Opdrachten</ForcingCommandsTitle>
+	<ForcingJobBehaviorTitle>Werkgedrag</ForcingJobBehaviorTitle>
+	<ForcingStopRulesTitle>Stopregels</ForcingStopRulesTitle>
+	<ForcingFeedbackTitle>Terugkoppeling</ForcingFeedbackTitle>
+	<PositioningRightClickTitle>Rechtsklik</PositioningRightClickTitle>
+	<PositioningDraggingTitle>Slepen en formaties</PositioningDraggingTitle>
+
+	<PositioningEnabledTitle>Aangepaste muispositionering</PositioningEnabledTitle>
+	<PositioningEnabledExplained>Schakelt Achtungs positionering, slepen en formaties via rechtsklik in.</PositioningEnabledExplained>
+
+	<AchtungModifierTitle>Achtung!-toets</AchtungModifierTitle>
+	<AchtungModifierExplained>Houd deze toets tijdens het positioneren ingedrukt om de geselecteerde kolonisten hun wapen te laten trekken. Tijdens het slepen met de rechtermuisknop behouden ze hun huidige formatie. Je kunt de toets loslaten zodra de rechtermuisknop ingedrukt is. Draai de formatie met Q en E.</AchtungModifierExplained>
+
+	<ForceCommandMenuModeTitle>Rechtsklikmodus</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Wisseltoets</ForceCommandMenuKeyTitle>
+
+	<CommandMenuModeOptionAuto>Afhankelijk van wapenstatus</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionAutoExplained>De wapenstatus van de kolonist bepaalt of de rechtsklik het contextmenu opent of een positieopdracht geeft.</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionPressForMenu>Toets voor menu</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForMenuExplained>Houd de toets ingedrukt om het contextmenu te openen in plaats van de standaardactie uit te voeren.</CommandMenuModeOptionPressForMenuExplained>
+	<CommandMenuModeOptionPressForPosition>Toets voor positionering</CommandMenuModeOptionPressForPosition>
+	<CommandMenuModeOptionPressForPositionExplained>Houd de toets ingedrukt om kolonisten te positioneren in plaats van het contextmenu te openen.</CommandMenuModeOptionPressForPositionExplained>
+	<CommandMenuModeOptionDelayed>Ingedrukt houden voor menu</CommandMenuModeOptionDelayed>
+	<CommandMenuModeOptionDelayedExplained>Rechtsklik om te positioneren; houd de knop tijdens de ingestelde vertraging ingedrukt om het contextmenu te openen.</CommandMenuModeOptionDelayedExplained>
+
+	<DelayTitle>Vertraging voor menu</DelayTitle>
+	<DelayExplained>Hoe lang je de rechtsklik in milliseconden moet vasthouden voordat het contextmenu opent.</DelayExplained>
+
+	<DraftedColonistDraggingModeTitle>Kolonisten met getrokken wapen</DraftedColonistDraggingModeTitle>
+	<DraftedColonistDraggingModeExplained>Kies wanneer rechtsklikken op een kolonist met getrokken wapen het slepen of positioneren in formatie start.</DraftedColonistDraggingModeExplained>
+	<DraftedColonistDraggingModeOptionOff>Uit</DraftedColonistDraggingModeOptionOff>
+	<DraftedColonistDraggingModeOptionOffExplained>Rechtsklikken op kolonisten met getrokken wapen start het slepen niet.</DraftedColonistDraggingModeOptionOffExplained>
+	<DraftedColonistDraggingModeOptionUnselected>Niemand geselecteerd</DraftedColonistDraggingModeOptionUnselected>
+	<DraftedColonistDraggingModeOptionUnselectedExplained>Start het slepen alleen als vóór de rechtsklik geen bestuurbare kolonist geselecteerd was.</DraftedColonistDraggingModeOptionUnselectedExplained>
+	<DraftedColonistDraggingModeOptionAlways>Altijd</DraftedColonistDraggingModeOptionAlways>
+	<DraftedColonistDraggingModeOptionAlwaysExplained>Rechtsklikken op een kolonist met getrokken wapen maakt slepen of positioneren in formatie altijd mogelijk.</DraftedColonistDraggingModeOptionAlwaysExplained>
+
+	<RescueEnabledTitle>Kolom ‘Redden’ op tabblad Werk</RescueEnabledTitle>
+	<RescueEnabledExplained>Voegt de werkprioriteit Redden toe, zodat kolonisten neergehaalde bondgenoten automatisch naar bedden brengen.</RescueEnabledExplained>
+
+	<ShowForceEndLetterTitle>Melding tonen wanneer gedwongen werk eindigt</ShowForceEndLetterTitle>
+	<ShowForceEndLetterExplained>Toont een melding wanneer een kolonist geen gedwongen werk meer heeft.</ShowForceEndLetterExplained>
+	<KeepDraftedAndUndraftedCommandsSeparateTitle>Opdrachten met en zonder getrokken wapen scheiden</KeepDraftedAndUndraftedCommandsSeparateTitle>
+	<KeepDraftedAndUndraftedCommandsSeparateExplained>Houdt rechtsklikopdrachten voor kolonisten met en zonder getrokken wapen gescheiden, zoals in RimWorld zonder mods.</KeepDraftedAndUndraftedCommandsSeparateExplained>
+
+	<ReplaceCleanRoomTitle>Opdracht ‘Kamer schoonmaken’ vervangen</ReplaceCleanRoomTitle>
+	<ReplaceCleanRoomExplained>Gebruikt Achtungs grondige schoonmaakopdracht in plaats van die van RimWorld.</ReplaceCleanRoomExplained>
+
+	<ReplaceFightFireTitle>Opdracht ‘Brand blussen’ vervangen</ReplaceFightFireTitle>
+	<ReplaceFightFireExplained>Gebruikt Achtungs grondige brandblusopdracht in plaats van die van RimWorld.</ReplaceFightFireExplained>
+
+	<ForcedCommandState>Opdracht om door te werken tot alles klaar is.</ForcedCommandState>
+
+	<ForceMenuButtonText>Dwingen</ForceMenuButtonText>
+
+	<IncreaseForceRadius>Straal vergroten</IncreaseForceRadius>
+	<IncreaseForceRadiusDesc>Vergroot de zoekstraal voor gedwongen werk (nu {0}).</IncreaseForceRadiusDesc>
+	<DecreaseForceRadius>Straal verkleinen</DecreaseForceRadius>
+	<DecreaseForceRadiusDesc>Verkleint de zoekstraal voor gedwongen werk (nu {0}).</DecreaseForceRadiusDesc>
+	<BuildingSmart>Slim bouwen</BuildingSmart>
+	<BuildingSmartDesc>Voorkomt onbereikbare gaten en opgesloten bouwers. Het is langzamer en bouwt vanaf het startpunt naar buiten.</BuildingSmartDesc>
+
+	<AchtungModKeyOptionNone>Uitgeschakeld</AchtungModKeyOptionNone>
+	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
+	<AchtungModKeyOptionCtrl>Ctrl</AchtungModKeyOptionCtrl>
+	<AchtungModKeyOptionShift>Shift</AchtungModKeyOptionShift>
+	<AchtungModKeyOptionMeta>Win/Cmd</AchtungModKeyOptionMeta>
+
+	<BreakLevelTitle>Risico op inzinking</BreakLevelTitle>
+	<BreakLevelExplained>Stopt gedwongen werk zodra de kolonist dit risiconiveau voor een inzinking bereikt.</BreakLevelExplained>
+	<BreakLevelOptionNone>Negeren</BreakLevelOptionNone>
+	<BreakLevelOptionMinor>Klein</BreakLevelOptionMinor>
+	<BreakLevelOptionMajor>Groot</BreakLevelOptionMajor>
+	<BreakLevelOptionAlmostExtreme>Bijna extreem</BreakLevelOptionAlmostExtreme>
+	<BreakLevelOptionExtreme>Extreem</BreakLevelOptionExtreme>
+
+	<HealthLevelTitle>Gezondheidstoestand</HealthLevelTitle>
+	<HealthLevelExplained>Stopt gedwongen werk zodra de kolonist deze gezondheidstoestand bereikt.</HealthLevelExplained>
+	<HealthLevelOptionNone>Negeren</HealthLevelOptionNone>
+	<HealthLevelOptionShouldBeTendedNow>Behandeling is nu noodzakelijk</HealthLevelOptionShouldBeTendedNow>
+	<HealthLevelOptionPrefersMedicalRest>Medische rust nodig</HealthLevelOptionPrefersMedicalRest>
+	<HealthLevelOptionNeedsMedicalRest>Dringend medische rust nodig</HealthLevelOptionNeedsMedicalRest>
+	<HealthLevelOptionInPainShock>Pijnshock</HealthLevelOptionInPainShock>
+
+	<IgnoreForbiddenTitle>Verbod negeren</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Staat gedwongen werk met verboden voorwerpen toe.</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>Toegestane zone negeren</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Staat gedwongen werk buiten de toegestane zone van een kolonist toe.</IgnoreRestrictionsExplained>
+	<IgnoreAssignmentsTitle>Werkprioriteiten negeren</IgnoreAssignmentsTitle>
+	<IgnoreAssignmentsExplained>Staat gedwongen werk toe wanneer de bijbehorende werkprioriteit uitgeschakeld is.</IgnoreAssignmentsExplained>
+
+	<ReplaceForcedWorkTitle>Gedwongen werk vervangen</ReplaceForcedWorkTitle>
+	<ReplaceForcedWorkExplained>Een nieuwe gedwongen opdracht annuleert het huidige en wachtende gedwongen werk van de kolonist in plaats van aan de wachtrij te worden toegevoegd.</ReplaceForcedWorkExplained>
+
+	<BuildingSmartTitle>Slim bouwen voor nieuwe opdrachten</BuildingSmartTitle>
+	<BuildingSmartExplained>Gebruikt standaard de veiligere bouwvolgorde voor nieuwe gedwongen bouwopdrachten.</BuildingSmartExplained>
+
+	<WorkMarkersTitle>Markeringen voor gedwongen werk</WorkMarkersTitle>
+	<WorkMarkersExplained>Toont kleine markeringen op doelen van gedwongen werk.</WorkMarkersExplained>
+	<WorkMarkersOptionAnimated>Geanimeerd</WorkMarkersOptionAnimated>
+	<WorkMarkersOptionStatic>Statisch</WorkMarkersOptionStatic>
+	<WorkMarkersOptionOff>Uit</WorkMarkersOptionOff>
+
+	<ForceCommandsEnabledTitle>Opdrachten voor gedwongen werk</ForceCommandsEnabledTitle>
+	<ForceCommandsEnabledExplained>Toon een bliksemknop bij gewone rechtsklikopdrachten. Deze start gedwongen werk en kan vergelijkbare doelen in de buurt toevoegen.</ForceCommandsEnabledExplained>
+	<MaxForcedItemsTitle>Doellimiet voor gedwongen werk</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Beperk hoeveel vergelijkbare doelen in de buurt Achtung aan één opdracht voor gedwongen werk toevoegt.</MaxForcedItemsExplained>
+	<MaxForcedItemsUnlimited>Onbeperkt</MaxForcedItemsUnlimited>
+
+
+	<JobInterruptedLabel>Geannuleerd: {0}</JobInterruptedLabel>
+	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
+	<JobInterruptedBadHealth>{0} is er slecht aan toe.</JobInterruptedBadHealth>
+
+	<CleanRoomLabel>Kamer schoonmaken (Achtung)</CleanRoomLabel>
+	<CleanRoomInfoText>Maakt de kamer grondig schoon</CleanRoomInfoText>
+	<CleanRoomDescription>Maakt de hele kamer schoon, niet slechts één plek.</CleanRoomDescription>
+	<CleanRoomReport>Maakt{0} schoon: {1}</CleanRoomReport>
+
+	<FireFightLabel>Brand blussen (Achtung)</FireFightLabel>
+	<FireFightInfoText>Blust een brand</FireFightInfoText>
+	<FireFightDescription>Blust een brand volledig, zelfs buiten de thuiszone.</FireFightDescription>
+	<FireFightReport>Blust brand: {0}</FireFightReport>
+
+	<SowZoneLabel>Deze zone of kamer inzaaien</SowZoneLabel>
+	<SowZoneInfoText>Zaait een zone of kamer in</SowZoneInfoText>
+	<SowZoneDescription>Zaait een hele kweekzone of kamer in.</SowZoneDescription>
+	<SowZoneReport>Zaait{0} in: {1}</SowZoneReport>
+
+	<AlreadyDoing>(Taak #{0})</AlreadyDoing>
+
+	<CouldNotFindMoreForcedWork>{0} kon geen gedwongen werk meer vinden. De overige doelen zijn waarschijnlijk gereserveerd of onbereikbaar.</CouldNotFindMoreForcedWork>
+	<NoForcedWork>Geen gedwongen werk</NoForcedWork>
+	<ForcedWorkWasInterrupted>Het gedwongen werk van {0} is onderbroken.</ForcedWorkWasInterrupted>
+
+	<WorkType_Rescue_Label>redden</WorkType_Rescue_Label>
+	<WorkType_Rescue_PawnLabel>Redder</WorkType_Rescue_PawnLabel>
+	<WorkType_Rescue_GerundLabel>redden</WorkType_Rescue_GerundLabel>
+	<WorkType_Rescue_Description>Brengt neergehaalde bondgenoten naar bedden waar ze behandeld kunnen worden.</WorkType_Rescue_Description>
+	<WorkType_Rescue_Verb>red</WorkType_Rescue_Verb>
+
+</LanguageData>

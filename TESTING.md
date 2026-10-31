@@ -21,16 +21,14 @@ Deploy to a stopped RimWorld installation:
   -p:RIMWORLD_MOD_DIR="/path/to/RimWorld/RimWorldMac.app/Mods"
 ```
 
-The main project automatically restores and builds
-`Source/BridgeTools/Achtung.BridgeTools.csproj`. A deploy is one unit:
-
-- `RIMWORLD_MOD_DIR/Achtung/1.6/Assemblies/Achtung.dll`
-- `RIMWORLD_MOD_DIR/../BridgeTools/Achtung/Achtung.BridgeTools.dll`
+The main project builds `1.7/Assemblies/Achtung.dll`. It preserves the
+published `1.6/Assemblies/Achtung.dll`. The build also builds the matching
+RimBridge companion by default.
 
 The deploy guard rejects an invalid UserData alias and serializes destructive
 copies to a physical Mods directory across repository clones and worktrees.
 Both `scripts/build-quiet.sh` and the locked deploy path refuse a deploy while
-RimWorld is running. Stop the game through GABS before deploying.
+RimWorld is running. Stop the game before deploying.
 
 Companion DLL changes are not hot-reloaded. Restart RimWorld after every deploy
 that changes either DLL, then reconnect and rediscover tools. Do not use or edit
@@ -68,13 +66,13 @@ For Multiplayer compatibility tests, use this active order:
 
 Create the test save with that exact list before hosting. Loading an older
 singleplayer fixture with Multiplayer added is useful for migration testing,
-but it is not a clean synchronization baseline. The compatibility project and
-packaged API dependency are 1.6-only; do not edit the frozen 1.1 through 1.5
-release directories while maintaining this integration.
+but it is not a clean synchronization baseline. The 1.7 build includes the
+Multiplayer API dependency. A two-client synchronization test remains necessary
+to verify the 1.7 integration.
 
 ## GABS lifecycle
 
-Use the normal GABS lifecycle rather than launching a second game process:
+For a GABS-managed game, use its lifecycle rather than launching a second process:
 
 1. Inspect the configured games and current ownership with `games_list` and
    `games_status`.
@@ -150,12 +148,13 @@ Releases run `scripts/check-settings-layout-release-gate.py` before creating a
 tag. The gate compares the release tree with the previous semantic release tag
 and has exactly two outcomes:
 
-- when no `Languages/*/Keyed/*.xml` wording changed, it reports `skipped` and
+- when no active `1.7/Languages/*/Keyed/*.xml` wording changed, it reports `skipped` and
   requires no RimWorld localization matrix;
 - when keyed wording changed, it requires `TestEvidence/SettingsLayout.json`
   to contain a passing, current live matrix for every shipped language.
 
-The evidence digest covers all keyed language XML plus the settings renderer
+The gate compares 1.7 wording with the previous release's active language files.
+The evidence digest covers the 1.7 keyed language XML plus the settings renderer
 and companion audit sources. Any wording or relevant layout/audit change makes
 old evidence stale. Inspect the trigger and current digest with:
 

@@ -46,20 +46,6 @@ public class ForcedFloatMenuOption(string label, Action action, MenuOptionPriori
 
 	public static FloatMenuOption CreateForcedMenuItem(FloatMenuOption option, Pawn pawn, LocalTargetInfo target, WorkGiver_Scanner workgiver)
 	{
-		if (option.action == null)
-			return CopyOptionState(option, new FloatMenuOption(
-				option.labelInt,
-				option.action,
-				option.priorityInt,
-				option.mouseoverGuiAction,
-				option.revalidateClickTarget,
-				option.extraPartWidth,
-				option.extraPartOnGUI,
-				option.revalidateWorldClickTarget,
-				option.playSelectionSound,
-				option.orderInPriority
-			));
-
 		var forcedOption = new ForcedFloatMenuOption(
 			option.labelInt,
 			option.action,

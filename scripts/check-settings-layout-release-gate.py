@@ -16,7 +16,7 @@ from typing import NoReturn
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_EVIDENCE = Path("TestEvidence/SettingsLayout.json")
-WORDING_PATH_PATTERN = re.compile(r"Languages/[^/]+/Keyed/[^/]+\.xml")
+WORDING_PATH_PATTERN = re.compile(r"(?:1\.7/)?Languages/[^/]+/Keyed/[^/]+\.xml")
 RELEASE_TAG_PATTERN = re.compile(r"v\d+(?:\.\d+)+")
 AUDIT_SOURCE_PATHS = (
     Path("Source/Settings.cs"),
@@ -83,17 +83,22 @@ def resolve_previous_release_tag(target_ref: str | None) -> str:
 
 
 def wording_files_at_ref(ref: str) -> list[Path]:
-    return sorted(
+    paths = sorted(
         Path(path)
-        for path in git("ls-tree", "-r", "--name-only", ref, "--", "Languages").splitlines()
+        for path in git("ls-tree", "-r", "--name-only", ref, "--", "Languages", "1.7/Languages").splitlines()
         if WORDING_PATH_PATTERN.fullmatch(path)
     )
+    versioned = [path for path in paths if path.parts[0] == "1.7"]
+    return versioned or paths
 
 
 def working_wording_files() -> list[Path]:
+    language_root = REPO_ROOT / "1.7/Languages"
+    if not language_root.is_dir():
+        language_root = REPO_ROOT / "Languages"
     return sorted(
         path.relative_to(REPO_ROOT)
-        for path in REPO_ROOT.glob("Languages/*/Keyed/*.xml")
+        for path in language_root.glob("*/Keyed/*.xml")
         if path.is_file() and WORDING_PATH_PATTERN.fullmatch(path.relative_to(REPO_ROOT).as_posix())
     )
 
@@ -123,18 +128,23 @@ def translation_entries(path: Path, content: bytes, ref: str) -> dict[str, str]:
 
 
 def changed_wording_files(base_ref: str, target_ref: str | None) -> list[str]:
-    base_files = set(wording_files_at_ref(base_ref))
-    target_files = set(wording_files_at_ref(target_ref)) if target_ref else set(working_wording_files())
+    def by_language_path(paths: list[Path]) -> dict[Path, Path]:
+        return {Path(*path.parts[1:]) if path.parts[0] == "1.7" else path: path for path in paths}
+
+    base_files = by_language_path(wording_files_at_ref(base_ref))
+    target_files = by_language_path(wording_files_at_ref(target_ref) if target_ref else working_wording_files())
     changed: list[str] = []
-    for path in sorted(base_files | target_files):
-        if path not in base_files or path not in target_files:
-            changed.append(path.as_posix())
+    for path in sorted(base_files.keys() | target_files.keys()):
+        base_path = base_files.get(path)
+        target_path = target_files.get(path)
+        if base_path is None or target_path is None:
+            changed.append((target_path or base_path).as_posix())
             continue
-        base_entries = translation_entries(path, content_for(path, base_ref), base_ref)
+        base_entries = translation_entries(base_path, content_for(base_path, base_ref), base_ref)
         target_name = target_ref or "working-tree"
-        target_entries = translation_entries(path, content_for(path, target_ref), target_name)
+        target_entries = translation_entries(target_path, content_for(target_path, target_ref), target_name)
         if base_entries != target_entries:
-            changed.append(path.as_posix())
+            changed.append(target_path.as_posix())
     return changed
 
 
@@ -168,7 +178,7 @@ def input_digest(paths: list[Path], target_ref: str | None) -> str:
 
 
 def expected_languages(paths: list[Path]) -> list[str]:
-    return sorted({path.parts[1] for path in paths if path.parts[0] == "Languages"})
+    return sorted({path.parts[2] if path.parts[0] == "1.7" else path.parts[1] for path in paths if "Languages" in path.parts})
 
 
 def read_evidence(path: Path, target_ref: str | None) -> dict[str, object]:

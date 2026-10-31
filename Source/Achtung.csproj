@@ -3,10 +3,13 @@
 	<PropertyGroup>
 		<RootNamespace>$(ModFileName)</RootNamespace>
 		<AssemblyName>$(ModFileName)</AssemblyName>
-		<TargetFramework>net472</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<LangVersion>preview</LangVersion>
-		<PlatformTarget>x64</PlatformTarget>
-		<OutputPath>..\1.6\Assemblies\</OutputPath>
+		<PlatformTarget>AnyCPU</PlatformTarget>
+		<OutputPath>..\1.7\Assemblies\</OutputPath>
+		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+		<GenerateDependencyFile>false</GenerateDependencyFile>
+		<NoWarn>$(NoWarn);NU1701</NoWarn>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<Version>$(ModVersion)</Version>
@@ -38,7 +41,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Remove="BridgeTools\**\*.cs" />
+		<Compile Include="*.cs" />
 		<None Include="BridgeTools\**\*" />
 		<Content Include="..\Directory.Build.props">
 			<Link>%(Filename)%(Extension)</Link>
@@ -47,60 +50,47 @@
 
 	<ItemGroup>
 		<PackageReference Include="Brrainz.RimWorld.CrossPromotion" Version="1.1.2" />
-		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4871" GeneratePathProperty="true" />
-		<PackageReference Include="Lib.Harmony.Ref" Version="2.4.2" />
-		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
-		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net472" Version="1.0.3">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
+		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.7.4990-unstable" GeneratePathProperty="true" />
+		<PackageReference Include="Lib.Harmony.Ref" Version="3.0.0-rc.4" />
 		<PackageReference Include="RimWorld.MultiplayerAPI" Version="0.6.0" />
 		<PackageReference Include="TaskPubliciser" Version="1.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="ModFeatures">
-			<HintPath>..\1.6\Assemblies\ModFeatures.dll</HintPath>
+			<HintPath>..\1.7\Assemblies\ModFeatures.dll</HintPath>
+			<Private>false</Private>
 		</Reference>
 	</ItemGroup>
 
-	<Target Name="MyCode" BeforeTargets="UpdateReferences">
+	<Target Name="PubliciseGame" BeforeTargets="ResolveAssemblyReferences">
 		<PropertyGroup>
-			<AssemblyCSharp>$(PkgKrafs_Rimworld_Ref)\ref\net472\Assembly-CSharp.dll</AssemblyCSharp>
-			<PubliciseOutputPath>$(PkgKrafs_Rimworld_Ref)\ref\net472\</PubliciseOutputPath>
-			<AssemblyCSharp_Publicised>$(PubliciseOutputPath)Assembly-CSharp_publicised.dll</AssemblyCSharp_Publicised>
+			<PublicisedDir>$(MSBuildProjectDirectory)\obj\publicised\</PublicisedDir>
 		</PropertyGroup>
-		<Message Importance="High" Text="Publicising Rimworld Assembly ..." />
-		<Publicise TargetAssemblyPath="$(AssemblyCSharp)" OutputPath="$(PubliciseOutputPath)" Condition="Exists('$(AssemblyCSharp)')" />
-		<Message Importance="High" Text="Replacing reference to un-publicised assemblies with publicised equivalents ..." />
+		<MakeDir Directories="$(PublicisedDir)" />
+		<Publicise TargetAssemblyPath="$(PkgKrafs_Rimworld_Ref)\ref\net10.0\Assembly-CSharp.dll" OutputPath="$(PublicisedDir)" />
 		<ItemGroup>
-			<Reference Include="$(AssemblyCSharp_Publicised)">
-				<SpecificVersion>false</SpecificVersion>
-				<HintPath>$(AssemblyCSharp_Publicised)</HintPath>
-				<Implicit>true</Implicit>
-				<Private>false</Private>
-			</Reference>
+			<Reference Include="$(PublicisedDir)Assembly-CSharp_publicised.dll"><Private>false</Private></Reference>
 		</ItemGroup>
 	</Target>
 
-	<Target Name="UpdateReferences" AfterTargets="ResolveLockFileReferences">
-		<Message Importance="High" Text="Remove References ..." />
+	<Target Name="ReplaceGameReference" AfterTargets="ResolveLockFileReferences">
 		<ItemGroup>
-			<Reference Remove="$(PkgKrafs_Rimworld_Ref)\ref\net472\Assembly-CSharp.dll" />
+			<Reference Remove="$(PkgKrafs_Rimworld_Ref)\ref\net10.0\Assembly-CSharp.dll" />
 		</ItemGroup>
 	</Target>
 
 	<Target Name="PostBuildAction" AfterTargets="Build">
-		<Delete Files="..\1.6\Assemblies\RimBridgeServer.Annotations.dll;..\1.6\Assemblies\RimBridgeServer.Sdk.dll" />
+		<Delete Files="..\1.7\Assemblies\RimBridgeServer.Annotations.dll;..\1.7\Assemblies\RimBridgeServer.Sdk.dll" />
 		<XmlPoke XmlInputPath="$(MSBuildProjectDirectory)\..\About\About.xml" Query="//ModMetaData/modVersion" Value="$(ModVersion)" />
 		<XmlPoke XmlInputPath="$(MSBuildProjectDirectory)\..\About\Manifest.xml" Query="//Manifest/version" Value="$(ModVersion)" />
 	</Target>
 
-	<Target Name="RestoreBridgeTools" BeforeTargets="Build" Condition="'$(BuildBridgeTools)' != 'false' And ('$(RIMWORLD_MOD_DIR)' == '' Or '$(RimworldDeployGuardInner)' == 'true')">
+	<Target Name="RestoreBridgeTools" BeforeTargets="Build" Condition="'$(BuildBridgeTools)' != 'false'">
 		<Exec Command="&quot;$(DOTNET_HOST_PATH)&quot; restore &quot;$(MSBuildProjectDirectory)\BridgeTools\Achtung.BridgeTools.csproj&quot; --nologo --verbosity quiet" />
 	</Target>
 
-	<Target Name="BuildBridgeTools" DependsOnTargets="RestoreBridgeTools" AfterTargets="Build" BeforeTargets="_CopyToRimworldUnlocked" Condition="'$(BuildBridgeTools)' != 'false' And ('$(RIMWORLD_MOD_DIR)' == '' Or '$(RimworldDeployGuardInner)' == 'true')">
+	<Target Name="BuildBridgeTools" DependsOnTargets="RestoreBridgeTools" AfterTargets="Build" Condition="'$(BuildBridgeTools)' != 'false'">
 		<MSBuild
 			Projects="$(MSBuildProjectDirectory)\BridgeTools\Achtung.BridgeTools.csproj"
 			Targets="Build"
@@ -114,7 +104,7 @@
 		<Exec Command="&quot;$(DeployGuardScript)&quot; validate &quot;$(RIMWORLD_MOD_DIR)&quot; &quot;$(MSBuildProjectFullPath)&quot; &quot;$(ModFileName)&quot;" />
 	</Target>
 
-	<Target Name="CopyToRimworld" AfterTargets="PostBuildAction" Condition="'$(RIMWORLD_MOD_DIR)' != '' And '$(RimworldDeployGuardInner)' != 'true'">
+	<Target Name="CopyToRimworld" DependsOnTargets="BuildBridgeTools" AfterTargets="PostBuildAction" Condition="'$(RIMWORLD_MOD_DIR)' != '' And '$(RimworldDeployGuardInner)' != 'true'">
 		<PropertyGroup>
 			<DeployGuardScript>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\scripts\rimworld-deploy-guard.sh'))</DeployGuardScript>
 		</PropertyGroup>
@@ -122,24 +112,25 @@
 	</Target>
 
 	<Target Name="_CopyToRimworldUnlocked" Condition="'$(RIMWORLD_MOD_DIR)' != '' And '$(RimworldDeployGuardInner)' == 'true'">
-		<Delete Files="..\1.6\Assemblies\0Harmony.dll" />
-		<RemoveDir Directories="$(RIMWORLD_MOD_DIR)\$(ModFileName)" />
+		<Exec Command="python3 &quot;$(MSBuildProjectDirectory)/../scripts/verify-frozen-payload.py&quot; &quot;$(RIMWORLD_MOD_DIR)/$(ModFileName)&quot;" />
+		<RemoveDir Directories="$(RIMWORLD_MOD_DIR)\$(ModFileName)\1.7" />
 		<PropertyGroup>
 			<!-- Keep the companion DLL paired with the deployed mod DLL: Mods/Achtung and sibling Mods/../BridgeTools/Achtung are one deployment unit. -->
 			<GlobalBridgeToolsDir>$(RIMWORLD_MOD_DIR)\..\BridgeTools</GlobalBridgeToolsDir>
 		</PropertyGroup>
 		<ItemGroup>
-			<Copy_11 Include="..\1.1\**" Exclude="..\1.1\**\.DS_Store;..\1.1\**\._*" />
-			<Copy_12 Include="..\1.2\**" Exclude="..\1.2\**\.DS_Store;..\1.2\**\._*" />
-			<Copy_13 Include="..\1.3\**" Exclude="..\1.3\**\.DS_Store;..\1.3\**\._*" />
-			<Copy_14 Include="..\1.4\**" Exclude="..\1.4\**\.DS_Store;..\1.4\**\._*" />
-			<Copy_15 Include="..\1.5\**" Exclude="..\1.5\**\.DS_Store;..\1.5\**\._*" />
-			<Copy_16 Include="..\1.6\**" Exclude="..\1.6\BridgeTools\**;..\1.6\**\.DS_Store;..\1.6\**\._*" />
+			<Copy_11 Include="..\1.1\**" Exclude="..\1.1\**\.DS_Store;..\1.1\**\._*" Condition="!Exists('$(RIMWORLD_MOD_DIR)/$(ModFileName)/1.1')" />
+			<Copy_12 Include="..\1.2\**" Exclude="..\1.2\**\.DS_Store;..\1.2\**\._*" Condition="!Exists('$(RIMWORLD_MOD_DIR)/$(ModFileName)/1.2')" />
+			<Copy_13 Include="..\1.3\**" Exclude="..\1.3\**\.DS_Store;..\1.3\**\._*" Condition="!Exists('$(RIMWORLD_MOD_DIR)/$(ModFileName)/1.3')" />
+			<Copy_14 Include="..\1.4\**" Exclude="..\1.4\**\.DS_Store;..\1.4\**\._*" Condition="!Exists('$(RIMWORLD_MOD_DIR)/$(ModFileName)/1.4')" />
+			<Copy_15 Include="..\1.5\**" Exclude="..\1.5\**\.DS_Store;..\1.5\**\._*" Condition="!Exists('$(RIMWORLD_MOD_DIR)/$(ModFileName)/1.5')" />
+			<Copy_16 Include="..\1.6\**" Exclude="..\1.6\BridgeTools\**;..\1.6\**\.DS_Store;..\1.6\**\._*" Condition="!Exists('$(RIMWORLD_MOD_DIR)/$(ModFileName)/1.6')" />
+			<Copy_17 Include="..\1.7\**" Exclude="..\1.7\**\.DS_Store;..\1.7\**\._*;..\1.7\**\*.pdb" />
 			<CopyAbout Include="..\About\**" Exclude="..\About\**\.DS_Store;..\About\**\._*" />
-			<CopyFeatures Include="..\Features\**" Exclude="..\Features\**\.DS_Store;..\Features\**\._*" />
-			<CopyLanguages Include="..\Languages\**" Exclude="..\Languages\**\.DS_Store;..\Languages\**\._*" />
-			<CopyPatches Include="..\Patches\**" Exclude="..\Patches\**\.DS_Store;..\Patches\**\._*" />
-			<CopyTextures Include="..\Textures\**" Exclude="..\Textures\**\.DS_Store;..\Textures\**\._*" />
+			<CopyFeatures Include="..\Features\**" Exclude="..\Features\**\.DS_Store;..\Features\**\._*" Condition="!Exists('$(RIMWORLD_MOD_DIR)/$(ModFileName)/Features')" />
+			<CopyLanguages Include="..\Languages\**" Exclude="..\Languages\**\.DS_Store;..\Languages\**\._*" Condition="!Exists('$(RIMWORLD_MOD_DIR)/$(ModFileName)/Languages')" />
+			<CopyPatches Include="..\Patches\**" Exclude="..\Patches\**\.DS_Store;..\Patches\**\._*" Condition="!Exists('$(RIMWORLD_MOD_DIR)/$(ModFileName)/Patches')" />
+			<CopyTextures Include="..\Textures\**" Exclude="..\Textures\**\.DS_Store;..\Textures\**\._*" Condition="!Exists('$(RIMWORLD_MOD_DIR)/$(ModFileName)/Textures')" />
 			<CopyLicense Include="..\LICENSE" />
 			<CopyLoadFolders Include="..\LoadFolders.xml" />
 			<CopyReadme Include="..\README.md" />
@@ -151,6 +142,7 @@
 		<Copy SourceFiles="@(Copy_14)" DestinationFolder="$(RIMWORLD_MOD_DIR)\$(ModFileName)\1.4\%(RecursiveDir)" />
 		<Copy SourceFiles="@(Copy_15)" DestinationFolder="$(RIMWORLD_MOD_DIR)\$(ModFileName)\1.5\%(RecursiveDir)" />
 		<Copy SourceFiles="@(Copy_16)" DestinationFolder="$(RIMWORLD_MOD_DIR)\$(ModFileName)\1.6\%(RecursiveDir)" />
+		<Copy SourceFiles="@(Copy_17)" DestinationFolder="$(RIMWORLD_MOD_DIR)\$(ModFileName)\1.7\%(RecursiveDir)" />
 		<Copy SourceFiles="@(CopyAbout)" DestinationFolder="$(RIMWORLD_MOD_DIR)\$(ModFileName)\About\%(RecursiveDir)" />
 		<Copy SourceFiles="@(CopyFeatures)" DestinationFolder="$(RIMWORLD_MOD_DIR)\$(ModFileName)\Features\%(RecursiveDir)" />
 		<Copy SourceFiles="@(CopyLanguages)" DestinationFolder="$(RIMWORLD_MOD_DIR)\$(ModFileName)\Languages\%(RecursiveDir)" />

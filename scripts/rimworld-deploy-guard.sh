@@ -25,7 +25,7 @@ USAGE
 ensure_rimworld_stopped() {
 	local running
 
-	running="$(ps ax -o pid=,comm= | awk '$0 ~ /\/RimWorld by Ludeon Studios$/ { print }' || true)"
+	running="$(ps ax -o pid=,comm= | awk '$0 ~ /\/RimWorld( by Ludeon Studios)?$/ { print }' || true)"
 	if [[ -n "$running" ]]; then
 		printf 'Refusing deploy build because RimWorld is still running:\n%s\n' "$running" >&2
 		printf 'Stop the game through GABS, then rerun the build.\n' >&2
@@ -54,12 +54,19 @@ physical_dir() {
 validate_mod_dir() {
 	local rimworld_mod_dir="$1"
 	local mod_file_name="$2"
-	local provided_abs resolved_abs parent parent_name app_mods app_resolved
+	local provided_abs resolved_abs parent parent_name app_mods app_resolved dotnet_mods
 
 	provided_abs="$(logical_dir "$rimworld_mod_dir")"
 	resolved_abs="$(physical_dir "$rimworld_mod_dir")"
 	parent="$(dirname "$provided_abs")"
 	parent_name="$(basename "$parent")"
+	if [[ "$parent_name" == *.app ]]; then
+		dotnet_mods="$(dirname "$parent")/Mods"
+		if [[ -d "$dotnet_mods" && "$(physical_dir "$dotnet_mods")" == "$resolved_abs" ]]; then
+			printf 'Achtung targets RimWorld 1.7. Use its Mods path: %s\n' "$dotnet_mods" >&2
+			exit 2
+		fi
+	fi
 
 	if [[ "$parent_name" == *-UserData ]]; then
 		app_mods="${parent%-UserData}.app/Mods"

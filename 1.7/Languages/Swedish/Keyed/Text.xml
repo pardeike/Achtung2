@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+	<Feature_Achtung_Welcome>Välkommen till Achtung!</Feature_Achtung_Welcome>
+	<Feature_Achtung_Forcing>Tvingat arbete</Feature_Achtung_Forcing>
+	<Feature_Achtung_MenuError>Menyfel</Feature_Achtung_MenuError>
+	<Feature_Achtung_Formations>Formationer</Feature_Achtung_Formations>
+	<Feature_Achtung_Cooperation>Samarbete</Feature_Achtung_Cooperation>
+	<Feature_Achtung_FourModes>Fyra lägen</Feature_Achtung_FourModes>
+	<Feature_Achtung_Settings>Inställningar</Feature_Achtung_Settings>
+	<Feature_Achtung_Draftstatus>Kommenderingsstatus</Feature_Achtung_Draftstatus>
+	<Feature_Achtung_Rescue>Räddning</Feature_Achtung_Rescue>
+	<Feature_Achtung_Dragging>Dra vid kommendering</Feature_Achtung_Dragging>
+	<AchtungTutorialButton>Guide</AchtungTutorialButton>
+	<PositioningSettingsHeader>Positionering</PositioningSettingsHeader>
+	<ForcingSettingsHeader>Tvingat arbete</ForcingSettingsHeader>
+	<ForcingCommandsTitle>Kommandon</ForcingCommandsTitle>
+	<ForcingJobBehaviorTitle>Arbetsbeteende</ForcingJobBehaviorTitle>
+	<ForcingStopRulesTitle>Stoppregler</ForcingStopRulesTitle>
+	<ForcingFeedbackTitle>Återkoppling</ForcingFeedbackTitle>
+	<PositioningRightClickTitle>Högerklick</PositioningRightClickTitle>
+	<PositioningDraggingTitle>Dragning och formationer</PositioningDraggingTitle>
+
+	<PositioningEnabledTitle>Anpassad muspositionering</PositioningEnabledTitle>
+	<PositioningEnabledExplained>Aktiverar Achtungs positionering, dragning och formationer med högerklick.</PositioningEnabledExplained>
+
+	<AchtungModifierTitle>Achtung!-tangent</AchtungModifierTitle>
+	<AchtungModifierExplained>Håll den här tangenten nedtryckt under positionering för att kommendera de valda kolonisterna. De behåller sin nuvarande formation medan du drar med höger musknapp. Du kan släppa tangenten när höger musknapp hålls ned. Rotera formationen med Q och E.</AchtungModifierExplained>
+
+	<ForceCommandMenuModeTitle>Högerklicksläge</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Växlingstangent</ForceCommandMenuKeyTitle>
+
+	<CommandMenuModeOptionAuto>Beroende på kommendering</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionAutoExplained>Använder kolonistens kommenderingsstatus för att välja mellan kontextmenyn och positionering.</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionPressForMenu>Tangent för meny</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForMenuExplained>Håll tangenten nedtryckt för att öppna kontextmenyn i stället för att utföra standardåtgärden.</CommandMenuModeOptionPressForMenuExplained>
+	<CommandMenuModeOptionPressForPosition>Tangent för positionering</CommandMenuModeOptionPressForPosition>
+	<CommandMenuModeOptionPressForPositionExplained>Håll tangenten nedtryckt för att positionera kolonister i stället för att öppna kontextmenyn.</CommandMenuModeOptionPressForPositionExplained>
+	<CommandMenuModeOptionDelayed>Håll för meny</CommandMenuModeOptionDelayed>
+	<CommandMenuModeOptionDelayedExplained>Högerklicka för att positionera; håll knappen nedtryckt under den inställda fördröjningen för att öppna kontextmenyn.</CommandMenuModeOptionDelayedExplained>
+
+	<DelayTitle>Fördröjning för meny</DelayTitle>
+	<DelayExplained>Tid i millisekunder som högerklicket måste hållas ned innan kontextmenyn öppnas.</DelayExplained>
+
+	<DraftedColonistDraggingModeTitle>Kommenderade kolonister</DraftedColonistDraggingModeTitle>
+	<DraftedColonistDraggingModeExplained>Välj när högerklick på en kommenderad kolonist startar dragning eller formationspositionering.</DraftedColonistDraggingModeExplained>
+	<DraftedColonistDraggingModeOptionOff>Av</DraftedColonistDraggingModeOptionOff>
+	<DraftedColonistDraggingModeOptionOffExplained>Högerklick på kommenderade kolonister startar inte dragning.</DraftedColonistDraggingModeOptionOffExplained>
+	<DraftedColonistDraggingModeOptionUnselected>Ingen vald</DraftedColonistDraggingModeOptionUnselected>
+	<DraftedColonistDraggingModeOptionUnselectedExplained>Startar dragning endast om ingen styrbar kolonist var vald före högerklicket.</DraftedColonistDraggingModeOptionUnselectedExplained>
+	<DraftedColonistDraggingModeOptionAlways>Alltid</DraftedColonistDraggingModeOptionAlways>
+	<DraftedColonistDraggingModeOptionAlwaysExplained>Högerklick på en kommenderad kolonist tillåter alltid dragning eller formationspositionering.</DraftedColonistDraggingModeOptionAlwaysExplained>
+
+	<RescueEnabledTitle>Kolumnen ”Rädda” på fliken Arbete</RescueEnabledTitle>
+	<RescueEnabledExplained>Lägger till arbetsprioriteten Rädda så att kolonister automatiskt bär utslagna allierade till sängar.</RescueEnabledExplained>
+
+	<ShowForceEndLetterTitle>Visa meddelande när tvingat arbete tar slut</ShowForceEndLetterTitle>
+	<ShowForceEndLetterExplained>Visar ett meddelande när en kolonist inte har något tvingat arbete kvar.</ShowForceEndLetterExplained>
+	<KeepDraftedAndUndraftedCommandsSeparateTitle>Separera kommandon efter kommenderingsstatus</KeepDraftedAndUndraftedCommandsSeparateTitle>
+	<KeepDraftedAndUndraftedCommandsSeparateExplained>Håller högerklickskommandon för kommenderade och icke kommenderade kolonister åtskilda, som i RimWorld utan moddar.</KeepDraftedAndUndraftedCommandsSeparateExplained>
+
+	<ReplaceCleanRoomTitle>Ersätt kommandot ”Städa rum”</ReplaceCleanRoomTitle>
+	<ReplaceCleanRoomExplained>Använder Achtungs grundliga rumsstädning i stället för RimWorlds kommando.</ReplaceCleanRoomExplained>
+
+	<ReplaceFightFireTitle>Ersätt kommandot ”Släck brand”</ReplaceFightFireTitle>
+	<ReplaceFightFireExplained>Använder Achtungs grundliga brandsläckning i stället för RimWorlds kommando.</ReplaceFightFireExplained>
+
+	<ForcedCommandState>Beordrad att fortsätta arbeta tills allt är klart.</ForcedCommandState>
+
+	<ForceMenuButtonText>Tvinga</ForceMenuButtonText>
+
+	<IncreaseForceRadius>Öka radie</IncreaseForceRadius>
+	<IncreaseForceRadiusDesc>Ökar sökradien för tvingat arbete (nu {0}).</IncreaseForceRadiusDesc>
+	<DecreaseForceRadius>Minska radie</DecreaseForceRadius>
+	<DecreaseForceRadiusDesc>Minskar sökradien för tvingat arbete (nu {0}).</DecreaseForceRadiusDesc>
+	<BuildingSmart>Smart byggande</BuildingSmart>
+	<BuildingSmartDesc>Undviker oåtkomliga luckor och instängda byggare. Det är långsammare och bygger utåt från startpunkten.</BuildingSmartDesc>
+
+	<AchtungModKeyOptionNone>Inaktiverad</AchtungModKeyOptionNone>
+	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
+	<AchtungModKeyOptionCtrl>Ctrl</AchtungModKeyOptionCtrl>
+	<AchtungModKeyOptionShift>Shift</AchtungModKeyOptionShift>
+	<AchtungModKeyOptionMeta>Win/Cmd</AchtungModKeyOptionMeta>
+
+	<BreakLevelTitle>Risk för nervsammanbrott</BreakLevelTitle>
+	<BreakLevelExplained>Stoppar tvingat arbete när kolonisten når den här risknivån för nervsammanbrott.</BreakLevelExplained>
+	<BreakLevelOptionNone>Ignorera</BreakLevelOptionNone>
+	<BreakLevelOptionMinor>Liten</BreakLevelOptionMinor>
+	<BreakLevelOptionMajor>Stor</BreakLevelOptionMajor>
+	<BreakLevelOptionAlmostExtreme>Nästan extrem</BreakLevelOptionAlmostExtreme>
+	<BreakLevelOptionExtreme>Extrem</BreakLevelOptionExtreme>
+
+	<HealthLevelTitle>Hälsotillstånd</HealthLevelTitle>
+	<HealthLevelExplained>Stoppar tvingat arbete när kolonisten når det här hälsotillståndet.</HealthLevelExplained>
+	<HealthLevelOptionNone>Ignorera</HealthLevelOptionNone>
+	<HealthLevelOptionShouldBeTendedNow>Behöver vård nu</HealthLevelOptionShouldBeTendedNow>
+	<HealthLevelOptionPrefersMedicalRest>Behöver medicinsk vila</HealthLevelOptionPrefersMedicalRest>
+	<HealthLevelOptionNeedsMedicalRest>Behöver akut medicinsk vila</HealthLevelOptionNeedsMedicalRest>
+	<HealthLevelOptionInPainShock>Smärtchock</HealthLevelOptionInPainShock>
+
+	<IgnoreForbiddenTitle>Ignorera förbud</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Tillåter tvingat arbete på förbjudna objekt.</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>Ignorera begränsningar för tillåtet område</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Tillåter tvingat arbete utanför en kolonists tillåtna område.</IgnoreRestrictionsExplained>
+	<IgnoreAssignmentsTitle>Ignorera arbetsprioriteringar</IgnoreAssignmentsTitle>
+	<IgnoreAssignmentsExplained>Tillåter tvingat arbete när den berörda arbetsprioriteringen är avstängd.</IgnoreAssignmentsExplained>
+
+	<ReplaceForcedWorkTitle>Ersätt tvingat arbete</ReplaceForcedWorkTitle>
+	<ReplaceForcedWorkExplained>En ny tvingad order avbryter kolonistens pågående och köade tvingade arbete i stället för att läggas i kön.</ReplaceForcedWorkExplained>
+
+	<BuildingSmartTitle>Smart byggande för nya arbeten</BuildingSmartTitle>
+	<BuildingSmartExplained>Använder den säkrare byggordningen som standard för nya tvingade byggarbeten.</BuildingSmartExplained>
+
+	<WorkMarkersTitle>Markörer för tvingat arbete</WorkMarkersTitle>
+	<WorkMarkersExplained>Visar små markörer på mål för tvingat arbete.</WorkMarkersExplained>
+	<WorkMarkersOptionAnimated>Animerade</WorkMarkersOptionAnimated>
+	<WorkMarkersOptionStatic>Statiska</WorkMarkersOptionStatic>
+	<WorkMarkersOptionOff>Av</WorkMarkersOptionOff>
+
+	<ForceCommandsEnabledTitle>Kommandon för tvingat arbete</ForceCommandsEnabledTitle>
+	<ForceCommandsEnabledExplained>Visar en blixtknapp för vanliga arbeten i högerklicksmenyn. Den startar tvingat arbete och kan lägga till närliggande mål av samma typ.</ForceCommandsEnabledExplained>
+	<MaxForcedItemsTitle>Målgräns för tvingat arbete</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Begränsar hur många närliggande mål av samma typ som Achtung lägger till i ett kommando för tvingat arbete.</MaxForcedItemsExplained>
+	<MaxForcedItemsUnlimited>Obegränsat</MaxForcedItemsUnlimited>
+
+
+	<JobInterruptedLabel>Avbrutet: {0}</JobInterruptedLabel>
+	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
+	<JobInterruptedBadHealth>{0} har dålig hälsa.</JobInterruptedBadHealth>
+
+	<CleanRoomLabel>Städa rum (Achtung)</CleanRoomLabel>
+	<CleanRoomInfoText>Städar rummet grundligt</CleanRoomInfoText>
+	<CleanRoomDescription>Städar hela rummet, inte bara en plats.</CleanRoomDescription>
+	<CleanRoomReport>Städar{0}: {1}</CleanRoomReport>
+
+	<FireFightLabel>Släck brand (Achtung)</FireFightLabel>
+	<FireFightInfoText>Släcker en brand</FireFightInfoText>
+	<FireFightDescription>Släcker en brand helt, även utanför hemområdet.</FireFightDescription>
+	<FireFightReport>Släcker brand: {0}</FireFightReport>
+
+	<SowZoneLabel>Så den här zonen eller det här rummet</SowZoneLabel>
+	<SowZoneInfoText>Sår i en zon eller ett rum</SowZoneInfoText>
+	<SowZoneDescription>Sår hela odlingszonen eller rummet.</SowZoneDescription>
+	<SowZoneReport>Sår{0}: {1}</SowZoneReport>
+
+	<AlreadyDoing>(Arbete #{0})</AlreadyDoing>
+
+	<CouldNotFindMoreForcedWork>{0} kunde inte hitta mer tvingat arbete. De återstående målen är troligen reserverade eller oåtkomliga.</CouldNotFindMoreForcedWork>
+	<NoForcedWork>Inget tvingat arbete</NoForcedWork>
+	<ForcedWorkWasInterrupted>Det tvingade arbetet för {0} avbröts.</ForcedWorkWasInterrupted>
+
+	<WorkType_Rescue_Label>rädda</WorkType_Rescue_Label>
+	<WorkType_Rescue_PawnLabel>Räddare</WorkType_Rescue_PawnLabel>
+	<WorkType_Rescue_GerundLabel>räddning</WorkType_Rescue_GerundLabel>
+	<WorkType_Rescue_Description>Bär utslagna allierade till sängar där de kan få vård.</WorkType_Rescue_Description>
+	<WorkType_Rescue_Verb>rädda</WorkType_Rescue_Verb>
+
+</LanguageData>

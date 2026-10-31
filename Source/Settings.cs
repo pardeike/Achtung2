@@ -94,6 +94,7 @@ public class AchtungSettings : ModSettings
 	public bool ignoreForbidden = false;
 	public bool ignoreRestrictions = false;
 	public bool ignoreAssignments = false;
+	public bool replaceForcedWork = false;
 	public WorkMarkers workMarkers = WorkMarkers.Animated;
 	public bool buildingSmart = true;
 	public bool keepDraftedAndUndraftedCommandsSeparate = false;
@@ -139,6 +140,7 @@ public class AchtungSettings : ModSettings
 		Scribe_Values.Look(ref ignoreForbidden, "ignoreForbidden", false, true);
 		Scribe_Values.Look(ref ignoreRestrictions, "ignoreRestrictions", false, true);
 		Scribe_Values.Look(ref ignoreAssignments, "ignoreAssignments", false, true);
+		Scribe_Values.Look(ref replaceForcedWork, "replaceForcedWork", false, true);
 		Scribe_Values.Look(ref workMarkers, "workMarkers", WorkMarkers.Animated, true);
 		Scribe_Values.Look(ref buildingSmart, "buildingSmart", false, true);
 		Scribe_Values.Look(ref keepDraftedAndUndraftedCommandsSeparate, "keepDraftedAndUndraftedCommandsSeparate", false, true);
@@ -306,6 +308,8 @@ public class AchtungSettings : ModSettings
 		DrawCheckboxSetting(list, "RescueEnabled", ref Achtung.Settings.rescueEnabled, ToggleRescue);
 
 		DrawSubheading(list, "ForcingJobBehavior");
+		DrawCheckboxSetting(list, "ReplaceForcedWork", ref Achtung.Settings.replaceForcedWork, null);
+		DrawSettingGap(list);
 		DrawCheckboxSetting(list, "BuildingSmart", ref Achtung.Settings.buildingSmart, null);
 		DrawSettingGap(list);
 		DrawCheckboxSetting(list, "IgnoreForbidden", ref Achtung.Settings.ignoreForbidden, _ => ForbidUtility_IsForbidden_Patch.FixPatch());

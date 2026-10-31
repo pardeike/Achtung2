@@ -147,7 +147,7 @@ public class ForcedWork(World world) : WorldComponent(world)
 	public void Remove(Pawn pawn)
 	{
 		if (allForcedJobs.TryGetValue(pawn, out var forcedJobs))
-			forcedJobs.jobs.Do(job => job?.Cleanup());
+			forcedJobs?.jobs?.Do(job => job?.Cleanup());
 		_ = allForcedJobs.Remove(pawn);
 		hasForcedJobs = allForcedJobs.Count > 0;
 		UpdatePawnForcedJobs(pawn, new ForcedJobs());
@@ -155,6 +155,16 @@ public class ForcedWork(World world) : WorldComponent(world)
 
 	public bool AddForcedJob(Pawn pawn, List<WorkGiverDef> workgiverDefs, LocalTargetInfo item, out ForcedJob forcedJob)
 	{
+		if (Achtung.Settings.replaceForcedWork && GetForcedJob(pawn) is ForcedJob current)
+		{
+			var active = pawn.CurJob != null && pawn.CurJob.loadID == current.activeJobId;
+			Remove(pawn);
+			if (active)
+			{
+				pawn.ClearReservationsForJob(pawn.CurJob);
+				pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, startNewJob: false);
+			}
+		}
 		if (allForcedJobs.ContainsKey(pawn) == false)
 			allForcedJobs[pawn] = new ForcedJobs();
 
@@ -179,6 +189,8 @@ public class ForcedWork(World world) : WorldComponent(world)
 		for (var i = 0; i < radial.Length; i++)
 		{
 			var cell = pos + radial[i];
+			if (!cell.InBounds(pawn.Map))
+				continue;
 			var job = cell.GetCellJob(pawn, workgiver, expandSearch);
 			if (job != null)
 				return new LocalTargetInfo(cell);
@@ -309,9 +321,38 @@ public class ForcedWork(World world) : WorldComponent(world)
 
 	public void Cleanup(Map map)
 	{
-		allForcedJobs
-			.Where(pair => pair.Key?.Map == map)
-			.SelectMany(pair => pair.Value.jobs)
-			.Do(job => job?.Cleanup());
+		if (map == null || allForcedJobs == null)
+			return;
+		var pawns = allForcedJobs.Keys.Where(pawn => pawn?.Map == map).OrderBy(pawn => pawn.thingIDNumber).ToArray();
+		foreach (var pawn in pawns)
+		{
+			Unprepare(pawn);
+			Remove(pawn);
+		}
+	}
+
+	public void RemoveInvalidLoadedJobs()
+	{
+		if (allForcedJobs == null)
+			return;
+		foreach (var pair in allForcedJobs.OrderBy(pair => pair.Key.thingIDNumber).ToArray())
+		{
+			var jobs = pair.Value;
+			if (jobs?.jobs == null)
+			{
+				Remove(pair.Key);
+				continue;
+			}
+			jobs.jobs.RemoveAll(job =>
+			{
+				if (job == null) return true;
+				if (!job.invalidTargetsOnly) return false;
+				job.Cleanup();
+				return true;
+			});
+			jobs.UpdateCount();
+			if (jobs.count == 0) Remove(pair.Key);
+			else UpdatePawnForcedJobs(pair.Key, jobs);
+		}
 	}
 }

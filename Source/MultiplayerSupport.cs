@@ -23,6 +23,7 @@ public sealed class AchtungSimulationSettingsSnapshot : IEquatable<AchtungSimula
 	public readonly bool IgnoreForbidden;
 	public readonly bool IgnoreRestrictions;
 	public readonly bool IgnoreAssignments;
+	public readonly bool ReplaceForcedWork;
 	public readonly bool BuildingSmart;
 	public readonly int MaxForcedItems;
 	public readonly bool ForcedEndedLetter;
@@ -34,6 +35,7 @@ public sealed class AchtungSimulationSettingsSnapshot : IEquatable<AchtungSimula
 		bool ignoreForbidden,
 		bool ignoreRestrictions,
 		bool ignoreAssignments,
+		bool replaceForcedWork,
 		bool buildingSmart,
 		int maxForcedItems,
 		bool forcedEndedLetter)
@@ -44,6 +46,7 @@ public sealed class AchtungSimulationSettingsSnapshot : IEquatable<AchtungSimula
 		IgnoreForbidden = ignoreForbidden;
 		IgnoreRestrictions = ignoreRestrictions;
 		IgnoreAssignments = ignoreAssignments;
+		ReplaceForcedWork = replaceForcedWork;
 		BuildingSmart = buildingSmart;
 		MaxForcedItems = Math.Clamp(maxForcedItems, 0, AchtungSettings.UnlimitedForcedItems);
 		ForcedEndedLetter = forcedEndedLetter;
@@ -57,6 +60,7 @@ public sealed class AchtungSimulationSettingsSnapshot : IEquatable<AchtungSimula
 			&& IgnoreForbidden == other.IgnoreForbidden
 			&& IgnoreRestrictions == other.IgnoreRestrictions
 			&& IgnoreAssignments == other.IgnoreAssignments
+			&& ReplaceForcedWork == other.ReplaceForcedWork
 			&& BuildingSmart == other.BuildingSmart
 			&& MaxForcedItems == other.MaxForcedItems
 			&& ForcedEndedLetter == other.ForcedEndedLetter;
@@ -75,6 +79,7 @@ public sealed class AchtungSimulationSettingsSnapshot : IEquatable<AchtungSimula
 			hash = hash * 31 + IgnoreForbidden.GetHashCode();
 			hash = hash * 31 + IgnoreRestrictions.GetHashCode();
 			hash = hash * 31 + IgnoreAssignments.GetHashCode();
+			hash = hash * 31 + ReplaceForcedWork.GetHashCode();
 			hash = hash * 31 + BuildingSmart.GetHashCode();
 			hash = hash * 31 + MaxForcedItems;
 			hash = hash * 31 + ForcedEndedLetter.GetHashCode();
@@ -92,6 +97,7 @@ public sealed class AchtungSimulationSettingsSnapshot : IEquatable<AchtungSimula
 			settings.ignoreForbidden,
 			settings.ignoreRestrictions,
 			settings.ignoreAssignments,
+			settings.replaceForcedWork,
 			settings.buildingSmart,
 			settings.maxForcedItems,
 			settings.forcedEndedLetter);
@@ -106,6 +112,7 @@ public sealed class AchtungSimulationSettingsSnapshot : IEquatable<AchtungSimula
 		settings.ignoreForbidden = IgnoreForbidden;
 		settings.ignoreRestrictions = IgnoreRestrictions;
 		settings.ignoreAssignments = IgnoreAssignments;
+		settings.replaceForcedWork = ReplaceForcedWork;
 		settings.buildingSmart = BuildingSmart;
 		settings.maxForcedItems = MaxForcedItems;
 		settings.forcedEndedLetter = ForcedEndedLetter;
@@ -193,6 +200,7 @@ public static class MultiplayerSupport
 			after.IgnoreForbidden,
 			after.IgnoreRestrictions,
 			after.IgnoreAssignments,
+			after.ReplaceForcedWork,
 			after.BuildingSmart,
 			after.MaxForcedItems,
 			after.ForcedEndedLetter);
@@ -206,6 +214,7 @@ public static class MultiplayerSupport
 		bool ignoreForbidden,
 		bool ignoreRestrictions,
 		bool ignoreAssignments,
+		bool replaceForcedWork,
 		bool buildingSmart,
 		int maxForcedItems,
 		bool forcedEndedLetter)
@@ -217,6 +226,7 @@ public static class MultiplayerSupport
 			ignoreForbidden,
 			ignoreRestrictions,
 			ignoreAssignments,
+			replaceForcedWork,
 			buildingSmart,
 			maxForcedItems,
 			forcedEndedLetter);

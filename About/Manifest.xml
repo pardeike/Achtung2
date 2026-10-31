@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Manifest>
   <identifier>net.pardeike.rimworld.mod.achtung</identifier>
-  <version>4.1.14</version>
+  <version>4.1.15</version>
   <targetVersions>
     <li>1.0.0</li>
     <li>1.1.0</li>
@@ -10,6 +10,7 @@
     <li>1.4.0</li>
     <li>1.5.0</li>
     <li>1.6.0</li>
+    <li>1.7.0</li>
   </targetVersions>
   <dependencies>
   </dependencies>

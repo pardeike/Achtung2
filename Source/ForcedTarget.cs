@@ -9,6 +9,7 @@ public class ForcedTarget : IExposable, IEquatable<ForcedTarget>
 	public LocalTargetInfo item = LocalTargetInfo.Invalid;
 	public XY XY => item.Cell;
 	public int materialScore = 0;
+	bool skipCrossRef;
 
 	public ForcedTarget()
 	{
@@ -31,6 +32,7 @@ public class ForcedTarget : IExposable, IEquatable<ForcedTarget>
 			// consume it. Parse that existing on-disk representation directly.
 			var node = Scribe.loader.curXmlParent["item"];
 			var value = node?.InnerText;
+			skipCrossRef = node == null || (value?.Length > 0 && value[0] == '(');
 			if (value?.Length > 0 && value[0] == '(')
 				item = new LocalTargetInfo(IntVec3.FromString(value));
 			else if (node == null)
@@ -38,7 +40,7 @@ public class ForcedTarget : IExposable, IEquatable<ForcedTarget>
 			else
 				Scribe_TargetInfo.Look(ref item, "item");
 		}
-		else if (Scribe.mode != LoadSaveMode.ResolvingCrossRefs || item.IsValid == false)
+		else if (Scribe.mode != LoadSaveMode.ResolvingCrossRefs || (!skipCrossRef && item.IsValid == false))
 			Scribe_TargetInfo.Look(ref item, "item");
 		Scribe_Values.Look(ref materialScore, "materialScore", 0, true);
 	}
@@ -46,7 +48,7 @@ public class ForcedTarget : IExposable, IEquatable<ForcedTarget>
 	public bool Equals(ForcedTarget other) => item == other.item;
 	public override int GetHashCode() => item.GetHashCode();
 
-	public bool IsValidTarget() => item.HasThing == false || item.ThingDestroyed == false;
+	public bool IsValidTarget() => item.IsValid && (item.HasThing == false || item.ThingDestroyed == false);
 
 	public bool IsBuilding()
 	{

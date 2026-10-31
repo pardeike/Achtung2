@@ -27,7 +27,7 @@ public static class AchtungLoader
 		Controller.InstallDefs();
 
 		Achtung.harmony = new Harmony("net.pardeike.rimworld.mods.achtung");
-		Achtung.harmony.PatchAll();
+		Achtung.harmony.PatchAll(Assembly.GetExecutingAssembly());
 		MultiplayerSupport.Install();
 
 		const string sameSpotId = "net.pardeike.rimworld.mod.samespot";
@@ -372,6 +372,13 @@ static class MemoryUtility_ClearAllMapsAndWorld_Patch
 static class Game_DeinitAndRemoveMap_Patch
 {
 	public static void Prefix(Map map) => ForcedWork.Instance?.Cleanup(map);
+}
+
+[HarmonyPatch(typeof(Game))]
+[HarmonyPatch(nameof(Game.FinalizeInit))]
+static class Game_FinalizeInit_Patch
+{
+	public static void Postfix() => ForcedWork.Instance?.RemoveInvalidLoadedJobs();
 }
 
 // Optional fast path. Custom thinkers keep their state and use ForcedWork's dictionary.
@@ -866,7 +873,7 @@ static class Pawn_JobTracker_EndCurrentJob_Patch
 }
 
 // fix enter portal code so it no longer uses static state
-[HarmonyPatch(typeof(FloatMenuOptionProvider_EnterMapPortal), nameof(FloatMenuOptionProvider_EnterMapPortal.GetSingleOptionFor))]
+[HarmonyPatch(typeof(FloatMenuOptionProvider_EnterMapPortal), nameof(FloatMenuOptionProvider_EnterMapPortal.GetSingleOptionFor), new Type[] { typeof(Thing), typeof(FloatMenuContext) })]
 public static class FloatMenuOptionProvider_EnterMapPortal_GetSingleOptionFor_Patch
 {
 	public static bool Prefix(ref FloatMenuOption __result, Thing clickedThing, FloatMenuContext context)

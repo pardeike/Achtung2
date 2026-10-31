@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+	<Feature_Achtung_Welcome>Willkommen bei Achtung!</Feature_Achtung_Welcome>
+	<Feature_Achtung_Forcing>Erzwungene Arbeit</Feature_Achtung_Forcing>
+	<Feature_Achtung_MenuError>Menüfehler</Feature_Achtung_MenuError>
+	<Feature_Achtung_Formations>Formationen</Feature_Achtung_Formations>
+	<Feature_Achtung_Cooperation>Zusammenarbeit</Feature_Achtung_Cooperation>
+	<Feature_Achtung_FourModes>Vier Modi</Feature_Achtung_FourModes>
+	<Feature_Achtung_Settings>Einstellungen</Feature_Achtung_Settings>
+	<Feature_Achtung_Draftstatus>Kampfmodus</Feature_Achtung_Draftstatus>
+	<Feature_Achtung_Rescue>Rettung</Feature_Achtung_Rescue>
+	<Feature_Achtung_Dragging>Ziehen im Kampfmodus</Feature_Achtung_Dragging>
+	<AchtungTutorialButton>Anleitung</AchtungTutorialButton>
+	<PositioningSettingsHeader>Positionierung</PositioningSettingsHeader>
+	<ForcingSettingsHeader>Erzwungene Arbeit</ForcingSettingsHeader>
+	<ForcingCommandsTitle>Befehle</ForcingCommandsTitle>
+	<ForcingJobBehaviorTitle>Arbeitsverhalten</ForcingJobBehaviorTitle>
+	<ForcingStopRulesTitle>Abbruchregeln</ForcingStopRulesTitle>
+	<ForcingFeedbackTitle>Rückmeldung</ForcingFeedbackTitle>
+	<PositioningRightClickTitle>Rechtsklick</PositioningRightClickTitle>
+	<PositioningDraggingTitle>Ziehen und Formationen</PositioningDraggingTitle>
+
+	<PositioningEnabledTitle>Eigene Mauspositionierung</PositioningEnabledTitle>
+	<PositioningEnabledExplained>Aktiviert Achtungs Positionierung, Ziehen und Formationen per Rechtsklick.</PositioningEnabledExplained>
+
+	<AchtungModifierTitle>Achtung!-Taste</AchtungModifierTitle>
+	<AchtungModifierExplained>Hältst du diese Taste beim Positionieren gedrückt, wechseln die ausgewählten Kolonisten in den Kampfmodus. Beim Ziehen mit der rechten Maustaste behalten sie ihre Formation bei. Sobald du die rechte Maustaste gedrückt hältst, kannst du die Taste loslassen. Mit Q und E drehst du die Formation.</AchtungModifierExplained>
+
+	<ForceCommandMenuModeTitle>Rechtsklickmodus</ForceCommandMenuModeTitle>
+	<ForceCommandMenuKeyTitle>Wechseltaste</ForceCommandMenuKeyTitle>
+
+	<CommandMenuModeOptionAuto>Kampfmodusabhängig</CommandMenuModeOptionAuto>
+	<CommandMenuModeOptionAutoExplained>Der Kampfmodus des Kolonisten bestimmt, ob der Rechtsklick das Kontextmenü öffnet oder einen Positionsbefehl erteilt.</CommandMenuModeOptionAutoExplained>
+	<CommandMenuModeOptionPressForMenu>Taste für Menü</CommandMenuModeOptionPressForMenu>
+	<CommandMenuModeOptionPressForMenuExplained>Halte die Taste gedrückt, um statt der Standardaktion das Kontextmenü zu öffnen.</CommandMenuModeOptionPressForMenuExplained>
+	<CommandMenuModeOptionPressForPosition>Taste zum Positionieren</CommandMenuModeOptionPressForPosition>
+	<CommandMenuModeOptionPressForPositionExplained>Halte die Taste gedrückt, um statt des Kontextmenüs einen Positionsbefehl zu erteilen.</CommandMenuModeOptionPressForPositionExplained>
+	<CommandMenuModeOptionDelayed>Halten für Menü</CommandMenuModeOptionDelayed>
+	<CommandMenuModeOptionDelayedExplained>Ein kurzer Rechtsklick positioniert die Kolonisten; nach der eingestellten Haltedauer öffnet sich das Kontextmenü.</CommandMenuModeOptionDelayedExplained>
+
+	<DelayTitle>Haltedauer fürs Menü</DelayTitle>
+	<DelayExplained>Zeit in Millisekunden, die du den Rechtsklick halten musst, bevor sich das Kontextmenü öffnet.</DelayExplained>
+
+	<DraftedColonistDraggingModeTitle>Kolonisten im Kampfmodus</DraftedColonistDraggingModeTitle>
+	<DraftedColonistDraggingModeExplained>Legt fest, wann ein Rechtsklick auf einen Kolonisten im Kampfmodus das Ziehen oder Positionieren in Formation startet.</DraftedColonistDraggingModeExplained>
+	<DraftedColonistDraggingModeOptionOff>Aus</DraftedColonistDraggingModeOptionOff>
+	<DraftedColonistDraggingModeOptionOffExplained>Rechtsklicks auf Kolonisten im Kampfmodus starten kein Ziehen.</DraftedColonistDraggingModeOptionOffExplained>
+	<DraftedColonistDraggingModeOptionUnselected>Niemand ausgewählt</DraftedColonistDraggingModeOptionUnselected>
+	<DraftedColonistDraggingModeOptionUnselectedExplained>Das Ziehen startet nur, wenn vor dem Rechtsklick kein steuerbarer Kolonist ausgewählt war.</DraftedColonistDraggingModeOptionUnselectedExplained>
+	<DraftedColonistDraggingModeOptionAlways>Immer</DraftedColonistDraggingModeOptionAlways>
+	<DraftedColonistDraggingModeOptionAlwaysExplained>Ein Rechtsklick auf einen Kolonisten im Kampfmodus erlaubt immer Ziehen oder Positionieren in Formation.</DraftedColonistDraggingModeOptionAlwaysExplained>
+
+	<RescueEnabledTitle>Spalte „Retten“ im Arbeitstab</RescueEnabledTitle>
+	<RescueEnabledExplained>Fügt dem Arbeitstab die Priorität „Retten“ hinzu. Kolonisten bringen damit automatisch am Boden liegende Verbündete in Betten.</RescueEnabledExplained>
+
+	<ShowForceEndLetterTitle>Meldung bei Ende der erzwungenen Arbeit</ShowForceEndLetterTitle>
+	<ShowForceEndLetterExplained>Zeigt eine Meldung, wenn ein Kolonist keine erzwungene Arbeit mehr hat.</ShowForceEndLetterExplained>
+	<KeepDraftedAndUndraftedCommandsSeparateTitle>Befehle nach Kampfmodus trennen</KeepDraftedAndUndraftedCommandsSeparateTitle>
+	<KeepDraftedAndUndraftedCommandsSeparateExplained>Trennt Rechtsklickbefehle für Kolonisten im und außerhalb des Kampfmodus, wie in RimWorld ohne Mods.</KeepDraftedAndUndraftedCommandsSeparateExplained>
+
+	<ReplaceCleanRoomTitle>Befehl „Raum reinigen“ ersetzen</ReplaceCleanRoomTitle>
+	<ReplaceCleanRoomExplained>Ersetzt RimWorlds Befehl durch Achtungs gründliche Raumreinigung.</ReplaceCleanRoomExplained>
+
+	<ReplaceFightFireTitle>Befehl „Feuer löschen“ ersetzen</ReplaceFightFireTitle>
+	<ReplaceFightFireExplained>Ersetzt RimWorlds Befehl durch Achtungs gründliche Brandbekämpfung.</ReplaceFightFireExplained>
+
+	<ForcedCommandState>Soll weiterarbeiten, bis alles erledigt ist.</ForcedCommandState>
+
+	<ForceMenuButtonText>Erzwingen</ForceMenuButtonText>
+
+	<IncreaseForceRadius>Radius vergrößern</IncreaseForceRadius>
+	<IncreaseForceRadiusDesc>Vergrößert den Suchradius für erzwungene Arbeit (aktuell {0}).</IncreaseForceRadiusDesc>
+	<DecreaseForceRadius>Radius verkleinern</DecreaseForceRadius>
+	<DecreaseForceRadiusDesc>Verkleinert den Suchradius für erzwungene Arbeit (aktuell {0}).</DecreaseForceRadiusDesc>
+	<BuildingSmart>Intelligentes Bauen</BuildingSmart>
+	<BuildingSmartDesc>Verhindert unerreichbare Lücken und eingeschlossene Bauarbeiter. Es ist langsamer und baut vom Startpunkt nach außen.</BuildingSmartDesc>
+
+	<AchtungModKeyOptionNone>Deaktiviert</AchtungModKeyOptionNone>
+	<AchtungModKeyOptionAlt>Alt</AchtungModKeyOptionAlt>
+	<AchtungModKeyOptionCtrl>Strg</AchtungModKeyOptionCtrl>
+	<AchtungModKeyOptionShift>Umschalt</AchtungModKeyOptionShift>
+	<AchtungModKeyOptionMeta>Win/Cmd</AchtungModKeyOptionMeta>
+
+	<BreakLevelTitle>Zusammenbruchsrisiko</BreakLevelTitle>
+	<BreakLevelExplained>Beendet erzwungene Arbeit, sobald der Kolonist diese Stufe des Zusammenbruchsrisikos erreicht.</BreakLevelExplained>
+	<BreakLevelOptionNone>Ignorieren</BreakLevelOptionNone>
+	<BreakLevelOptionMinor>Leicht</BreakLevelOptionMinor>
+	<BreakLevelOptionMajor>Schwer</BreakLevelOptionMajor>
+	<BreakLevelOptionAlmostExtreme>Fast extrem</BreakLevelOptionAlmostExtreme>
+	<BreakLevelOptionExtreme>Extrem</BreakLevelOptionExtreme>
+
+	<HealthLevelTitle>Gesundheitszustand</HealthLevelTitle>
+	<HealthLevelExplained>Beendet erzwungene Arbeit, sobald der Kolonist diesen Gesundheitszustand erreicht.</HealthLevelExplained>
+	<HealthLevelOptionNone>Ignorieren</HealthLevelOptionNone>
+	<HealthLevelOptionShouldBeTendedNow>Muss jetzt behandelt werden</HealthLevelOptionShouldBeTendedNow>
+	<HealthLevelOptionPrefersMedicalRest>Soll im Krankenbett liegen</HealthLevelOptionPrefersMedicalRest>
+	<HealthLevelOptionNeedsMedicalRest>Muss dringend ins Krankenbett</HealthLevelOptionNeedsMedicalRest>
+	<HealthLevelOptionInPainShock>Im Schmerzschock</HealthLevelOptionInPainShock>
+
+	<IgnoreForbiddenTitle>Verbote ignorieren</IgnoreForbiddenTitle>
+	<IgnoreForbiddenExplained>Erlaubt erzwungene Arbeit an verbotenen Objekten.</IgnoreForbiddenExplained>
+	<IgnoreRestrictionsTitle>Erlaubte Gebiete ignorieren</IgnoreRestrictionsTitle>
+	<IgnoreRestrictionsExplained>Erlaubt erzwungene Arbeit außerhalb des erlaubten Gebiets eines Kolonisten.</IgnoreRestrictionsExplained>
+	<IgnoreAssignmentsTitle>Arbeitsprioritäten ignorieren</IgnoreAssignmentsTitle>
+	<IgnoreAssignmentsExplained>Erlaubt erzwungene Arbeit, wenn die passende Arbeitspriorität deaktiviert ist.</IgnoreAssignmentsExplained>
+
+	<ReplaceForcedWorkTitle>Erzwungene Arbeit ersetzen</ReplaceForcedWorkTitle>
+	<ReplaceForcedWorkExplained>Ein neuer erzwungener Auftrag bricht die laufende und vorgemerkte erzwungene Arbeit des Kolonisten ab, statt sich in die Warteschlange einzureihen.</ReplaceForcedWorkExplained>
+
+	<BuildingSmartTitle>Neue Bauaufträge intelligent ausführen</BuildingSmartTitle>
+	<BuildingSmartExplained>Verwendet für neue erzwungene Bauarbeiten standardmäßig die sichere Baureihenfolge.</BuildingSmartExplained>
+
+	<WorkMarkersTitle>Markierungen für erzwungene Arbeit</WorkMarkersTitle>
+	<WorkMarkersExplained>Zeigt kleine Markierungen an den Zielen erzwungener Arbeit.</WorkMarkersExplained>
+	<WorkMarkersOptionAnimated>Animiert</WorkMarkersOptionAnimated>
+	<WorkMarkersOptionStatic>Statisch</WorkMarkersOptionStatic>
+	<WorkMarkersOptionOff>Aus</WorkMarkersOptionOff>
+
+	<ForceCommandsEnabledTitle>Befehle für erzwungene Arbeit</ForceCommandsEnabledTitle>
+	<ForceCommandsEnabledExplained>Zeigt bei normalen Rechtsklick-Aufträgen eine Blitzschaltfläche. Sie startet erzwungene Arbeit und kann passende Ziele in der Nähe hinzufügen.</ForceCommandsEnabledExplained>
+	<MaxForcedItemsTitle>Höchstzahl erzwungener Arbeitsziele</MaxForcedItemsTitle>
+	<MaxForcedItemsExplained>Begrenzt, wie viele passende Ziele in der Nähe Achtung einem Befehl für erzwungene Arbeit hinzufügt.</MaxForcedItemsExplained>
+	<MaxForcedItemsUnlimited>Unbegrenzt</MaxForcedItemsUnlimited>
+
+
+	<JobInterruptedLabel>Abgebrochen: {0}</JobInterruptedLabel>
+	<JobInterruptedBreakdown>{0}: {1}</JobInterruptedBreakdown>
+	<JobInterruptedBadHealth>{0} ist in schlechter Verfassung.</JobInterruptedBadHealth>
+
+	<CleanRoomLabel>Raum reinigen (Achtung)</CleanRoomLabel>
+	<CleanRoomInfoText>Reinigt den Raum gründlich</CleanRoomInfoText>
+	<CleanRoomDescription>Reinigt den ganzen Raum statt nur einer Stelle.</CleanRoomDescription>
+	<CleanRoomReport>Reinigt{0}: {1}</CleanRoomReport>
+
+	<FireFightLabel>Feuer löschen (Achtung)</FireFightLabel>
+	<FireFightInfoText>Löscht einen Brand</FireFightInfoText>
+	<FireFightDescription>Löscht einen Brand vollständig, auch außerhalb des Heimatgebiets.</FireFightDescription>
+	<FireFightReport>Löscht Feuer: {0}</FireFightReport>
+
+	<SowZoneLabel>Diese Zone oder diesen Raum bepflanzen</SowZoneLabel>
+	<SowZoneInfoText>Bepflanzt eine Zone oder einen Raum</SowZoneInfoText>
+	<SowZoneDescription>Bepflanzt eine ganze Anbauzone oder einen ganzen Raum.</SowZoneDescription>
+	<SowZoneReport>Bepflanzt{0}: {1}</SowZoneReport>
+
+	<AlreadyDoing>(Auftrag Nr. {0})</AlreadyDoing>
+
+	<CouldNotFindMoreForcedWork>{0} konnte keine weitere erzwungene Arbeit finden. Die übrigen Ziele sind vermutlich reserviert oder nicht erreichbar.</CouldNotFindMoreForcedWork>
+	<NoForcedWork>Keine erzwungene Arbeit</NoForcedWork>
+	<ForcedWorkWasInterrupted>Die erzwungene Arbeit von {0} wurde unterbrochen.</ForcedWorkWasInterrupted>
+
+	<WorkType_Rescue_Label>retten</WorkType_Rescue_Label>
+	<WorkType_Rescue_PawnLabel>Retter</WorkType_Rescue_PawnLabel>
+	<WorkType_Rescue_GerundLabel>Rettung</WorkType_Rescue_GerundLabel>
+	<WorkType_Rescue_Description>Bringt am Boden liegende Verbündete in Betten, wo sie behandelt werden können.</WorkType_Rescue_Description>
+	<WorkType_Rescue_Verb>retten</WorkType_Rescue_Verb>
+
+</LanguageData>

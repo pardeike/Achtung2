@@ -27,6 +27,7 @@ public class ForcedJob : IExposable
 	public IntVec3 lastAssignedCell = IntVec3.Invalid;
 	public bool started = false;
 	public bool cancelled = false;
+	internal bool invalidTargetsOnly;
 	public bool buildingSmart = true;
 	public int activeJobId = -1;
 	public Thing explicitTarget;
@@ -603,7 +604,12 @@ public class ForcedJob : IExposable
 
 		if (Scribe.mode == LoadSaveMode.PostLoadInit)
 		{
+			targets_temp_list ??= [];
+			var invalid = targets_temp_list.RemoveAll(target => target == null || !target.IsValidTarget() || (pawn?.Map != null && !target.item.Cell.InBounds(pawn.Map)));
+			if (invalid > 0)
+				Log.Warning($"Achtung dropped {invalid} invalid forced-work target(s) while loading.");
 			targets = [.. targets_temp_list];
+			invalidTargetsOnly = invalid > 0 && targets.Count == 0;
 			smartTargetsCached = null;
 			targets_temp_list.Clear();
 		}

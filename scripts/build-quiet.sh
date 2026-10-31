@@ -3,6 +3,18 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
+mkdir -p .builds
+log="$repo_root/.builds/build-quiet.log"
+exec 3>&1
+exec >"$log" 2>&1
+trap 'build_exit=$?; if (( build_exit != 0 )); then printf "Build or verification failed (exit %s). Log: %s\n" "$build_exit" "$log" >&3; tail -25 "$log" >&3; fi' EXIT
+
+released_16_sha=ff8d60361a124b76bfc48a635c890c4907bbd52354a526fd8e9b4316ef683d96
+actual_16_sha=$(shasum -a 256 1.6/Assemblies/Achtung.dll | cut -d ' ' -f 1)
+if [[ "$actual_16_sha" != "$released_16_sha" ]]; then
+	printf 'The 1.6 DLL differs from the published release.\n' >&2
+	exit 1
+fi
 
 dotnet_args=()
 rimworld_mod_dir_arg=""
@@ -82,3 +94,24 @@ if (( ${#dotnet_args[@]} )); then
 else
 	dotnet build Source/Achtung.csproj -v:q -clp:ErrorsOnly
 fi
+
+actual_16_sha=$(shasum -a 256 1.6/Assemblies/Achtung.dll | cut -d ' ' -f 1)
+if [[ "$actual_16_sha" != "$released_16_sha" ]]; then
+	printf 'The build changed the published 1.6 DLL.\n' >&2
+	exit 1
+fi
+if [[ -n "$effective_rimworld_mod_dir" ]]; then
+	cmp 1.6/Assemblies/Achtung.dll "$effective_rimworld_mod_dir/Achtung/1.6/Assemblies/Achtung.dll"
+	cmp 1.7/Assemblies/Achtung.dll "$effective_rimworld_mod_dir/Achtung/1.7/Assemblies/Achtung.dll"
+	python3 - "$effective_rimworld_mod_dir" <<'PY'
+from pathlib import Path
+from zipfile import ZipFile
+import sys
+root = Path(sys.argv[1])
+with ZipFile(root / 'Achtung.zip') as archive:
+    for name in ('1.6/Assemblies/Achtung.dll', '1.7/Assemblies/Achtung.dll', 'About/About.xml', 'About/Manifest.xml', 'LoadFolders.xml'):
+        if archive.read(name) != (root / 'Achtung' / name).read_bytes():
+            raise SystemExit(f'ZIP does not match deployed file: {name}')
+PY
+fi
+printf 'ok\n' >&3

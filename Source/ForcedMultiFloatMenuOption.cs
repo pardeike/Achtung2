@@ -19,6 +19,7 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 	public readonly List<Pawn> forcedPawns;
 	public readonly List<FloatMenuOption> options;
 	public bool actionSelected = false;
+	readonly bool canForce;
 
 	public static float buttonSpace = 10;
 	public static float buttonWidth = 32;
@@ -28,6 +29,7 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 	{
 		this.forcedPawns = forcedPawns;
 		this.options = options;
+		canForce = options.OfType<ForcedFloatMenuOption>().Any(option => CanForceWork(option.forcePawn, option.forceWorkgiver, option.forceCell));
 		extraPartOnGUI = extraPartRect =>
 		{
 			var originalRect = extraPartRect;
@@ -50,8 +52,12 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 		rect.y += padding;
 		rect.height -= 2 * padding;
 
-		var isOver = Mouse.IsOver(buttonRect);
+		var isOver = canForce && Mouse.IsOver(buttonRect);
+		var oldColor = GUI.color;
+		if (!canForce)
+			GUI.color = new Color(oldColor.r, oldColor.g, oldColor.b, oldColor.a * 0.35f);
 		GUI.DrawTexture(rect, Forcing[isOver ? 1 : 0], ScaleMode.ScaleToFit);
+		GUI.color = oldColor;
 
 		var selected = isOver && Input.GetMouseButtonDown(0);
 		if (selected)
@@ -61,13 +67,15 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 
 	public bool ActivateForceAction(Rect drawRect)
 	{
+		if (!canForce)
+			return false;
 		if (actionSelected)
 			return true;
 		actionSelected = true;
 
 		if (MultiplayerSupport.IsActive)
 		{
-			var forceOption = options.OfType<ForcedFloatMenuOption>().FirstOrDefault();
+			var forceOption = options.OfType<ForcedFloatMenuOption>().FirstOrDefault(option => CanForceWork(option.forcePawn, option.forceWorkgiver, option.forceCell));
 			return forceOption != null
 				? BeginForceWork(forcedPawns, forceOption.forceWorkgiver, forceOption.forceCell)
 				: false;
@@ -76,7 +84,7 @@ public class ForcedMultiFloatMenuOption : FloatMenuOption
 		return options.OfType<ForcedFloatMenuOption>().Any(forceOption =>
 		{
 			var forced = false;
-			foreach (var pawn in forcedPawns.Distinct())
+			foreach (var pawn in forcedPawns.Distinct().Where(pawn => CanForceWork(pawn, forceOption.forceWorkgiver, forceOption.forceCell)))
 				forced |= ForceAction(pawn, forceOption.forceWorkgiver, forceOption.forceCell);
 			return forced;
 		});
