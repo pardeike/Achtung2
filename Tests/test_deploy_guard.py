@@ -29,5 +29,37 @@ class DeployGuardTests(unittest.TestCase):
             self.assertIn("targets RimWorld 1.7", wrong.stderr)
 
 
+    def test_running_game_blocks_only_its_own_installation(self):
+        with tempfile.TemporaryDirectory() as temp:
+            running = Path(temp) / "Running"
+            other = Path(temp) / "Other"
+            exe = running / "RimWorld.app" / "Contents" / "MacOS" / "RimWorld"
+            exe.parent.mkdir(parents=True)
+            exe.write_bytes(Path("/bin/sleep").read_bytes())
+            exe.chmod(0o755)
+            # macOS kills a copied system binary unless it is re-signed.
+            subprocess.run(["codesign", "-s", "-", "-f", str(exe)], check=True, capture_output=True)
+            (running / "Mods").mkdir()
+            (other / "Mods").mkdir(parents=True)
+            game = subprocess.Popen([str(exe), "30"])
+            try:
+                def check(*args):
+                    return subprocess.run([str(GUARD), "check-stopped", *args], capture_output=True, text=True)
+
+                own = check(str(running / "Mods"))
+                self.assertEqual(2, own.returncode)
+                self.assertIn(str(exe), own.stderr)
+                self.assertNotIn(str(exe), check(str(other / "Mods")).stderr)
+                self.assertIn(str(exe), check().stderr)
+                # Another path to the same Mods folder must still block.
+                alias = Path(temp) / "Alias"
+                alias.mkdir()
+                (alias / "Mods").symlink_to(running / "Mods", target_is_directory=True)
+                self.assertIn(str(exe), check(str(alias / "Mods")).stderr)
+            finally:
+                game.kill()
+                game.wait()
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -8,14 +8,16 @@ checks that the published 1.6 DLL remains unchanged. Omit `RIMWORLD_MOD_DIR`
 for a local build only. Full output goes to `.builds/build-quiet.log`.
 
 The build also builds and deploys the matching RimBridge companion. It uses
-`RimBridgeServer.Sdk` 2.3.0 from the sibling `.nuget-local` feed. If that
-package is missing, create it with `../RimBridgeServer/scripts/pack-sdk.sh`.
+the published `RimBridgeServer.Sdk` 2.0.0 package from NuGet.org. No local SDK
+package is required.
 Pass `-p:BuildBridgeTools=false` to omit the companion when packaging a release.
 
 When `RIMWORLD_MOD_DIR` is set in the environment or passed using any normal
 MSBuild property spelling, the script treats the command as a deployment. It
-rejects conflicting values and refuses to deploy while RimWorld is running.
-Stop the game before deployment and restart it afterwards.
+rejects conflicting values. It refuses to deploy while a RimWorld started from
+the target installation is running. A game started from another installation,
+such as an APFS clone, does not block. Stop the affected game before deployment
+and restart it afterwards.
 
 ## rimworld-deploy-guard.sh
 

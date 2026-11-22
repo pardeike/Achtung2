@@ -142,7 +142,134 @@ public sealed partial class AchtungBridgeTools
 		}, cancellationToken);
 	}
 
-	[Tool("achtung/get_thorough_work_state", Description = "Read the current cleaning/firefighting driver target, original room anchor, partial work, movement and cleaning-speed inputs. Compare this state before/after a normal game save/load.")]
+	[Tool("achtung/test_rescue_fixture_contract", Description = "Create a temporary colonist inside an incoming drop pod and, with Biotech, a temporary player paramedic. Turn the real Rescue setting off, create the fixtures, then toggle it on/off/on and verify the held colonist's priority count and work-giver cache, and that the paramedic keeps rescue work in both states. Destroys the fixtures and leaves Rescue enabled.")]
+	public static async Task<object> TestRescueFixtureContract(IRimBridgeContext ctx, CancellationToken cancellationToken)
+	{
+		return await ctx.MainThread.InvokeAsync<object>(() =>
+		{
+			if (Current.Game == null || Find.CurrentMap == null)
+				return new { success = false, error = "Load a game first." };
+			if (MultiplayerSupport.IsActive)
+				return new { success = false, error = "Run this settings contract outside an active multiplayer session." };
+			var map = Find.CurrentMap;
+			var rescueName = Tools.RescuingWorkTypeDef.defName;
+			var doctorRescue = DefDatabase<WorkGiverDef>.GetNamed("DoctorRescue");
+			var toggle = AccessTools.Method(typeof(AchtungSettings), "ToggleRescue");
+			var paramedicKind = ModsConfig.BiotechActive ? DefDatabase<PawnKindDef>.GetNamedSilentFail("Mech_Paramedic") : null;
+			Pawn podPawn = null, paramedic = null;
+			var fallers = new List<Thing>();
+			var phases = new List<object>();
+			var errors = new List<string>();
+
+			void SetRescue(bool enabled)
+			{
+				Achtung.Settings.rescueEnabled = enabled;
+				_ = toggle.Invoke(null, [enabled]);
+			}
+
+			string CacheError(Pawn pawn)
+			{
+				try
+				{
+					pawn.workSettings.workGiversDirty = true;
+					_ = pawn.workSettings.WorkGiversInOrderNormal;
+					return null;
+				}
+				catch (Exception ex)
+				{
+					return ex.GetType().Name + ": " + ex.Message;
+				}
+			}
+
+			try
+			{
+				// Insert Rescue while the colonist is held in a pod, as a first save does.
+				SetRescue(false);
+				var podsBefore = map.listerThings.ThingsOfDef(ThingDefOf.DropPodIncoming).ToList();
+				// Relations would leave generated relatives behind as world pawns.
+				podPawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(PawnKindDefOf.Colonist, Faction.OfPlayer, canGeneratePawnRelations: false));
+				var info = new ActiveTransporterInfo();
+				_ = info.innerContainer.TryAdd(podPawn);
+				DropPodUtility.MakeDropPodAt(DropCellFinder.RandomDropSpot(map, true), map, info);
+				fallers.AddRange(map.listerThings.ThingsOfDef(ThingDefOf.DropPodIncoming).Except(podsBefore));
+				if (paramedicKind != null)
+				{
+					paramedic = PawnGenerator.GeneratePawn(paramedicKind, Faction.OfPlayer);
+					_ = GenSpawn.Spawn(paramedic, CellFinder.RandomClosewalkCellNear(map.Center, map, 12, null), map);
+				}
+
+				foreach (var enabled in new[] { true, false, true })
+				{
+					SetRescue(enabled);
+					var rescue = DefDatabase<WorkTypeDef>.GetNamedSilentFail(rescueName);
+					var expectedCount = DefDatabase<WorkTypeDef>.DefCount;
+					var podCount = podPawn.workSettings.priorities.values.Count;
+					var podCacheError = CacheError(podPawn);
+					var phaseErrors = new List<string>();
+					if (podPawn.Spawned)
+						phaseErrors.Add("The pod colonist is spawned; the fixture no longer tests a held pawn.");
+					if (podCount != expectedCount)
+						phaseErrors.Add($"Pod colonist priority count {podCount}, expected {expectedCount}.");
+					if (podCacheError != null)
+						phaseErrors.Add("Pod colonist work-giver cache failed: " + podCacheError);
+
+					bool? paramedicCanRescue = null, raceListsRescue = null;
+					int? paramedicDoctorPriority = null, paramedicRescuePriority = null;
+					string paramedicCacheError = null;
+					if (paramedic != null)
+					{
+						paramedicCacheError = CacheError(paramedic);
+						paramedicCanRescue = paramedicCacheError == null
+							&& paramedic.workSettings.WorkGiversInOrderNormal.Concat(paramedic.workSettings.WorkGiversInOrderEmergency).Any(worker => worker.def == doctorRescue);
+						paramedicDoctorPriority = paramedic.workSettings.GetPriority(WorkTypeDefOf.Doctor);
+						if (rescue != null)
+						{
+							raceListsRescue = paramedic.RaceProps.mechEnabledWorkTypes.Contains(rescue);
+							paramedicRescuePriority = paramedic.workSettings.GetPriority(rescue);
+						}
+						if (paramedicCanRescue != true)
+							phaseErrors.Add("The paramedic has no rescue work giver." + (paramedicCacheError == null ? "" : " " + paramedicCacheError));
+						if (enabled && raceListsRescue != true)
+							phaseErrors.Add("The paramedic race does not list the Rescue work type.");
+						if (enabled && (paramedicRescuePriority <= 0 || paramedicRescuePriority != paramedicDoctorPriority))
+							phaseErrors.Add($"Paramedic Rescue priority {paramedicRescuePriority}, Doctor priority {paramedicDoctorPriority}; expected equal and above 0.");
+					}
+					phases.Add(new { enabled, expectedCount, podCount, podSpawned = podPawn.Spawned, podCacheError, paramedicCanRescue, raceListsRescue, paramedicDoctorPriority, paramedicRescuePriority, errors = phaseErrors.ToArray() });
+					errors.AddRange(phaseErrors);
+				}
+				if (DefDatabase<WorkTypeDef>.GetNamedSilentFail(rescueName) == null)
+					errors.Add("Rescue is not enabled after the contract.");
+				if (paramedicKind == null)
+					errors.Add("Biotech's Mech_Paramedic is unavailable; the mech half did not run.");
+			}
+			catch (Exception ex)
+			{
+				errors.Add("Contract failed: " + ex);
+			}
+			finally
+			{
+				foreach (var faller in fallers.Where(faller => faller.Destroyed == false))
+					faller.Destroy(DestroyMode.Vanish);
+				if (podPawn != null && podPawn.Destroyed == false)
+					podPawn.Destroy(DestroyMode.Vanish);
+				if (paramedic != null && paramedic.Destroyed == false)
+					paramedic.Destroy(DestroyMode.Vanish);
+				if (Achtung.Settings.rescueEnabled == false || DefDatabase<WorkTypeDef>.GetNamedSilentFail(rescueName) == null)
+					SetRescue(true);
+			}
+			return new
+			{
+				success = errors.Count == 0,
+				phases,
+				errors,
+				fixturesRemoved = (podPawn == null || podPawn.Destroyed) && (paramedic == null || paramedic.Destroyed) && fallers.All(faller => faller.Destroyed),
+				rescueEnabled = Achtung.Settings.rescueEnabled,
+				limit = "Creates and destroys a pod colonist and a paramedic. Does not tick the game or test the rescue job itself."
+			};
+		}, cancellationToken);
+	}
+
+	[Tool("achtung/get_thorough_work_state", Description ="Read the current cleaning/firefighting driver target, original room anchor, partial work, movement and cleaning-speed inputs. Compare this state before/after a normal game save/load.")]
 	public static object GetThoroughWorkState(string pawnId = null)
 	{
 		var pawn = FindPawn(pawnId);

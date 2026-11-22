@@ -115,6 +115,10 @@ On a paused loaded map, the companion provides these focused checks:
 - `achtung/test_rescue_priority_roundtrip`: exercises the production setting
   toggle and checks indexed priorities for all existing initialized pawns. Reports
   which spawned/unspawned/dead cases are present; leaves Rescue enabled.
+- `achtung/test_rescue_fixture_contract`: creates a colonist inside an incoming
+  drop pod and, with Biotech, a player paramedic. Toggles Rescue and checks the
+  held colonist's priority count and work-giver cache, and that the paramedic
+  keeps the rescue work giver. Destroys both fixtures; leaves Rescue enabled.
 - `achtung/start_thorough_work_at_cell` and `achtung/get_thorough_work_state`:
   start production cleaning/firefighting and compare target identity, partial work
   and original room around a normal save/load. Use a new test save name, never

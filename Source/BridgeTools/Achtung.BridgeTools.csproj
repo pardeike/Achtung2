@@ -11,8 +11,6 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<GenerateDependencyFile>false</GenerateDependencyFile>
 		<NoWarn>$(NoWarn);NU1701</NoWarn>
-		<LocalNuGetSource>$(MSBuildProjectDirectory)\..\..\..\.nuget-local</LocalNuGetSource>
-		<RestoreAdditionalProjectSources Condition="Exists('$(LocalNuGetSource)')">$(RestoreAdditionalProjectSources);$(LocalNuGetSource)</RestoreAdditionalProjectSources>
 		<Version>$(ModVersion)</Version>
 		<AssemblyVersion>$(ModVersion)</AssemblyVersion>
 		<FileVersion>$(ModVersion)</FileVersion>
@@ -55,8 +53,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.7.4990-unstable" GeneratePathProperty="true" />
-		<PackageReference Include="Lib.Harmony.Ref" Version="3.0.0-rc.4" />
-		<PackageReference Include="RimBridgeServer.Sdk" Version="2.3.0" PrivateAssets="all" ExcludeAssets="runtime" />
+		<PackageReference Include="Lib.Harmony.Ref" Version="3.0.0-rc.5" />
+		<PackageReference Include="RimBridgeServer.Sdk" Version="2.0.0" PrivateAssets="all" ExcludeAssets="runtime" />
 		<PackageReference Include="TaskPubliciser" Version="1.0.3" />
 	</ItemGroup>
 

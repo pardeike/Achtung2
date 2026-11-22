@@ -38,9 +38,16 @@ public class DynamicWorkTypes
 		if (Scribe.mode != LoadSaveMode.PostLoadInit) return;
 		var allDefsCount = DefDatabase<WorkTypeDef>.AllDefsListForReading.Count;
 		var priorities = __instance.workSettings?.priorities?.values;
-		if (priorities != null)
-			while (priorities.Count < allDefsCount)
-				priorities.Add(Pawn_WorkSettings.DefaultPriority);
+		if (priorities == null)
+			return;
+		while (priorities.Count < allDefsCount)
+			priorities.Add(Pawn_WorkSettings.DefaultPriority);
+		// Players cannot edit mech priorities. Older saves stored 0 for a split-off
+		// type that mechs were not allowed to do, so mechs follow the original type.
+		var race = __instance.RaceProps;
+		if (race?.IsMechanoid == true)
+			foreach (var pair in disabledWorkTypePairs.Where(pair => race.mechEnabledWorkTypes.Contains(pair.Key)))
+				priorities[pair.Value.index] = priorities[pair.Key.index];
 	}
 
 	static void Reload<T>() where T : Def
@@ -105,10 +112,38 @@ public class DynamicWorkTypes
 		}
 	}
 
+	static IEnumerable<RaceProperties> MechRaces => DefDatabase<ThingDef>.AllDefsListForReading
+		.Select(thingDef => thingDef.race)
+		.Where(race => race?.mechEnabledWorkTypes != null);
+
+	// Colony mechs may only do work types their race lists. A split-off work type
+	// inherits that permission, and any fixed priority, from its original type.
+	static void MirrorMechWorkType(WorkTypeDef def, WorkTypeDef copyFrom)
+	{
+		foreach (var race in MechRaces)
+		{
+			if (race.mechEnabledWorkTypes.Contains(copyFrom) && race.mechEnabledWorkTypes.Contains(def) == false)
+				race.mechEnabledWorkTypes.Add(def);
+			var priority = race.mechWorkTypePriorities?.FirstOrDefault(p => p.def == copyFrom);
+			if (priority != null && race.mechWorkTypePriorities.Any(p => p.def == def) == false)
+				race.mechWorkTypePriorities.Add(new MechWorkTypePriority { def = def, priority = priority.priority });
+		}
+	}
+
+	static void RemoveMechWorkType(WorkTypeDef def)
+	{
+		foreach (var race in MechRaces)
+		{
+			_ = race.mechEnabledWorkTypes.Remove(def);
+			_ = race.mechWorkTypePriorities?.RemoveAll(p => p.def == def);
+		}
+	}
+
 	public static WorkTypeDef AddWorkTypeDef(WorkTypeDef def, WorkTypeDef copyFrom, WorkGiverDef workgiver)
 	{
 		DefDatabase<WorkTypeDef>.Add(def);
 		disabledWorkTypePairs[copyFrom] = def;
+		MirrorMechWorkType(def, copyFrom);
 
 		var saved = workgiver.workType;
 		workgiver.workType = def;
@@ -149,6 +184,7 @@ public class DynamicWorkTypes
 	public static void RemoveWorkTypeDef(WorkTypeDef def, WorkTypeDef savedDef, WorkGiverDef workGiver)
 	{
 		_ = disabledWorkTypePairs.Remove(savedDef);
+		RemoveMechWorkType(def);
 
 		var oldWorkGiver = workGiver.workType;
 		workGiver.workType = savedDef;

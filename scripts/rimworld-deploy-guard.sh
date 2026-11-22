@@ -12,7 +12,7 @@ cleanup_deploy_lock() {
 usage() {
 	cat >&2 <<'USAGE'
 Usage:
-  rimworld-deploy-guard.sh check-stopped
+  rimworld-deploy-guard.sh check-stopped [RIMWORLD_MOD_DIR]
   rimworld-deploy-guard.sh validate RIMWORLD_MOD_DIR PROJECT_PATH MOD_FILE_NAME
   rimworld-deploy-guard.sh deploy RIMWORLD_MOD_DIR PROJECT_PATH CONFIGURATION PLATFORM MOD_FILE_NAME [BUILD_BRIDGE_TOOLS]
 
@@ -22,10 +22,24 @@ USAGE
 	exit 64
 }
 
+# Without a Mods root, any running RimWorld blocks. With one, a game blocks when
+# its installation's Mods folder resolves to the target, or when its layout is
+# unknown. A game started from an independent copy does not block.
 ensure_rimworld_stopped() {
-	local running
+	local rimworld_mod_dir="${1:-}" running target line path root blocking=""
 
 	running="$(ps ax -o pid=,comm= | awk '$0 ~ /\/RimWorld( by Ludeon Studios)?$/ { print }' || true)"
+	if [[ -n "$rimworld_mod_dir" && -n "$running" ]]; then
+		target="$(physical_dir "$rimworld_mod_dir")"
+		while IFS= read -r line; do
+			path="$(printf '%s' "$line" | sed -E 's/^[[:space:]]*[0-9]+[[:space:]]+//')"
+			root="${path%/*.app/Contents/MacOS/*}"
+			if [[ "$root" == "$path" || ! -d "$root/Mods" ]] || [[ "$( (cd -P "$root/Mods" && pwd -P) )" == "$target" ]]; then
+				blocking+="$line"$'\n'
+			fi
+		done <<<"$running"
+		running="${blocking%$'\n'}"
+	fi
 	if [[ -n "$running" ]]; then
 		printf 'Refusing deploy build because RimWorld is still running:\n%s\n' "$running" >&2
 		printf 'Stop the game through GABS, then rerun the build.\n' >&2
@@ -122,7 +136,7 @@ run_inner_deploy() {
 
 	# Repeat this check inside the lock. The wrapper check is an early diagnostic,
 	# but this is the safety boundary immediately before destructive MSBuild targets.
-	ensure_rimworld_stopped
+	ensure_rimworld_stopped "$rimworld_mod_dir"
 
 	if [[ -n "$build_bridge_tools" ]]; then
 		args+=("/p:BuildBridgeTools=$build_bridge_tools")
@@ -185,8 +199,8 @@ EOF
 mode="${1:-}"
 case "$mode" in
 	check-stopped)
-		(($# == 1)) || usage
-		ensure_rimworld_stopped
+		(($# == 1 || $# == 2)) || usage
+		ensure_rimworld_stopped "${2:-}"
 		;;
 	validate)
 		(($# == 4)) || usage

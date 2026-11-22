@@ -86,7 +86,7 @@ if [[ "$rimworld_mod_dir_property_seen" == true ]]; then
 fi
 
 if [[ -n "$effective_rimworld_mod_dir" ]]; then
-	"$repo_root/scripts/rimworld-deploy-guard.sh" check-stopped
+	"$repo_root/scripts/rimworld-deploy-guard.sh" check-stopped "$effective_rimworld_mod_dir"
 fi
 
 if (( ${#dotnet_args[@]} )); then
